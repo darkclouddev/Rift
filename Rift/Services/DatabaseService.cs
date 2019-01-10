@@ -16,6 +16,8 @@ using IonicLib.Extensions;
 
 using Microsoft.EntityFrameworkCore;
 
+using Rift.Services.Role;
+
 namespace Rift.Services
 {
     public class DatabaseService
@@ -1048,6 +1050,60 @@ namespace Rift.Services
         }
 
         #endregion Pending Users
+
+        #region Temp Roles
+
+        public async Task AddTempRoleAsync(RiftTempRole role)
+        {
+            using (var context = new RiftContext())
+            {
+                await context.TempRoles.AddAsync(role);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<List<RiftTempRole>> GetUserTempRolesAsync(ulong userId)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.TempRoles
+                                    .Where(x => x.UserId == userId)
+                                    .ToListAsync();
+            }
+        }
+
+        public async Task<int> GetTempRolesCountAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.TempRoles.CountAsync();
+            }
+        }
+
+        public async Task<bool> HasTempRoleAsync(ulong userId, ulong roleId)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.TempRoles.AnyAsync(x => x.UserId == userId && x.RoleId == roleId);
+            }
+        }
+
+        public async Task RemoveUserTempRoleAsync(ulong userId, ulong roleId)
+        {
+            var rtr = new RiftTempRole
+            {
+                UserId = userId,
+                RoleId = roleId,
+            };
+
+            using (var context = new RiftContext())
+            {
+                context.TempRoles.Remove(rtr);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        #endregion Temp Roles
 
         public async Task AddInventoryAsync(ulong userId, uint coins = 0u, uint tokens = 0u, uint chests = 0u,
                                             uint capsules = 0u, uint spheres = 0u, uint doubleExps = 0u,

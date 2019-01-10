@@ -12,7 +12,6 @@ namespace Rift.Data.Models
         public ulong LastStoreTimestamp { get; set; } = 0ul;
         public ulong LastAttackTimestamp { get; set; } = 0ul;
         public ulong LastBeingAttackedTimestamp { get; set; } = 0ul;
-        public ulong CreatedAtTimestamp { get; set; } = 0ul;
         public ulong LastDailyChestTimestamp { get; set; } = 0ul;
         public ulong LastBragTimestamp { get; set; } = 0ul;
         public ulong LastGiftTimestamp { get; set; } = 0ul;

@@ -15,6 +15,7 @@ namespace Rift.Data
         public DbSet<RiftAchievements> Achievements { get; set; }
         public DbSet<RiftPendingUser> PendingUsers { get; set; }
         public DbSet<ScheduledEvent> ScheduledEvents { get; set; }
+        public DbSet<RiftTempRole> TempRoles { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
             optionsBuilder
