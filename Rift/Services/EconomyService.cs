@@ -769,7 +769,7 @@ namespace Rift.Services
 
             var dbSummoner = await RiftBot.GetService<DatabaseService>().GetUserLolDataAsync(userId);
 
-            if (String.IsNullOrWhiteSpace(dbSummoner.AccountId))
+            if (dbSummoner is null || String.IsNullOrWhiteSpace(dbSummoner.AccountId))
                 return (BragResult.Error, BragEmbeds.NoData);
 
             (var matchlistResult, var matchlist) = await RiftBot

@@ -393,10 +393,10 @@ namespace Rift.Services
                     continue;
                 }
 
-                if (codeResult != RequestResult.Success)
+                if (code is null || codeResult != RequestResult.Success)
                     continue;
 
-                string sanitizedCode = new string(code.Where(Char.IsLetterOrDigit).ToArray());
+                string sanitizedCode = new string(code.Where(x => Char.IsLetterOrDigit(x)).ToArray());
 
                 if (sanitizedCode != user.ConfirmationCode)
                     continue;
