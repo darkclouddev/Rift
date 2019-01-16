@@ -602,10 +602,9 @@ namespace Rift.Services
 
             if (isUp)
             {
-                await chatChannel.SendEmbedAsync(LolProfileEmbeds.ChatRankUpdated(sgUser,
-                                                                                  GetStatStringFromRank(newRank)));
+                await chatChannel.SendEmbedAsync(LolProfileEmbeds.ChatRankUpdated(sgUser, GetStatStringFromRank(newRank)));
 
-                if (newRank < LeagueRank.Silver)
+                if (newRank < LeagueRank.Bronze)
                     return;
 
                 await RiftBot.GetService<DatabaseService>().AddInventoryAsync(sgUser.Id, chests: 4u);
@@ -855,14 +854,14 @@ namespace Rift.Services
         {
             switch (rank)
             {
-                case LeagueRank.Iron:        return $"{Settings.Emote.RankBronze} Железо";
+                case LeagueRank.Iron:        return $"{Settings.Emote.RankIron} Железо";
                 case LeagueRank.Bronze:      return $"{Settings.Emote.RankBronze} Бронза";
                 case LeagueRank.Silver:      return $"{Settings.Emote.RankSilver} Серебро";
                 case LeagueRank.Gold:        return $"{Settings.Emote.RankGold} Золото";
                 case LeagueRank.Platinum:    return $"{Settings.Emote.RankPlatinum} Платина";
                 case LeagueRank.Diamond:     return $"{Settings.Emote.RankDiamond} Алмаз";
                 case LeagueRank.Master:      return $"{Settings.Emote.RankMaster} Мастер";
-                case LeagueRank.GrandMaster: return $"{Settings.Emote.RankMaster} Грандмастер";
+                case LeagueRank.GrandMaster: return $"{Settings.Emote.RankGrandmaster} Грандмастер";
                 case LeagueRank.Challenger:  return $"{Settings.Emote.RankChallenger} Претендент";
             }
 
