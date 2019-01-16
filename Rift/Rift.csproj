@@ -7,6 +7,23 @@
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Migrations\20190115184835_AddedIdTotempRoles.cs" />
+    <Compile Remove="Migrations\20190115184835_AddedIdTotempRoles.Designer.cs" />
+    <Compile Remove="Migrations\20190115185022_AddedIdTotempRoles1.cs" />
+    <Compile Remove="Migrations\20190115185022_AddedIdTotempRoles1.Designer.cs" />
+    <Compile Remove="Migrations\20190115202501_AddedFluentAPI.cs" />
+    <Compile Remove="Migrations\20190115202501_AddedFluentAPI.Designer.cs" />
+    <Compile Remove="Migrations\20190115202953_AddedFluentAPI.cs" />
+    <Compile Remove="Migrations\20190115202953_AddedFluentAPI.Designer.cs" />
+    <Compile Remove="Migrations\20190115205121_AddedFluentApi.cs" />
+    <Compile Remove="Migrations\20190115205121_AddedFluentApi.Designer.cs" />
+    <Compile Remove="Migrations\20190115211417_AddedFluentApi.cs" />
+    <Compile Remove="Migrations\20190115211417_AddedFluentApi.Designer.cs" />
+    <Compile Remove="Migrations\20190115211506_AddedFluentApi.cs" />
+    <Compile Remove="Migrations\20190115211506_AddedFluentApi.Designer.cs" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="2.0.1" />

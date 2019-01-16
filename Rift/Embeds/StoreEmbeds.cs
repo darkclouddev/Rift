@@ -12,37 +12,37 @@ namespace Rift.Embeds
 {
     class StoreEmbeds
     {
-        public static readonly Embed NoCoinsEmbed =
+        public static readonly Embed NoCoins =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
                 .WithDescription($"У вас не хватает монет для покупки.")
                 .Build();
 
-        public static readonly Embed NoTokensEmbed =
+        public static readonly Embed NoTokens =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
                 .WithDescription($"У вас не хватает жетонов для покупки.")
                 .Build();
 
-        public static Embed CooldownEmbed(ulong remainingSeconds)
+        public static Embed Cooldown(TimeSpan remainingTime)
         {
             return new EmbedBuilder()
                    .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                    .WithColor(226, 87, 76)
-                   .WithDescription($"Необходимо подождать, попробуйте через {TimeSpan.FromSeconds(remainingSeconds).FormatTimeToString()}")
+                   .WithDescription($"Необходимо подождать, попробуйте через {remainingTime.FormatTimeToString()}")
                    .Build();
         }
 
-        public static Embed ChatEmbed(SocketGuildUser sgUser, StoreItem item)
+        public static Embed Chat(SocketGuildUser sgUser, StoreItem item)
         {
             return new EmbedBuilder()
                    .WithDescription($"Призыватель {sgUser.Mention} купил роль {item.Emote} {item.Name}.")
                    .Build();
         }
 
-        public static Embed DMSuccessEmbed(StoreItem item, string balance)
+        public static Embed DMSuccess(StoreItem item, string balance)
         {
             return new EmbedBuilder()
                    .WithAuthor("Успешно", Settings.Emote.VerifyUrl)

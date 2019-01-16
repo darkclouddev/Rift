@@ -9,7 +9,7 @@ namespace Rift.Embeds
     {
         public static readonly string FreeMessage = "Призыватели, @here, участвуйте в розыгрыше.";
 
-        public static Embed ChatFreeEmbed(Reward reward)
+        public static Embed ChatFree(Reward reward)
         {
             return new EmbedBuilder()
                    .WithColor(243, 205, 87)
@@ -20,7 +20,7 @@ namespace Rift.Embeds
                    .Build();
         }
 
-        public static Embed ChatTicketEmbed(Reward reward, string ticketString, int userCnt)
+        public static Embed ChatTicket(Reward reward, string ticketString, int userCnt)
         {
             return new EmbedBuilder()
                    .WithColor(243, 205, 87)
@@ -32,7 +32,7 @@ namespace Rift.Embeds
                    .Build();
         }
 
-        public static Embed ChatWinnerEmbed(ulong winner, Reward reward)
+        public static Embed ChatWinner(ulong winner, Reward reward)
         {
             return new EmbedBuilder()
                    .WithColor(243, 205, 87)
@@ -40,7 +40,7 @@ namespace Rift.Embeds
                    .Build();
         }
 
-        public static Embed DMWinnerEmbed(Reward reward)
+        public static Embed DMWinner(Reward reward)
         {
             return new EmbedBuilder()
                    .WithColor(243, 205, 87)

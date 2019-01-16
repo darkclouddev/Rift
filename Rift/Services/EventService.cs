@@ -61,7 +61,6 @@ namespace Rift.Services
             }
 
             var dt = DateTime.Now;
-            var day = dt.DayOfWeek;
 
             ScheduledEvent eventData;
 
@@ -159,31 +158,31 @@ namespace Rift.Services
             switch (eventType)
             {
                 case EventType.Baron:
-                    eventEmbed = EventEmbeds.BaronEmbed(reward);
+                    eventEmbed = EventEmbeds.Baron(reward);
                     break;
 
                 case EventType.Drake:
-                    eventEmbed = EventEmbeds.DrakeEmbed(reward);
+                    eventEmbed = EventEmbeds.Drake(reward);
                     break;
 
                 case EventType.Wolves:
-                    eventEmbed = EventEmbeds.WolvesEmbed(reward);
+                    eventEmbed = EventEmbeds.Wolves(reward);
                     break;
 
                 case EventType.Razorfins:
-                    eventEmbed = EventEmbeds.RazorfinsEmbed(reward);
+                    eventEmbed = EventEmbeds.Razorfins(reward);
                     break;
 
                 case EventType.Krug:
-                    eventEmbed = EventEmbeds.KrugEmbed(reward);
+                    eventEmbed = EventEmbeds.Krug(reward);
                     break;
 
                 case EventType.RedBuff:
-                    eventEmbed = EventEmbeds.RedBuffEmbed(reward);
+                    eventEmbed = EventEmbeds.RedBuff(reward);
                     break;
 
                 case EventType.BlueBuff:
-                    eventEmbed = EventEmbeds.BlueBuffEmbed(reward);
+                    eventEmbed = EventEmbeds.BlueBuff(reward);
                     break;
 
                 default:
@@ -232,13 +231,13 @@ namespace Rift.Services
                         ulong winnerId = reactionIds.Random();
                         await winnerReward.GiveRewardAsync(winnerId);
 
-                        await channel.SendEmbedAsync(EventEmbeds.WinnerEmbed(winnerId, winnerReward.RewardString));
+                        await channel.SendEmbedAsync(EventEmbeds.Winner(winnerId, winnerReward.RewardString));
                         break;
                     }
                 }
             }
 
-            await channel.SendEmbedAsync(EventEmbeds.UserCountEmbed(reactionIds.Count()));
+            await channel.SendEmbedAsync(EventEmbeds.UserCount(reactionIds.Count()));
 
             reactionIds = new List<ulong>();
             eventMessageId = 0ul;

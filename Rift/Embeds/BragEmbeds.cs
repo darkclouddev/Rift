@@ -12,21 +12,21 @@ namespace Rift.Embeds
 {
     class BragEmbeds
     {
-        public static readonly Embed NoDataEmbed =
+        public static readonly Embed NoData =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
                 .WithDescription($"Необходимо подтвердить игровой аккаунт, чтобы хвастаться.")
                 .Build();
 
-        public static readonly Embed NoMatchesEmbed =
+        public static readonly Embed NoMatches =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
                 .WithDescription($"Отсутствуют недавние матчи, самое время сыграть!")
                 .Build();
 
-        public static Embed SuccessEmbed(ulong userId, string champThumb, string champName, Participant player,
+        public static Embed Success(ulong userId, string champThumb, string champName, Participant player,
                                          string queue, uint coins)
         {
             var eb = new EmbedBuilder()
@@ -44,12 +44,12 @@ namespace Rift.Embeds
             return eb.Build();
         }
 
-        public static Embed CooldownEmbed(ulong remainingSeconds)
+        public static Embed Cooldown(TimeSpan remaining)
         {
             return new EmbedBuilder()
                    .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                    .WithColor(226, 87, 76)
-                   .WithDescription($"Вы недавно уже хвастались в чате, подождите {TimeSpan.FromSeconds(remainingSeconds).FormatTimeToString()}")
+                   .WithDescription($"Вы недавно уже хвастались в чате, подождите {remaining.FormatTimeToString()}")
                    .Build();
         }
     }

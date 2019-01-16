@@ -27,10 +27,10 @@ namespace Rift.Embeds
                 sb.Append($" {Settings.Emote.BotRespect} {reward.PowerupsBotRespect}");
 
             if (reward.UsualTickets > 0)
-                sb.Append($" {Settings.Emote.Ctickets} {reward.UsualTickets}");
+                sb.Append($" {Settings.Emote.UsualTickets} {reward.UsualTickets}");
 
             if (reward.RareTickets > 0)
-                sb.Append($" {Settings.Emote.Gtickets} {reward.RareTickets}");
+                sb.Append($" {Settings.Emote.RareTickets} {reward.RareTickets}");
 
             if (sb.Length == 0)
                 return null;

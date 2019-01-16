@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
 using Newtonsoft.Json;
 
@@ -9,21 +10,19 @@ namespace Rift.Configuration
     {
         const string SettingsFolderName = "config";
 
-        static readonly string SettingsFolderPath = Path.Combine(RiftBot.AppPath, SettingsFolderName);
+        static readonly string settingsFolderPath;
 
-        static readonly string AppSettingsFilePath = Path.Combine(SettingsFolderPath, "app.json");
-        static readonly string ChannelIdSettingsFilePath = Path.Combine(SettingsFolderPath, "channels.json");
-        static readonly string ChatSettingsFilePath = Path.Combine(SettingsFolderPath, "chat.json");
-        static readonly string DatabaseSettingsFilePath = Path.Combine(SettingsFolderPath, "database.json");
-        static readonly string EconomySettingsFilePath = Path.Combine(SettingsFolderPath, "economy.json");
-        static readonly string EmoteSettingsFilePath = Path.Combine(SettingsFolderPath, "emotes.json");
-        static readonly string RoleIdSettingsFilePath = Path.Combine(SettingsFolderPath, "roles.json");
-        static readonly string ThumbnailSettingsFilePath = Path.Combine(SettingsFolderPath, "thumbnails.json");
+        static readonly string appSettingsFilePath;
+        static readonly string channelIdSettingsFilePath;
+        static readonly string chatSettingsFilePath;
+        static readonly string economySettingsFilePath;
+        static readonly string emoteSettingsFilePath;
+        static readonly string roleIdSettingsFilePath;
+        static readonly string thumbnailSettingsFilePath;
 
         public static App App;
         public static ChannelId ChannelId;
         public static Chat Chat;
-        public static Database Database;
         public static Economy Economy;
         public static Emote Emote;
         public static RoleId RoleId;
@@ -31,16 +30,23 @@ namespace Rift.Configuration
 
         static Settings()
         {
+            settingsFolderPath = Path.Combine(RiftBot.GetContentRoot(), SettingsFolderName);
+
+            appSettingsFilePath = Path.Combine(settingsFolderPath, "app.json");
+            channelIdSettingsFilePath = Path.Combine(settingsFolderPath, "channels.json");
+            chatSettingsFilePath = Path.Combine(settingsFolderPath, "chat.json");
+            economySettingsFilePath = Path.Combine(settingsFolderPath, "economy.json");
+            emoteSettingsFilePath = Path.Combine(settingsFolderPath, "emotes.json");
+            roleIdSettingsFilePath = Path.Combine(settingsFolderPath, "roles.json");
+            thumbnailSettingsFilePath = Path.Combine(settingsFolderPath, "thumbnails.json");
+
             ReloadAll();
         }
 
         static void EnsureConfigDirCreated()
         {
-            if (!Directory.Exists(SettingsFolderPath))
-            {
-                var di = Directory.CreateDirectory(SettingsFolderPath);
-                RiftBot.Log.Debug($"Creating config folder: {di.Name}");
-            }
+            if (!Directory.Exists(settingsFolderPath)) 
+                Directory.CreateDirectory(settingsFolderPath);
         }
 
         public static void ReloadAll()
@@ -50,7 +56,6 @@ namespace Rift.Configuration
             ReloadApp();
             ReloadChannels();
             ReloadChat();
-            ReloadDatabase();
             ReloadEconomy();
             ReloadEmotes();
             ReloadRoles();
@@ -59,42 +64,37 @@ namespace Rift.Configuration
 
         public static void ReloadApp()
         {
-            App = LoadSettingsFromFile<App>(AppSettingsFilePath);
+            App = LoadSettingsFromFile<App>(appSettingsFilePath);
         }
 
         public static void ReloadChannels()
         {
-            ChannelId = LoadSettingsFromFile<ChannelId>(ChannelIdSettingsFilePath);
+            ChannelId = LoadSettingsFromFile<ChannelId>(channelIdSettingsFilePath);
         }
 
         public static void ReloadChat()
         {
-            Chat = LoadSettingsFromFile<Chat>(ChatSettingsFilePath);
-        }
-
-        public static void ReloadDatabase()
-        {
-            Database = LoadSettingsFromFile<Database>(DatabaseSettingsFilePath);
+            Chat = LoadSettingsFromFile<Chat>(chatSettingsFilePath);
         }
 
         public static void ReloadEconomy()
         {
-            Economy = LoadSettingsFromFile<Economy>(EconomySettingsFilePath);
+            Economy = LoadSettingsFromFile<Economy>(economySettingsFilePath);
         }
 
         public static void ReloadEmotes()
         {
-            Emote = LoadSettingsFromFile<Emote>(EmoteSettingsFilePath);
+            Emote = LoadSettingsFromFile<Emote>(emoteSettingsFilePath);
         }
 
         public static void ReloadRoles()
         {
-            RoleId = LoadSettingsFromFile<RoleId>(RoleIdSettingsFilePath);
+            RoleId = LoadSettingsFromFile<RoleId>(roleIdSettingsFilePath);
         }
 
         public static void ReloadThumbnails()
         {
-            Thumbnail = LoadSettingsFromFile<Thumbnail>(ThumbnailSettingsFilePath);
+            Thumbnail = LoadSettingsFromFile<Thumbnail>(thumbnailSettingsFilePath);
         }
 
         static T LoadSettingsFromFile<T>(string path)
@@ -107,40 +107,37 @@ namespace Rift.Configuration
             return JsonConvert.DeserializeObject<T>(jsonContent);
         }
 
-        public static void Save(SettingsType type)
+        public static async Task Save(SettingsType type)
         {
             switch (type)
             {
                 case SettingsType.App:
-                    File.WriteAllText(AppSettingsFilePath, JsonConvert.SerializeObject(App, Formatting.Indented));
+                    await File.WriteAllTextAsync(appSettingsFilePath, JsonConvert.SerializeObject(App, Formatting.Indented));
                     break;
 
                 case SettingsType.ChannelId:
-                    File.WriteAllText(ChannelIdSettingsFilePath, JsonConvert.SerializeObject(ChannelId, Formatting.Indented));
+                    await File.WriteAllTextAsync(channelIdSettingsFilePath, JsonConvert.SerializeObject(ChannelId, Formatting.Indented));
                     break;
 
                 case SettingsType.Chat:
-                    File.WriteAllText(ChatSettingsFilePath, JsonConvert.SerializeObject(Chat, Formatting.Indented));
+                    await File.WriteAllTextAsync(chatSettingsFilePath, JsonConvert.SerializeObject(Chat, Formatting.Indented));
                     break;
 
                 case SettingsType.Economy:
-                    File.WriteAllText(EconomySettingsFilePath, JsonConvert.SerializeObject(Economy, Formatting.Indented));
+                    await File.WriteAllTextAsync(economySettingsFilePath, JsonConvert.SerializeObject(Economy, Formatting.Indented));
                     break;
 
                 case SettingsType.Emote:
-                    File.WriteAllText(EmoteSettingsFilePath, JsonConvert.SerializeObject(Emote, Formatting.Indented));
+                    await File.WriteAllTextAsync(emoteSettingsFilePath, JsonConvert.SerializeObject(Emote, Formatting.Indented));
                     break;
 
                 case SettingsType.RoleId:
-                    File.WriteAllText(RoleIdSettingsFilePath, JsonConvert.SerializeObject(RoleId, Formatting.Indented));
+                    await File.WriteAllTextAsync(roleIdSettingsFilePath, JsonConvert.SerializeObject(RoleId, Formatting.Indented));
                     break;
 
                 case SettingsType.Thumbnail:
-                    File.WriteAllText(ThumbnailSettingsFilePath, JsonConvert.SerializeObject(Thumbnail, Formatting.Indented));
+                    await File.WriteAllTextAsync(thumbnailSettingsFilePath, JsonConvert.SerializeObject(Thumbnail, Formatting.Indented));
                     break;
-
-                case SettingsType.Database:
-                default: throw new InvalidOperationException($"Tried to save Database settings which is not allowed to do at runtime!");
             }
         }
     }
@@ -150,7 +147,6 @@ namespace Rift.Configuration
         App,
         ChannelId,
         Chat,
-        Database,
         Economy,
         Emote,
         RoleId,

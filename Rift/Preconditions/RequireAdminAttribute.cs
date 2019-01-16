@@ -5,7 +5,7 @@ using Discord.Commands;
 
 namespace Rift.Preconditions
 {
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
     class RequireAdminAttribute : PreconditionAttribute
     {
         public override async Task<PreconditionResult> CheckPermissionsAsync(

@@ -1,4 +1,6 @@
-﻿namespace Rift.Data.Models.Users
+﻿using System;
+
+namespace Rift.Data.Models.Users
 {
     public class UserProfile
     {
@@ -6,7 +8,7 @@
         public uint Experience;
         public uint Level;
         public decimal TotalDonate;
-        public ulong DoubleExpTimestamp;
-        public ulong BotRespectTimestamp;
+        public DateTime DoubleExpTime;
+        public DateTime BotRespectTime;
     }
 }

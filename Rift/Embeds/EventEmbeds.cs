@@ -16,7 +16,7 @@ namespace Rift.Embeds
                 .WithDescription($"Призыватели, чат отключается для сражения.")
                 .Build();
 
-        public static Embed BaronEmbed(Reward reward)
+        public static Embed Baron(Reward reward)
         {
             return new EmbedBuilder()
                    .WithAuthor("Барон Нашор", Settings.Emote.BaronUrl)
@@ -25,7 +25,7 @@ namespace Rift.Embeds
                    .Build();
         }
 
-        public static Embed DrakeEmbed(Reward reward)
+        public static Embed Drake(Reward reward)
         {
             return new EmbedBuilder()
                    .WithAuthor("Дракон", Settings.Emote.DrakeUrl)
@@ -34,7 +34,7 @@ namespace Rift.Embeds
                    .Build();
         }
 
-        public static Embed WolvesEmbed(Reward reward)
+        public static Embed Wolves(Reward reward)
         {
             return new EmbedBuilder()
                    .WithAuthor("Волки мрака", Settings.Emote.WolvesUrl)
@@ -43,7 +43,7 @@ namespace Rift.Embeds
                    .Build();
         }
 
-        public static Embed RazorfinsEmbed(Reward reward)
+        public static Embed Razorfins(Reward reward)
         {
             return new EmbedBuilder()
                    .WithAuthor("Остроклювы", Settings.Emote.RazorfinsUrl)
@@ -52,7 +52,7 @@ namespace Rift.Embeds
                    .Build();
         }
 
-        public static Embed KrugEmbed(Reward reward)
+        public static Embed Krug(Reward reward)
         {
             return new EmbedBuilder()
                    .WithAuthor("Големы", Settings.Emote.KrugUrl)
@@ -61,7 +61,7 @@ namespace Rift.Embeds
                    .Build();
         }
 
-        public static Embed RedBuffEmbed(Reward reward)
+        public static Embed RedBuff(Reward reward)
         {
             return new EmbedBuilder()
                    .WithAuthor("Красный бафф", Settings.Emote.RedBuffUrl)
@@ -70,7 +70,7 @@ namespace Rift.Embeds
                    .Build();
         }
 
-        public static Embed BlueBuffEmbed(Reward reward)
+        public static Embed BlueBuff(Reward reward)
         {
             return new EmbedBuilder()
                    .WithAuthor("Синий бафф", Settings.Emote.BlueBuffUrl)
@@ -79,7 +79,7 @@ namespace Rift.Embeds
                    .Build();
         }
 
-        public static Embed UserCountEmbed(int count)
+        public static Embed UserCount(int count)
         {
             return new EmbedBuilder()
                    .WithDescription($"Призыватели убили лесного монстра и забрали награду.\n"
@@ -87,7 +87,7 @@ namespace Rift.Embeds
                    .Build();
         }
 
-        public static Embed WinnerEmbed(ulong winnerId, string reward)
+        public static Embed Winner(ulong winnerId, string reward)
         {
             return new EmbedBuilder()
                    .WithDescription($"Призыватель <@{winnerId}> после сражения получил {reward}")

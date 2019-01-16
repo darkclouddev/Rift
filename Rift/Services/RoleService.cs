@@ -1,43 +1,99 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
+using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Data.Models;
-using Rift.Services.Message;
-using Rift.Services.Role;
+using Rift.Embeds;
 
 using IonicLib;
-using IonicLib.Extensions;
-using IonicLib.Util;
 
 using Discord;
 using Discord.WebSocket;
 
-using Newtonsoft.Json;
+using Humanizer;
 
 namespace Rift.Services
 {
     public class RoleService
     {
-        static IEnumerable<TempRole> rolesToRemove = new List<TempRole>();
-        static readonly TimeSpan tempRoleCheckTimerCooldown = TimeSpan.FromSeconds(15);
-
-        static Timer tempRoleCheckTimer;
+        static Timer tempRoleTimer;
 
         public RoleService()
         {
-            //tempRoleCheckTimer = new Timer(async delegate { await CheckExpiredRolesAsync(); }, null, TimeSpan.FromSeconds(15), tempRoleCheckTimerCooldown);
+            Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(10)).ContinueWith(async _ => await RescheduleTimerAsync());
+            });
         }
 
-        void ResetTimer(TimeSpan delay, TimeSpan period)
+        async Task RescheduleTimerAsync()
         {
-            //tempRoleCheckTimer = new Timer(async delegate { await CheckExpiredRolesAsync(); }, null, delay, period);
+            RiftBot.Log.Info("Rescheduling now.");
+
+            var nearestRole = await RiftBot.GetService<DatabaseService>().GetNearestExpiringTempRoleAsync();
+
+            if (nearestRole is null)
+            {
+                RiftBot.Log.Info("No temp roles for scheduling, sleeping..");
+                tempRoleTimer = null;
+
+                return;
+            }
+
+            if (DateTime.UtcNow >= nearestRole.ExpirationTime)
+            {
+                RiftBot.Log.Info($"Captured expired role: {nearestRole}");
+
+                await Task.Delay(1)
+                    .ContinueWith(async _ =>
+                    {
+                        await RescheduleTimerAsync();
+                    });
+
+                return;
+            }
+
+            var diff = nearestRole.ExpirationTime - DateTime.UtcNow;
+
+            tempRoleTimer = new Timer(async delegate { await TimerProcAsync(); }, null, diff, TimeSpan.Zero);
+
+            RiftBot.Log.Info($"Next proc in {diff.Humanize(5, new CultureInfo("en-US"))}");
+        }
+
+        async Task TimerProcAsync()
+        {
+            var expiredRoles = await RiftBot.GetService<DatabaseService>().GetExpiredTempRolesAsync();
+
+            if (expiredRoles is null || expiredRoles.Count == 0)
+            {
+                await RescheduleTimerAsync();
+                return;
+            }
+
+            foreach (var expiredRole in expiredRoles)
+            {
+                await RemoveTempRoleAsync(expiredRole);
+            }
+
+            await RescheduleTimerAsync();
+        }
+
+        public async Task<(bool, Embed)> AddPermanentRoleAsync(ulong userId, ulong roleId)
+        {
+            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
+
+            if (sgUser is null)
+                return (false, GenericEmbeds.UserNotFound);
+
+            if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var role))
+                return (false, GenericEmbeds.RoleNotFound);
+
+            await sgUser.AddRoleAsync(role);
+            return (true, null);
         }
 
         public async Task AddTempRoleAsync(ulong userId, ulong roleId, TimeSpan duration, string reason)
@@ -47,11 +103,70 @@ namespace Rift.Services
                 UserId = userId,
                 RoleId = roleId,
                 ObtainedFrom = reason,
-                ObtainedAtTimestamp = DateTime.UtcNow,
-                ExpirationTimestamp = DateTime.UtcNow + duration,
+                ObtainedTime = DateTime.UtcNow,
+                ExpirationTime = DateTime.UtcNow + duration,
             };
 
-            await RiftBot.GetService<DatabaseService>().AddTempRoleAsync(role);
+            await RiftBot.GetService<DatabaseService>()
+                         .AddTempRoleAsync(role)
+                         .ContinueWith(async _ => { await RescheduleTimerAsync(); });
+        }
+
+        public async Task<(bool, Embed)> RemoveTempRoleAsync(RiftTempRole role)
+        {
+            return await RemoveTempRoleAsync(role.UserId, role.RoleId);
+        }
+
+        public async Task<(bool, Embed)> RemoveTempRoleAsync(ulong userId, ulong roleId)
+        {
+            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
+
+            if (sgUser is null)
+                return (false, GenericEmbeds.UserNotFound);
+
+            var role = sgUser.Roles.FirstOrDefault(x => x.Id == roleId);
+
+            if (role is null)
+                return (false, GenericEmbeds.RoleNotFound);
+
+            await sgUser.RemoveRoleAsync(role);
+            await RiftBot.GetService<DatabaseService>().RemoveUserTempRoleAsync(userId, roleId);
+            await RescheduleTimerAsync();
+
+            return (true, null);
+        }
+
+        public async Task<List<RiftTempRole>> GetUserTempRolesAsync(ulong userId)
+        {
+            return await RiftBot.GetService<DatabaseService>().GetUserTempRolesAsync(userId);
+        }
+
+        public async Task RestoreTempRolesAsync(SocketGuildUser sgUser)
+        {
+            RiftBot.Log.Info($"User {sgUser} ({sgUser.Id}) joined, checking temp roles");
+
+            var tempRoles = await RiftBot.GetService<DatabaseService>().GetUserTempRolesAsync(sgUser.Id);
+
+            if (tempRoles is null)
+            {
+                RiftBot.Log.Debug($"No temp roles for user {sgUser}");
+                return;
+            }
+
+            foreach (var tempRole in tempRoles)
+            {
+                if (sgUser.Roles.Any(x => x.Id == tempRole.RoleId))
+                    continue;
+
+                if (!IonicClient.GetRole(Settings.App.MainGuildId, tempRole.RoleId, out var role))
+                {
+                    RiftBot.Log.Error($"Applying role {tempRole.RoleId}: FAILED");
+                    continue;
+                }
+
+                await sgUser.AddRoleAsync(role);
+                RiftBot.Log.Debug($"Successfully added temp role \"{role.Name}\" for user {sgUser}");
+            }
         }
     }
 }

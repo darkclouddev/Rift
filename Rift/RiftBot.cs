@@ -159,10 +159,12 @@ namespace Rift
         public static async Task Main(string[] args)
         {
             AppPath = GetContentRoot();
-
             Culture = new CultureInfo("ru-RU");
 
-            await CreateWebHostBuilder(args).Build().StartAsync();
+            Console.WriteLine($"Using content root: {AppPath}");
+
+            //await CreateWebHostBuilder(args).Build().StartAsync();
+
             await new IonicClient(Path.Combine(AppPath, ".token"), Culture, new GregorianCalendar())
                   .RunAsync()
                   .ConfigureAwait(false);
@@ -171,7 +173,7 @@ namespace Rift
                   .ConfigureAwait(false);
         }
 
-        static string GetContentRoot()
+        public static string GetContentRoot()
         {
             var assemblyPath = Assembly.GetEntryAssembly().Location;
             var fwdSlashIndex = assemblyPath.LastIndexOf('/'); // *nix
@@ -185,6 +187,8 @@ namespace Rift
         {
             LogManager.LoadConfiguration("nlog.config");
             Log = LogManager.GetCurrentClassLogger();
+
+            Log.Info($"Using content root: {AppPath}");
 
             var serviceProvider = SetupServices();
 
@@ -221,9 +225,9 @@ namespace Rift
         static IServiceProvider SetupServices()
         {
             var services = new ServiceCollection()
-                           .AddSingleton(IonicClient.Client)
                            .AddSingleton(Log)
                            .AddSingleton(new DatabaseService())
+                           .AddSingleton(IonicClient.Client)
                            .AddSingleton(new EconomyService())
                            .AddSingleton(new RoleService())
                            .AddSingleton(new RiotService())
@@ -234,11 +238,11 @@ namespace Rift
                            .AddSingleton(new MinionService())
                            .AddSingleton(new BotRespectService())
                            .AddSingleton(new ReliabilityService(IonicClient.Client))
-                           .AddSingleton(new ChannelService(IonicClient.Client))
+                           //.AddSingleton(new ChannelService(IonicClient.Client))
                            .AddSingleton(new CommandService(new CommandServiceConfig
                            {
                                CaseSensitiveCommands = false,
-                               ThrowOnError = false,
+                               ThrowOnError = true,
                                DefaultRunMode = RunMode.Async
                            }));
 

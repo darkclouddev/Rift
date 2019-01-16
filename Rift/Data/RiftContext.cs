@@ -1,5 +1,4 @@
-﻿using Rift.Configuration;
-using Rift.Data.Models;
+﻿using Rift.Data.Models;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +8,7 @@ namespace Rift.Data
     {
         public DbSet<RiftUser> Users { get; set; }
         public DbSet<RiftInventory> Inventory { get; set; }
-        public DbSet<RiftTimestamp> Timestamps { get; set; }
+        public DbSet<RiftCooldowns> Cooldowns { get; set; }
         public DbSet<RiftLolData> LolData { get; set; }
         public DbSet<RiftStatistics> Statistics { get; set; }
         public DbSet<RiftAchievements> Achievements { get; set; }
@@ -19,9 +18,65 @@ namespace Rift.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
             optionsBuilder
-                .UseMySql($@"Server={Settings.Database.Host};"
-                          + $"Uid={Settings.Database.User};"
-                          + $"Pwd={Settings.Database.Password};"
-                          + $"Database={Settings.Database.Name};");
+                .UseMySql($@"Server=localhost;Uid=rift;Pwd=;Database=rift;");
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<RiftUser>().HasKey(key => key.UserId);
+
+            builder.Entity<RiftAchievements>().HasKey(key => key.UserId);
+            builder.Entity<RiftUser>()
+                   .HasOne(user => user.Achievements)
+                   .WithOne(ach => ach.User)
+                   .HasForeignKey<RiftAchievements>(user => user.UserId);
+
+            builder.Entity<RiftCooldowns>().HasKey(key => key.UserId);
+            builder.Entity<RiftUser>()
+                   .HasOne(user => user.Cooldowns)
+                   .WithOne(cd => cd.User)
+                   .HasForeignKey<RiftCooldowns>(user => user.UserId);
+
+            builder.Entity<RiftInventory>().HasKey(key => key.UserId);
+            builder.Entity<RiftUser>()
+                   .HasOne(user => user.Inventory)
+                   .WithOne(inv => inv.User)
+                   .HasForeignKey<RiftInventory>(user => user.UserId);
+
+            builder.Entity<RiftLolData>().HasKey(key => key.UserId);
+            builder.Entity<RiftUser>()
+                   .HasOne(user => user.LolData)
+                   .WithOne(lol => lol.User)
+                   .HasForeignKey<RiftLolData>(user => user.UserId);
+
+            builder.Entity<RiftPendingUser>().HasKey(key => key.UserId);
+            builder.Entity<RiftUser>()
+                   .HasOne(user => user.PendingUser)
+                   .WithOne(pending => pending.User)
+                   .HasForeignKey<RiftPendingUser>(user => user.UserId);
+
+            builder.Entity<RiftTempRole>().ToTable("TempRoles");
+            builder.Entity<RiftTempRole>()
+                   .HasKey(x => new
+                   {
+                       x.UserId,
+                       x.RoleId
+                   });
+            builder.Entity<RiftUser>()
+                   .HasMany(users => users.TempRoles)
+                   .WithOne(role => role.User)
+                   .HasForeignKey(role => role.UserId)
+                   .HasConstraintName($"FK_RiftTempRoles_Users_UserId");
+
+            builder.Entity<RiftStatistics>().HasKey(key => key.UserId);
+            builder.Entity<RiftUser>()
+                   .HasOne(user => user.Statistics)
+                   .WithOne(stat => stat.User)
+                   .HasForeignKey<RiftStatistics>(user => user.UserId);
+
+            builder.Entity<ScheduledEvent>().HasKey(key => key.Id);
+            builder.Entity<ScheduledEvent>()
+                   .Property(prop => prop.Id)
+                   .ValueGeneratedOnAdd();
+        }
     }
 }

@@ -10,7 +10,7 @@ namespace Rift.Services.Message
 
             DestinationType = destType;
             DestinationId = destId;
-            DeliveryTime = DateTime.Now + timeOffset;
+            DeliveryTime = DateTime.UtcNow + timeOffset;
             Text = text;
         }
     }

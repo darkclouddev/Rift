@@ -1,9 +1,7 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using Rift.Configuration;
+using Rift.Preconditions;
 
 using Discord.Commands;
 
@@ -12,35 +10,8 @@ namespace Rift.Modules
     [Group("settings")]
     public class SettingsModule : RiftModuleBase
     {
-        [Group("channels")]
-        public class ChannelsModule : ModuleBase
-        {
-            [Command]
-            public async Task Default(string property, ulong value)
-            {
-                var p = Settings.ChannelId.GetType().GetProperty(property, BindingFlags.IgnoreCase);
-
-                if (p is null)
-                {
-                    await ReplyAsync($"Property not found: \"{property}\".\n\n**Object properties**: {String.Join(",", Settings.ChannelId.GetType().GetProperties().ToList())}");
-                    return;
-                }
-
-                try
-                {
-                    p.SetValue(Settings.ChannelId, value);
-                }
-                catch
-                {
-                    await ReplyAsync($"Failed to assign property value, check console log for details.");
-                    return;
-                }
-
-                await ReplyAsync($"\"{p.Name}\" has been set to \"{value}\"");
-            }
-        }
-
         [Group("reload")]
+        [RequireAdmin]
         public class ReloadModule : ModuleBase
         {
             [Command]
@@ -75,14 +46,6 @@ namespace Rift.Modules
                 await ReplyAsync($"Chat settings reloaded successfully.");
             }
 
-            [Command("database")]
-            public async Task Database()
-            {
-                Settings.ReloadChat();
-
-                await ReplyAsync($"Database settings reloaded successfully.");
-            }
-
             [Command("economy")]
             public async Task Economy()
             {
@@ -105,6 +68,60 @@ namespace Rift.Modules
                 Settings.ReloadRoles();
 
                 await ReplyAsync($"Roles reloaded successfully.");
+            }
+        }
+
+        [Group("save")]
+        [RequireAdmin]
+        public class SaveModule : ModuleBase
+        {
+            [Command("app")]
+            public async Task App()
+            {
+                await Settings.Save(SettingsType.App);
+                await ReplyAsync("App settings saved successfully.");
+            }
+
+            [Command("channels")]
+            public async Task Channels()
+            {
+                await Settings.Save(SettingsType.ChannelId);
+                await ReplyAsync("Channels saved successfully.");
+            }
+
+            [Command("chat")]
+            public async Task Chat()
+            {
+                await Settings.Save(SettingsType.Chat);
+                await ReplyAsync("Chat settings saved successfully.");
+            }
+
+            [Command("economy")]
+            public async Task Economy()
+            {
+                await Settings.Save(SettingsType.Economy);
+                await ReplyAsync("Economy settings saved successfully.");
+            }
+
+            [Command("emote")]
+            public async Task Emote()
+            {
+                await Settings.Save(SettingsType.Emote);
+                await ReplyAsync("Emotes saved successfully.");
+            }
+
+            [Command("roles")]
+            public async Task Roles()
+            {
+                await Settings.Save(SettingsType.RoleId);
+                await ReplyAsync("Roles saved successfully.");
+            }
+
+            [Command("thumbnails")]
+            public async Task Thumbnails()
+            {
+                await Settings.Save(SettingsType.Thumbnail);
+                await ReplyAsync("Thumbnails saved successfully.");
             }
         }
     }

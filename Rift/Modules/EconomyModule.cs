@@ -430,7 +430,7 @@ namespace Rift.Modules
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.Ctickets} {amount}"));
+                                            .WithDescription($"{giveText} {Settings.Emote.UsualTickets} {amount}"));
             }
 
             [Command("gtickets")]
@@ -445,7 +445,7 @@ namespace Rift.Modules
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.Gtickets} {amount}"));
+                                            .WithDescription($"{giveText} {Settings.Emote.RareTickets} {amount}"));
             }
         }
 
@@ -578,7 +578,7 @@ namespace Rift.Modules
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.Ctickets} {amount}"));
+                                            .WithDescription($"{takeText} {Settings.Emote.UsualTickets} {amount}"));
             }
 
             [Command("gtickets")]
@@ -593,7 +593,7 @@ namespace Rift.Modules
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.Gtickets} {amount}"));
+                                            .WithDescription($"{takeText} {Settings.Emote.RareTickets} {amount}"));
             }
 
             [Command("all")]
@@ -815,7 +815,7 @@ namespace Rift.Modules
         [Command("атаки")]
         public async Task Attacks()
         {
-            await Context.User.SendEmbedAsync(AttackEmbeds.HelpEmbed);
+            await Context.User.SendEmbedAsync(AttackEmbeds.Help);
         }
 
         [Command("магазин")]

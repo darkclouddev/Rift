@@ -13,35 +13,35 @@ namespace Rift.Embeds
 {
     class GiftEmbeds
     {
-        public static readonly Embed SelfGiftEmbed =
+        public static readonly Embed SelfGift =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
                 .WithDescription("Невозможно отправить подарок себе.")
                 .Build();
 
-        public static readonly Embed NoCoinsEmbed =
+        public static readonly Embed NoCoins =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
                 .WithDescription("У вас не хватает монет для отправки подарка.")
                 .Build();
 
-        public static readonly Embed NoTokensEmbed =
+        public static readonly Embed NoTokens =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
                 .WithDescription("У вас не хватает жетонов для отправки подарка.")
                 .Build();
 
-        public static readonly Embed IncorrectNumberEmbed =
+        public static readonly Embed IncorrectNumber =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
                 .WithDescription("Предмета с таким номером не существует.")
                 .Build();
 
-        public static Embed DMFromEmbed(SocketGuildUser toUser, UserInventory inventory)
+        public static Embed DMFrom(SocketGuildUser toUser, UserInventory inventory)
         {
             return new EmbedBuilder()
                    .WithAuthor("Успешно", Settings.Emote.VerifyUrl)
@@ -52,14 +52,14 @@ namespace Rift.Embeds
                    .Build();
         }
 
-        public static Embed DMToEmbed(SocketGuildUser fromUser, string giftString)
+        public static Embed DMTo(SocketGuildUser fromUser, string giftString)
         {
             return new EmbedBuilder()
                    .WithDescription($"Призыватель {fromUser.Username} подарил вам {giftString}")
                    .Build();
         }
 
-        public static Embed ChatEmbed(SocketGuildUser fromUser, SocketGuildUser toUser, string giftString)
+        public static Embed Chat(SocketGuildUser fromUser, SocketGuildUser toUser, string giftString)
         {
             return new EmbedBuilder()
                    .WithDescription($"Призывателю {toUser.Mention} подарили {giftString}")
@@ -67,12 +67,12 @@ namespace Rift.Embeds
                    .Build();
         }
 
-        public static Embed CooldownEmbed(ulong remainingSeconds)
+        public static Embed Cooldown(TimeSpan remainingTime)
         {
             return new EmbedBuilder()
                    .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                    .WithColor(226, 87, 76)
-                   .WithDescription($"Необходимо подождать, попробуйте через {TimeSpan.FromSeconds(remainingSeconds).FormatTimeToString()}.")
+                   .WithDescription($"Необходимо подождать, попробуйте через {remainingTime.FormatTimeToString()}.")
                    .Build();
         }
 

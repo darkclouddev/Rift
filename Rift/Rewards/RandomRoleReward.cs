@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
+using Humanizer;
+
 using Rift.Services;
-using Rift.Services.Role;
 
 using IonicLib.Extensions;
 
@@ -16,9 +16,9 @@ namespace Rift.Rewards
         public ulong RoleId;
         public string RoleString;
 
-        protected void GetRole(List<ulong> AvailableRoles, ulong userId)
+        protected async Task GetRole(List<ulong> AvailableRoles, ulong userId)
         {
-            var tempRoles = RiftBot.GetService<RoleService>().GetTempRoles(userId).Select(x => x.RoleId);
+            var tempRoles = (await RiftBot.GetService<RoleService>().GetUserTempRolesAsync(userId)).Select(x => x.RoleId);
 
             var availableRoles = AvailableRoles.Except(tempRoles);
             if (availableRoles.Any())
@@ -34,8 +34,7 @@ namespace Rift.Rewards
         {
             if (RoleId != 0)
             {
-                var role = new TempRole(userId, RoleId, TimeSpan.FromDays(days));
-                await RiftBot.GetService<RoleService>().AddTempRoleAsync(role);
+                await RiftBot.GetService<RoleService>().AddTempRoleAsync(userId, RoleId, TimeSpan.FromDays(days), nameof(RandomRoleReward).Humanize());
             }
         }
     }

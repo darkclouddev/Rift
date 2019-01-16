@@ -45,20 +45,17 @@ namespace Rift.Services
         const string DataDragonVersionsUrl = "https://ddragon.leagueoflegends.com/api/versions.json";
         const string DataDragonTarballUrlTemplate = "https://ddragon.leagueoflegends.com/cdn/dragontail-{0}.tgz";
         const string DataDragonChampPortraitTemplate = "https://ddragon.leagueoflegends.com/cdn/{0}/img/champion/{1}";
-        
-        const ulong pendingUserLifetimeSeconds = 60ul * 60ul * 3ul; //3 hours
 
         public delegate void RankChanged(RankChangedEventArgs e);
 
         public event RankChanged OnRankChanged;
 
         static uint index = 0;
-        static UserLastLolAccountUpdateTimestamp[] users = null;
+        static UserLastLolAccountUpdateTime[] users = null;
         static Timer updateTimer;
-        const ulong cooldownAutoUpdateSeconds = 60ul * 60ul * 6; // 6 hours
 
         static Timer approveTimer;
-        static readonly TimeSpan approveCheckCooldown = TimeSpan.FromMinutes(5);
+        static readonly TimeSpan approveCheckCooldown = TimeSpan.FromMinutes(1);
 
         static readonly SemaphoreSlim registerMutex = new SemaphoreSlim(1);
 
@@ -69,17 +66,22 @@ namespace Rift.Services
             if (!Directory.Exists(DataDragonDataFolder))
                 Directory.CreateDirectory(DataDragonDataFolder);
 
-            Directory.Delete(TempFolder, true);
-
-            if (!Directory.Exists(TempFolder))
+            if (Directory.Exists(TempFolder))
+            {
+                Directory.Delete(TempFolder, true);
                 Directory.CreateDirectory(TempFolder);
+            }
+            else
+            {
+                Directory.CreateDirectory(TempFolder);
+            }
 
             api = RiotApi.NewInstance(Settings.App.RiotApiKey);
 
-            approveTimer = new Timer(async delegate { await CheckApproveAsync(); }, null, TimeSpan.FromSeconds(10),
+            approveTimer = new Timer(async delegate { await CheckApproveAsync(); }, null, TimeSpan.FromSeconds(20),
                                      approveCheckCooldown);
-            updateTimer = new Timer(async delegate { await UpdateUsers(); }, null, TimeSpan.FromSeconds(10),
-                                    TimeSpan.FromSeconds(90));
+            updateTimer = new Timer(async delegate { await UpdateUsersAsync(); }, null, TimeSpan.FromSeconds(20),
+                                    TimeSpan.FromMinutes(5));
         }
 
         #region Data
@@ -143,6 +145,7 @@ namespace Rift.Services
                     LoadData();
 
                     Settings.App.LolVersion = version;
+                    await Settings.Save(SettingsType.App);
 
                     RiftBot.Log.Info($"Data update completed. New version is {Settings.App.LolVersion}");
 
@@ -174,7 +177,7 @@ namespace Rift.Services
 
             if (version.Equals(Settings.App.LolVersion, StringComparison.InvariantCultureIgnoreCase))
             {
-                RiftBot.Log.Info($"Data version in up to date.");
+                RiftBot.Log.Info($"Data version {Settings.App.LolVersion} is up to date.");
 
                 return (false, string.Empty);
             }
@@ -338,11 +341,11 @@ namespace Rift.Services
                 AccountId = summoner.AccountId,
                 SummonedId = summoner.Id,
                 ConfirmationCode = code,
-                ExpirationTimestamp = Helper.CurrentUnixTimestamp + pendingUserLifetimeSeconds
+                ExpirationTime = DateTime.UtcNow + Settings.Economy.PendingUserLifeTime
             };
 
             if (!await AddForApprovalAsync(pendingUser))
-                return GenericEmbeds.ErrorEmbed;
+                return GenericEmbeds.Error;
 
             return RegisterEmbeds.CodeGenerated(code);
         }
@@ -360,14 +363,14 @@ namespace Rift.Services
         {
             var pendingUsers = await RiftBot.GetService<DatabaseService>().GetAllPendingUsersAsync();
 
-            if (pendingUsers is null || pendingUsers.Any())
+            if (pendingUsers is null || !pendingUsers.Any())
                 return;
 
             RiftBot.Log.Debug($"Checking {pendingUsers.Count} pending users...");
 
             foreach (var user in pendingUsers)
             {
-                bool expired = Helper.CurrentUnixTimestamp > user.ExpirationTimestamp;
+                bool expired = DateTime.UtcNow > user.ExpirationTime;
 
                 if (expired)
                 {
@@ -393,7 +396,7 @@ namespace Rift.Services
                 if (codeResult != RequestResult.Success)
                     continue;
 
-                string sanitizedCode = new string(code.Where(x => Char.IsLetterOrDigit(x)).ToArray());
+                string sanitizedCode = new string(code.Where(Char.IsLetterOrDigit).ToArray());
 
                 if (sanitizedCode != user.ConfirmationCode)
                     continue;
@@ -407,8 +410,17 @@ namespace Rift.Services
                     continue;
                 }
 
-                await RiftBot.GetService<DatabaseService>()
-                             .SetLolDataAsync(user.UserId, user.Region, user.PlayerUUID, user.AccountId, user.SummonedId, summoner.Name);
+                var lolData = new RiftLolData
+                {
+                    UserId = user.UserId,
+                    SummonerRegion = user.Region,
+                    PlayerUUID = user.PlayerUUID,
+                    AccountId = user.AccountId,
+                    SummonerId = user.SummonedId,
+                    SummonerName = summoner.Name
+                };
+
+                await RiftBot.GetService<DatabaseService>().AddLolDataAsync(lolData);
 
                 usersValidated++;
 
@@ -450,7 +462,7 @@ namespace Rift.Services
 
         #region Rank
 
-        async Task UpdateUsers()
+        async Task UpdateUsersAsync()
         {
             if (users == null || index == users.Length)
             {
@@ -460,7 +472,7 @@ namespace Rift.Services
             }
 
             var user = users[index];
-            if (user.LastUpdateTimestamp + cooldownAutoUpdateSeconds > Helper.CurrentUnixTimestamp)
+            if (user.LastUpdateTime + Settings.Economy.LolAccountUpdateCooldown > DateTime.UtcNow)
                 return;
 
             try
@@ -468,7 +480,7 @@ namespace Rift.Services
                 var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, user.UserId);
 
                 if (sgUser is null)
-                    await RiftBot.GetService<DatabaseService>().ClearLolDataAsync(user.UserId);
+                    await RiftBot.GetService<DatabaseService>().RemoveLolDataAsync(user.UserId);
                 else
                     await UpdateRankAsync(user.UserId, true);
             }
@@ -477,7 +489,7 @@ namespace Rift.Services
             }
 
             await RiftBot.GetService<DatabaseService>()
-                         .SetLastLolAccountUpdateTimestamp(user.UserId, Helper.CurrentUnixTimestamp);
+                         .SetLastLolAccountUpdateTimeAsync(user.UserId, DateTime.UtcNow);
             index++;
         }
 
@@ -488,7 +500,12 @@ namespace Rift.Services
 
             RiftBot.Log.Debug($"[User|{userId}] Getting summoner for rank update");
 
-            var summonerData = await RiftBot.GetService<DatabaseService>().GetUserLolDataAsync(userId);
+            var lolData = await RiftBot.GetService<DatabaseService>().GetUserLolDataAsync(userId);
+
+            await RiftBot.GetService<DatabaseService>()
+                         .UpdateLolDataAsync(userId, lolData.SummonerRegion, lolData.PlayerUUID,
+                                             lolData.AccountId, lolData.SummonerId,
+                                             lolData.SummonerName);
 
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
@@ -499,7 +516,7 @@ namespace Rift.Services
             }
 
             (RequestResult rankResult, LeaguePosition[] rankData) =
-                await GetLeaguePositionsByEncryptedSummonerIdAsync(summonerData.SummonerRegion, summonerData.SummonerId);
+                await GetLeaguePositionsByEncryptedSummonerIdAsync(lolData.SummonerRegion, lolData.SummonerId);
 
             if (rankResult != RequestResult.Success)
             {

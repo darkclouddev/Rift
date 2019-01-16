@@ -12,12 +12,12 @@ namespace Rift.Embeds
 {
     class AttackEmbeds
     {
-        public static readonly Embed AttacksUnlockedDMEmbed =
+        public static readonly Embed AttacksUnlockedDM =
             new EmbedBuilder()
                 .WithDescription($"Призыватель, вам открыт доступ к атакам в чате.")
                 .Build();
 
-        public static readonly Embed HelpEmbed =
+        public static readonly Embed Help =
             new EmbedBuilder()
                 .WithAuthor($"Атаки")
                 .WithDescription($"Нападение на призывателей осуществляется в общем чате.\n"
@@ -29,112 +29,93 @@ namespace Rift.Embeds
                 .WithFooter("Максимум одна атака в два часа.")
                 .Build();
 
-        public static Embed AttacksUnlockedChatEmbed(ulong userId)
+        public static Embed AttacksUnlockedChat(ulong userId)
         {
             return new EmbedBuilder()
                    .WithDescription($"Призыватель <@{userId}> открыл доступ к атакам в чате.")
                    .Build();
         }
 
-        public static readonly Embed SelfAttackEmbed =
+        public static readonly Embed SelfAttack =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
                 .WithDescription("Вы не можете атаковать себя.")
                 .Build();
 
-        public static readonly Embed LowLevelEmbed =
+        public static readonly Embed LowLevel =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
                 .WithDescription($"Атаковать призывателей можно лишь со {Settings.Economy.AttackMinimumLevel} уровня.")
                 .Build();
 
-        public static readonly Embed LowTargetLevelEmbed =
+        public static readonly Embed LowTargetLevel =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
                 .WithDescription($"Вы не можете атаковать призывателя ниже {Settings.Economy.AttackMinimumLevel} уровня.")
                 .Build();
 
-        public static readonly Embed NoCoinsEmbed =
+        public static readonly Embed NoCoins =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
                 .WithDescription("У вас не хватает монет для атаки.")
                 .Build();
 
-        public static readonly Embed ModeratorEmbed =
+        public static readonly Embed Moderator =
             new EmbedBuilder()
                 .WithDescription("Вы не можете атаковать модераторов сервера.")
                 .Build();
 
-        public static readonly Embed WiseEmbed =
-            new EmbedBuilder()
-                .WithDescription("Вы не можете атаковать основателя сервера.")
-                .Build();
-
-        public static readonly Embed BotKeeperEmbed =
+        public static readonly Embed BotKeeper =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
                 .WithDescription("Нельзя атаковать хранителя ботов.")
                 .Build();
 
-        public static readonly Embed IonEmbed =
-            new EmbedBuilder()
-                .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
-                .WithColor(226, 87, 76)
-                .WithDescription("Зачем атаковать моего хозяина? Лучше бы подарили что-нибудь :(")
-                .Build();
-
-        public static readonly Embed TvariusEmbed =
-            new EmbedBuilder()
-                .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
-                .WithColor(226, 87, 76)
-                .WithDescription("Зачем его атаковать? Он тут так, проездом.")
-                .Build();
-
-        public static Embed CooldownEmbed(ulong cooldown)
+        public static Embed Cooldown(TimeSpan remainingTime)
         {
             return new EmbedBuilder()
                    .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                    .WithColor(226, 87, 76)
-                   .WithDescription($"Невозможно атаковать, попробуйте через {TimeSpan.FromSeconds(cooldown).FormatTimeToString()}")
+                   .WithDescription($"Невозможно атаковать, попробуйте через {remainingTime.FormatTimeToString()}")
                    .Build();
         }
 
-        public static Embed TargetCooldownEmbed(ulong cooldown)
+        public static Embed TargetCooldown(TimeSpan remainingTime)
         {
             return new EmbedBuilder()
                    .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                    .WithColor(226, 87, 76)
-                   .WithDescription($"Именно этого призывателя нельзя атаковать еще {TimeSpan.FromSeconds(cooldown).FormatTimeToString()}")
+                   .WithDescription($"Именно этого призывателя нельзя атаковать еще {remainingTime.FormatTimeToString()}")
                    .Build();
         }
 
-        public static Embed ChatEmbed(SocketGuildUser sgAttacker, SocketGuildUser sgTarget)
+        public static Embed Chat(SocketGuildUser sgAttacker, SocketGuildUser sgTarget)
         {
             return new EmbedBuilder()
                    .WithDescription($"Призыватель {sgAttacker.Mention} атаковал {sgTarget.Mention}.")
                    .Build();
         }
 
-        public static Embed AttackDescEmbed(SocketGuildUser sgAttacker, SocketGuildUser sgTarget, Attack attack)
+        public static Embed AttackDesc(SocketGuildUser sgAttacker, SocketGuildUser sgTarget, Attack attack)
         {
             return new EmbedBuilder()
                    .WithDescription(GetChatDescription(sgAttacker, sgTarget, attack))
                    .Build();
         }
 
-        public static Embed AttackerEmbed(SocketGuildUser sgTarget, Attack attack)
+        public static Embed Attacker(SocketGuildUser sgTarget, Attack attack)
         {
             return new EmbedBuilder()
                    .WithDescription(GetAttackerDescription(sgTarget, attack))
                    .Build();
         }
 
-        public static Embed TargetEmbed(SocketGuildUser sgAttacker, Attack attack)
+        public static Embed Target(SocketGuildUser sgAttacker, Attack attack)
         {
             return new EmbedBuilder()
                    .WithDescription(GetTargetDescription(sgAttacker, attack))
@@ -147,34 +128,34 @@ namespace Rift.Embeds
             {
                 case SkillResult.GhostCoins:
                     return $"{sgAttacker.Mention} использует {Settings.Emote.Ghost} заклинание.\n"
-                           + $"Призыватель ворует монеты при атаке.";
+                           + "Призыватель ворует монеты при атаке.";
                 case SkillResult.GhostChests:
                     return $"{sgAttacker.Mention} использует {Settings.Emote.Ghost} заклинание.\n"
-                           + $"Призыватель ворует сундук при атаке.";
+                           + "Призыватель ворует сундук при атаке.";
                 case SkillResult.GhostMute:
                     return $"{sgAttacker.Mention} использует {Settings.Emote.Ghost} заклинание.\n"
                            + $"Призыватель выдает блокировку чата при атаке на {attack.Count} мин.";
                 case SkillResult.GhostNothing:
                     return $"{sgTarget.Mention} использует {Settings.Emote.Ghost} заклинание и убегает.\n"
-                           + $"Атакующий теряет свои монеты, атака не срабатывает.";
+                           + "Атакующий теряет свои монеты, атака не срабатывает.";
                 case SkillResult.FlashCoins:
                     return $"{sgAttacker.Mention} использует {Settings.Emote.Flash} заклинание.\n"
-                           + $"Призыватель ворует монеты при атаке.";
+                           + "Призыватель ворует монеты при атаке.";
                 case SkillResult.FlashChests:
                     return $"{sgAttacker.Mention} использует {Settings.Emote.Flash} заклинание.\n"
-                           + $"Призыватель ворует сундук при атаке.";
+                           + "Призыватель ворует сундук при атаке.";
                 case SkillResult.FlashMute:
                     return $"{sgAttacker.Mention} использует {Settings.Emote.Flash} заклинание.\n"
                            + $"Призыватель выдает блокировку чата при атаке на {attack.Count} мин.";
                 case SkillResult.FlashNothing:
                     return $"{sgTarget.Mention} использует {Settings.Emote.Flash} заклинание и убегает.\n"
-                           + $"Атака не срабатывает, атакующий пытался догнать и флешнулся в стену.";
+                           + "Атака не срабатывает, атакующий пытался догнать и флешнулся в стену.";
                 case SkillResult.IgniteCoins:
                     return $"{sgAttacker.Mention} использует {Settings.Emote.Ignite} заклинание.\n"
-                           + $"Призыватель ворует монеты при атаке.";
+                           + "Призыватель ворует монеты при атаке.";
                 case SkillResult.IgniteChests:
                     return $"{sgAttacker.Mention} использует {Settings.Emote.Ignite} заклинание.\n"
-                           + $"Призыватель ворует сундук при атаке.";
+                           + "Призыватель ворует сундук при атаке.";
                 case SkillResult.IgniteMute:
                     return $"{sgAttacker.Mention} использует {Settings.Emote.Ignite} заклинание.\n"
                            + $"Призыватель выдает блокировку чата при атаке на {attack.Count} мин.";
@@ -183,13 +164,13 @@ namespace Rift.Embeds
                            + $"Игрокам выдается двойная блокировка чата на {attack.Count} мин.";
                 case SkillResult.HealNothing:
                     return $"{sgTarget.Mention} использует {Settings.Emote.Heal} заклинание.\n"
-                           + $"Атакующий призыватель теряет монеты, атака не срабатывает.";
+                           + "Атакующий призыватель теряет монеты, атака не срабатывает.";
                 case SkillResult.HealReversedMute:
                     return $"{sgTarget.Mention} использует {Settings.Emote.Heal} заклинание.\n"
                            + $"Призыватель выдает блокировку чата атакующему на {attack.Count} мин.";
                 case SkillResult.BarrierNothing:
                     return $"{sgTarget.Mention} использует {Settings.Emote.Barrier} заклинание.\n"
-                           + $"Атакующий призыватель теряет монеты, атака не срабатывает.";
+                           + "Атакующий призыватель теряет монеты, атака не срабатывает.";
                 case SkillResult.BarrierReversedMute:
                     return $"{sgTarget.Mention} использует {Settings.Emote.Barrier} заклинание.\n"
                            + $"Призыватель выдает блокировку чата атакующему на {attack.Count} мин.";
@@ -214,7 +195,7 @@ namespace Rift.Embeds
                 case AttackLoot.ReversedMute:
                     return $"Вы атаковали {sgTarget.Username} и получили обратную блокировку чата.";
 
-                case AttackLoot.MutualMute: return $"Двойное заклинание, две блокировки чата.";
+                case AttackLoot.MutualMute: return "Двойное заклинание, две блокировки чата.";
 
                 default: return "";
             }
@@ -240,7 +221,7 @@ namespace Rift.Embeds
                     return $"Сработала защита, вы выдали обратную блокировку {sgAttacker.Username}.";
 
                 case AttackLoot.MutualMute:
-                    return $"Двойное заклинание, две блокировки чата.";
+                    return "Двойное заклинание, две блокировки чата.";
 
                 default: return "";
             }

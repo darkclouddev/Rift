@@ -39,7 +39,7 @@ namespace Rift.Embeds
                 .WithAuthor("Возможности платных ролей")
                 .WithDescription("\n")
                 .AddField($"Возможности с легендарной ролью:",
-                          $"• Еженедельные подарки: {Settings.Emote.Coin} 5000 {Settings.Emote.Ctickets} 4\n"
+                          $"• Еженедельные подарки: {Settings.Emote.Coin} 5000 {Settings.Emote.UsualTickets} 4\n"
                           + $"• Возможность получать за хвастайся больше монет.\n"
                           + $"• Возможность ставить эмоции под сообщения в чате.\n"
                           + $"• Возможность получать каждый день дополнительную награду.")

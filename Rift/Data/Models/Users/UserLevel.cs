@@ -5,6 +5,5 @@
         public ulong UserId;
         public uint Level;
         public uint Experience;
-        public ulong DoubleExpTimestamp;
     }
 }

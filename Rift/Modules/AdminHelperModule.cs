@@ -122,7 +122,7 @@ namespace Rift.Modules
                 await user.SendEmbedAsync(absoluteEmbed);
             }
 
-            var legendaryEmbed = GiftEmbeds.RoleReward($"{Settings.Emote.Coin} 5000 {Settings.Emote.Ctickets} 2");
+            var legendaryEmbed = GiftEmbeds.RoleReward($"{Settings.Emote.Coin} 5000 {Settings.Emote.UsualTickets} 2");
 
             foreach (var user in srLegendary.Members)
             {

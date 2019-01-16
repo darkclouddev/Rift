@@ -40,9 +40,9 @@ namespace Rift.Services.Economy
                          Currency.Coins),
             new GiftItem(2u, Settings.Emote.Coin, "Монеты (рандом)", GiftItemType.CoinsRandom, 3_000u,
                          Currency.Coins),
-            new GiftItem(3u, Settings.Emote.Ctickets, "Обычный билет", GiftItemType.UsualTicket, 4_000u,
+            new GiftItem(3u, Settings.Emote.UsualTickets, "Обычный билет", GiftItemType.UsualTicket, 4_000u,
                          Currency.Coins),
-            new GiftItem(4u, Settings.Emote.Gtickets, "Редкий билет", GiftItemType.RareTicket, 20_000u,
+            new GiftItem(4u, Settings.Emote.RareTickets, "Редкий билет", GiftItemType.RareTicket, 20_000u,
                          Currency.Coins),
         };
     }

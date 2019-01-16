@@ -10,14 +10,14 @@ namespace Rift.Services.Message
         {
             ChannelId = channelId;
             MessageId = messageId;
-            DeletionTime = DateTime.Now + offset;
+            DeletionTime = DateTime.UtcNow + offset;
         }
 
         public DeleteMessage(IUserMessage message, TimeSpan offset)
         {
             ChannelId = message.Channel.Id;
             MessageId = message.Id;
-            DeletionTime = DateTime.Now + offset;
+            DeletionTime = DateTime.UtcNow + offset;
         }
     }
 }

@@ -32,7 +32,7 @@ namespace Rift.Services
 
         async Task CheckMessagesAsync()
         {
-            var dtNow = DateTime.Now;
+            var dtNow = DateTime.UtcNow;
 
             await CheckSendAsync(dtNow);
             await CheckDeleteAsync(dtNow);
@@ -46,7 +46,7 @@ namespace Rift.Services
                                  .OrderBy(x => x.AddedOn)
                                  .Select(x => x.Id);
 
-            if (unsentId is null || unsentId.Count() == 0)
+            if (unsentId is null || unsentId.Any())
                 return;
 
             foreach (var id in unsentId)
@@ -64,7 +64,7 @@ namespace Rift.Services
         {
             var undeletedId = toDelete.Values.ToList().Where(x => x.DeletionTime < dt).Take(3).Select(x => x.Id);
 
-            if (undeletedId is null || undeletedId.Count() == 0)
+            if (undeletedId is null || undeletedId.Any())
                 return;
 
             foreach (var id in undeletedId)

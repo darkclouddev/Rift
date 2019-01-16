@@ -67,7 +67,7 @@ namespace Rift.Services.Giveaway
                     return;
 
                 await channel.SendMessageAsync(GiveawayEmbeds.FreeMessage);
-                var msg = await channel.SendEmbedAsync(GiveawayEmbeds.ChatFreeEmbed(reward));
+                var msg = await channel.SendEmbedAsync(GiveawayEmbeds.ChatFree(reward));
                 giveawayMessageId = msg.Id;
 
                 IonicClient.Client.ReactionAdded += Client_AddReactedUser;

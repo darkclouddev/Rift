@@ -7,7 +7,6 @@ using Rift.Configuration;
 using Rift.Embeds;
 using Rift.Preconditions;
 using Rift.Services;
-using Rift.Services.Role;
 
 using IonicLib;
 using IonicLib.Util;
@@ -130,9 +129,7 @@ namespace Rift.Modules
                 return;
             }
 
-            TempRole tempRole = new TempRole(user.Id, Settings.RoleId.Muted, ts);
-
-            await roleService.AddTempRoleAsync(tempRole);
+            await roleService.AddTempRoleAsync(user.Id, Settings.RoleId.Muted, ts, $"Muted by {Context.User.Id} with reason: {reason}");
 
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return;
@@ -153,7 +150,7 @@ namespace Rift.Modules
                 return;
             }
 
-            await roleService.SetExpiredAsync(sgUser.Id, Settings.RoleId.Muted);
+            await roleService.RemoveTempRoleAsync(sgUser.Id, Settings.RoleId.Muted);
         }
 
         [Command("warn")]
@@ -171,34 +168,6 @@ namespace Rift.Modules
             }
 
             await chatChannel.SendEmbedAsync(AdminEmbeds.Warn(sgUser));
-        }
-
-        [Command("banlist")]
-        [RequireAdmin]
-        [RequireContext(ContextType.Guild)]
-        public async Task Banlist()
-        {
-            var banlist = roleService.GetMutes();
-
-            if (banlist == null || banlist.Count() == 0)
-            {
-                var msg = await ReplyAsync($"Банлист пуст (пока что).");
-                return;
-            }
-
-            var sb = new StringBuilder();
-            sb.AppendLine("Список провинившихся");
-            sb.AppendLine();
-
-            foreach (var ban in banlist)
-            {
-                var user = IonicClient.GetGuildUserById(Settings.App.MainGuildId, ban.UserId);
-                var value = user != null ? $"{user.Username}#{user.Discriminator}" : ban.UserId.ToString();
-
-                sb.AppendLine($"{value} до {ban.UntilTimestamp:(dd/MM/yy HH:mm)}");
-            }
-
-            await ReplyAsync(sb.ToString());
         }
     }
 }

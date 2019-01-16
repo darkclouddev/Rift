@@ -21,7 +21,6 @@ namespace Rift.Embeds
                                     + $"{GetAchievementMark(achievements.Brag100Times)} Хвастунишка (100 раз похвастаться)\n"
                                     + $"{GetAchievementMark(achievements.Attack200Times)} Линчеватель (200 раз атаковать)\n"
                                     + $"{GetAchievementMark(achievements.OpenSphere)} Нечто классное (открыть одну сферу)\n"
-                                    + $"{GetAchievementMark(achievements.GiftSphere)} Щедрое влияние (подарить одну сферу)\n"
                                     + $"{GetAchievementMark(achievements.Purchase200Items)} Транжира (купить 200 товаров в магазине)\n"
                                     + $"{GetAchievementMark(achievements.Open100Chests)} Золотоискатель (открыть 100 сундуков)\n"
                                     + $"{GetAchievementMark(achievements.Send100Gifts)} Альтруист (подарить 100 подарков)\n"

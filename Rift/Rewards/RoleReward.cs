@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+using Humanizer;
+
 using Rift.Configuration;
 using Rift.Services;
-using Rift.Services.Role;
 
 namespace Rift.Rewards
 {
@@ -26,16 +27,16 @@ namespace Rift.Rewards
         public override async Task GiveRewardAsync(ulong userId)
         {
             await base.GiveRewardAsync(userId);
+
             if (RoleId != 0)
             {
                 if (Days != 0)
                 {
-                    var role = new TempRole(userId, RoleId, TimeSpan.FromDays(Days));
-                    await RiftBot.GetService<RoleService>().AddTempRoleAsync(role, true);
+                    await RiftBot.GetService<RoleService>().AddTempRoleAsync(userId, RoleId, TimeSpan.FromDays(Days), nameof(RoleReward).Humanize());
                 }
                 else
                 {
-                    await RiftBot.GetService<RoleService>().AddRoleAsync(userId, RoleId);
+                    await RiftBot.GetService<RoleService>().AddPermanentRoleAsync(userId, RoleId);
                 }
             }
         }

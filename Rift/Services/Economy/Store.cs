@@ -83,9 +83,9 @@ namespace Rift.Services.Economy
 
         static readonly List<StoreItem> StoreTickets = new List<StoreItem>
         {
-            new StoreItem(4u, Settings.Emote.Ctickets, "Обычный билет", StoreItemType.UsualTicket, 4_000u,
+            new StoreItem(4u, Settings.Emote.UsualTickets, "Обычный билет", StoreItemType.UsualTicket, 4_000u,
                           Currency.Coins),
-            new StoreItem(5u, Settings.Emote.Gtickets, "Редкий билет", StoreItemType.RareTicket, 20_000u,
+            new StoreItem(5u, Settings.Emote.RareTickets, "Редкий билет", StoreItemType.RareTicket, 20_000u,
                           Currency.Coins),
         };
 

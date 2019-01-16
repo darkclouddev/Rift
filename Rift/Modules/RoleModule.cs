@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
@@ -14,10 +17,19 @@ using Discord.Commands;
 using Discord.Webhook;
 using Discord.WebSocket;
 
+using Newtonsoft.Json;
+
 namespace Rift.Modules
 {
     public class RoleModule : RiftModuleBase
     {
+        readonly RoleService roleService;
+
+        public RoleModule(RoleService roleService)
+        {
+            this.roleService = roleService;
+        }
+
         [Command("роли")]
         [RequireContext(ContextType.Guild)]
         public async Task Roles()

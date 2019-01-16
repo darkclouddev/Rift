@@ -24,8 +24,8 @@ namespace Rift.Embeds
                              + $"{Settings.Emote.BotRespect} {inventory.PowerupsBotRespect}"
                              , true)
                    .AddField("Билеты",
-                             $"{Settings.Emote.Ctickets} {inventory.UsualTickets} "
-                             + $"{Settings.Emote.Gtickets} {inventory.RareTickets}"
+                             $"{Settings.Emote.UsualTickets} {inventory.UsualTickets} "
+                             + $"{Settings.Emote.RareTickets} {inventory.RareTickets}"
                              , true)
 
                    //.AddField("Информация о бонусах",

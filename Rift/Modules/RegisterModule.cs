@@ -37,7 +37,7 @@ namespace Rift.Modules
 
             var responseEmbed = await riotService.RegisterAsync(Context.User.Id, region, summonerName);
 
-            await Context.Channel.SendEmbedAsync(responseEmbed);
+            await Context.User.SendEmbedAsync(responseEmbed);
         }
 
         [Command("отвязать")]
@@ -51,7 +51,7 @@ namespace Rift.Modules
                 return;
             }
 
-            await databaseService.ClearLolDataAsync(user.Id);
+            await databaseService.RemoveLolDataAsync(user.Id);
         }
     }
 }

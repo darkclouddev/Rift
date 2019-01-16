@@ -7,7 +7,7 @@ namespace Rift.Embeds
 {
     class LevelUpEmbeds
     {
-        public static Embed ChatEmbed(ulong userId, uint newLevel)
+        public static Embed Chat(ulong userId, uint newLevel)
         {
             return new EmbedBuilder()
                    .WithColor(107, 188, 239)
@@ -15,7 +15,7 @@ namespace Rift.Embeds
                    .Build();
         }
 
-        public static Embed DMEmbed(uint level, UserStatistics statistics, string rewards)
+        public static Embed DM(uint level, UserStatistics statistics, string rewards)
         {
             return new EmbedBuilder()
                    .WithAuthor("Уровень")

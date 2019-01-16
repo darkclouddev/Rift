@@ -52,11 +52,11 @@ namespace Rift.Services.Giveaway
         {
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Giveaways, out var channel))
                 return;
-            await channel.SendEmbedAsync(GiveawayEmbeds.ChatWinnerEmbed(winner, reward));
+            await channel.SendEmbedAsync(GiveawayEmbeds.ChatWinner(winner, reward));
 
             RiftBot.GetService<MessageService>()
                 .TryAddSend(new EmbedMessage(DestinationType.DM, winner, TimeSpan.Zero,
-                                             GiveawayEmbeds.DMWinnerEmbed(reward)));
+                                             GiveawayEmbeds.DMWinner(reward)));
 
             Clean();
         }

@@ -8,7 +8,7 @@ namespace Rift.Services.Message
     {
         public Guid Id = Guid.NewGuid();
 
-        public DateTime AddedOn = DateTime.Now;
+        public DateTime AddedOn = DateTime.UtcNow;
 
         public virtual MessageType MessageType { get; protected set; }
 

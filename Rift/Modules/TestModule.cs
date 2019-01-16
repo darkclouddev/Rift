@@ -240,11 +240,11 @@ namespace Rift.Modules
                            .ToString();
 
             var message3 = new StringBuilder()
-                           .AppendLine($"Из одной {Settings.Emote.Sphere} сферы можно гарантированно получить {Settings.Emote.Coin} монеты, {Settings.Emote.Ctickets} обычные билеты, {Settings.Emote.Gtickets} редкие билеты, {Settings.Emote.PowerupDoubleExperience} двойной опыт, {Settings.Emote.BotRespect} уважение ботов.")
-                           .AppendLine($"Из {Settings.Emote.Chest} сундука выпадают гарантированно монеты, но также может выпасть {Settings.Emote.Ctickets} обычный билет, {Settings.Emote.PowerupDoubleExperience} двойной опыт и {Settings.Emote.BotRespect} уважение ботов.")
-                           .AppendLine($"А из одной {Settings.Emote.Capsule} капсулы можно получить {Settings.Emote.Coin} монеты, {Settings.Emote.Token} жетоны, {Settings.Emote.PowerupDoubleExperience} двойной опыт, {Settings.Emote.Ctickets} обычные билеты, {Settings.Emote.Gtickets} редкие билеты и уникальную роль на 60 дней.")
+                           .AppendLine($"Из одной {Settings.Emote.Sphere} сферы можно гарантированно получить {Settings.Emote.Coin} монеты, {Settings.Emote.UsualTickets} обычные билеты, {Settings.Emote.RareTickets} редкие билеты, {Settings.Emote.PowerupDoubleExperience} двойной опыт, {Settings.Emote.BotRespect} уважение ботов.")
+                           .AppendLine($"Из {Settings.Emote.Chest} сундука выпадают гарантированно монеты, но также может выпасть {Settings.Emote.UsualTickets} обычный билет, {Settings.Emote.PowerupDoubleExperience} двойной опыт и {Settings.Emote.BotRespect} уважение ботов.")
+                           .AppendLine($"А из одной {Settings.Emote.Capsule} капсулы можно получить {Settings.Emote.Coin} монеты, {Settings.Emote.Token} жетоны, {Settings.Emote.PowerupDoubleExperience} двойной опыт, {Settings.Emote.UsualTickets} обычные билеты, {Settings.Emote.RareTickets} редкие билеты и уникальную роль на 60 дней.")
                            .AppendLine()
-                           .AppendLine($"Есть два типа билетов и розыгрышей: {Settings.Emote.Ctickets} обычные билеты используются для обычных розыгрышей, {Settings.Emote.Gtickets} редкие билеты используются для особых розыгрышей.")
+                           .AppendLine($"Есть два типа билетов и розыгрышей: {Settings.Emote.UsualTickets} обычные билеты используются для обычных розыгрышей, {Settings.Emote.RareTickets} редкие билеты используются для особых розыгрышей.")
                            .AppendLine($"Как только начнется розыгрыш, бот автоматически использует ваш билет и заберет из инвентаря. Проверяйте текстовый канал <#{Settings.ChannelId.Giveaways}>.")
                            .AppendLine()
                            .AppendLine($"**Бонусы и их возможности:**")

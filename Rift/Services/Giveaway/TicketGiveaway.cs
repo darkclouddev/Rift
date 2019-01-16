@@ -20,9 +20,9 @@ namespace Rift.Services.Giveaway
         {
             Ticket = ticket;
             if (ticket == TicketType.Usual)
-                ticketString = $"{Settings.Emote.Ctickets} обычный билет";
+                ticketString = $"{Settings.Emote.UsualTickets} обычный билет";
             else
-                ticketString = $"{Settings.Emote.Gtickets} редкий билет";
+                ticketString = $"{Settings.Emote.RareTickets} редкий билет";
         }
 
         public override async Task StartGiveawayAsync()
@@ -52,7 +52,7 @@ namespace Rift.Services.Giveaway
                 }
             }
 
-            await channel.SendEmbedAsync(GiveawayEmbeds.ChatTicketEmbed(reward, ticketString, users.Count));
+            await channel.SendEmbedAsync(GiveawayEmbeds.ChatTicket(reward, ticketString, users.Count));
 
             await FinishGiveaway();
         }

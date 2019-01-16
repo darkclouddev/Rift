@@ -61,10 +61,10 @@ namespace Rift.Rewards
                     RewardString += $" {Settings.Emote.BotRespect} {PowerupsBotRespect}";
 
                 if (UsualTickets > 0u)
-                    RewardString += $" {Settings.Emote.Ctickets} {UsualTickets}";
+                    RewardString += $" {Settings.Emote.UsualTickets} {UsualTickets}";
 
                 if (RareTickets > 0u)
-                    RewardString += $" {Settings.Emote.Gtickets} {RareTickets}";
+                    RewardString += $" {Settings.Emote.RareTickets} {RareTickets}";
 
                 RewardString = RewardString.TrimStart();
             }

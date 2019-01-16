@@ -35,7 +35,8 @@ namespace Rift.Rewards
             reward = PossibleReward.Copy();
             reward.CalculateReward();
             reward.GenerateRewardString();
-            GetRole(AvailableRoles, userId);
+
+            Task.Run(async () => await GetRole(AvailableRoles, userId));
 
             RewardString = reward.RewardString;
 

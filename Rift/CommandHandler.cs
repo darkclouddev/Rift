@@ -60,7 +60,7 @@ namespace Rift
             client.MessageReceived += ProcessMessage;
             client.UserJoined += UserJoined;
             client.UserLeft += UserLeft;
-            client.Ready += Ready;
+            //client.Ready += Ready;
         }
 
         public static async Task Ready()
@@ -81,8 +81,8 @@ namespace Rift
                 return;
 
             if (Settings.App.MaintenanceMode
-                && !RiftBot.IsAdmin(message.Author)
-                && !RiftBot.IsModerator(message.Author))
+                && !RiftBot.IsAdmin(message.Author))
+                //&& !RiftBot.IsModerator(message.Author))
                 return;
 
             var context = new CommandContext(client, message);
@@ -90,7 +90,7 @@ namespace Rift
             if (await HandleCommand(context))
                 return;
 
-            await HandlePlainText(context);
+            //await HandlePlainText(context);
         }
 
         async Task<bool> HandleCommand(CommandContext context)
@@ -201,7 +201,7 @@ namespace Rift
         {
             if (state == UserState.Joined)
             {
-                await roleService.RestoreTempRoles(sgUser);
+                await roleService.RestoreTempRolesAsync(sgUser);
 
                 if (sgUser.Guild.Id == Settings.App.MainGuildId)
                 {
@@ -299,23 +299,23 @@ namespace Rift
             return ytRegex.IsMatch(url);
         }
 
-        static Dictionary<ulong, ulong> lastPostTimestamps = new Dictionary<ulong, ulong>();
+        static Dictionary<ulong, DateTime> lastPostTimestamps = new Dictionary<ulong, DateTime>();
 
         static bool IsEligibleForEconomy(ulong userId)
         {
             if (!lastPostTimestamps.ContainsKey(userId))
             {
-                lastPostTimestamps.Add(userId, IonicLib.Extensions.Helper.CurrentUnixTimestamp);
+                lastPostTimestamps.Add(userId, DateTime.UtcNow);
 
                 return true;
             }
 
-            ulong currentTimestamp = IonicLib.Extensions.Helper.CurrentUnixTimestamp;
+            var currentTime = DateTime.UtcNow;
 
-            bool result = (currentTimestamp - lastPostTimestamps[userId]) > Settings.Economy.MessageCooldownSeconds;
+            bool result = (currentTime - lastPostTimestamps[userId]) > Settings.Economy.MessageCooldown;
 
             if (result)
-                lastPostTimestamps[userId] = currentTimestamp;
+                lastPostTimestamps[userId] = currentTime;
 
             return result;
         }
