@@ -1413,15 +1413,6 @@ namespace Rift.Services
             if (sgAttacker.Id == sgTarget.Id)
                 return (AttackResult.SelfAttack, AttackEmbeds.SelfAttack);
 
-            //if (IonicBot.IsModerator(sgTarget))
-            //	return (AttackResult.TargetModerator, embedAttackModerator);
-
-            //if (sgTarget.Id == 178443743026872321ul)
-            //	return (AttackResult.TargetWise, embedAttackWise);
-
-            if (sgTarget.Id == 212997107525746690ul || sgTarget.Id == 393440346702610433ul)
-                return (AttackResult.TargetIon, AttackEmbeds.BotKeeper);
-
             (bool canBeAttacked, TimeSpan canBeAttackedRemainingTime) = await CanBeAttackedAgain(sgTarget.Id);
 
             if (!canBeAttacked)
