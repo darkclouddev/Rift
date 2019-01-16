@@ -35,27 +35,11 @@
         public string RP { get; set; }
         public string Rewards { get; set; }
         public string Member { get; set; }
-        public string PouchCoins { get; set; }
-        public string PouchTokens { get; set; }
         public string Yasuo { get; set; }
         public string Profile { get; set; }
         public string Legendary { get; set; }
         public string Absolute { get; set; }
         public string Keeper { get; set; }
-        public string Thonk { get; set; }
-        public string StoreChest { get; set; }
-        public string StoreArcade { get; set; }
-        public string StoreBotRespect { get; set; }
-        public string StoreJusticars { get; set; }
-        public string StoreParty { get; set; }
-        public string StoreWorldbreakers { get; set; }
-        public string StoreVictorious { get; set; }
-        public string StoreDebonair { get; set; }
-        public string StoreThunderlords { get; set; }
-        public string StoreArclight { get; set; }
-        public string StoreDarkStar { get; set; }
-        public string StoreBloodMoon { get; set; }
-        public string StoreVandals { get; set; }
         public string RankIron { get; set; }
         public string RankBronze { get; set; }
         public string RankSilver { get; set; }
@@ -82,20 +66,14 @@
         public string Id { get; set; }
         public string Forms { get; set; }
         public string FormsUrl { get; set; }
-        public string StoreMagicSet { get; set; }
-        public string StoreMagicSetUrl { get; set; }
         public string Vk { get; set; }
         public string VkUrl { get; set; }
         public string Krug { get; set; }
         public string KrugUrl { get; set; }
-        public string DonateGift { get; set; }
-        public string DonateDiamond { get; set; }
         public string Sphere { get; set; }
         public string SphereUrl { get; set; }
         public string PowerupDoubleExperience { get; set; }
         public string PowerupDoubleExperienceUrl { get; set; }
-        public string PowerupAttack { get; set; }
-        public string PowerupAttackUrl { get; set; }
         public string BotRespect { get; set; }
         public string BotRespectUrl { get; set; }
         public string RedBuff { get; set; }
