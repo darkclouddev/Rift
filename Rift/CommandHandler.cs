@@ -60,7 +60,7 @@ namespace Rift
             client.MessageReceived += ProcessMessage;
             client.UserJoined += UserJoined;
             client.UserLeft += UserLeft;
-            //client.Ready += Ready;
+            client.Ready += Ready;
         }
 
         public static async Task Ready()
@@ -81,8 +81,8 @@ namespace Rift
                 return;
 
             if (Settings.App.MaintenanceMode
-                && !RiftBot.IsAdmin(message.Author))
-                //&& !RiftBot.IsModerator(message.Author))
+                && !RiftBot.IsAdmin(message.Author)
+                && !RiftBot.IsModerator(message.Author))
                 return;
 
             var context = new CommandContext(client, message);
@@ -90,7 +90,7 @@ namespace Rift
             if (await HandleCommand(context))
                 return;
 
-            //await HandlePlainText(context);
+            await HandlePlainText(context);
         }
 
         async Task<bool> HandleCommand(CommandContext context)
