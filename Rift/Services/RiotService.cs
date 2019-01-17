@@ -256,7 +256,7 @@ namespace Rift.Services
                             if (entry.IsDirectory)
                                 continue;
 
-                            if (!entry.Name.Contains($"en_US/champion.json"))
+                            if (!entry.Name.Contains($"ru_RU/champion.json"))
                                 continue;
 
                             string name = entry.Name.Replace('/', Path.DirectorySeparatorChar);
