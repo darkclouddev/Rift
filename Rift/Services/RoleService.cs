@@ -21,6 +21,7 @@ namespace Rift.Services
     public class RoleService
     {
         static Timer tempRoleTimer;
+        static SemaphoreSlim timerMutex = new SemaphoreSlim(1);
 
         public RoleService()
         {
@@ -32,36 +33,42 @@ namespace Rift.Services
 
         async Task RescheduleTimerAsync()
         {
-            RiftBot.Log.Info("Rescheduling now.");
+            await timerMutex.WaitAsync().ConfigureAwait(false);
 
-            var nearestRole = await RiftBot.GetService<DatabaseService>().GetNearestExpiringTempRoleAsync();
-
-            if (nearestRole is null)
+            try
             {
-                RiftBot.Log.Info("No temp roles for scheduling, sleeping..");
-                tempRoleTimer = null;
+                RiftBot.Log.Info("Rescheduling now.");
 
-                return;
+                var nearestRole = await RiftBot.GetService<DatabaseService>().GetNearestExpiringTempRoleAsync();
+
+                if (nearestRole is null)
+                {
+                    RiftBot.Log.Info("No temp roles for scheduling, sleeping..");
+                    tempRoleTimer = null;
+
+                    return;
+                }
+
+                if (DateTime.UtcNow >= nearestRole.ExpirationTime)
+                {
+                    RiftBot.Log.Info($"Captured expired role: {nearestRole}");
+
+                    await Task.Delay(1)
+                              .ContinueWith(async _ => { await RescheduleTimerAsync(); });
+
+                    return;
+                }
+
+                var diff = nearestRole.ExpirationTime - DateTime.UtcNow;
+
+                tempRoleTimer = new Timer(async delegate { await TimerProcAsync(); }, null, diff, TimeSpan.Zero);
+
+                RiftBot.Log.Info($"Next proc in {diff.Humanize(4, new CultureInfo("en-US"))}");
             }
-
-            if (DateTime.UtcNow >= nearestRole.ExpirationTime)
+            finally
             {
-                RiftBot.Log.Info($"Captured expired role: {nearestRole}");
-
-                await Task.Delay(1)
-                    .ContinueWith(async _ =>
-                    {
-                        await RescheduleTimerAsync();
-                    });
-
-                return;
+                timerMutex.Release();
             }
-
-            var diff = nearestRole.ExpirationTime - DateTime.UtcNow;
-
-            tempRoleTimer = new Timer(async delegate { await TimerProcAsync(); }, null, diff, TimeSpan.Zero);
-
-            RiftBot.Log.Info($"Next proc in {diff.Humanize(4, new CultureInfo("en-US"))}");
         }
 
         async Task TimerProcAsync()
@@ -76,7 +83,7 @@ namespace Rift.Services
 
             foreach (var expiredRole in expiredRoles)
             {
-                await RemoveTempRoleAsync(expiredRole);
+                await RemoveTempRoleAsync(expiredRole.UserId, expiredRole.RoleId, false);
             }
 
             await RescheduleTimerAsync();
@@ -122,12 +129,7 @@ namespace Rift.Services
                          .ContinueWith(async _ => { await RescheduleTimerAsync(); });
         }
 
-        public async Task<(bool, Embed)> RemoveTempRoleAsync(RiftTempRole role)
-        {
-            return await RemoveTempRoleAsync(role.UserId, role.RoleId);
-        }
-
-        public async Task<(bool, Embed)> RemoveTempRoleAsync(ulong userId, ulong roleId)
+        public async Task<(bool, Embed)> RemoveTempRoleAsync(ulong userId, ulong roleId, bool reschedule = true)
         {
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
@@ -141,7 +143,9 @@ namespace Rift.Services
 
             await sgUser.RemoveRoleAsync(role);
             await RiftBot.GetService<DatabaseService>().RemoveUserTempRoleAsync(userId, roleId);
-            await RescheduleTimerAsync();
+
+            if (reschedule)
+                await RescheduleTimerAsync();
 
             return (true, null);
         }

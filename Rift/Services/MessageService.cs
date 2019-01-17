@@ -44,9 +44,10 @@ namespace Rift.Services
                                  .Where(x => x.DeliveryTime < dt)
                                  .Take(3)
                                  .OrderBy(x => x.AddedOn)
-                                 .Select(x => x.Id);
+                                 .Select(x => x.Id)
+                                 .ToList();
 
-            if (unsentId is null || !unsentId.Any())
+            if (!unsentId.Any())
                 return;
 
             foreach (var id in unsentId)
@@ -62,7 +63,12 @@ namespace Rift.Services
 
         async Task CheckDeleteAsync(DateTime dt)
         {
-            var undeletedId = toDelete.Values.ToList().Where(x => x.DeletionTime < dt).Take(3).Select(x => x.Id);
+            var undeletedId = toDelete.Values
+                                      .ToList()
+                                      .Where(x => x.DeletionTime < dt)
+                                      .Take(3)
+                                      .Select(x => x.Id)
+                                      .ToList();
 
             if (undeletedId is null || !undeletedId.Any())
                 return;

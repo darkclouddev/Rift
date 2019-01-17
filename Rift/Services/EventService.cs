@@ -5,11 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
-using Rift.Data;
 using Rift.Data.Models;
 using Rift.Embeds;
 using Rift.Rewards;
-using Rift.Services;
 
 using IonicLib;
 using IonicLib.Extensions;
@@ -237,7 +235,7 @@ namespace Rift.Services
                 }
             }
 
-            await channel.SendEmbedAsync(EventEmbeds.UserCount(reactionIds.Count()));
+            await channel.SendEmbedAsync(EventEmbeds.UserCount(reactionIds.Count));
 
             reactionIds = new List<ulong>();
             eventMessageId = 0ul;
