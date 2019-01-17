@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -26,7 +26,7 @@ namespace Rift.Services
         {
             Task.Run(async () =>
             {
-                await Task.Delay(TimeSpan.FromSeconds(10)).ContinueWith(async _ => await RescheduleTimerAsync());
+                await Task.Delay(TimeSpan.FromSeconds(10)).ContinueWith(async _ => await TimerProcAsync());
             });
         }
 
