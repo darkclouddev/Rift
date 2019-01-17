@@ -46,7 +46,7 @@ namespace Rift.Services
                                  .OrderBy(x => x.AddedOn)
                                  .Select(x => x.Id);
 
-            if (unsentId is null || unsentId.Any())
+            if (unsentId is null || !unsentId.Any())
                 return;
 
             foreach (var id in unsentId)
@@ -64,7 +64,7 @@ namespace Rift.Services
         {
             var undeletedId = toDelete.Values.ToList().Where(x => x.DeletionTime < dt).Take(3).Select(x => x.Id);
 
-            if (undeletedId is null || undeletedId.Any())
+            if (undeletedId is null || !undeletedId.Any())
                 return;
 
             foreach (var id in undeletedId)
