@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -214,7 +214,7 @@ namespace Rift.Services
 
             RiftBot.Log.Debug($"EndEvent Reactions: {reactionIds.Count}");
 
-            if (reactionIds.Count() != 0)
+            if (reactionIds.Count != 0)
             {
                 foreach (var id in reactionIds)
                 {

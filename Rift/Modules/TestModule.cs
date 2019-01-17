@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -27,44 +27,21 @@ namespace Rift.Modules
         readonly EconomyService economyService;
         readonly RoleService roleService;
         readonly MessageService messageService;
-
         readonly DatabaseService databaseService;
-
-        //readonly DonateService donateService;
         readonly EventService eventService;
 
         public TestModule(EconomyService economyService,
                           RoleService roleService,
                           MessageService messageService,
                           DatabaseService databaseService,
-
-                          //DonateService donateService,
                           EventService eventService)
         {
             this.economyService = economyService;
             this.roleService = roleService;
             this.messageService = messageService;
             this.databaseService = databaseService;
-
-            //this.donateService = donateService;
             this.eventService = eventService;
         }
-
-        string GetUserNameById(ulong userId)
-        {
-            var user = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            return user is null ? "-" : RemoveNonAlphanumeric(user.Username);
-        }
-
-        string RemoveNonAlphanumeric(string input)
-        {
-            char[] symbols = input.Where(x => (char.IsLetterOrDigit(x) || char.IsWhiteSpace(x) || x == '-')).ToArray();
-
-            return new string(symbols);
-        }
-
-        static Random random = new Random();
 
         [Command("since")]
         [RateLimit(1, 10, Measure.Minutes, RateLimitFlags.NoLimitForAdmins)]

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -1142,9 +1142,10 @@ namespace Rift.Services
 
                     return true;
                 }
-                catch
+                catch (Exception ex)
                 {
                     RiftBot.Log.Info($"Failed to check {nameof(EnsureStatisticsExistsAsync)}.");
+                    RiftBot.Log.Info(ex);
                     return false;
                 }
             }
@@ -1735,7 +1736,6 @@ namespace Rift.Services
             using (var context = new RiftContext())
             {
                 return await context.TempRoles
-                                    .OrderBy(x => x.ExpirationTime)
                                     .Where(x => x.ExpirationTime <= DateTime.UtcNow)
                                     .ToListAsync();
             }

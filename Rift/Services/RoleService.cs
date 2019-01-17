@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -21,54 +21,10 @@ namespace Rift.Services
     public class RoleService
     {
         static Timer tempRoleTimer;
-        static SemaphoreSlim timerMutex = new SemaphoreSlim(1);
 
         public RoleService()
         {
-            Task.Run(async () =>
-            {
-                await Task.Delay(TimeSpan.FromSeconds(10)).ContinueWith(async _ => await TimerProcAsync());
-            });
-        }
-
-        async Task RescheduleTimerAsync()
-        {
-            await timerMutex.WaitAsync().ConfigureAwait(false);
-
-            try
-            {
-                RiftBot.Log.Info("Rescheduling now.");
-
-                var nearestRole = await RiftBot.GetService<DatabaseService>().GetNearestExpiringTempRoleAsync();
-
-                if (nearestRole is null)
-                {
-                    RiftBot.Log.Info("No temp roles for scheduling, sleeping..");
-                    tempRoleTimer = null;
-
-                    return;
-                }
-
-                if (DateTime.UtcNow >= nearestRole.ExpirationTime)
-                {
-                    RiftBot.Log.Info($"Captured expired role: {nearestRole}");
-
-                    await Task.Delay(1)
-                              .ContinueWith(async _ => { await RescheduleTimerAsync(); });
-
-                    return;
-                }
-
-                var diff = nearestRole.ExpirationTime - DateTime.UtcNow;
-
-                tempRoleTimer = new Timer(async delegate { await TimerProcAsync(); }, null, diff, TimeSpan.Zero);
-
-                RiftBot.Log.Info($"Next proc in {diff.Humanize(4, new CultureInfo("en-US"))}");
-            }
-            finally
-            {
-                timerMutex.Release();
-            }
+            tempRoleTimer = new Timer(async delegate { await TimerProcAsync(); }, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(5));
         }
 
         async Task TimerProcAsync()
@@ -76,17 +32,12 @@ namespace Rift.Services
             var expiredRoles = await RiftBot.GetService<DatabaseService>().GetExpiredTempRolesAsync();
 
             if (expiredRoles is null || expiredRoles.Count == 0)
-            {
-                await RescheduleTimerAsync();
                 return;
-            }
 
             foreach (var expiredRole in expiredRoles)
             {
-                await RemoveTempRoleAsync(expiredRole.UserId, expiredRole.RoleId, false);
+                await RemoveTempRoleAsync(expiredRole.UserId, expiredRole.RoleId);
             }
-
-            await RescheduleTimerAsync();
         }
 
         public async Task<(bool, Embed)> AddPermanentRoleAsync(ulong userId, ulong roleId)
@@ -125,27 +76,24 @@ namespace Rift.Services
             await sgUser.AddRoleAsync(serverRole);
 
             await RiftBot.GetService<DatabaseService>()
-                         .AddTempRoleAsync(role)
-                         .ContinueWith(async _ => { await RescheduleTimerAsync(); });
+                         .AddTempRoleAsync(role);
         }
 
-        public async Task<(bool, Embed)> RemoveTempRoleAsync(ulong userId, ulong roleId, bool reschedule = true)
+        public async Task<(bool, Embed)> RemoveTempRoleAsync(ulong userId, ulong roleId)
         {
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
             if (sgUser is null)
                 return (false, GenericEmbeds.UserNotFound);
 
-            var role = sgUser.Roles.FirstOrDefault(x => x.Id == roleId);
-
-            if (role is null)
-                return (false, GenericEmbeds.RoleNotFound);
-
-            await sgUser.RemoveRoleAsync(role);
             await RiftBot.GetService<DatabaseService>().RemoveUserTempRoleAsync(userId, roleId);
 
-            if (reschedule)
-                await RescheduleTimerAsync();
+            var role = sgUser.Roles.FirstOrDefault(x => x.Id == roleId);
+
+            if (role != null)
+                await sgUser.RemoveRoleAsync(role);
+
+            RiftBot.Log.Info($"Removed role {roleId} from {sgUser} {userId.ToString()}");
 
             return (true, null);
         }
