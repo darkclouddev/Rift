@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -61,7 +61,7 @@ namespace Rift.Services
 
             tempRoleTimer = new Timer(async delegate { await TimerProcAsync(); }, null, diff, TimeSpan.Zero);
 
-            RiftBot.Log.Info($"Next proc in {diff.Humanize(5, new CultureInfo("en-US"))}");
+            RiftBot.Log.Info($"Next proc in {diff.Humanize(4, new CultureInfo("en-US"))}");
         }
 
         async Task TimerProcAsync()
@@ -106,6 +106,16 @@ namespace Rift.Services
                 ObtainedTime = DateTime.UtcNow,
                 ExpirationTime = DateTime.UtcNow + duration,
             };
+
+            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
+
+            if (sgUser is null)
+                return;
+
+            if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var serverRole))
+                return;
+
+            await sgUser.AddRoleAsync(serverRole);
 
             await RiftBot.GetService<DatabaseService>()
                          .AddTempRoleAsync(role)
