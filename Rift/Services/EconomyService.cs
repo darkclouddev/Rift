@@ -821,7 +821,7 @@ namespace Rift.Services
             await RiftBot.GetService<DatabaseService>().AddInventoryAsync(userId, coins: brag.Coins);
 
             var queue = RiftBot.GetService<RiotService>().GetQueueNameById(matchData.QueueId);
-            return (BragResult.Success, BragEmbeds.Success(userId, champThumb, champData.Id, player, queue,
+            return (BragResult.Success, BragEmbeds.Success(userId, champThumb, champData.Name, player, queue,
                                                            brag.Coins));
         }
 
