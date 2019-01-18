@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -81,14 +81,11 @@ namespace Rift.Services
 
         public async Task<(bool, Embed)> RemoveTempRoleAsync(ulong userId, ulong roleId)
         {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (sgUser is null)
-                return (false, GenericEmbeds.UserNotFound);
-
             await RiftBot.GetService<DatabaseService>().RemoveUserTempRoleAsync(userId, roleId);
 
-            var role = sgUser.Roles.FirstOrDefault(x => x.Id == roleId);
+            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
+
+            var role = sgUser?.Roles.FirstOrDefault(x => x.Id == roleId);
 
             if (role != null)
                 await sgUser.RemoveRoleAsync(role);
