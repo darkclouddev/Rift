@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -599,6 +599,42 @@ namespace Rift.Services
                     RiftBot.Log.Info($"Failed to check {nameof(EnsureStatisticsExistsAsync)}.");
                     return false;
                 }
+            }
+        }
+
+        public async Task<UserInventory> GetUserInventoryAsync(ulong userId)
+        {
+            if (!await EnsureInventoryExistsAsync(userId)
+                || !await EnsureStatisticsExistsAsync(userId))
+                throw new DatabaseException(nameof(GetUserInventoryAsync));
+
+            using (var context = new RiftContext())
+            {
+                return await context.Inventory
+                                    .Join(context.Statistics, inv => inv.UserId, stat => stat.UserId,
+                                          (inventory, statistics) =>
+                                              new
+                                              {
+                                                  Inventory = inventory,
+                                                  Statistics = statistics
+                                              })
+                                    .Where(x => x.Inventory.UserId == userId && x.Statistics.UserId == userId)
+                                    .Select(x => new UserInventory
+                                    {
+                                        UserId = x.Inventory.UserId,
+                                        Coins = x.Inventory.Coins,
+                                        Tokens = x.Inventory.Tokens,
+                                        Chests = x.Inventory.Chests,
+                                        Capsules = x.Inventory.Capsules,
+                                        Spheres = x.Inventory.Spheres,
+                                        PowerupsDoubleExperience = x.Inventory.PowerupsDoubleExp,
+                                        PowerupsBotRespect = x.Inventory.PowerupsBotRespect,
+                                        CoinsEarnedTotal = x.Statistics.CoinsEarnedTotal,
+                                        CoinsSpentTotal = x.Statistics.CoinsSpentTotal,
+                                        UsualTickets = x.Inventory.UsualTickets,
+                                        RareTickets = x.Inventory.RareTickets,
+                                    })
+                                    .FirstOrDefaultAsync();
             }
         }
 
@@ -1416,42 +1452,6 @@ namespace Rift.Services
                                         TotalDonate = x.User.Donate,
                                         DoubleExpTime = x.Cooldowns.DoubleExpTime,
                                         BotRespectTime = x.Cooldowns.BotRespectTime,
-                                    })
-                                    .FirstOrDefaultAsync();
-            }
-        }
-
-        public async Task<UserInventory> GetUserInventoryAsync(ulong userId)
-        {
-            if (!await EnsureInventoryExistsAsync(userId)
-                || !await EnsureStatisticsExistsAsync(userId))
-                throw new DatabaseException(nameof(GetUserInventoryAsync));
-
-            using (var context = new RiftContext())
-            {
-                return await context.Inventory
-                                    .Join(context.Statistics, inv => inv.UserId, stat => stat.UserId,
-                                          (inventory, statistics) =>
-                                              new
-                                              {
-                                                  Inventory = inventory,
-                                                  Statistics = statistics
-                                              })
-                                    .Where(x => x.Inventory.UserId == userId && x.Statistics.UserId == userId)
-                                    .Select(x => new UserInventory
-                                    {
-                                        UserId = x.Inventory.UserId,
-                                        Coins = x.Inventory.Coins,
-                                        Tokens = x.Inventory.Tokens,
-                                        Chests = x.Inventory.Chests,
-                                        Capsules = x.Inventory.Capsules,
-                                        Spheres = x.Inventory.Spheres,
-                                        PowerupsDoubleExperience = x.Inventory.PowerupsDoubleExp,
-                                        PowerupsBotRespect = x.Inventory.PowerupsBotRespect,
-                                        CoinsEarnedTotal = x.Statistics.CoinsEarnedTotal,
-                                        CoinsSpentTotal = x.Statistics.CoinsSpentTotal,
-                                        UsualTickets = x.Inventory.UsualTickets,
-                                        RareTickets = x.Inventory.RareTickets,
                                     })
                                     .FirstOrDefaultAsync();
             }
