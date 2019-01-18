@@ -24,16 +24,40 @@ namespace Rift.Modules
 {
     public class AdminHelperModule : RiftModuleBase
     {
-        readonly MessageService messageService;
+        readonly RiotService riotService;
         readonly EconomyService economyService;
         readonly DatabaseService databaseService;
 
-        public AdminHelperModule(MessageService messageService, EconomyService economyService,
+        public AdminHelperModule(RiotService riotService, EconomyService economyService,
                                  DatabaseService databaseService)
         {
-            this.messageService = messageService;
+            this.riotService = riotService;
             this.economyService = economyService;
             this.databaseService = databaseService;
+        }
+
+        [Command("code")]
+        [RequireContext(ContextType.DM)]
+        public async Task Code(ulong userId)
+        {
+            var pendingData = await databaseService.GetPendingUserAsync(userId);
+
+            if (pendingData is null)
+            {
+                await ReplyAsync($"No data for that user.");
+                return;
+            }
+
+            (var result, string code) = await riotService.GetThirdPartyCodeByEncryptedSummonerIdAsync(pendingData.Region,
+                                                                                                                                   pendingData.SummonedId);
+
+            if (result != RequestResult.Success)
+            {
+                await ReplyAsync($"Failed to obtain confirmation code!");
+                return;
+            }
+
+            await ReplyAsync($"Expected code: \"{pendingData.ConfirmationCode}\"\nActual code: \"{code}\"");
         }
 
         [Command("добавить донат")]
