@@ -41,14 +41,14 @@ namespace Rift.Embeds
 
             sb.AppendLine(cooldowns.DoubleExpTimeSpan != TimeSpan.Zero
                 ? $"Двойной опыт: {FormatTimeSpan(cooldowns.DoubleExpTimeSpan)}."
-                : "Двойной опыт: отсутствует.");
+                : "Двойной опыт отсутствует.");
 
             sb.AppendLine(cooldowns.BotRespectTimeSpan != TimeSpan.Zero
                 ? $"ДУважение ботов: {FormatTimeSpan(cooldowns.BotRespectTimeSpan)}."
-                : "Уважение ботов: отсутствует.");
+                : "Уважение ботов отсутствует.");
 
             sb.AppendLine(cooldowns.BotRespectTimeSpan != TimeSpan.Zero
-                ? $"Обновление ранга {FormatTimeSpan(cooldowns.BotRespectTimeSpan)} назад."
+                ? $"Ранг обновлялся {FormatTimeSpan(cooldowns.BotRespectTimeSpan)} назад."
                 : "Обновление ранга: только что.");
 
             var eb = new EmbedBuilder()

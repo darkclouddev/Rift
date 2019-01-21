@@ -135,7 +135,7 @@ namespace Rift.Preconditions
                 return Task.FromResult(PreconditionResult.FromSuccess());
             }
 
-            return Task.FromResult(PreconditionResult.FromError($"Превышена частота запросов! Попробуйте снова через {(timeout.FirstInvoke - DateTime.UtcNow + invokeLimitPeriod).Humanize(3)}"));
+            return Task.FromResult(PreconditionResult.FromError(ErrorMessage));
         }
 
         /// <summary>

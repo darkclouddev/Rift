@@ -211,8 +211,8 @@ namespace Rift.Modules
         }
 
         [Command("кд")]
-        [RateLimit(1, 10.0, Measure.Seconds, RateLimitFlags.NoLimitForAdmins, ErrorMessage = "Команда доступна 1 раз в 10 секунд!")]
-        [RequireDeveloper]
+        [Alias("таймеры")]
+        [RateLimit(1, 10.0, Measure.Seconds, RateLimitFlags.NoLimitForAdmins, ErrorMessage = "Проверять таймеры можно не чаще 1 раза в 10 секунд!")]
         [RequireContext(ContextType.Guild)]
         public async Task Cooldowns()
         {
