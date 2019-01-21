@@ -14,21 +14,55 @@ namespace Rift.Embeds
         public static Embed DMEmbed(UserCooldowns cooldowns)
         {
             var sb = new StringBuilder();
-            sb.AppendLine($"Покупка: {cooldowns.StoreTimeSpan.Humanize(1, culture: RiftBot.Culture, toWords: cooldowns.StoreTimeSpan == TimeSpan.Zero)}");
-            sb.AppendLine($"Атака: {cooldowns.AttackTimeSpan.Humanize(1, culture: RiftBot.Culture, toWords: cooldowns.AttackTimeSpan == TimeSpan.Zero)}");
-            sb.AppendLine($"Атака по вам: {cooldowns.BeingAttackedTimeSpan.Humanize(1, culture: RiftBot.Culture, toWords: cooldowns.BeingAttackedTimeSpan == TimeSpan.Zero)}");
-            sb.AppendLine($"Дейлик: {cooldowns.DailyChestTimeSpan.Humanize(1, culture: RiftBot.Culture, toWords: cooldowns.DailyChestTimeSpan == TimeSpan.Zero)}");
-            sb.AppendLine($"Похвастаться: {cooldowns.BragTimeSpan.Humanize(1, culture: RiftBot.Culture, toWords: cooldowns.BragTimeSpan == TimeSpan.Zero)}");
-            sb.AppendLine($"Подарок: {cooldowns.GiftTimeSpan.Humanize(1, culture: RiftBot.Culture, toWords: cooldowns.GiftTimeSpan == TimeSpan.Zero)}");
-            sb.AppendLine($"Двойной опыт: {cooldowns.DoubleExpTimeSpan.Humanize(1, culture: RiftBot.Culture, toWords: cooldowns.DoubleExpTimeSpan == TimeSpan.Zero)}");
-            sb.AppendLine($"Уважение ботов: {cooldowns.BotRespectTimeSpan.Humanize(1, culture: RiftBot.Culture, toWords: cooldowns.BotRespectTimeSpan == TimeSpan.Zero)}");
-            sb.AppendLine($"Обновление ранга: {cooldowns.LolAccountUpdateTimeSpan.Humanize(1, culture: RiftBot.Culture, toWords: cooldowns.LolAccountUpdateTimeSpan == TimeSpan.Zero)} назад");
-            
+
+            sb.AppendLine(cooldowns.StoreTimeSpan == TimeSpan.Zero
+                ? $"Покупка через {FormatTimeSpan(cooldowns.StoreTimeSpan)}."
+                : "Покупка доступна.");
+
+            sb.AppendLine(cooldowns.AttackTimeSpan == TimeSpan.Zero
+                ? $"Атака через {FormatTimeSpan(cooldowns.AttackTimeSpan)}."
+                : "Атака доступна.");
+
+            sb.AppendLine(cooldowns.BeingAttackedTimeSpan == TimeSpan.Zero
+                ? $"Вас смогут атаковать через {FormatTimeSpan(cooldowns.BeingAttackedTimeSpan)}."
+                : "Вас могут атаковать.");
+
+            sb.AppendLine(cooldowns.DailyChestTimeSpan == TimeSpan.Zero
+                ? $"Ежедневная награда через {FormatTimeSpan(cooldowns.DailyChestTimeSpan)}."
+                : "Ежедневная награда доступна.");
+
+            sb.AppendLine(cooldowns.BragTimeSpan == TimeSpan.Zero
+                ? $"Похвастаться через {FormatTimeSpan(cooldowns.BragTimeSpan)}."
+                : "Похвастаться можно уже сейчас.");
+
+            sb.AppendLine(cooldowns.GiftTimeSpan == TimeSpan.Zero
+                ? $"Подарить через {FormatTimeSpan(cooldowns.GiftTimeSpan)}."
+                : "Дарить можно уже сейчас.");
+
+            sb.AppendLine(cooldowns.DoubleExpTimeSpan == TimeSpan.Zero
+                ? $"Двойной опыт: {FormatTimeSpan(cooldowns.DoubleExpTimeSpan)}."
+                : "Двойной опыт: отсутствует.");
+
+            sb.AppendLine(cooldowns.BotRespectTimeSpan == TimeSpan.Zero
+                ? $"ДУважение ботов: {FormatTimeSpan(cooldowns.BotRespectTimeSpan)}."
+                : "Уважение ботов: отсутствует.");
+
+            sb.AppendLine(cooldowns.BotRespectTimeSpan == TimeSpan.Zero
+                ? $"Обновление ранга {FormatTimeSpan(cooldowns.BotRespectTimeSpan)} назад."
+                : "Обновление ранга: только что.");
+
             var eb = new EmbedBuilder()
                 .WithAuthor("Ваши таймеры")
                 .WithDescription(sb.ToString());
 
             return eb.Build();
+        }
+
+        static string FormatTimeSpan(TimeSpan ts)
+        {
+            return ts.Humanize(precision: 1,
+                               culture: RiftBot.Culture,
+                               toWords: ts == TimeSpan.Zero);
         }
     }
 }
