@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -80,7 +80,7 @@ namespace Rift
             if (!(socketMsg is SocketUserMessage message))
                 return;
 
-            if (!message.Author.IsBot)
+            if (message.Author.IsBot)
                 return;
 
             if (Settings.App.MaintenanceMode
