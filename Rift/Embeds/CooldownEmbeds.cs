@@ -15,39 +15,39 @@ namespace Rift.Embeds
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine(cooldowns.StoreTimeSpan == TimeSpan.Zero
+            sb.AppendLine(cooldowns.StoreTimeSpan != TimeSpan.Zero
                 ? $"Покупка через {FormatTimeSpan(cooldowns.StoreTimeSpan)}."
                 : "Покупка доступна.");
 
-            sb.AppendLine(cooldowns.AttackTimeSpan == TimeSpan.Zero
+            sb.AppendLine(cooldowns.AttackTimeSpan != TimeSpan.Zero
                 ? $"Атака через {FormatTimeSpan(cooldowns.AttackTimeSpan)}."
                 : "Атака доступна.");
 
-            sb.AppendLine(cooldowns.BeingAttackedTimeSpan == TimeSpan.Zero
+            sb.AppendLine(cooldowns.BeingAttackedTimeSpan != TimeSpan.Zero
                 ? $"Вас смогут атаковать через {FormatTimeSpan(cooldowns.BeingAttackedTimeSpan)}."
                 : "Вас могут атаковать.");
 
-            sb.AppendLine(cooldowns.DailyChestTimeSpan == TimeSpan.Zero
+            sb.AppendLine(cooldowns.DailyChestTimeSpan != TimeSpan.Zero
                 ? $"Ежедневная награда через {FormatTimeSpan(cooldowns.DailyChestTimeSpan)}."
                 : "Ежедневная награда доступна.");
 
-            sb.AppendLine(cooldowns.BragTimeSpan == TimeSpan.Zero
+            sb.AppendLine(cooldowns.BragTimeSpan != TimeSpan.Zero
                 ? $"Похвастаться через {FormatTimeSpan(cooldowns.BragTimeSpan)}."
                 : "Похвастаться можно уже сейчас.");
 
-            sb.AppendLine(cooldowns.GiftTimeSpan == TimeSpan.Zero
+            sb.AppendLine(cooldowns.GiftTimeSpan != TimeSpan.Zero
                 ? $"Подарить через {FormatTimeSpan(cooldowns.GiftTimeSpan)}."
                 : "Дарить можно уже сейчас.");
 
-            sb.AppendLine(cooldowns.DoubleExpTimeSpan == TimeSpan.Zero
+            sb.AppendLine(cooldowns.DoubleExpTimeSpan != TimeSpan.Zero
                 ? $"Двойной опыт: {FormatTimeSpan(cooldowns.DoubleExpTimeSpan)}."
                 : "Двойной опыт: отсутствует.");
 
-            sb.AppendLine(cooldowns.BotRespectTimeSpan == TimeSpan.Zero
+            sb.AppendLine(cooldowns.BotRespectTimeSpan != TimeSpan.Zero
                 ? $"ДУважение ботов: {FormatTimeSpan(cooldowns.BotRespectTimeSpan)}."
                 : "Уважение ботов: отсутствует.");
 
-            sb.AppendLine(cooldowns.BotRespectTimeSpan == TimeSpan.Zero
+            sb.AppendLine(cooldowns.BotRespectTimeSpan != TimeSpan.Zero
                 ? $"Обновление ранга {FormatTimeSpan(cooldowns.BotRespectTimeSpan)} назад."
                 : "Обновление ранга: только что.");
 
