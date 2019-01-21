@@ -33,38 +33,38 @@ namespace Rift.Data.Models.Cooldowns
             
             LastStoreTime = cooldowns.LastStoreTime;
             var nextStoreTime = LastStoreTime + Settings.Economy.StoreCooldown;
-            StoreTimeSpan = dt > nextStoreTime
-                                    ? dt - nextStoreTime
+            StoreTimeSpan = nextStoreTime > dt
+                                    ? nextStoreTime - dt
                                     : TimeSpan.Zero;
             
             LastAttackTime = cooldowns.LastAttackTime;
             var nextAttackTime = LastAttackTime + Settings.Economy.AttackPerUserCooldown;
-            AttackTimeSpan = dt > nextAttackTime
-                                    ? dt - nextAttackTime
+            AttackTimeSpan = nextAttackTime > dt
+                                    ? nextAttackTime - dt
                                     : TimeSpan.Zero;
             
             LastBeingAttackedTime = cooldowns.LastBeingAttackedTime;
             var nextAttackedTime = LastBeingAttackedTime + Settings.Economy.AttackSameUserCooldown;
-            BeingAttackedTimeSpan = dt > nextAttackedTime
-                                            ? dt - nextAttackedTime
+            BeingAttackedTimeSpan = nextAttackedTime > dt
+                                            ? nextAttackedTime - dt
                                             : TimeSpan.Zero;
             
             LastDailyChestTime = cooldowns.LastDailyChestTime;
             var nextDailyTime = LastDailyChestTime + TimeSpan.FromDays(1);
-            DailyChestTimeSpan = dt > nextDailyTime
-                                        ? dt - nextDailyTime
+            DailyChestTimeSpan = nextDailyTime > dt
+                                        ? nextDailyTime - dt
                                         : TimeSpan.Zero;
             
             LastBragTime = cooldowns.LastBragTime;
             var nextBragTime = LastBragTime + Settings.Economy.BragCooldown;
-            BragTimeSpan = dt > nextBragTime
-                                    ? dt - nextBragTime
+            BragTimeSpan = nextBragTime > dt
+                                    ? nextBragTime - dt
                                     : TimeSpan.Zero;
             
             LastGiftTime = cooldowns.LastGiftTime;
             var nextGiftTime = LastGiftTime + Settings.Economy.GiftCooldown;
-            GiftTimeSpan = dt > nextGiftTime
-                                    ? dt - nextGiftTime
+            GiftTimeSpan = nextGiftTime > dt
+                                    ? nextGiftTime - dt
                                     : TimeSpan.Zero;
             
             DoubleExpTime = cooldowns.DoubleExpTime;
