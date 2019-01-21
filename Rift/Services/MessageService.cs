@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
@@ -24,7 +24,7 @@ namespace Rift.Services
         public MessageService()
         {
             checkTimer = new Timer(async delegate { await CheckMessagesAsync(); }, null, TimeSpan.FromSeconds(10),
-                                   TimeSpan.FromSeconds(5));
+                                   TimeSpan.FromSeconds(1));
         }
 
         public bool TryAddSend(SendMessageBase message) => toSend.TryAdd(message.Id, message);
