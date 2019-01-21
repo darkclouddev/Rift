@@ -80,6 +80,9 @@ namespace Rift
             if (!(socketMsg is SocketUserMessage message))
                 return;
 
+            if (!message.Author.IsBot)
+                return;
+
             if (Settings.App.MaintenanceMode
                 && !RiftBot.IsAdmin(message.Author)
                 && !RiftBot.IsModerator(message.Author))
