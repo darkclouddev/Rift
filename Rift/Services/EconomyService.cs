@@ -465,8 +465,6 @@ namespace Rift.Services
             await CheckAchievements(userId);
         }
 
-        const ulong secondsInDay = 60ul * 60ul * 24ul; //86400
-
         static async Task CheckDailyMessageAsync(ulong userId)
         {
             var dbDaily = await RiftBot.GetService<DatabaseService>().GetUserLastDailyChestTimeAsync(userId);
