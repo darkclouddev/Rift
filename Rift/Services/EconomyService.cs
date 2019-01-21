@@ -846,11 +846,11 @@ namespace Rift.Services
 
             var diff = DateTime.UtcNow - data.LastBragTime;
 
-            bool result = diff > Settings.Economy.BragCooldownSeconds;
+            bool result = diff > Settings.Economy.BragCooldown;
 
             return (result, result
                         ? TimeSpan.Zero
-                        : Settings.Economy.BragCooldownSeconds - diff);
+                        : Settings.Economy.BragCooldown - diff);
         }
 
         static async Task UpdateRatingAsync()

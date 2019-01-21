@@ -1,28 +1,29 @@
 using System;
+using Rift.Configuration;
 
 namespace Rift.Data.Models.Cooldowns
 {
     public class UserCooldowns
     {
-        public ulong UserId { get; set; }
-        public DateTime LastStoreTime { get; set; }
-        public TimeSpan LastStoreTimeSpan { get; set; }
-        public DateTime LastAttackTime { get; set; }
-        public TimeSpan LastAttackTimeSpan { get; set; }
-        public DateTime LastBeingAttackedTime { get; set; }
-        public TimeSpan LastBeingAttackedTimeSpan { get; set; }
-        public DateTime LastDailyChestTime { get; set; }
-        public TimeSpan LastDailyChestTimeSpan { get; set; }
-        public DateTime LastBragTime { get; set; }
-        public TimeSpan LastBragTimeSpan { get; set; }
-        public DateTime LastGiftTime { get; set; }
-        public TimeSpan LastGiftTimeSpan { get; set; }
-        public DateTime DoubleExpTime { get; set; }
-        public TimeSpan DoubleExpTimeSpan { get; set; }
-        public DateTime BotRespectTime { get; set; }
-        public TimeSpan BotRespectTimeSpan { get; set; }
-        public DateTime LastLolAccountUpdateTime { get; set; }
-        public TimeSpan LastLolAccountUpdateTimeSpan { get; set; }
+        public ulong UserId { get; }
+        public DateTime LastStoreTime { get; }
+        public TimeSpan StoreTimeSpan { get; }
+        public DateTime LastAttackTime { get; }
+        public TimeSpan AttackTimeSpan { get; }
+        public DateTime LastBeingAttackedTime { get; }
+        public TimeSpan BeingAttackedTimeSpan { get; }
+        public DateTime LastDailyChestTime { get; }
+        public TimeSpan DailyChestTimeSpan { get; }
+        public DateTime LastBragTime { get; }
+        public TimeSpan BragTimeSpan { get; }
+        public DateTime LastGiftTime { get; }
+        public TimeSpan GiftTimeSpan { get; }
+        public DateTime DoubleExpTime { get; }
+        public TimeSpan DoubleExpTimeSpan { get; }
+        public DateTime BotRespectTime { get; }
+        public TimeSpan BotRespectTimeSpan { get; }
+        public DateTime LastLolAccountUpdateTime { get; }
+        public TimeSpan LolAccountUpdateTimeSpan { get; }
 
         public UserCooldowns(RiftCooldowns cooldowns)
         {
@@ -31,47 +32,53 @@ namespace Rift.Data.Models.Cooldowns
             var dt = DateTime.UtcNow;
             
             LastStoreTime = cooldowns.LastStoreTime;
-            LastStoreTimeSpan = dt > LastStoreTime
-                                    ? dt - LastStoreTime
+            var nextStoreTime = LastStoreTime + Settings.Economy.StoreCooldown;
+            StoreTimeSpan = dt > nextStoreTime
+                                    ? dt - nextStoreTime
                                     : TimeSpan.Zero;
             
             LastAttackTime = cooldowns.LastAttackTime;
-            LastAttackTimeSpan = dt > LastAttackTime
-                                    ? dt - LastAttackTime
+            var nextAttackTime = LastAttackTime + Settings.Economy.AttackPerUserCooldown;
+            AttackTimeSpan = dt > nextAttackTime
+                                    ? dt - nextAttackTime
                                     : TimeSpan.Zero;
             
             LastBeingAttackedTime = cooldowns.LastBeingAttackedTime;
-            LastBeingAttackedTimeSpan = dt > LastBeingAttackedTime
-                                            ? dt - LastBeingAttackedTime
+            var nextAttackedTime = LastBeingAttackedTime + Settings.Economy.AttackSameUserCooldown;
+            BeingAttackedTimeSpan = dt > nextAttackedTime
+                                            ? dt - nextAttackedTime
                                             : TimeSpan.Zero;
             
             LastDailyChestTime = cooldowns.LastDailyChestTime;
-            LastDailyChestTimeSpan = dt > LastDailyChestTime
-                                        ? dt - LastDailyChestTime
+            var nextDailyTime = LastDailyChestTime + TimeSpan.FromDays(1);
+            DailyChestTimeSpan = dt > nextDailyTime
+                                        ? dt - nextDailyTime
                                         : TimeSpan.Zero;
             
             LastBragTime = cooldowns.LastBragTime;
-            LastBragTimeSpan = dt > LastBragTime
-                                    ? dt - LastBragTime
+            var nextBragTime = LastBragTime + Settings.Economy.BragCooldown;
+            BragTimeSpan = dt > nextBragTime
+                                    ? dt - nextBragTime
                                     : TimeSpan.Zero;
             
             LastGiftTime = cooldowns.LastGiftTime;
-            LastGiftTimeSpan = dt > LastGiftTime
-                                    ? dt - LastGiftTime
+            var nextGiftTime = LastGiftTime + Settings.Economy.GiftCooldown;
+            GiftTimeSpan = dt > nextGiftTime
+                                    ? dt - nextGiftTime
                                     : TimeSpan.Zero;
             
             DoubleExpTime = cooldowns.DoubleExpTime;
-            DoubleExpTimeSpan = dt > DoubleExpTime
-                                    ? dt - DoubleExpTime
+            DoubleExpTimeSpan = DoubleExpTime > dt
+                                    ? DoubleExpTime - dt
                                     : TimeSpan.Zero;
             
             BotRespectTime = cooldowns.BotRespectTime;
-            BotRespectTimeSpan = dt > BotRespectTime
-                                    ? dt - BotRespectTime
+            BotRespectTimeSpan = BotRespectTime > dt
+                                    ? BotRespectTime - dt
                                     : TimeSpan.Zero;
             
             LastLolAccountUpdateTime = cooldowns.LastLolAccountUpdateTime;
-            LastLolAccountUpdateTimeSpan = dt > LastLolAccountUpdateTime
+            LolAccountUpdateTimeSpan = dt > LastLolAccountUpdateTime
                                                 ? dt - LastLolAccountUpdateTime
                                                 : TimeSpan.Zero;
         }
