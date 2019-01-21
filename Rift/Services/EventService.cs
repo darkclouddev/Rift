@@ -212,7 +212,7 @@ namespace Rift.Services
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
                 return;
 
-            RiftBot.Log.Debug($"EndEvent Reactions: {reactionIds.Count}");
+            RiftBot.Log.Debug($"EndEvent Reactions: {reactionIds.Count.ToString()}");
 
             if (reactionIds.Count != 0)
             {

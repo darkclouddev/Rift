@@ -20,7 +20,7 @@ namespace Rift.Embeds
                      .WithColor(222, 171, 54)
                      .WithThumbnailUrl(Settings.Thumbnail.Capsule)
                      .WithAuthor("Редкая капсула")
-                     .WithDescription($"Призыватель <@{userId}> открыл редкую капсулу.\n")
+                     .WithDescription($"Призыватель <@{userId.ToString()}> открыл редкую капсулу.\n")
                      .AddField("Выпало из капсулы", capsule.RewardString);
 
             if (capsule.RoleId != 0)

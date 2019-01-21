@@ -37,34 +37,34 @@ namespace Rift.Rewards
             if (String.IsNullOrWhiteSpace(RewardString))
             {
                 if (Experience > 0u)
-                    RewardString += $" {Settings.Emote.Experience} {Experience}";
+                    RewardString += $" {Settings.Emote.Experience} {Experience.ToString()}";
 
                 if (Coins > 0u)
-                    RewardString += $" {Settings.Emote.Coin} {Coins}";
+                    RewardString += $" {Settings.Emote.Coin} {Coins.ToString()}";
 
                 if (Tokens > 0u)
-                    RewardString += $" {Settings.Emote.Token} {Tokens}";
+                    RewardString += $" {Settings.Emote.Token} {Tokens.ToString()}";
 
                 if (Chests > 0u)
-                    RewardString += $" {Settings.Emote.Chest} {Chests}";
+                    RewardString += $" {Settings.Emote.Chest} {Chests.ToString()}";
 
                 if (Spheres > 0u)
-                    RewardString += $" {Settings.Emote.Sphere} {Spheres}";
+                    RewardString += $" {Settings.Emote.Sphere} {Spheres.ToString()}";
 
                 if (Capsules > 0u)
-                    RewardString += $" {Settings.Emote.Capsule} {Capsules}";
+                    RewardString += $" {Settings.Emote.Capsule} {Capsules.ToString()}";
 
                 if (PowerupsDoubleExp > 0u)
-                    RewardString += $" {Settings.Emote.PowerupDoubleExperience} {PowerupsDoubleExp}";
+                    RewardString += $" {Settings.Emote.PowerupDoubleExperience} {PowerupsDoubleExp.ToString()}";
 
                 if (PowerupsBotRespect > 0u)
-                    RewardString += $" {Settings.Emote.BotRespect} {PowerupsBotRespect}";
+                    RewardString += $" {Settings.Emote.BotRespect} {PowerupsBotRespect.ToString()}";
 
                 if (UsualTickets > 0u)
-                    RewardString += $" {Settings.Emote.UsualTickets} {UsualTickets}";
+                    RewardString += $" {Settings.Emote.UsualTickets} {UsualTickets.ToString()}";
 
                 if (RareTickets > 0u)
-                    RewardString += $" {Settings.Emote.RareTickets} {RareTickets}";
+                    RewardString += $" {Settings.Emote.RareTickets} {RareTickets.ToString()}";
 
                 RewardString = RewardString.TrimStart();
             }

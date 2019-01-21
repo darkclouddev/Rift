@@ -16,21 +16,21 @@ namespace Rift.Embeds
                    .WithThumbnailUrl(Settings.Thumbnail.Statistic)
                    .WithDescription("Статистика и информация для достижений:\n\n"
                                     + $"Монеты (получено / потрачено)\n"
-                                    + $"{statistics.CoinsEarnedTotal} / {statistics.CoinsSpentTotal}\n\n"
+                                    + $"{statistics.CoinsEarnedTotal.ToString()} / {statistics.CoinsSpentTotal.ToString()}\n\n"
                                     + $"Жетоны (получено / потрачено)\n"
-                                    + $"{statistics.TokensEarnedTotal} / {statistics.TokensSpentTotal}\n\n"
+                                    + $"{statistics.TokensEarnedTotal.ToString()} / {statistics.TokensSpentTotal.ToString()}\n\n"
                                     + $"Сундуки (получено / открыто)\n"
-                                    + $"{statistics.ChestsEarnedTotal} / {statistics.ChestsOpenedTotal}\n\n"
+                                    + $"{statistics.ChestsEarnedTotal.ToString()} / {statistics.ChestsOpenedTotal.ToString()}\n\n"
                                     + $"Магазин\n"
-                                    + $"Вы купили **{statistics.PurchasedItemsTotal}** товаров.\n\n"
+                                    + $"Вы купили **{statistics.PurchasedItemsTotal.ToString()}** товаров.\n\n"
                                     + $"Подарки\n"
-                                    + $"Вы отправили **{statistics.GiftsSent}** подарков.\n\n"
+                                    + $"Вы отправили **{statistics.GiftsSent.ToString()}** подарков.\n\n"
                                     + $"Атаки\n"
-                                    + $"Вы атаковали **{statistics.AttacksDone}** раз.\n\n"
+                                    + $"Вы атаковали **{statistics.AttacksDone.ToString()}** раз.\n\n"
                                     + $"Хвастовство\n"
-                                    + $"Вы похвастались **{statistics.BragTotal}** раз.\n\n"
+                                    + $"Вы похвастались **{statistics.BragTotal.ToString()}** раз.\n\n"
                                     + $"Сообщения\n"
-                                    + $"Вы написали **{statistics.MessagesSentTotal}** сообщений.")
+                                    + $"Вы написали **{statistics.MessagesSentTotal.ToString()}** сообщений.")
                    .Build();
         }
 
@@ -48,7 +48,7 @@ namespace Rift.Embeds
                    .WithAuthor("Ваш игровой аккаунт", Settings.Emote.LolUrl)
                    .WithDescription("Подробная информация о вашем аккаунте в игре:")
                    .AddField("Никнейм", summoner.Name, true)
-                   .AddField("Уровень / Регион", $"{summoner.SummonerLevel}", true)
+                   .AddField("Уровень / Регион", $"{summoner.SummonerLevel.ToString()}", true)
                    .AddField("Ранг (одиночная / парная)",
                              $"{soloqRanking}\n\n"
                              + $"Статистика игрового аккаунт обновляется автоматически.\n"

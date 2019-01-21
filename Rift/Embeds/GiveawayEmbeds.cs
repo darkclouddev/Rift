@@ -25,7 +25,7 @@ namespace Rift.Embeds
             return new EmbedBuilder()
                    .WithColor(243, 205, 87)
                    .WithThumbnailUrl(Settings.Thumbnail.Giveaway)
-                   .WithDescription($"В розыгрыше участвует **{userCnt}** призывателей\n"
+                   .WithDescription($"В розыгрыше участвует **{userCnt.ToString()}** призывателей\n"
                                     + $"Бот автоматически использует билет из вашего инвентаря.\n"
                                     + $"Для участия необходимо иметь {ticketString} в инвентаре.\n\n"
                                     + $"Разыгрывается: {reward.RewardString}.")
@@ -36,7 +36,7 @@ namespace Rift.Embeds
         {
             return new EmbedBuilder()
                    .WithColor(243, 205, 87)
-                   .WithDescription($"Призыватель <@{winner}> получил {reward.RewardString}.")
+                   .WithDescription($"Призыватель <@{winner.ToString()}> получил {reward.RewardString}.")
                    .Build();
         }
 

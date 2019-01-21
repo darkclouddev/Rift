@@ -49,7 +49,7 @@ namespace Rift.Rewards
                 RewardString = $"роль {Settings.Emote.Roles} {EconomyService.TempRoles[RoleId]}";
 
             if (Days > 0)
-                RewardString += $" ({Days} дней)";
+                RewardString += $" ({Days.ToString()} дней)";
         }
     }
 }

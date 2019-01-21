@@ -20,7 +20,7 @@ namespace Rift.Embeds
                    .WithColor(95, 198, 196)
                    .WithThumbnailUrl(Settings.Thumbnail.Sphere)
                    .WithAuthor("Сферы")
-                   .WithDescription($"Призыватель <@{userId}> только что открыл сферу.\n")
+                   .WithDescription($"Призыватель <@{userId.ToString()}> только что открыл сферу.\n")
                    .AddField("Выпало из сферы", $"{sphere.RewardString}")
                    .Build();
         }

@@ -23,23 +23,23 @@ namespace Rift.Services.Economy
                                  .WithDescription($"В магазине находятся сундуки, билеты и роли.\n"
                                                   + $"Для покупки напишите в чат `!купить` и номер желаемого товара.")
                                  .AddField($"Основные товары{Settings.Emote.Invisible}{Settings.Emote.Invisible}{Settings.Emote.Invisible}{Settings.Emote.Invisible}",
-                                           String.Join("\n", StoreItems.Select(x => $"{x.Id}. {x.FormattedName}")),
+                                           String.Join("\n", StoreItems.Select(x => $"{x.Id.ToString()}. {x.FormattedName}")),
                                            true)
                                  .AddField($"Стоимость{Settings.Emote.Invisible}",
                                            String.Join("\n", StoreItems.Select(x => x.FormattedPrice)), true)
                                  .AddField($"Билеты для розыгрышей{Settings.Emote.Invisible} {Settings.Emote.Invisible}",
-                                           String.Join("\n", StoreTickets.Select(x => $"{x.Id}. {x.FormattedName}")),
+                                           String.Join("\n", StoreTickets.Select(x => $"{x.Id.ToString()}. {x.FormattedName}")),
                                            true)
                                  .AddField($"Стоимость{Settings.Emote.Invisible}",
                                            String.Join("\n", StoreTickets.Select(x => x.FormattedPrice)), true)
                                  .AddField($"Роли на 30 дней {Settings.Emote.Invisible} {Settings.Emote.Invisible} {Settings.Emote.Invisible}{Settings.Emote.Invisible}",
-                                           String.Join("\n", StoreTempRoles.Select(x => $"{x.Id}. {x.FormattedName}")),
+                                           String.Join("\n", StoreTempRoles.Select(x => $"{x.Id.ToString()}. {x.FormattedName}")),
                                            true)
                                  .AddField($"Стоимость{Settings.Emote.Invisible}",
                                            String.Join("\n", StoreTempRoles.Select(x => x.FormattedPrice)), true)
                                  .AddField($"Роли навсегда {Settings.Emote.Invisible} {Settings.Emote.Invisible} {Settings.Emote.Invisible}{Settings.Emote.Invisible}",
                                            String.Join("\n",
-                                                       StorePermanentRoles.Select(x => $"{x.Id}. {x.FormattedName}")),
+                                                       StorePermanentRoles.Select(x => $"{x.Id.ToString()}. {x.FormattedName}")),
                                            true)
                                  .AddField($"Стоимость{Settings.Emote.Invisible}",
                                            String.Join("\n", StorePermanentRoles.Select(x => x.FormattedPrice)), true)
@@ -124,7 +124,7 @@ namespace Rift.Services.Economy
         public readonly string CurrencyEmote;
 
         public string FormattedName => $"{Emote} {Name}";
-        public string FormattedPrice => $"{CurrencyEmote} {Price}";
+        public string FormattedPrice => $"{CurrencyEmote} {Price.ToString()}";
 
         public StoreItem(uint id, string emote, string name, StoreItemType type, uint price,
                          Currency currency)

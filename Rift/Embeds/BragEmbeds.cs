@@ -35,11 +35,11 @@ namespace Rift.Embeds
             if (!String.IsNullOrWhiteSpace(champThumb))
                 eb.WithThumbnailUrl(champThumb);
 
-            eb.WithDescription($"Призыватель <@{userId}> хвастается своей игрой.\n"
-                               + $"Игроку выдаются монеты за {(player.Stats.Win ? "победу" : "поражение")} в данной игре: {Settings.Emote.Coin} {coins}")
+            eb.WithDescription($"Призыватель <@{userId.ToString()}> хвастается своей игрой.\n"
+                               + $"Игроку выдаются монеты за {(player.Stats.Win ? "победу" : "поражение")} в данной игре: {Settings.Emote.Coin} {coins.ToString()}")
               .AddField("Режим игры", $"{queue}", true)
               .AddField("Чемпион и счет",
-                        $"{champName} ({player.Stats.Kills} / {player.Stats.Deaths} / {player.Stats.Assists})", true);
+                        $"{champName} ({player.Stats.Kills.ToString()} / {player.Stats.Deaths.ToString()} / {player.Stats.Assists.ToString()})", true);
 
             return eb.Build();
         }

@@ -11,7 +11,7 @@ namespace Rift.Embeds
         {
             return new EmbedBuilder()
                    .WithColor(107, 188, 239)
-                   .WithDescription($"Призыватель <@{userId}> поднял {Settings.Emote.LevelUp} {newLevel} уровень на сервере.")
+                   .WithDescription($"Призыватель <@{userId.ToString()}> поднял {Settings.Emote.LevelUp} {newLevel.ToString()} уровень на сервере.")
                    .Build();
         }
 
@@ -21,7 +21,7 @@ namespace Rift.Embeds
                    .WithAuthor("Уровень")
                    .WithColor(107, 188, 239)
                    .WithThumbnailUrl(Settings.Thumbnail.LevelUp)
-                   .WithDescription($"Вы подняли **{level}** уровень на сервере.\n\n"
+                   .WithDescription($"Вы подняли **{level.ToString()}** уровень на сервере.\n\n"
                                     + $"Hаграда за повышение уровня: {rewards}")
                    .Build();
         }

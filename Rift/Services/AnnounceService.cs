@@ -45,11 +45,11 @@ namespace Rift.Services
                 .Build(),
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
-                .WithDescription($"В текстовом канале <#{Settings.ChannelId.Information}> можно узнать все о ботах сервера.")
+                .WithDescription($"В текстовом канале <#{Settings.ChannelId.Information.ToString()}> можно узнать все о ботах сервера.")
                 .Build(),
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
-                .WithDescription($"В текстовом канале <#{Settings.ChannelId.Search}> ищите тиммейтов.")
+                .WithDescription($"В текстовом канале <#{Settings.ChannelId.Search.ToString()}> ищите тиммейтов.")
                 .Build(),
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
@@ -65,7 +65,7 @@ namespace Rift.Services
                 .Build(),
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
-                .WithDescription($"Участвуйте в розыгрышах и получайте подарки: <#{Settings.ChannelId.Giveaways}>")
+                .WithDescription($"Участвуйте в розыгрышах и получайте подарки: <#{Settings.ChannelId.Giveaways.ToString()}>")
                 .Build(),
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
@@ -85,7 +85,7 @@ namespace Rift.Services
                 .Build(),
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
-                .WithDescription($"Подтвердите свой игровой аккаунт <#{Settings.ChannelId.Confirmation}> и получите награду.")
+                .WithDescription($"Подтвердите свой игровой аккаунт <#{Settings.ChannelId.Confirmation.ToString()}> и получите награду.")
                 .Build(),
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
@@ -125,7 +125,7 @@ namespace Rift.Services
                 .Build(),
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
-                .WithDescription($"Узнайте о бонусах больше в текстовом канале <#{Settings.ChannelId.Information}>")
+                .WithDescription($"Узнайте о бонусах больше в текстовом канале <#{Settings.ChannelId.Information.ToString()}>")
                 .Build(),
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
@@ -157,11 +157,11 @@ namespace Rift.Services
                 .Build(),
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
-                .WithDescription($"Покупайте наборы в <#{Settings.ChannelId.Donate}> и получайте подарки.")
+                .WithDescription($"Покупайте наборы в <#{Settings.ChannelId.Donate.ToString()}> и получайте подарки.")
                 .Build(),
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
-                .WithDescription($"Поддерживайте сервер и получайте уникальные роли: <#{Settings.ChannelId.Donate}>")
+                .WithDescription($"Поддерживайте сервер и получайте уникальные роли: <#{Settings.ChannelId.Donate.ToString()}>")
                 .Build(),
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
@@ -177,7 +177,7 @@ namespace Rift.Services
                 .Build(),
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
-                .WithDescription($"Узнайте подробнее о нашем клубе в игре в текстовом канале <#{Settings.ChannelId.Clubs}>")
+                .WithDescription($"Узнайте подробнее о нашем клубе в игре в текстовом канале <#{Settings.ChannelId.Clubs.ToString()}>")
                 .Build(),
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)

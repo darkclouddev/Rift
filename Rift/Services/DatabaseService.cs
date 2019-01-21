@@ -13,6 +13,7 @@ using Rift.Data.Models.Users;
 using Rift.Events;
 
 using Microsoft.EntityFrameworkCore;
+using NLog.Fluent;
 using Rift.Data.Models.Cooldowns;
 
 namespace Rift.Services
@@ -44,9 +45,10 @@ namespace Rift.Services
 
                     return true;
                 }
-                catch
+                catch (Exception ex)
                 {
                     RiftBot.Log.Info($"Failed to check {nameof(EnsureAchievementsExistsAsync)}.");
+                    RiftBot.Log.Error(ex);
                     return false;
                 }
             }
@@ -101,7 +103,7 @@ namespace Rift.Services
 
                 if (write100Messages && !achievements.Write100Messages)
                 {
-                    RiftBot.Log.Info($"User {userId} wrote more than 100 messages");
+                    RiftBot.Log.Info($"User {userId.ToString()} wrote more than 100 messages");
 
                     dbAchievements.Write100Messages = true;
                     entry.Property(x => x.Write100Messages).IsModified = true;
@@ -109,7 +111,7 @@ namespace Rift.Services
 
                 if (write1000Messages && !achievements.Write1000Messages)
                 {
-                    RiftBot.Log.Info($"User {userId} wrote more than 1000 messages");
+                    RiftBot.Log.Info($"User {userId.ToString()} wrote more than 1000 messages");
 
                     dbAchievements.Write1000Messages = true;
                     entry.Property(x => x.Write1000Messages).IsModified = true;
@@ -117,7 +119,7 @@ namespace Rift.Services
 
                 if (reach10Level && !achievements.Reach10Level)
                 {
-                    RiftBot.Log.Info($"User {userId} reached 10 level");
+                    RiftBot.Log.Info($"User {userId.ToString()} reached 10 level");
 
                     dbAchievements.Reach10Level = true;
                     entry.Property(x => x.Reach10Level).IsModified = true;
@@ -125,7 +127,7 @@ namespace Rift.Services
 
                 if (reach30Level && !achievements.Reach30Level)
                 {
-                    RiftBot.Log.Info($"User {userId} reached 30 level");
+                    RiftBot.Log.Info($"User {userId.ToString()} reached 30 level");
 
                     dbAchievements.Reach30Level = true;
                     entry.Property(x => x.Reach30Level).IsModified = true;
@@ -133,7 +135,7 @@ namespace Rift.Services
 
                 if (brag100Times && !achievements.Brag100Times)
                 {
-                    RiftBot.Log.Info($"User {userId} bragged 50 times");
+                    RiftBot.Log.Info($"User {userId.ToString()} bragged 50 times");
 
                     dbAchievements.Brag100Times = true;
                     entry.Property(x => x.Brag100Times).IsModified = true;
@@ -141,7 +143,7 @@ namespace Rift.Services
 
                 if (attack200Times && !achievements.Attack200Times)
                 {
-                    RiftBot.Log.Info($"User {userId} did 50 attacks");
+                    RiftBot.Log.Info($"User {userId.ToString()} did 50 attacks");
 
                     dbAchievements.Attack200Times = true;
                     entry.Property(x => x.Attack200Times).IsModified = true;
@@ -149,7 +151,7 @@ namespace Rift.Services
 
                 if (openSphere && !achievements.OpenSphere)
                 {
-                    RiftBot.Log.Info($"User {userId} opened sphere for the first time");
+                    RiftBot.Log.Info($"User {userId.ToString()} opened sphere for the first time");
 
                     dbAchievements.OpenSphere = true;
                     entry.Property(x => x.OpenSphere).IsModified = true;
@@ -157,7 +159,7 @@ namespace Rift.Services
 
                 if (purchase200Items && !achievements.Purchase200Items)
                 {
-                    RiftBot.Log.Info($"User {userId} purchased 50 items");
+                    RiftBot.Log.Info($"User {userId.ToString()} purchased 50 items");
 
                     dbAchievements.Purchase200Items = true;
                     entry.Property(x => x.Purchase200Items).IsModified = true;
@@ -165,7 +167,7 @@ namespace Rift.Services
 
                 if (open100Chests && !achievements.Open100Chests)
                 {
-                    RiftBot.Log.Info($"User {userId} opened 100 chests");
+                    RiftBot.Log.Info($"User {userId.ToString()} opened 100 chests");
 
                     dbAchievements.Open100Chests = true;
                     entry.Property(x => x.Open100Chests).IsModified = true;
@@ -173,7 +175,7 @@ namespace Rift.Services
 
                 if (send100Gifts && !achievements.Send100Gifts)
                 {
-                    RiftBot.Log.Info($"User {userId} sent 50 gifts");
+                    RiftBot.Log.Info($"User {userId.ToString()} sent 50 gifts");
 
                     dbAchievements.Send100Gifts = true;
                     entry.Property(x => x.Send100Gifts).IsModified = true;
@@ -181,7 +183,7 @@ namespace Rift.Services
 
                 if (isDonator && !achievements.IsDonator)
                 {
-                    RiftBot.Log.Info($"User {userId} first time donated");
+                    RiftBot.Log.Info($"User {userId.ToString()} first time donated");
 
                     dbAchievements.IsDonator = true;
                     entry.Property(x => x.IsDonator).IsModified = true;
@@ -189,7 +191,7 @@ namespace Rift.Services
 
                 if (hasDonateRole && !achievements.HasDonatedRole)
                 {
-                    RiftBot.Log.Info($"User {userId} has donate role");
+                    RiftBot.Log.Info($"User {userId.ToString()} has donate role");
 
                     dbAchievements.HasDonatedRole = true;
                     entry.Property(x => x.HasDonatedRole).IsModified = true;
@@ -197,7 +199,7 @@ namespace Rift.Services
 
                 if (giftToBotKeeper && !achievements.GiftToBotKeeper)
                 {
-                    RiftBot.Log.Info($"User {userId} made gift to bot keeper");
+                    RiftBot.Log.Info($"User {userId.ToString()} made gift to bot keeper");
 
                     dbAchievements.GiftToBotKeeper = true;
                     entry.Property(x => x.GiftToBotKeeper).IsModified = true;
@@ -243,9 +245,10 @@ namespace Rift.Services
 
                     return true;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    RiftBot.Log.Info($"Failed to check {nameof(EnsureCooldownsExistsAsync)}.");
+                    RiftBot.Log.Error($"Failed to check {nameof(EnsureCooldownsExistsAsync)}.");
+                    RiftBot.Log.Error(ex);
                     return false;
                 }
             }
@@ -609,9 +612,10 @@ namespace Rift.Services
 
                     return true;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    RiftBot.Log.Info($"Failed to check {nameof(EnsureStatisticsExistsAsync)}.");
+                    RiftBot.Log.Error($"Failed to check {nameof(EnsureStatisticsExistsAsync)}.");
+                    RiftBot.Log.Error(ex);
                     return false;
                 }
             }
@@ -712,7 +716,7 @@ namespace Rift.Services
                     else
                         statistics.CoinsEarnedTotal = dbStatistics.CoinsEarnedTotal + coins;
 
-                    RiftBot.Log.Info($"Modified {userId}'s coin(s): ({coinsBefore} => {inventory.Coins})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s coin(s): ({coinsBefore.ToString()} => {inventory.Coins.ToString()})");
 
                     inventoryEntry.Property(x => x.Coins).IsModified = true;
                     statisticsEntry.Property(x => x.CoinsEarnedTotal).IsModified = true;
@@ -732,7 +736,7 @@ namespace Rift.Services
                     else
                         statistics.TokensEarnedTotal = dbStatistics.TokensEarnedTotal + tokens;
 
-                    RiftBot.Log.Info($"Modified {userId}'s token(s): ({tokensBefore} => {inventory.Tokens})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s token(s): ({tokensBefore.ToString()} => {inventory.Tokens.ToString()})");
 
                     inventoryEntry.Property(x => x.Tokens).IsModified = true;
                     statisticsEntry.Property(x => x.TokensEarnedTotal).IsModified = true;
@@ -752,7 +756,7 @@ namespace Rift.Services
                     else
                         statistics.ChestsEarnedTotal = dbStatistics.ChestsEarnedTotal + chests;
 
-                    RiftBot.Log.Info($"Modified {userId}'s chest(s): ({chestsBefore} => {inventory.Chests})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s chest(s): ({chestsBefore.ToString()} => {inventory.Chests.ToString()})");
 
                     inventoryEntry.Property(x => x.Chests).IsModified = true;
                     statisticsEntry.Property(x => x.ChestsEarnedTotal).IsModified = true;
@@ -772,7 +776,7 @@ namespace Rift.Services
                     else
                         statistics.CapsuleEarnedTotal = dbStatistics.CapsuleEarnedTotal + capsules;
 
-                    RiftBot.Log.Info($"Modified {userId}'s capsule(s): ({capsulesBefore} => {inventory.Capsules})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s capsule(s): ({capsulesBefore.ToString()} => {inventory.Capsules.ToString()})");
 
                     inventoryEntry.Property(x => x.Capsules).IsModified = true;
                     statisticsEntry.Property(x => x.CapsuleEarnedTotal).IsModified = true;
@@ -792,7 +796,7 @@ namespace Rift.Services
                     else
                         statistics.SphereEarnedTotal = dbStatistics.SphereEarnedTotal + spheres;
 
-                    RiftBot.Log.Info($"Modified {userId}'s sphere(s): ({spheresBefore} => {inventory.Spheres})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s sphere(s): ({spheresBefore.ToString()} => {inventory.Spheres.ToString()})");
 
                     inventoryEntry.Property(x => x.Spheres).IsModified = true;
                     statisticsEntry.Property(x => x.SphereEarnedTotal).IsModified = true;
@@ -809,7 +813,7 @@ namespace Rift.Services
 
                     inventoryEntry.Property(x => x.PowerupsDoubleExp).IsModified = true;
 
-                    RiftBot.Log.Info($"Modified {userId}'s doubleExp(s): ({doubleExpsBefore} => {inventory.PowerupsDoubleExp})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s doubleExp(s): ({doubleExpsBefore.ToString()} => {inventory.PowerupsDoubleExp.ToString()})");
                 }
 
                 if (respects > uint.MinValue)
@@ -823,7 +827,7 @@ namespace Rift.Services
 
                     inventoryEntry.Property(x => x.PowerupsBotRespect).IsModified = true;
 
-                    RiftBot.Log.Info($"Modified {userId}'s respect(s): ({respectsBefore} => {inventory.PowerupsBotRespect})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s respect(s): ({respectsBefore.ToString()} => {inventory.PowerupsBotRespect.ToString()})");
                 }
 
                 if (usualTickets > uint.MinValue)
@@ -837,7 +841,7 @@ namespace Rift.Services
 
                     inventoryEntry.Property(x => x.UsualTickets).IsModified = true;
 
-                    RiftBot.Log.Info($"Modified {userId}'s usual ticket(s): ({usualTicketsBefore} => {inventory.UsualTickets})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s usual ticket(s): ({usualTicketsBefore.ToString()} => {inventory.UsualTickets.ToString()})");
                 }
 
                 if (rareTickets > uint.MinValue)
@@ -851,7 +855,7 @@ namespace Rift.Services
 
                     inventoryEntry.Property(x => x.RareTickets).IsModified = true;
 
-                    RiftBot.Log.Info($"Modified {userId}'s rare ticket(s): ({rareTicketsBefore} => {inventory.RareTickets})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s rare ticket(s): ({rareTicketsBefore.ToString()} => {inventory.RareTickets.ToString()})");
                 }
 
                 await context.SaveChangesAsync();
@@ -884,7 +888,7 @@ namespace Rift.Services
                     else
                         statistics.CoinsSpentTotal = dbInventory.CoinsSpentTotal + coins;
 
-                    RiftBot.Log.Info($"Modified {userId}'s coin(s): ({coinsBefore} => {inventory.Coins})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s coin(s): ({coinsBefore.ToString()} => {inventory.Coins.ToString()})");
 
                     inventoryEntry.Property(x => x.Coins).IsModified = true;
                     statisticsEntry.Property(x => x.CoinsSpentTotal).IsModified = true;
@@ -901,7 +905,7 @@ namespace Rift.Services
                     else
                         statistics.TokensSpentTotal = dbStatistics.TokensSpentTotal + tokens;
 
-                    RiftBot.Log.Info($"Modified {userId}'s token(s): ({tokensBefore} => {inventory.Tokens})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s token(s): ({tokensBefore.ToString()} => {inventory.Tokens.ToString()})");
 
                     inventoryEntry.Property(x => x.Tokens).IsModified = true;
                     statisticsEntry.Property(x => x.TokensSpentTotal).IsModified = true;
@@ -912,7 +916,7 @@ namespace Rift.Services
                 if (chests > uint.MinValue)
                 {
                     inventory.Chests = chestsBefore - chests;
-                    RiftBot.Log.Info($"Modified {userId}'s chest(s): ({chestsBefore} => {inventory.Chests})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s chest(s): ({chestsBefore.ToString()} => {inventory.Chests.ToString()})");
                     inventoryEntry.Property(x => x.Chests).IsModified = true;
                 }
 
@@ -921,7 +925,7 @@ namespace Rift.Services
                 if (capsules > uint.MinValue)
                 {
                     inventory.Capsules = capsulesBefore - capsules;
-                    RiftBot.Log.Info($"Modified {userId}'s capsule(s): ({capsulesBefore} => {inventory.Capsules})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s capsule(s): ({capsulesBefore.ToString()} => {inventory.Capsules.ToString()})");
                     inventoryEntry.Property(x => x.Capsules).IsModified = true;
                 }
 
@@ -930,7 +934,7 @@ namespace Rift.Services
                 if (spheres > uint.MinValue)
                 {
                     inventory.Spheres = spheresBefore - spheres;
-                    RiftBot.Log.Info($"Modified {userId}'s sphere(s): ({spheresBefore} => {inventory.Spheres})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s sphere(s): ({spheresBefore.ToString()} => {inventory.Spheres.ToString()})");
                     inventoryEntry.Property(x => x.Spheres).IsModified = true;
                 }
 
@@ -940,7 +944,7 @@ namespace Rift.Services
                 {
                     inventory.PowerupsDoubleExp = doubleExpsBefore - doubleExps;
                     inventoryEntry.Property(x => x.PowerupsDoubleExp).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId}'s doubleExp(s): ({doubleExpsBefore} => {inventory.PowerupsDoubleExp})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s doubleExp(s): ({doubleExpsBefore.ToString()} => {inventory.PowerupsDoubleExp.ToString()})");
                 }
 
                 uint respectsBefore = dbInventory.PowerupsBotRespect;
@@ -949,7 +953,7 @@ namespace Rift.Services
                 {
                     inventory.PowerupsBotRespect = respectsBefore - respects;
                     inventoryEntry.Property(x => x.PowerupsBotRespect).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId}'s respect(s): ({respectsBefore} => {inventory.PowerupsBotRespect})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s respect(s): ({respectsBefore.ToString()} => {inventory.PowerupsBotRespect.ToString()})");
                 }
 
                 uint usualTicketsBefore = dbInventory.UsualTickets;
@@ -958,7 +962,7 @@ namespace Rift.Services
                 {
                     inventory.UsualTickets = usualTicketsBefore - usualTickets;
                     inventoryEntry.Property(x => x.UsualTickets).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId}'s usual ticket(s): ({usualTicketsBefore} => {inventory.UsualTickets})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s usual ticket(s): ({usualTicketsBefore.ToString()} => {inventory.UsualTickets.ToString()})");
                 }
 
                 uint rareTicketsBefore = dbInventory.RareTickets;
@@ -967,7 +971,7 @@ namespace Rift.Services
                 {
                     inventory.RareTickets = rareTicketsBefore - rareTickets;
                     inventoryEntry.Property(x => x.RareTickets).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId}'s rare ticket(s): ({rareTicketsBefore} => {inventory.RareTickets})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s rare ticket(s): ({rareTicketsBefore.ToString()} => {inventory.RareTickets.ToString()})");
                 }
 
                 await context.SaveChangesAsync();
@@ -1195,8 +1199,8 @@ namespace Rift.Services
                 }
                 catch (Exception ex)
                 {
-                    RiftBot.Log.Info($"Failed to check {nameof(EnsureStatisticsExistsAsync)}.");
-                    RiftBot.Log.Info(ex);
+                    RiftBot.Log.Error($"Failed to check {nameof(EnsureStatisticsExistsAsync)}.");
+                    RiftBot.Log.Error(ex);
                     return false;
                 }
             }

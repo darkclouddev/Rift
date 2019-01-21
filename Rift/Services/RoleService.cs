@@ -90,7 +90,7 @@ namespace Rift.Services
             if (role != null)
                 await sgUser.RemoveRoleAsync(role);
 
-            RiftBot.Log.Info($"Removed role {roleId} from {sgUser} {userId.ToString()}");
+            RiftBot.Log.Info($"Removed role {roleId.ToString()} from {sgUser} {userId.ToString()}");
 
             return (true, null);
         }
@@ -102,7 +102,7 @@ namespace Rift.Services
 
         public async Task RestoreTempRolesAsync(SocketGuildUser sgUser)
         {
-            RiftBot.Log.Info($"User {sgUser} ({sgUser.Id}) joined, checking temp roles");
+            RiftBot.Log.Info($"User {sgUser} ({sgUser.Id.ToString()}) joined, checking temp roles");
 
             var tempRoles = await RiftBot.GetService<DatabaseService>().GetUserTempRolesAsync(sgUser.Id);
 
@@ -119,7 +119,7 @@ namespace Rift.Services
 
                 if (!IonicClient.GetRole(Settings.App.MainGuildId, tempRole.RoleId, out var role))
                 {
-                    RiftBot.Log.Error($"Applying role {tempRole.RoleId}: FAILED");
+                    RiftBot.Log.Error($"Applying role {tempRole.RoleId.ToString()}: FAILED");
                     continue;
                 }
 

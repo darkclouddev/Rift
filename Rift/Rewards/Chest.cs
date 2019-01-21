@@ -22,7 +22,7 @@ namespace Rift.Rewards
             UserId = userId;
             Amount = amount;
 
-            RiftBot.Log.Debug($"Opening {amount} chest(s) for {userId}");
+            RiftBot.Log.Debug($"Opening {amount.ToString()} chest(s) for {userId.ToString()}");
 
             reward = new Reward(coins: 0);
             CalculateLoot(amount);

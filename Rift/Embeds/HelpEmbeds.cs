@@ -27,7 +27,7 @@ namespace Rift.Embeds
                             + $"{Settings.Emote.Ward} `!активировать магический тотем`.")
                 .AddField($"Подарки, магазин и атаки в чате:"
                           , $"{Settings.Emote.Gifts} `!подарки`, {Settings.Emote.Store} `!магазин`, {Settings.Emote.Attack} `!атаки`.\n\n"
-                            + $"Полная информация о системе: <#{Settings.ChannelId.Information}>")
+                            + $"Полная информация о системе: <#{Settings.ChannelId.Information.ToString()}>")
                 .Build();
 
         public static readonly Embed Rules =

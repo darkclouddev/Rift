@@ -96,7 +96,7 @@ namespace Rift.Services
             minionTs *= 60;
 
             RiftBot.Log.Debug(nameof(MinionService),
-                              $"Next Minion: {Helper.FromTimestamp(Helper.CurrentUnixTimestamp + minionTs)}");
+                              $"Next Minion: {Helper.FromTimestamp(Helper.CurrentUnixTimestamp + minionTs).ToString()}");
 
             reward = GetReward(AvailableRewards).Copy();
             reward.CalculateReward();
@@ -131,7 +131,7 @@ namespace Rift.Services
             DropTimers();
             await reward.GiveRewardAsync(killerId);
 
-            RiftBot.Log.Debug($"Minion was killed by {killerId}");
+            RiftBot.Log.Debug($"Minion was killed by {killerId.ToString()}");
 
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
                 return;

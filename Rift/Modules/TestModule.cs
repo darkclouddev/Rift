@@ -121,8 +121,8 @@ namespace Rift.Modules
         public async Task Update()
         {
             var message = new StringBuilder()
-                          .AppendLine($"Используйте всю мощь <@404611580819537920> с обновленной системой, узнайте подробнее: <#{Settings.ChannelId.Information}>")
-                          .AppendLine($"Подтвердить игровой аккаунт в канале <#{Settings.ChannelId.Confirmation}> - это первый шаг к тому, чтобы стать частью сообщества нашего голосового сервера.")
+                          .AppendLine($"Используйте всю мощь <@404611580819537920> с обновленной системой, узнайте подробнее: <#{Settings.ChannelId.Information.ToString()}>")
+                          .AppendLine($"Подтвердить игровой аккаунт в канале <#{Settings.ChannelId.Confirmation.ToString()}> - это первый шаг к тому, чтобы стать частью сообщества нашего голосового сервера.")
                           .AppendLine($"Но рост нашего сообщества требует немного больше возможностей от данного бота. Скоро мы серьезно затронем систему, которая отвечает за взаимодействие игрока и игры на сервере.")
                           .AppendLine()
                           .AppendLine($"**Узнайте важную информацию:**")
@@ -155,11 +155,11 @@ namespace Rift.Modules
                           .AppendLine("Найдя тиммейтов, вы сможете легко и быстро присоединиться к любому доступному голосовому каналу.Объединяйтесь, играйте, побеждайте!")
                           .AppendLine()
                           .AppendLine($"**Основные каналы:**")
-                          .AppendLine($"**1**. <#{Settings.ChannelId.Confirmation}> для привязки вашего аккаунта в игре к серверу.")
-                          .AppendLine($"**2**. <#{Settings.ChannelId.Search}> поможет вам найти напарников в обычные, арамы или ранговые игры.")
-                          .AppendLine($"**3**. <#{Settings.ChannelId.Clubs}> для желающих присоединиться к сражению за сундуки и место клуба в сезоне.")
-                          .AppendLine($"**4**. <#{Settings.ChannelId.Chat}> позволит вам пообщаться с другими участниками сервера, познакомиться и получить первые награды за активность.")
-                          .AppendLine($"**5**. <#{Settings.ChannelId.Information}> существует для того, чтобы вы всегда могли прочесть о системе сервера и ознакомиться с основными командами ботов.")
+                          .AppendLine($"**1**. <#{Settings.ChannelId.Confirmation.ToString()}> для привязки вашего аккаунта в игре к серверу.")
+                          .AppendLine($"**2**. <#{Settings.ChannelId.Search.ToString()}> поможет вам найти напарников в обычные, арамы или ранговые игры.")
+                          .AppendLine($"**3**. <#{Settings.ChannelId.Clubs.ToString()}> для желающих присоединиться к сражению за сундуки и место клуба в сезоне.")
+                          .AppendLine($"**4**. <#{Settings.ChannelId.Chat.ToString()}> позволит вам пообщаться с другими участниками сервера, познакомиться и получить первые награды за активность.")
+                          .AppendLine($"**5**. <#{Settings.ChannelId.Information.ToString()}> существует для того, чтобы вы всегда могли прочесть о системе сервера и ознакомиться с основными командами ботов.")
                           .AppendLine()
                           .AppendLine($"**Правила поведения на сервере:**")
                           .AppendLine($"• Запрещено неуважительное отношение к участникам сервера (сексизм, расизм, травля, провокация).")
@@ -192,7 +192,7 @@ namespace Rift.Modules
                           .AppendLine($"Получайте **ед. опыта** за активность на нашем сервере, поднимайте уровень и зарабатывайте награды. Необходимо написать `!команды` в чат, чтобы узнать основные команды бота.")
                           .AppendLine($"На сервере присутствует собственная система прогресса с **монетами** (основная валюта), **жетонами** (редкая валюта), **сундуками**, **сферами** и **капсулами**.")
                           .AppendLine()
-                          .AppendLine($"Подтвердите свой игровой аккаунт в канале <#{Settings.ChannelId.Confirmation}> и получите награду. Начните общаться в общем чате <#{Settings.ChannelId.Chat}>, чтобы получить первую награду за активность.")
+                          .AppendLine($"Подтвердите свой игровой аккаунт в канале <#{Settings.ChannelId.Confirmation.ToString()}> и получите награду. Начните общаться в общем чате <#{Settings.ChannelId.Chat.ToString()}>, чтобы получить первую награду за активность.")
                           .AppendLine()
                           .AppendLine($"**1.** После того, как вы получили {Settings.Emote.Chest} сундуки за активность, откройте свой первый сундук командой в чате `!открыть сундук`.")
                           .AppendLine($"**2.** Проверьте свой {Settings.Emote.Profile} профиль командой `!профиль`, в нём отображается уровень, статистика уровня, активные бонусы, часы в голосовых каналах, ваши роли и пожертвования.")
@@ -222,7 +222,7 @@ namespace Rift.Modules
                            .AppendLine($"А из одной {Settings.Emote.Capsule} капсулы можно получить {Settings.Emote.Coin} монеты, {Settings.Emote.Token} жетоны, {Settings.Emote.PowerupDoubleExperience} двойной опыт, {Settings.Emote.UsualTickets} обычные билеты, {Settings.Emote.RareTickets} редкие билеты и уникальную роль на 60 дней.")
                            .AppendLine()
                            .AppendLine($"Есть два типа билетов и розыгрышей: {Settings.Emote.UsualTickets} обычные билеты используются для обычных розыгрышей, {Settings.Emote.RareTickets} редкие билеты используются для особых розыгрышей.")
-                           .AppendLine($"Как только начнется розыгрыш, бот автоматически использует ваш билет и заберет из инвентаря. Проверяйте текстовый канал <#{Settings.ChannelId.Giveaways}>.")
+                           .AppendLine($"Как только начнется розыгрыш, бот автоматически использует ваш билет и заберет из инвентаря. Проверяйте текстовый канал <#{Settings.ChannelId.Giveaways.ToString()}>.")
                            .AppendLine()
                            .AppendLine($"**Бонусы и их возможности:**")
                            .ToString();
@@ -300,7 +300,7 @@ namespace Rift.Modules
         public async Task Rank()
         {
             var sb = new StringBuilder()
-                     .AppendLine($"Призыватели, для регистрации вашего игрового аккаунта в нашей системе, вам нужно написать в текстовый канал <#{Settings.ChannelId.Chat}> одну из команд ниже.")
+                     .AppendLine($"Призыватели, для регистрации вашего игрового аккаунта в нашей системе, вам нужно написать в текстовый канал <#{Settings.ChannelId.Chat.ToString()}> одну из команд ниже.")
                      .AppendLine()
                      .AppendLine($"Используйте команду `!регистрация RU ваш_никнейм` в чате для привязки аккаунта c русского сервера.")
                      .AppendLine($"Используйте команду `!регистрация EUW ваш_никнейм` в чате для привязки аккаунта c западного сервера.")
@@ -337,7 +337,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.DM)]
         public async Task Exp(uint level)
         {
-            await ReplyAsync($"Lv {level}: {EconomyService.GetExpForLevel(level)} XP");
+            await ReplyAsync($"Lv {level.ToString()}: {EconomyService.GetExpForLevel(level).ToString()} XP");
         }
 
         [Command("search")]

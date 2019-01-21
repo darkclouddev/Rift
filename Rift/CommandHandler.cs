@@ -237,7 +237,7 @@ namespace Rift
                      .WithDescription($"Никнейм: {sgUser.Mention} ({sgUser.Username}#{sgUser.Discriminator})")
                      .WithFooter(new EmbedFooterBuilder
                      {
-                         Text = $"ID: {sgUser.Id}"
+                         Text = $"ID: {sgUser.Id.ToString()}"
                      })
                      .WithCurrentTimestamp();
 

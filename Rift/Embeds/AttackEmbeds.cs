@@ -25,14 +25,14 @@ namespace Rift.Embeds
                 .AddField("Команда для атаки",
                           $"Напишите в общий чат {Settings.Emote.Attack} `!атаковать` и никнейм пользователя. ")
                 .AddField("Стоимость атаки",
-                          $"Потратьте {Settings.Emote.Coin} {Settings.Economy.AttackPrice} монет и атакуйте призывателя в чате.")
+                          $"Потратьте {Settings.Emote.Coin} {Settings.Economy.AttackPrice.ToString()} монет и атакуйте призывателя в чате.")
                 .WithFooter("Максимум одна атака в два часа.")
                 .Build();
 
         public static Embed AttacksUnlockedChat(ulong userId)
         {
             return new EmbedBuilder()
-                   .WithDescription($"Призыватель <@{userId}> открыл доступ к атакам в чате.")
+                   .WithDescription($"Призыватель <@{userId.ToString()}> открыл доступ к атакам в чате.")
                    .Build();
         }
 
@@ -47,14 +47,14 @@ namespace Rift.Embeds
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
-                .WithDescription($"Атаковать призывателей можно лишь со {Settings.Economy.AttackMinimumLevel} уровня.")
+                .WithDescription($"Атаковать призывателей можно лишь со {Settings.Economy.AttackMinimumLevel.ToString()} уровня.")
                 .Build();
 
         public static readonly Embed LowTargetLevel =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
-                .WithDescription($"Вы не можете атаковать призывателя ниже {Settings.Economy.AttackMinimumLevel} уровня.")
+                .WithDescription($"Вы не можете атаковать призывателя ниже {Settings.Economy.AttackMinimumLevel.ToString()} уровня.")
                 .Build();
 
         public static readonly Embed NoCoins =
@@ -134,7 +134,7 @@ namespace Rift.Embeds
                            + "Призыватель ворует сундук при атаке.";
                 case SkillResult.GhostMute:
                     return $"{sgAttacker.Mention} использует {Settings.Emote.Ghost} заклинание.\n"
-                           + $"Призыватель выдает блокировку чата при атаке на {attack.Count} мин.";
+                           + $"Призыватель выдает блокировку чата при атаке на {attack.Count.ToString()} мин.";
                 case SkillResult.GhostNothing:
                     return $"{sgTarget.Mention} использует {Settings.Emote.Ghost} заклинание и убегает.\n"
                            + "Атакующий теряет свои монеты, атака не срабатывает.";
@@ -146,7 +146,7 @@ namespace Rift.Embeds
                            + "Призыватель ворует сундук при атаке.";
                 case SkillResult.FlashMute:
                     return $"{sgAttacker.Mention} использует {Settings.Emote.Flash} заклинание.\n"
-                           + $"Призыватель выдает блокировку чата при атаке на {attack.Count} мин.";
+                           + $"Призыватель выдает блокировку чата при атаке на {attack.Count.ToString()} мин.";
                 case SkillResult.FlashNothing:
                     return $"{sgTarget.Mention} использует {Settings.Emote.Flash} заклинание и убегает.\n"
                            + "Атака не срабатывает, атакующий пытался догнать и флешнулся в стену.";
@@ -158,22 +158,22 @@ namespace Rift.Embeds
                            + "Призыватель ворует сундук при атаке.";
                 case SkillResult.IgniteMute:
                     return $"{sgAttacker.Mention} использует {Settings.Emote.Ignite} заклинание.\n"
-                           + $"Призыватель выдает блокировку чата при атаке на {attack.Count} мин.";
+                           + $"Призыватель выдает блокировку чата при атаке на {attack.Count.ToString()} мин.";
                 case SkillResult.IgniteMutualMute:
                     return $"{sgAttacker.Mention} и {sgTarget.Mention} используют {Settings.Emote.Ignite} заклинания.\n"
-                           + $"Игрокам выдается двойная блокировка чата на {attack.Count} мин.";
+                           + $"Игрокам выдается двойная блокировка чата на {attack.Count.ToString()} мин.";
                 case SkillResult.HealNothing:
                     return $"{sgTarget.Mention} использует {Settings.Emote.Heal} заклинание.\n"
                            + "Атакующий призыватель теряет монеты, атака не срабатывает.";
                 case SkillResult.HealReversedMute:
                     return $"{sgTarget.Mention} использует {Settings.Emote.Heal} заклинание.\n"
-                           + $"Призыватель выдает блокировку чата атакующему на {attack.Count} мин.";
+                           + $"Призыватель выдает блокировку чата атакующему на {attack.Count.ToString()} мин.";
                 case SkillResult.BarrierNothing:
                     return $"{sgTarget.Mention} использует {Settings.Emote.Barrier} заклинание.\n"
                            + "Атакующий призыватель теряет монеты, атака не срабатывает.";
                 case SkillResult.BarrierReversedMute:
                     return $"{sgTarget.Mention} использует {Settings.Emote.Barrier} заклинание.\n"
-                           + $"Призыватель выдает блокировку чата атакующему на {attack.Count} мин.";
+                           + $"Призыватель выдает блокировку чата атакующему на {attack.Count.ToString()} мин.";
                 default: return "";
             }
         }
@@ -185,10 +185,10 @@ namespace Rift.Embeds
                 case AttackLoot.Nothing: return $"Атака на {sgTarget.Username} не сработала, вы потеряли свои монеты.";
 
                 case AttackLoot.Coins:
-                    return $"Вы атаковали {sgTarget.Username} и украли {Settings.Emote.Coin} {attack.Count}";
+                    return $"Вы атаковали {sgTarget.Username} и украли {Settings.Emote.Coin} {attack.Count.ToString()}";
 
                 case AttackLoot.Chests:
-                    return $"Вы атаковали {sgTarget.Username} и украли {Settings.Emote.Chest} {attack.Count}";
+                    return $"Вы атаковали {sgTarget.Username} и украли {Settings.Emote.Chest} {attack.Count.ToString()}";
 
                 case AttackLoot.Mute: return $"Вы атаковали {sgTarget.Username} и выдали блокировку чата.";
 
@@ -209,10 +209,10 @@ namespace Rift.Embeds
                     return $"Сработала защита, {sgAttacker.Username} не смог вас атаковать.";
 
                 case AttackLoot.Coins:
-                    return $"Призыватель {sgAttacker.Username} украл у вас {Settings.Emote.Coin} {attack.Count} при атаке.";
+                    return $"Призыватель {sgAttacker.Username} украл у вас {Settings.Emote.Coin} {attack.Count.ToString()} при атаке.";
 
                 case AttackLoot.Chests:
-                    return $"Призыватель {sgAttacker.Username} украл у вас {Settings.Emote.Chest} {attack.Count} при атаке.";
+                    return $"Призыватель {sgAttacker.Username} украл у вас {Settings.Emote.Chest} {attack.Count.ToString()} при атаке.";
 
                 case AttackLoot.Mute:
                     return $"Призыватель {sgAttacker.Username} выдал вам блокировку чата при атаке.";

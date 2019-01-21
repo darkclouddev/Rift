@@ -171,9 +171,9 @@ namespace Rift.Modules
             }
 
             await Context.User.SendMessageAsync($"Выдача подарков завершена!\n\n"
-                                                + $"{srAbsolute.Name}: {srAbsolute.Members.Count()}\n"
-                                                + $"{srLegendary.Name}: {srLegendary.Members.Count()}\n"
-                                                + $"Личные роли: {privateRoleUsers.Count()}");
+                                                + $"{srAbsolute.Name}: {srAbsolute.Members.Count().ToString()}\n"
+                                                + $"{srLegendary.Name}: {srLegendary.Members.Count().ToString()}\n"
+                                                + $"Личные роли: {privateRoleUsers.Count.ToString()}");
         }
 
         [Command("selftest")]
@@ -335,11 +335,11 @@ namespace Rift.Modules
                 if (errorList.Length >= 1024)
                 {
                     errorList = String.Join('\n', errors.Take(10));
-                    eb.AddField($"{errors.Count} error(s)", "Displaying first 10\n\n" + errorList);
+                    eb.AddField($"{errors.Count.ToString()} error(s)", "Displaying first 10\n\n" + errorList);
                 }
                 else
                 {
-                    eb.AddField($"{errors.Count} error(s)", errorList);
+                    eb.AddField($"{errors.Count.ToString()} error(s)", errorList);
                 }
             }
 
@@ -350,7 +350,7 @@ namespace Rift.Modules
                 var embedMsg = new EmbedBuilder()
                                .WithColor(255, 255, 0)
                                .WithAuthor("Self-test")
-                               .WithDescription($"Automatically resolved {fixedRoles} roles.");
+                               .WithDescription($"Automatically resolved {fixedRoles.ToString()} roles.");
 
                 await Context.Channel.SendEmbedAsync(embedMsg);
             }
@@ -371,7 +371,7 @@ namespace Rift.Modules
 
                 var eb = new EmbedBuilder()
                          .WithAuthor($"Server roles")
-                         .WithFooter($"Page {page}");
+                         .WithFooter($"Page {page.ToString()}");
 
                 List<ulong> ids = new List<ulong>();
                 List<string> names = new List<string>();
@@ -475,7 +475,7 @@ namespace Rift.Modules
         public async Task AppStatus()
         {
             string infoText =
-                $"{Format.Underline($"{Format.Bold(nameof(Rift))} v{RiftBot.InternalVersion} {RuntimeInformation.OSArchitecture}")}\n"
+                $"{Format.Underline($"{Format.Bold(nameof(Rift))} v{RiftBot.InternalVersion} {RuntimeInformation.OSArchitecture.ToString()}")}\n"
                 + $"- Автор: <@212997107525746690>\n"
                 + $"- Аптайм: {GetUptime()}\n"
                 + $"- Память: {GetHeapSize()} MB\n"

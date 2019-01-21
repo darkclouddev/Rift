@@ -119,7 +119,7 @@ namespace Rift.Modules
                     break;
 
                 default:
-                    await Context.User.SendMessageAsync($"Неверный модификатор времени: \"{timeMod}\"");
+                    await Context.User.SendMessageAsync($"Неверный модификатор времени: \"{timeMod.ToString()}\"");
                     return;
             }
 
@@ -129,7 +129,7 @@ namespace Rift.Modules
                 return;
             }
 
-            await roleService.AddTempRoleAsync(user.Id, Settings.RoleId.Muted, ts, $"Muted by {Context.User.Id} with reason: {reason}");
+            await roleService.AddTempRoleAsync(user.Id, Settings.RoleId.Muted, ts, $"Muted by {Context.User.Id.ToString()} with reason: {reason}");
 
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return;

@@ -37,7 +37,7 @@ namespace Rift.Services.Giveaway
             if (users.Count > 0)
             {
                 winner = users.Random();
-                RiftBot.Log.Debug($"Giveaway winner: {winner}");
+                RiftBot.Log.Debug($"Giveaway winner: {winner.ToString()}");
                 await reward.GiveRewardAsync(winner);
             }
             else

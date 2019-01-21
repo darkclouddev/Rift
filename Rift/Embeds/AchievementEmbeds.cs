@@ -42,7 +42,7 @@ namespace Rift.Embeds
             return new EmbedBuilder()
                    .WithTitle("Достижение")
                    .WithColor(103, 240, 154)
-                   .WithDescription($"Призыватель <@{userId}> получает {Settings.Emote.MarkedAchievement} {achievementName}.")
+                   .WithDescription($"Призыватель <@{userId.ToString()}> получает {Settings.Emote.MarkedAchievement} {achievementName}.")
                    .Build();
         }
 

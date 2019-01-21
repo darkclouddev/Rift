@@ -48,7 +48,7 @@ namespace Rift.Embeds
                    .WithColor(73, 197, 105)
                    .WithDescription($"Призыватель {toUser.Username} успешно получил подарок.\n"
                                     + $"Монеты и жетоны после отправки подарка: "
-                                    + $"{Settings.Emote.Coin} {inventory.Coins} {Settings.Emote.Token} {inventory.Tokens}")
+                                    + $"{Settings.Emote.Coin} {inventory.Coins.ToString()} {Settings.Emote.Token} {inventory.Tokens.ToString()}")
                    .Build();
         }
 

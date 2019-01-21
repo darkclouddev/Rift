@@ -14,18 +14,18 @@ namespace Rift.Embeds
                    .WithThumbnailUrl(Settings.Thumbnail.Inventory)
                    .WithDescription("Количество предметов, бонусов и билетов:")
                    .AddField("Предметы",
-                             $"{Settings.Emote.Coin} {inventory.Coins} "
-                             + $"{Settings.Emote.Token} {inventory.Tokens} "
-                             + $"{Settings.Emote.Chest} {inventory.Chests} "
-                             + $"{Settings.Emote.Sphere} {inventory.Spheres} "
-                             + $"{Settings.Emote.Capsule} {inventory.Capsules}")
+                             $"{Settings.Emote.Coin} {inventory.Coins.ToString()} "
+                             + $"{Settings.Emote.Token} {inventory.Tokens.ToString()} "
+                             + $"{Settings.Emote.Chest} {inventory.Chests.ToString()} "
+                             + $"{Settings.Emote.Sphere} {inventory.Spheres.ToString()} "
+                             + $"{Settings.Emote.Capsule} {inventory.Capsules.ToString()}")
                    .AddField("Бонусы",
-                             $"{Settings.Emote.PowerupDoubleExperience} {inventory.PowerupsDoubleExperience} "
-                             + $"{Settings.Emote.BotRespect} {inventory.PowerupsBotRespect}"
+                             $"{Settings.Emote.PowerupDoubleExperience} {inventory.PowerupsDoubleExperience.ToString()} "
+                             + $"{Settings.Emote.BotRespect} {inventory.PowerupsBotRespect.ToString()}"
                              , true)
                    .AddField("Билеты",
-                             $"{Settings.Emote.UsualTickets} {inventory.UsualTickets} "
-                             + $"{Settings.Emote.RareTickets} {inventory.RareTickets}"
+                             $"{Settings.Emote.UsualTickets} {inventory.UsualTickets.ToString()} "
+                             + $"{Settings.Emote.RareTickets} {inventory.RareTickets.ToString()}"
                              , true)
 
                    //.AddField("Информация о бонусах",

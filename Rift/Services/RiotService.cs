@@ -1002,7 +1002,7 @@ namespace Rift.Services
 
         public string GetSummonerIconUrlById(int iconId)
         {
-            return $"http://ddragon.leagueoflegends.com/cdn/{Settings.App.LolVersion}/img/profileicon/{iconId}.png";
+            return $"http://ddragon.leagueoflegends.com/cdn/{Settings.App.LolVersion}/img/profileicon/{iconId.ToString()}.png";
         }
 
         public static string GetChampionSquareByName(ChampionImage ci)

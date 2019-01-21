@@ -21,23 +21,23 @@ namespace Rift.Embeds
             var sb = new StringBuilder();
 
             if (reward.PowerupsDoubleExp > 0)
-                sb.Append($" {Settings.Emote.PowerupDoubleExperience} {reward.PowerupsDoubleExp}");
+                sb.Append($" {Settings.Emote.PowerupDoubleExperience} {reward.PowerupsDoubleExp.ToString()}");
 
             if (reward.PowerupsBotRespect > 0)
-                sb.Append($" {Settings.Emote.BotRespect} {reward.PowerupsBotRespect}");
+                sb.Append($" {Settings.Emote.BotRespect} {reward.PowerupsBotRespect.ToString()}");
 
             if (reward.UsualTickets > 0)
-                sb.Append($" {Settings.Emote.UsualTickets} {reward.UsualTickets}");
+                sb.Append($" {Settings.Emote.UsualTickets} {reward.UsualTickets.ToString()}");
 
             if (reward.RareTickets > 0)
-                sb.Append($" {Settings.Emote.RareTickets} {reward.RareTickets}");
+                sb.Append($" {Settings.Emote.RareTickets} {reward.RareTickets.ToString()}");
 
             if (sb.Length == 0)
                 return null;
 
             return new EmbedBuilder()
                    .WithAuthor("Сундуки", Settings.Emote.ChestUrl)
-                   .WithDescription($"Призывателю <@{userId}> выпало:{sb.ToString()}")
+                   .WithDescription($"Призывателю <@{userId.ToString()}> выпало:{sb.ToString()}")
                    .Build();
         }
 
@@ -50,7 +50,7 @@ namespace Rift.Embeds
             if (amount == 1)
                 eb.WithDescription($"Призыватель, вы только что открыли сундук.\n\nВ сундуке: {reward.RewardString}");
             else
-                eb.WithDescription($"Призыватель, вы только что открыли {amount} сундук(ов).\n\nВ сундуках: {reward.RewardString}");
+                eb.WithDescription($"Призыватель, вы только что открыли {amount.ToString()} сундук(ов).\n\nВ сундуках: {reward.RewardString}");
             return eb.Build();
         }
     }

@@ -22,7 +22,7 @@ namespace Rift.Embeds
         public static Embed MinionKilled(MinionColor color, ulong userId, Reward reward)
         {
             return new EmbedBuilder()
-                   .WithDescription($"Призыватель <@{userId}> убил миньона и забрал {reward.RewardString}")
+                   .WithDescription($"Призыватель <@{userId.ToString()}> убил миньона и забрал {reward.RewardString}")
                    .Build();
         }
 

@@ -83,14 +83,14 @@ namespace Rift.Embeds
         {
             return new EmbedBuilder()
                    .WithDescription($"Призыватели убили лесного монстра и забрали награду.\n"
-                                    + $"Всего в сражении участвовало **{count}** призывателей.")
+                                    + $"Всего в сражении участвовало **{count.ToString()}** призывателей.")
                    .Build();
         }
 
         public static Embed Winner(ulong winnerId, string reward)
         {
             return new EmbedBuilder()
-                   .WithDescription($"Призыватель <@{winnerId}> после сражения получил {reward}")
+                   .WithDescription($"Призыватель <@{winnerId.ToString()}> после сражения получил {reward}")
                    .Build();
         }
     }

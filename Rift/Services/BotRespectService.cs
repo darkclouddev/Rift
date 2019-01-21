@@ -53,7 +53,7 @@ namespace Rift.Services
             var nextGiftsTimeSpan = Helper.NextUInt(210, 330) * 60;
             timer.Change(TimeSpan.FromSeconds(nextGiftsTimeSpan), TimeSpan.Zero);
 
-            RiftBot.Log.Debug($"Next gifts: {Helper.FromTimestamp(Helper.CurrentUnixTimestamp + nextGiftsTimeSpan)}");
+            RiftBot.Log.Debug($"Next gifts: {Helper.FromTimestamp(Helper.CurrentUnixTimestamp + nextGiftsTimeSpan).ToString()}");
 
             return Task.CompletedTask;
         }

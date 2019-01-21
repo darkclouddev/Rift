@@ -58,7 +58,7 @@ namespace Rift.Services.Economy
         public readonly string CurrencyEmote;
 
         public string FormattedName => $"{Emote} {Name}";
-        public string FormattedPrice => $"{CurrencyEmote} {Price}";
+        public string FormattedPrice => $"{CurrencyEmote} {Price.ToString()}";
 
         public GiftItem(uint id, string emote, string name, GiftItemType type, uint price,
                         Currency currency)

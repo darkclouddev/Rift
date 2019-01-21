@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -234,7 +234,7 @@ namespace Rift.Services
                                                 AchievementEmbeds.AchievementsEmbed(achievements)));
         }
 
-        public static async Task AddAchievement(ulong userId, string achievementName, Reward reward)
+        static async Task AddAchievement(ulong userId, string achievementName, Reward reward)
         {
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return;
@@ -246,7 +246,7 @@ namespace Rift.Services
             await chatChannel.SendEmbedAsync(AchievementEmbeds.ChatEmbed(userId, achievementName));
         }
 
-        public static async Task CheckAchievements(ulong userId)
+        static async Task CheckAchievements(ulong userId)
         {
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return;
@@ -386,7 +386,7 @@ namespace Rift.Services
                 else if (e.DonateTotal >= 10_000M)
                 {
                     var embed = new EmbedBuilder()
-                                .WithDescription($"Призыватель <@{e.UserId}> получил личную роль\nза общую сумму пожертвований в размере **10000** рублей.")
+                                .WithDescription($"Призыватель <@{e.UserId.ToString()}> получил личную роль\nза общую сумму пожертвований в размере **10000** рублей.")
                                 .Build();
 
                     messageService.TryAddSend(new EmbedMessage(DestinationType.GuildChannel, Settings.ChannelId.Chat,
@@ -422,7 +422,7 @@ namespace Rift.Services
             await CheckAchievements(message.Author.Id);
         }
 
-        public static async Task AddExpAsync(ulong userId, uint exp)
+        static async Task AddExpAsync(ulong userId, uint exp)
         {
             await RiftBot.GetService<DatabaseService>().AddExperienceAsync(userId, exp);
 
@@ -443,7 +443,7 @@ namespace Rift.Services
                 {
                     await RiftBot.GetService<DatabaseService>().SetLevelAsync(userId, newLevel);
 
-                    RiftBot.Log.Info($"{userId} just leveled up to {newLevel}");
+                    RiftBot.Log.Info($"{userId.ToString()} just leveled up to {newLevel.ToString()}");
 
                     if (newLevel == 1u)
                         return; //no rewards on level 1
@@ -467,15 +467,15 @@ namespace Rift.Services
 
         static async Task CheckDailyMessageAsync(ulong userId)
         {
-            var dbDaily = await RiftBot.GetService<DatabaseService>().GetUserLastDailyChestTimeAsync(userId);
-
-            var diff = DateTime.UtcNow - dbDaily.LastDailyChestTime;
-
-            if (diff.Days == 0)
-                return;
-
             try
             {
+                var dbDaily = await RiftBot.GetService<DatabaseService>().GetUserLastDailyChestTimeAsync(userId);
+    
+                var diff = DateTime.UtcNow - dbDaily.LastDailyChestTime;
+    
+                if (diff.Days == 0)
+                    return;
+            
                 await dailyChestMutex.WaitAsync().ConfigureAwait(false);
 
                 var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
@@ -633,10 +633,10 @@ namespace Rift.Services
 
             string position = ratingSorted is null
                 ? "-"
-                : $"{(ratingSorted.IndexOf(userId) + 1).ToString()} / {ratingSorted.Count}";
+                : $"{(ratingSorted.IndexOf(userId) + 1).ToString()} / {ratingSorted.Count.ToString()}";
 
             var tempRoles = await RiftBot.GetService<RoleService>().GetUserTempRolesAsync(userId);
-            var donateRoleString = $"{Settings.Emote.Donate} Узнайте больше о донате: <#{Settings.ChannelId.Donate}>";
+            var donateRoleString = $"{Settings.Emote.Donate} Узнайте больше о донате: <#{Settings.ChannelId.Donate.ToString()}>";
             var tempRolesList = new List<string>();
 
             foreach (var role in tempRoles)
@@ -648,13 +648,13 @@ namespace Rift.Services
                 string time;
 
                 if (timeLeft.Days > 0)
-                    time = $"{timeLeft.Days} дн.";
+                    time = $"{timeLeft.Days.ToString()} дн.";
                 else if (timeLeft.Hours > 0)
-                    time = $"{timeLeft.Hours} ч.";
+                    time = $"{timeLeft.Hours.ToString()} ч.";
                 else if (timeLeft.Minutes > 0)
-                    time = $"{timeLeft.Minutes} мин.";
+                    time = $"{timeLeft.Minutes.ToString()} мин.";
                 else
-                    time = $"{timeLeft.Seconds} сек.";
+                    time = $"{timeLeft.Seconds.ToString()} сек.";
 
                 tempRolesList.Add($"- {TempRoles[role.RoleId]} ({time})");
             }
@@ -667,12 +667,12 @@ namespace Rift.Services
                         .WithTitle($"Ваш профиль")
                         .WithThumbnailUrl(sgUser.GetAvatarUrl())
                         .WithDescription($"Статистика и информация о вашем аккаунте в системе:")
-                        .AddField("Уровень", $"{Settings.Emote.LevelUp} {profile.Level}", true)
+                        .AddField("Уровень", $"{Settings.Emote.LevelUp} {profile.Level.ToString()}", true)
                         .AddField("Место", $"{Settings.Emote.Rewards} {position}", true)
                         .AddField("Статистика текущего уровня",
                                   $"{Settings.Emote.Experience} Получено "
-                                  + $"{100 - (100 * (GetExpForLevel(profile.Level + 1u) - profile.Experience)) / (GetExpForLevel(profile.Level + 1u) - GetExpForLevel(profile.Level))}"
-                                  + $"% опыта до {profile.Level + 1} уровня.")
+                                  + $"{(100 - (100 * (GetExpForLevel(profile.Level + 1u) - profile.Experience)) / (GetExpForLevel(profile.Level + 1u) - GetExpForLevel(profile.Level))).ToString()}"
+                                  + $"% опыта до {(profile.Level + 1).ToString()} уровня.")
 
                         //.AddField("Голосовой онлайн", $"{Settings.Emote.Voice} Данная функция отключена.")
                         .AddField("Платные роли и пожертвования", $"Текущая: -\n"
@@ -734,7 +734,7 @@ namespace Rift.Services
                 int totalGames = league.Wins + league.Losses;
                 int winratePerc = (int) Math.Round(((double) league.Wins / (double) totalGames) * 100);
                 soloqRanking =
-                    $"{RiotService.GetStatStringFromRank(RiotService.GetRankFromPosition(league))} {league.Rank} ({league.LeaguePoints} LP) ({league.Wins}W / {league.Losses}L Winrate: {winratePerc}%)";
+                    $"{RiotService.GetStatStringFromRank(RiotService.GetRankFromPosition(league))} {league.Rank} ({league.LeaguePoints.ToString()} LP) ({league.Wins.ToString()}W / {league.Losses.ToString()}L Winrate: {winratePerc.ToString()}%)";
             }
 
             var thumbnail = RiftBot.GetService<RiotService>().GetSummonerIconUrlById(summoner.ProfileIconId);
@@ -871,7 +871,7 @@ namespace Rift.Services
 
             (OpenChestResult, Embed) result;
 
-            RiftBot.Log.Info($"Opening chest for {userId}.");
+            RiftBot.Log.Info($"Opening chest for {userId.ToString()}.");
 
             try
             {
@@ -895,7 +895,7 @@ namespace Rift.Services
 
             (OpenChestResult, Embed) result;
 
-            RiftBot.Log.Info($"Opening all chests for {userId}");
+            RiftBot.Log.Info($"Opening all chests for {userId.ToString()}");
 
             try
             {
@@ -948,7 +948,7 @@ namespace Rift.Services
 
             (OpenCapsuleResult, Embed) result;
 
-            RiftBot.Log.Info($"Opening capsule for {userId}.");
+            RiftBot.Log.Info($"Opening capsule for {userId.ToString()}.");
 
             try
             {
@@ -992,7 +992,7 @@ namespace Rift.Services
 
             (OpenSphereResult, Embed) result;
 
-            RiftBot.Log.Info($"Opening sphere for {userId}.");
+            RiftBot.Log.Info($"Opening sphere for {userId.ToString()}.");
 
             try
             {
@@ -1036,7 +1036,7 @@ namespace Rift.Services
 
             (StorePurchaseResult, Embed) result;
 
-            RiftBot.Log.Info($"Store purchase: #{item.Id} by {userId}.");
+            RiftBot.Log.Info($"Store purchase: #{item.Id.ToString()} by {userId.ToString()}.");
 
             try
             {
@@ -1163,7 +1163,7 @@ namespace Rift.Services
             {
                 var dbInventory = await RiftBot.GetService<DatabaseService>().GetUserInventoryAsync(userId);
 
-                return $"{Settings.Emote.Coin} {dbInventory.Coins} {Settings.Emote.Token} {dbInventory.Tokens}";
+                return $"{Settings.Emote.Coin} {dbInventory.Coins.ToString()} {Settings.Emote.Token} {dbInventory.Tokens.ToString()}";
             }
 
             return (StorePurchaseResult.Success, StoreEmbeds.DMSuccess(item, balance));
@@ -1188,7 +1188,7 @@ namespace Rift.Services
 
             (GiftResult, Embed) result;
 
-            RiftBot.Log.Info($"Gift from {fromUser.Id} to {toUser.Id}.");
+            RiftBot.Log.Info($"Gift from {fromUser.Id.ToString()} to {toUser.Id.ToString()}.");
 
             try
             {
@@ -1275,13 +1275,13 @@ namespace Rift.Services
                 case GiftItemType.CoinsRandom:
                     uint coins = Helper.NextUInt(1000, 3501);
                     await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toUser.Id, coins: coins);
-                    giftString = $"{Settings.Emote.Coin} {coins}";
+                    giftString = $"{Settings.Emote.Coin} {coins.ToString()}";
                     break;
 
                 case GiftItemType.ChestsRandom:
                     uint chests = Helper.NextUInt(4, 12);
                     await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toUser.Id, chests: chests);
-                    giftString = $"{Settings.Emote.Chest} {chests}";
+                    giftString = $"{Settings.Emote.Chest} {chests.ToString()}";
                     break;
 
                 case GiftItemType.Chest:
@@ -1380,7 +1380,7 @@ namespace Rift.Services
 
             (AttackResult, Embed) result;
 
-            RiftBot.Log.Info($"Attacktime! {sgAttacker.Id} want to kick {sgTarget.Id}'s ass.");
+            RiftBot.Log.Info($"Attacktime! {sgAttacker.Id.ToString()} want to kick {sgTarget.Id.ToString()}'s ass.");
 
             try
             {
@@ -1394,10 +1394,10 @@ namespace Rift.Services
                         && IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat,
                                                       out var chatChannel))
                     {
-                        var achivements =
+                        var achievements =
                             await RiftBot.GetService<DatabaseService>().GetUserAchievementsAsync(sgAttacker.Id);
 
-                        if (!achivements.AttackWise)
+                        if (!achievements.AttackWise)
                         {
                             await AddAchievement(sgAttacker.Id, "разоритель основателя", Achievements.AttackWise);
                             await RiftBot.GetService<DatabaseService>()
@@ -1566,7 +1566,7 @@ namespace Rift.Services
                     await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toId, coins: 300u, chests: 2u);
 
                     chatEmbed
-                        .WithDescription($"Стример <@{fromId}> подарил {Settings.Emote.Coin} 300 {Settings.Emote.Chest} 2 призывателю <@{toId}>");
+                        .WithDescription($"Стример <@{fromId.ToString()}> подарил {Settings.Emote.Coin} 300 {Settings.Emote.Chest} 2 призывателю <@{toId}>");
                     break;
 
                 case GiftSource.Moderator:
@@ -1574,7 +1574,7 @@ namespace Rift.Services
                     await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toId, coins: 100u, chests: 1u);
 
                     chatEmbed
-                        .WithDescription($"Призыватель <@{toId}> получил {Settings.Emote.Coin} 100 {Settings.Emote.Chest} 1");
+                        .WithDescription($"Призыватель <@{toId.ToString()}> получил {Settings.Emote.Coin} 100 {Settings.Emote.Chest} 1");
                     break;
 
                 case GiftSource.Voice:
@@ -1584,11 +1584,11 @@ namespace Rift.Services
 
                     chatEmbed
                         .WithAuthor("Голосовые каналы", Settings.Emote.VoiceUrl)
-                        .WithDescription($"Призыватель <@{toId}> получил {Settings.Emote.Coin} {coins} за активность.");
+                        .WithDescription($"Призыватель <@{toId.ToString()}> получил {Settings.Emote.Coin} {coins.ToString()} за активность.");
 
                     dmEmbed
                         .WithAuthor("Голосовые каналы", Settings.Emote.VoiceUrl)
-                        .WithDescription($"Вы получили {Settings.Emote.Coin} {coins} за активность.");
+                        .WithDescription($"Вы получили {Settings.Emote.Coin} {coins.ToString()} за активность.");
                     break;
             }
 

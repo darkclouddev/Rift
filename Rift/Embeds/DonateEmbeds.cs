@@ -15,21 +15,21 @@ namespace Rift.Embeds
         {
             return new EmbedBuilder()
                    .WithAuthor($"Пожертвования", Settings.Emote.DonateUrl)
-                   .WithDescription($"Призыватель <@{userId}> отправил **{amount}** рублей.")
+                   .WithDescription($"Призыватель <@{userId.ToString()}> отправил **{amount.ToString()}** рублей.")
                    .Build();
         }
 
         public static Embed ChatDonateLegendaryRoleRewardEmbed(ulong userId)
         {
             return new EmbedBuilder()
-                   .WithDescription($"Призыватель <@{userId}> получил роль {Settings.Emote.Legendary} легендарные\nза общую сумму пожертвований в размере **500** рублей.")
+                   .WithDescription($"Призыватель <@{userId.ToString()}> получил роль {Settings.Emote.Legendary} легендарные\nза общую сумму пожертвований в размере **500** рублей.")
                    .Build();
         }
 
         public static Embed ChatDonateAbsoluteRoleRewardEmbed(ulong userId)
         {
             return new EmbedBuilder()
-                   .WithDescription($"Призыватель <@{userId}> получил роль {Settings.Emote.Absolute} абсолютные\nза общую сумму пожертвований в размере **3000** рублей")
+                   .WithDescription($"Призыватель <@{userId.ToString()}> получил роль {Settings.Emote.Absolute} абсолютные\nза общую сумму пожертвований в размере **3000** рублей")
                    .Build();
         }
 

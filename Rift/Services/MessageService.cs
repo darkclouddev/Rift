@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
@@ -12,7 +12,7 @@ using IonicLib.Util;
 
 namespace Rift.Services
 {
-    public class MessageService
+    public class MessageService //todo rewrite using scheduling timer
     {
         static ConcurrentDictionary<Guid, SendMessageBase> toSend = new ConcurrentDictionary<Guid, SendMessageBase>();
 
