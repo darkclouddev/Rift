@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -612,6 +612,18 @@ namespace Rift.Services
             await sgUser.SendEmbedAsync(eb);
         }
 
+        public async Task<Embed> GetUserCooldownsAsync(ulong userId)
+        {
+            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
+
+            if (sgUser is null)
+                return GenericEmbeds.Error;
+
+            var cooldowns = await RiftBot.GetService<DatabaseService>().GetUserCooldownsAsync(userId);
+
+            return CooldownEmbeds.DMEmbed(cooldowns);
+        }
+        
         public async Task<Embed> GetUserProfileAsync(ulong userId)
         {
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);

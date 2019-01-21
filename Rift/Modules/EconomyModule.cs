@@ -210,6 +210,19 @@ namespace Rift.Modules
             }
         }
 
+        [Command("кд")]
+        [RateLimit(1, 10.0, Measure.Seconds, RateLimitFlags.NoLimitForAdmins, ErrorMessage = "Команда доступна 1 раз в 10 секунд!")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task Cooldowns()
+        {
+            using (Context.Channel.EnterTypingState())
+            {
+                var result = await economyService.GetUserCooldownsAsync(Context.User.Id);
+                await Context.User.SendEmbedAsync(result);
+            }
+        }
+
         [Group("активировать")]
         [RequireContext(ContextType.Guild)]
         public class ActivateModule : ModuleBase

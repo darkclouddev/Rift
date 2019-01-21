@@ -13,6 +13,7 @@ using Rift.Data.Models.Users;
 using Rift.Events;
 
 using Microsoft.EntityFrameworkCore;
+using Rift.Data.Models.Cooldowns;
 
 namespace Rift.Services
 {
@@ -250,6 +251,20 @@ namespace Rift.Services
             }
         }
 
+        public async Task<UserCooldowns> GetUserCooldownsAsync(ulong userId)
+        {
+            if (!await EnsureCooldownsExistsAsync(userId))
+                throw new DatabaseException(nameof(GetUserDoubleExpTimeAsync));
+
+            using (var context = new RiftContext())
+            {
+                return await context.Cooldowns
+                    .Where(x => x.UserId == userId)
+                    .Select(x => new UserCooldowns(x))
+                    .FirstAsync();
+            }
+        }
+        
         public async Task<UserDoubleExpTime> GetUserDoubleExpTimeAsync(ulong userId)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
