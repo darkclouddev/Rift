@@ -28,6 +28,9 @@ namespace Rift.Services
 
         static async Task<bool> EnsureAchievementsExistsAsync(ulong userId)
         {
+            if (await EnsureUserExistsAsync(userId))
+                return false;
+            
             using (var context = new RiftContext())
             {
                 if (await context.Achievements.AnyAsync(x => x.UserId == userId))
@@ -47,7 +50,7 @@ namespace Rift.Services
                 }
                 catch (Exception ex)
                 {
-                    RiftBot.Log.Info($"Failed to check {nameof(EnsureAchievementsExistsAsync)}.");
+                    RiftBot.Log.Info($"Failed to check {nameof(EnsureAchievementsExistsAsync)} for user {userId.ToString()}.");
                     RiftBot.Log.Error(ex);
                     return false;
                 }
@@ -228,6 +231,9 @@ namespace Rift.Services
 
         static async Task<bool> EnsureCooldownsExistsAsync(ulong userId)
         {
+            if (await EnsureUserExistsAsync(userId))
+                return false;
+            
             using (var context = new RiftContext())
             {
                 if (await context.Cooldowns.AnyAsync(x => x.UserId == userId))
@@ -247,7 +253,7 @@ namespace Rift.Services
                 }
                 catch (Exception ex)
                 {
-                    RiftBot.Log.Error($"Failed to check {nameof(EnsureCooldownsExistsAsync)}.");
+                    RiftBot.Log.Error($"Failed to check {nameof(EnsureCooldownsExistsAsync)} for user {userId.ToString()}.");
                     RiftBot.Log.Error(ex);
                     return false;
                 }
@@ -595,6 +601,9 @@ namespace Rift.Services
 
         static async Task<bool> EnsureInventoryExistsAsync(ulong userId)
         {
+            if (await EnsureUserExistsAsync(userId))
+                return false;
+            
             using (var context = new RiftContext())
             {
                 if (await context.Inventory.AnyAsync(x => x.UserId == userId))
@@ -614,7 +623,7 @@ namespace Rift.Services
                 }
                 catch (Exception ex)
                 {
-                    RiftBot.Log.Error($"Failed to check {nameof(EnsureStatisticsExistsAsync)}.");
+                    RiftBot.Log.Error($"Failed to check {nameof(EnsureInventoryExistsAsync)} for user {userId.ToString()}.");
                     RiftBot.Log.Error(ex);
                     return false;
                 }
@@ -1003,6 +1012,8 @@ namespace Rift.Services
 
         public async Task AddLolDataAsync(RiftLolData lolData)
         {
+            await EnsureUserExistsAsync(lolData.UserId);
+            
             using (var context = new RiftContext())
             {
                 await context.LolData.AddAsync(lolData);
@@ -1147,15 +1158,6 @@ namespace Rift.Services
             }
         }
 
-        public async Task RemovePendingUsersAsync(List<RiftPendingUser> pendingUsersList)
-        {
-            using (var context = new RiftContext())
-            {
-                context.PendingUsers.RemoveRange(pendingUsersList);
-                await context.SaveChangesAsync();
-            }
-        }
-
         public async Task<bool> IsPendingAsync(ulong userId)
         {
             using (var context = new RiftContext())
@@ -1180,6 +1182,9 @@ namespace Rift.Services
 
         static async Task<bool> EnsureStatisticsExistsAsync(ulong userId)
         {
+            if (await EnsureUserExistsAsync(userId))
+                return false;
+            
             using (var context = new RiftContext())
             {
                 if (await context.Statistics.AnyAsync(x => x.UserId == userId))
@@ -1199,7 +1204,7 @@ namespace Rift.Services
                 }
                 catch (Exception ex)
                 {
-                    RiftBot.Log.Error($"Failed to check {nameof(EnsureStatisticsExistsAsync)}.");
+                    RiftBot.Log.Error($"Failed to check {nameof(EnsureStatisticsExistsAsync)} for user {userId.ToString()}.");
                     RiftBot.Log.Error(ex);
                     return false;
                 }
@@ -1433,7 +1438,7 @@ namespace Rift.Services
                 }
                 catch
                 {
-                    RiftBot.Log.Info($"Failed to check {nameof(EnsureUserExistsAsync)}.");
+                    RiftBot.Log.Info($"Failed to check {nameof(EnsureUserExistsAsync)} for user {userId.ToString()}.");
                     return false;
                 }
             }
@@ -1721,6 +1726,8 @@ namespace Rift.Services
 
         public async Task AddTempRoleAsync(RiftTempRole role)
         {
+            await EnsureUserExistsAsync(role.UserId);
+            
             using (var context = new RiftContext())
             {
                 await context.TempRoles.AddAsync(role);
