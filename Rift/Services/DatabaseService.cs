@@ -28,7 +28,7 @@ namespace Rift.Services
 
         static async Task<bool> EnsureAchievementsExistsAsync(ulong userId)
         {
-            if (await EnsureUserExistsAsync(userId))
+            if (!await EnsureUserExistsAsync(userId))
                 return false;
             
             using (var context = new RiftContext())
@@ -231,7 +231,7 @@ namespace Rift.Services
 
         static async Task<bool> EnsureCooldownsExistsAsync(ulong userId)
         {
-            if (await EnsureUserExistsAsync(userId))
+            if (!await EnsureUserExistsAsync(userId))
                 return false;
             
             using (var context = new RiftContext())
@@ -601,7 +601,7 @@ namespace Rift.Services
 
         static async Task<bool> EnsureInventoryExistsAsync(ulong userId)
         {
-            if (await EnsureUserExistsAsync(userId))
+            if (!await EnsureUserExistsAsync(userId))
                 return false;
             
             using (var context = new RiftContext())
@@ -1182,7 +1182,7 @@ namespace Rift.Services
 
         static async Task<bool> EnsureStatisticsExistsAsync(ulong userId)
         {
-            if (await EnsureUserExistsAsync(userId))
+            if (!await EnsureUserExistsAsync(userId))
                 return false;
             
             using (var context = new RiftContext())
