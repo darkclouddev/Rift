@@ -44,12 +44,8 @@ namespace Rift.Embeds
                 : "Двойной опыт отсутствует.");
 
             sb.AppendLine(cooldowns.BotRespectTimeSpan != TimeSpan.Zero
-                ? $"ДУважение ботов: {FormatTimeSpan(cooldowns.BotRespectTimeSpan)}."
+                ? $"Уважение ботов: {FormatTimeSpan(cooldowns.BotRespectTimeSpan)}."
                 : "Уважение ботов отсутствует.");
-
-            sb.AppendLine(cooldowns.BotRespectTimeSpan != TimeSpan.Zero
-                ? $"Ранг обновлялся {FormatTimeSpan(cooldowns.BotRespectTimeSpan)} назад."
-                : "Обновление ранга: только что.");
 
             var eb = new EmbedBuilder()
                 .WithAuthor("Ваши таймеры")
