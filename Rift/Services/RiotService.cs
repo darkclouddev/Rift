@@ -106,9 +106,10 @@ namespace Rift.Services
 
             await DownloadDataAsync(version).ContinueWith(async x =>
             {
-                if (!x.IsCompletedSuccessfully)
+                if (x.IsFaulted)
                 {
                     RiftBot.Log.Error(x.Exception, "Data download failed!");
+                    RiftBot.Log.Warn("Using fallback champion data.");
                     LoadData();
 
                     return;
@@ -161,7 +162,7 @@ namespace Rift.Services
 
             if (response.StatusCode != 200)
             {
-                RiftBot.Log.Error($"Failed to execute GET request: {response.StatusCode}");
+                RiftBot.Log.Error($"Failed to execute GET request: {response.StatusCode.ToString()}");
 
                 return (false, string.Empty);
             }
@@ -204,7 +205,6 @@ namespace Rift.Services
             catch (Exception ex)
             {
                 RiftBot.Log.Error(ex, "Download failed.");
-
                 return;
             }
         }
@@ -221,7 +221,7 @@ namespace Rift.Services
                 champions.Add(champData.Value.Key, champData.Value);
             }
 
-            RiftBot.Log.Info($"Loaded {champions.Count} champion(s).");
+            RiftBot.Log.Info($"Loaded {champions.Count.ToString()} champion(s).");
         }
 
         static async Task UnpackData(string pathToArchive, string version)
