@@ -98,53 +98,56 @@ namespace Rift.Services
             if (!newDataAvailable)
             {
                 LoadData();
-
                 return;
             }
 
             RiftBot.Log.Info($"Initiating data update: {Settings.App.LolVersion} -> {version}");
 
-            await DownloadDataAsync(version).ContinueWith(async x =>
+            try
             {
-                string path = Path.Combine(TempFolder, $"{version}.tgz");
-
-                await UnpackData(path, version).ContinueWith(async y =>
-                {
-                    if (!y.IsCompletedSuccessfully)
+                await DownloadDataAsync(version).ContinueWith(async x =>
                     {
-                        RiftBot.Log.Error(y.Exception, "Data download failed!");
-                        LoadData();
+                        string path = Path.Combine(TempFolder, $"{version}.tgz");
 
-                        return;
-                    }
+                        await UnpackData(path, version).ContinueWith(async y =>
+                        {
+                            if (!y.IsCompletedSuccessfully)
+                            {
+                                RiftBot.Log.Error(y.Exception, "Data download failed!");
+                                LoadData();
 
-                    string tempPath = Path.Combine(TempFolder, version, "champion.json");
-                    string realPath = Path.Combine(DataDragonDataFolder, "champion.json");
+                                return;
+                            }
 
-                    try
-                    {
-                        if (File.Exists(realPath))
-                            File.Delete(realPath);
+                            string tempPath = Path.Combine(TempFolder, version, "champion.json");
+                            string realPath = Path.Combine(DataDragonDataFolder, "champion.json");
 
-                        File.Move(tempPath, realPath);
-                    }
-                    catch (Exception ex)
-                    {
-                        RiftBot.Log.Error(ex);
-                        return;
-                    }
+                            try
+                            {
+                                if (File.Exists(realPath))
+                                    File.Delete(realPath);
 
-                    LoadData();
+                                File.Move(tempPath, realPath);
+                            }
+                            catch (Exception ex)
+                            {
+                                RiftBot.Log.Error(ex);
+                                return;
+                            }
 
-                    Settings.App.LolVersion = version;
-                    await Settings.Save(SettingsType.App);
+                            LoadData();
 
-                    RiftBot.Log.Info($"Data update completed. New version is {Settings.App.LolVersion}");
+                            Settings.App.LolVersion = version;
+                            await Settings.Save(SettingsType.App);
 
-                    await RiftBot.SendMessageToDevelopers($"Data update completed."
-                                                          + $" New version is {Settings.App.LolVersion}.");
-                });
-            }, TaskContinuationOptions.NotOnFaulted | TaskContinuationOptions.NotOnCanceled);
+                            RiftBot.Log.Info($"Data update completed. New version is {Settings.App.LolVersion}");
+
+                            await RiftBot.SendMessageToDevelopers($"Data update completed."
+                                                                  + $" New version is {Settings.App.LolVersion}.");
+                        });
+                    }, TaskContinuationOptions.NotOnFaulted | TaskContinuationOptions.NotOnCanceled);
+            }
+            catch (TaskCanceledException) {}
         }
 
         static async Task<(bool, string)> CheckNewVersionAsync()
