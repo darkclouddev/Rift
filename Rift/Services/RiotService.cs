@@ -106,15 +106,6 @@ namespace Rift.Services
 
             await DownloadDataAsync(version).ContinueWith(async x =>
             {
-                if (x.IsFaulted)
-                {
-                    RiftBot.Log.Error(x.Exception, "Data download failed!");
-                    RiftBot.Log.Warn("Using fallback champion data.");
-                    LoadData();
-
-                    return;
-                }
-
                 string path = Path.Combine(TempFolder, $"{version}.tgz");
 
                 await UnpackData(path, version).ContinueWith(async y =>
@@ -153,7 +144,7 @@ namespace Rift.Services
                     await RiftBot.SendMessageToDevelopers($"Data update completed."
                                                           + $" New version is {Settings.App.LolVersion}.");
                 });
-            });
+            }, TaskContinuationOptions.NotOnFaulted | TaskContinuationOptions.NotOnCanceled);
         }
 
         static async Task<(bool, string)> CheckNewVersionAsync()
@@ -196,7 +187,7 @@ namespace Rift.Services
                 {
                     string file = Path.Combine(TempFolder, $"{version}.tgz");
 
-                    if (File.Exists(file))
+                    if (File.Exists(file)) //todo check file size
                         return;
 
                     await client.DownloadFileTaskAsync(new Uri(string.Format(DataDragonTarballUrlTemplate, version)), file);
@@ -205,6 +196,8 @@ namespace Rift.Services
             catch (Exception ex)
             {
                 RiftBot.Log.Error(ex, "Download failed.");
+                RiftBot.Log.Warn("Falling back to existing champion data.");
+                LoadData();
                 return;
             }
         }
