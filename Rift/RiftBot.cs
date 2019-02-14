@@ -160,12 +160,13 @@ namespace Rift
         {
             AppPath = GetContentRoot();
             Culture = new CultureInfo("ru-RU");
+            Culture.DateTimeFormat.Calendar = new GregorianCalendar();
 
             Console.WriteLine($"Using content root: {AppPath}");
 
             //await CreateWebHostBuilder(args).Build().StartAsync();
 
-            await new IonicClient(Path.Combine(AppPath, ".token"), Culture, new GregorianCalendar())
+            await new IonicClient(Path.Combine(AppPath, ".token"))
                   .RunAsync()
                   .ConfigureAwait(false);
             await new RiftBot()
