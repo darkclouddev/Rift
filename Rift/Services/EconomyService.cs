@@ -1066,6 +1066,20 @@ namespace Rift.Services
             if (!RiftBot.IsAdmin(sgUser) && !canBuy)
                 return (StorePurchaseResult.Cooldown, StoreEmbeds.Cooldown(remaining));
 
+            // if buying temp role over existing one
+            if (item.Type == StoreItemType.TempRole)
+            {
+                var userTempRoles = await RiftBot.GetService<RoleService>().GetUserTempRolesAsync(userId);
+
+                if (userTempRoles != null && userTempRoles.Count > 0)
+                {
+                    if (userTempRoles.Any(x => x.UserId == userId && x.RoleId == item.RoleId))
+                    {
+                        return (StorePurchaseResult.HasRole, StoreEmbeds.HasRole);
+                    }
+                }
+            }
+
             (bool result, var currencyType) = await WithdrawCurrencyAsync();
 
             if (!result)
@@ -1117,16 +1131,6 @@ namespace Rift.Services
 
                 case StoreItemType.TempRole:
 
-                    var userTempRoles = await RiftBot.GetService<RoleService>().GetUserTempRolesAsync(userId);
-
-                    if (userTempRoles != null && userTempRoles.Count > 0)
-                    {
-                        if (userTempRoles.Any(x => x.UserId == userId && x.RoleId == item.RoleId))
-                        {
-                            return (StorePurchaseResult.HasRole, StoreEmbeds.HasRole);
-                        }
-                    }
-                    
                     await RiftBot.GetService<RoleService>()
                                  .AddTempRoleAsync(userId, item.RoleId, TimeSpan.FromDays(30), "Store Purchase");
                     await channel.SendEmbedAsync(StoreEmbeds.Chat(sgUser, item));
