@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Rift.Configuration;
 using Rift.Services.Economy;
@@ -24,6 +24,13 @@ namespace Rift.Embeds
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                 .WithColor(226, 87, 76)
                 .WithDescription($"У вас не хватает жетонов для покупки.")
+                .Build();
+
+        public static readonly Embed HasRole =
+            new EmbedBuilder()
+                .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
+                .WithColor(226, 87, 76)
+                .WithDescription($"У вас уже имеется выбранная роль.")
                 .Build();
 
         public static Embed Cooldown(TimeSpan remainingTime)

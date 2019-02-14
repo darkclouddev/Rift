@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -1116,6 +1116,17 @@ namespace Rift.Services
                     break;
 
                 case StoreItemType.TempRole:
+
+                    var userTempRoles = await RiftBot.GetService<RoleService>().GetUserTempRolesAsync(userId);
+
+                    if (userTempRoles != null && userTempRoles.Count > 0)
+                    {
+                        if (userTempRoles.Any(x => x.UserId == userId && x.RoleId == item.RoleId))
+                        {
+                            return (StorePurchaseResult.HasRole, StoreEmbeds.HasRole);
+                        }
+                    }
+                    
                     await RiftBot.GetService<RoleService>()
                                  .AddTempRoleAsync(userId, item.RoleId, TimeSpan.FromDays(30), "Store Purchase");
                     await channel.SendEmbedAsync(StoreEmbeds.Chat(sgUser, item));
