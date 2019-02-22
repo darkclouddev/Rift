@@ -791,7 +791,7 @@ namespace Rift.Modules
 
             [Command]
             [RequireContext(ContextType.Guild)]
-            public async Task Default([Remainder] string mention)
+            public async Task Default([Remainder] String mention)
             {
                 using (Context.Channel.EnterTypingState())
                 {
@@ -809,19 +809,12 @@ namespace Rift.Modules
 
             async Task AttackAsync(SocketGuildUser sgAttacker, SocketGuildUser sgTarget)
             {
-                var result = await economy.AttackAsync(sgAttacker, sgTarget);
+                var (attackResult, embed) = await economy.AttackAsync(sgAttacker, sgTarget);
 
-                if (result.Item1 == AttackResult.Success)
+                if (attackResult == AttackResult.Success)
                     return;
 
-                switch (result.Item1)
-                {
-                    default:
-
-                        await Context.User.SendEmbedAsync(result.Item2);
-
-                        break;
-                }
+                await Context.User.SendEmbedAsync(embed);
             }
         }
 

@@ -120,7 +120,6 @@ namespace Rift.Services
             ratingUpdateTimer = new Timer(async delegate { await UpdateRatingAsync(); }, null, TimeSpan.FromMinutes(5), ratingTimerCooldown);
             InitActiveUsersTimer();
             InitRichUsersTimer();
-            CalculateAchievementRewards();
         }
 
         static void InitActiveUsersTimer()
@@ -145,63 +144,14 @@ namespace Rift.Services
                                        TimeSpan.FromDays(1));
         }
 
-        static void CalculateAchievementRewards()
-        {
-            Achievements.Write100Messages.CalculateReward();
-            Achievements.Write100Messages.GenerateRewardString();
-
-            Achievements.Write1000Messages.CalculateReward();
-            Achievements.Write1000Messages.GenerateRewardString();
-
-            Achievements.Reach10Level.CalculateReward();
-            Achievements.Reach10Level.GenerateRewardString();
-
-            Achievements.Reach30Level.CalculateReward();
-            Achievements.Reach30Level.GenerateRewardString();
-
-            Achievements.Brag100Times.CalculateReward();
-            Achievements.Brag100Times.GenerateRewardString();
-
-            Achievements.Attack200Times.CalculateReward();
-            Achievements.Attack200Times.GenerateRewardString();
-
-            Achievements.OpenSphere.CalculateReward();
-            Achievements.OpenSphere.GenerateRewardString();
-
-            Achievements.Purchase200Items.CalculateReward();
-            Achievements.Purchase200Items.GenerateRewardString();
-
-            Achievements.Open100Chests.CalculateReward();
-            Achievements.Open100Chests.GenerateRewardString();
-
-            Achievements.Send100Gifts.CalculateReward();
-            Achievements.Send100Gifts.GenerateRewardString();
-
-            Achievements.IsDonator.CalculateReward();
-            Achievements.IsDonator.GenerateRewardString();
-
-            Achievements.HasDonatedRole.CalculateReward();
-            Achievements.HasDonatedRole.GenerateRewardString();
-
-            Achievements.GiftToBotKeeper.CalculateReward();
-            Achievements.GiftToBotKeeper.GenerateRewardString();
-
-            Achievements.GiftToModerator.CalculateReward();
-            Achievements.GiftToModerator.GenerateRewardString();
-
-            Achievements.AttackWise.CalculateReward();
-            Achievements.AttackWise.GenerateRewardString();
-        }
-
         public static async Task ShowActiveUsersAsync()
         {
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return;
 
             var topTen = await RiftBot.GetService<DatabaseService>()
-                                      .GetTopTenByExpAsync(x =>
-                                                               !(IonicClient.GetGuildUserById(Settings.App.MainGuildId,
-                                                                                              x.UserId) is null));
+                .GetTopTenByExpAsync(x =>
+                    !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
 
             if (topTen.Length == 0)
                 return;
@@ -237,8 +187,7 @@ namespace Rift.Services
                 var messageService = RiftBot.GetService<MessageService>();
 
                 messageService.TryAddSend(new EmbedMessage(DestinationType.GuildChannel, Settings.ChannelId.Chat,
-                                                           TimeSpan.Zero,
-                                                           DonateEmbeds.ChatDonateEmbed(e.UserId, e.DonateAmount)));
+                    TimeSpan.Zero, DonateEmbeds.ChatDonateEmbed(e.UserId, e.DonateAmount)));
 
                 if (e.DonateTotal >= 500M && e.DonateTotal < 2_000M)
                 {
@@ -271,14 +220,12 @@ namespace Rift.Services
                     if (announceRole)
                     {
                         messageService.TryAddSend(roleId == Settings.RoleId.Legendary
-                                                      ? new EmbedMessage(DestinationType.GuildChannel,
-                                                                         Settings.ChannelId.Chat, TimeSpan.Zero,
-                                                                         DonateEmbeds
-                                                                             .ChatDonateLegendaryRoleRewardEmbed(e.UserId))
-                                                      : new EmbedMessage(DestinationType.GuildChannel,
-                                                                         Settings.ChannelId.Chat, TimeSpan.Zero,
-                                                                         DonateEmbeds
-                                                                             .ChatDonateAbsoluteRoleRewardEmbed(e.UserId)));
+                            ? new EmbedMessage(DestinationType.GuildChannel,
+                                Settings.ChannelId.Chat, TimeSpan.Zero,
+                                DonateEmbeds.ChatDonateLegendaryRoleRewardEmbed(e.UserId))
+                            : new EmbedMessage(DestinationType.GuildChannel,
+                                Settings.ChannelId.Chat, TimeSpan.Zero,
+                                DonateEmbeds.ChatDonateAbsoluteRoleRewardEmbed(e.UserId)));
                     }
                 }
             });
@@ -709,7 +656,7 @@ namespace Rift.Services
 
             var diff = DateTime.UtcNow - data.LastBragTime;
 
-            bool result = diff > Settings.Economy.BragCooldown;
+            Boolean result = diff > Settings.Economy.BragCooldown;
 
             return (result, result
                         ? TimeSpan.Zero
@@ -721,10 +668,10 @@ namespace Rift.Services
             using (var context = new RiftContext())
             {
                 var sortedIds = await context.Users
-                                             .OrderByDescending(x => x.Level)
-                                             .ThenByDescending(x => x.Experience)
-                                             .Select(x => x.UserId)
-                                             .ToListAsync();
+                    .OrderByDescending(x => x.Level)
+                    .ThenByDescending(x => x.Experience)
+                    .Select(x => x.UserId)
+                    .ToListAsync();
 
                 ratingSorted = sortedIds;
             }
@@ -741,6 +688,7 @@ namespace Rift.Services
             try
             {
                 result = await OpenChestInternalAsync(userId, 1).ConfigureAwait(false);
+                
                 if (result.Item1 == OpenChestResult.Success)
                     await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(userId, chestsOpenedTotal: 1);
             }
@@ -789,16 +737,7 @@ namespace Rift.Services
             var chest = new Chest(userId, amount);
 
             await chest.GiveRewardAsync();
-
             await sgUser.SendEmbedAsync(ChestEmbeds.DMEmbed(chest.reward, amount));
-
-            //var chatEmbed = ChestEmbeds.ChatEmbed(chest.reward, userId);
-            //if (chatEmbed != null)
-            //{
-            //    if (!IonicClient.GetTextChannel(Settings.App.MainServerId, Settings.ChannelId.Chat, out var chatChannel))
-            //        return (OpenChestResult.Error, GenericEmbeds.ErrorEmbed);
-            //    await chatChannel.SendEmbedAsync(chatEmbed);
-            //}
 
             return (OpenChestResult.Success, GenericEmbeds.Empty);
         }
