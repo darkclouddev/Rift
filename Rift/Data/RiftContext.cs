@@ -11,7 +11,6 @@ namespace Rift.Data
         public DbSet<RiftCooldowns> Cooldowns { get; set; }
         public DbSet<RiftLolData> LolData { get; set; }
         public DbSet<RiftStatistics> Statistics { get; set; }
-        public DbSet<RiftAchievements> Achievements { get; set; }
         public DbSet<RiftPendingUser> PendingUsers { get; set; }
         public DbSet<ScheduledEvent> ScheduledEvents { get; set; }
         public DbSet<RiftTempRole> TempRoles { get; set; }
@@ -23,12 +22,6 @@ namespace Rift.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<RiftUser>().HasKey(key => key.UserId);
-
-            builder.Entity<RiftAchievements>().HasKey(key => key.UserId);
-            builder.Entity<RiftUser>()
-                   .HasOne(user => user.Achievements)
-                   .WithOne(ach => ach.User)
-                   .HasForeignKey<RiftAchievements>(user => user.UserId);
 
             builder.Entity<RiftCooldowns>().HasKey(key => key.UserId);
             builder.Entity<RiftUser>()

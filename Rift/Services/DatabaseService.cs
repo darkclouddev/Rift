@@ -24,209 +24,6 @@ namespace Rift.Services
 
         public event DonateAdded OnDonateAdded;
 
-        #region Achievements
-
-        static async Task<bool> EnsureAchievementsExistsAsync(ulong userId)
-        {
-            if (!await EnsureUserExistsAsync(userId))
-                return false;
-            
-            using (var context = new RiftContext())
-            {
-                if (await context.Achievements.AnyAsync(x => x.UserId == userId))
-                    return true;
-
-                try
-                {
-                    var entry = new RiftAchievements
-                    {
-                        UserId = userId,
-                    };
-
-                    await context.Achievements.AddAsync(entry);
-                    await context.SaveChangesAsync();
-
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    RiftBot.Log.Info($"Failed to check {nameof(EnsureAchievementsExistsAsync)} for user {userId.ToString()}.");
-                    RiftBot.Log.Error(ex);
-                    return false;
-                }
-            }
-        }
-
-        public async Task<RiftAchievements> GetUserAchievementsAsync(ulong userId)
-        {
-            if (!await EnsureAchievementsExistsAsync(userId))
-                throw new DatabaseException(nameof(GetUserAchievementsAsync));
-
-            using (var context = new RiftContext())
-            {
-                return await context.Achievements
-                                    .Where(x => x.UserId == userId)
-                                    .Select(x => new RiftAchievements
-                                    {
-                                        UserId = x.UserId,
-                                        Write100Messages = x.Write100Messages,
-                                        Write1000Messages = x.Write1000Messages,
-                                        Reach10Level = x.Reach10Level,
-                                        Reach30Level = x.Reach30Level,
-                                        Brag100Times = x.Brag100Times,
-                                        Attack200Times = x.Attack200Times,
-                                        OpenSphere = x.OpenSphere,
-                                        Purchase200Items = x.Purchase200Items,
-                                        Open100Chests = x.Open100Chests,
-                                        Send100Gifts = x.Send100Gifts,
-                                        IsDonator = x.IsDonator,
-                                        HasDonatedRole = x.HasDonatedRole,
-                                        GiftToBotKeeper = x.GiftToBotKeeper,
-                                        GiftToModerator = x.GiftToModerator,
-                                        AttackWise = x.AttackWise,
-                                    })
-                                    .FirstAsync();
-            }
-        }
-
-        public async Task UpdateAchievementAsync(ulong userId, bool write100Messages = false, bool write1000Messages = false,
-                                                 bool reach10Level = false, bool reach30Level = false, bool brag100Times = false,
-                                                 bool attack200Times = false, bool openSphere = false, bool purchase200Items = false,
-                                                 bool open100Chests = false,bool send100Gifts = false, bool isDonator = false,
-                                                 bool hasDonateRole = false, bool giftToBotKeeper = false, bool giftToModerator = false,
-                                                 bool attackWise = false)
-        {
-            var achievements = await GetUserAchievementsAsync(userId);
-
-            var dbAchievements = new RiftAchievements { UserId = userId };
-
-            using (var context = new RiftContext())
-            {
-                var entry = context.Attach(dbAchievements);
-
-                if (write100Messages && !achievements.Write100Messages)
-                {
-                    RiftBot.Log.Info($"User {userId.ToString()} wrote more than 100 messages");
-
-                    dbAchievements.Write100Messages = true;
-                    entry.Property(x => x.Write100Messages).IsModified = true;
-                }
-
-                if (write1000Messages && !achievements.Write1000Messages)
-                {
-                    RiftBot.Log.Info($"User {userId.ToString()} wrote more than 1000 messages");
-
-                    dbAchievements.Write1000Messages = true;
-                    entry.Property(x => x.Write1000Messages).IsModified = true;
-                }
-
-                if (reach10Level && !achievements.Reach10Level)
-                {
-                    RiftBot.Log.Info($"User {userId.ToString()} reached 10 level");
-
-                    dbAchievements.Reach10Level = true;
-                    entry.Property(x => x.Reach10Level).IsModified = true;
-                }
-
-                if (reach30Level && !achievements.Reach30Level)
-                {
-                    RiftBot.Log.Info($"User {userId.ToString()} reached 30 level");
-
-                    dbAchievements.Reach30Level = true;
-                    entry.Property(x => x.Reach30Level).IsModified = true;
-                }
-
-                if (brag100Times && !achievements.Brag100Times)
-                {
-                    RiftBot.Log.Info($"User {userId.ToString()} bragged 50 times");
-
-                    dbAchievements.Brag100Times = true;
-                    entry.Property(x => x.Brag100Times).IsModified = true;
-                }
-
-                if (attack200Times && !achievements.Attack200Times)
-                {
-                    RiftBot.Log.Info($"User {userId.ToString()} did 50 attacks");
-
-                    dbAchievements.Attack200Times = true;
-                    entry.Property(x => x.Attack200Times).IsModified = true;
-                }
-
-                if (openSphere && !achievements.OpenSphere)
-                {
-                    RiftBot.Log.Info($"User {userId.ToString()} opened sphere for the first time");
-
-                    dbAchievements.OpenSphere = true;
-                    entry.Property(x => x.OpenSphere).IsModified = true;
-                }
-
-                if (purchase200Items && !achievements.Purchase200Items)
-                {
-                    RiftBot.Log.Info($"User {userId.ToString()} purchased 50 items");
-
-                    dbAchievements.Purchase200Items = true;
-                    entry.Property(x => x.Purchase200Items).IsModified = true;
-                }
-
-                if (open100Chests && !achievements.Open100Chests)
-                {
-                    RiftBot.Log.Info($"User {userId.ToString()} opened 100 chests");
-
-                    dbAchievements.Open100Chests = true;
-                    entry.Property(x => x.Open100Chests).IsModified = true;
-                }
-
-                if (send100Gifts && !achievements.Send100Gifts)
-                {
-                    RiftBot.Log.Info($"User {userId.ToString()} sent 50 gifts");
-
-                    dbAchievements.Send100Gifts = true;
-                    entry.Property(x => x.Send100Gifts).IsModified = true;
-                }
-
-                if (isDonator && !achievements.IsDonator)
-                {
-                    RiftBot.Log.Info($"User {userId.ToString()} first time donated");
-
-                    dbAchievements.IsDonator = true;
-                    entry.Property(x => x.IsDonator).IsModified = true;
-                }
-
-                if (hasDonateRole && !achievements.HasDonatedRole)
-                {
-                    RiftBot.Log.Info($"User {userId.ToString()} has donate role");
-
-                    dbAchievements.HasDonatedRole = true;
-                    entry.Property(x => x.HasDonatedRole).IsModified = true;
-                }
-
-                if (giftToBotKeeper && !achievements.GiftToBotKeeper)
-                {
-                    RiftBot.Log.Info($"User {userId.ToString()} made gift to bot keeper");
-
-                    dbAchievements.GiftToBotKeeper = true;
-                    entry.Property(x => x.GiftToBotKeeper).IsModified = true;
-                }
-
-                if (giftToModerator && !achievements.GiftToModerator)
-                {
-                    dbAchievements.GiftToModerator = true;
-                    entry.Property(x => x.GiftToModerator).IsModified = true;
-                }
-
-                if (attackWise && !achievements.AttackWise)
-                {
-                    dbAchievements.AttackWise = true;
-                    entry.Property(x => x.AttackWise).IsModified = true;
-                }
-
-                if (entry.State != EntityState.Unchanged)
-                    await context.SaveChangesAsync();
-            }
-        }
-
-        #endregion Achievements
-
         #region Cooldowns
 
         static async Task<bool> EnsureCooldownsExistsAsync(ulong userId)
@@ -1210,60 +1007,37 @@ namespace Rift.Services
             }
         }
 
-        public async Task<UserStatistics> GetUserStatisticsAsync(ulong userId)
+        public async Task<UserStatistics> GetUserStatisticsAsync(UInt64 userId)
         {
-            if (!await EnsureStatisticsExistsAsync(userId)
-                || !await EnsureAchievementsExistsAsync(userId))
+            if (!await EnsureStatisticsExistsAsync(userId))
                 throw new DatabaseException(nameof(GetUserStatisticsAsync));
             
-
             using (var context = new RiftContext())
             {
                 return await context.Statistics
-                                    .Join(context.Achievements, s => s.UserId, a => a.UserId,
-                                          (statistics, achievements) => new
-                                          {
-                                              Statistics = statistics,
-                                              Achievements = achievements
-                                          })
-                                    .Where(x => x.Statistics.UserId == userId && x.Achievements.UserId == userId)
-                                    .Select(x => new UserStatistics
-                                    {
-                                        UserId = x.Statistics.UserId,
-                                        CoinsEarnedTotal = x.Statistics.CoinsEarnedTotal,
-                                        TokensEarnedTotal = x.Statistics.TokensEarnedTotal,
-                                        ChestsEarnedTotal = x.Statistics.ChestsEarnedTotal,
-                                        SphereEarnedTotal = x.Statistics.SphereEarnedTotal,
-                                        CapsuleEarnedTotal = x.Statistics.CapsuleEarnedTotal,
-                                        ChestsOpenedTotal = x.Statistics.ChestsOpenedTotal,
-                                        SphereOpenedTotal = x.Statistics.SphereEarnedTotal,
-                                        CapsuleOpenedTotal = x.Statistics.CapsuleEarnedTotal,
-                                        AttacksDone = x.Statistics.AttacksDone,
-                                        AttacksReceived = x.Statistics.AttacksReceived,
-                                        CoinsSpentTotal = x.Statistics.CoinsSpentTotal,
-                                        TokensSpentTotal = x.Statistics.TokensSpentTotal,
-                                        GiftsSent = x.Statistics.GiftsSent,
-                                        GiftsReceived = x.Statistics.GiftsReceived,
-                                        MessagesSentTotal = x.Statistics.MessagesSentTotal,
-                                        BragTotal = x.Statistics.BragTotal,
-                                        PurchasedItemsTotal = x.Statistics.PurchasedItemsTotal,
-                                        AchievementsCount = Convert.ToUInt32(x.Achievements.Write100Messages)
-                                                            + Convert.ToUInt32(x.Achievements.Write1000Messages)
-                                                            + Convert.ToUInt32(x.Achievements.Reach10Level)
-                                                            + Convert.ToUInt32(x.Achievements.Reach30Level)
-                                                            + Convert.ToUInt32(x.Achievements.Brag100Times)
-                                                            + Convert.ToUInt32(x.Achievements.Attack200Times)
-                                                            + Convert.ToUInt32(x.Achievements.OpenSphere)
-                                                            + Convert.ToUInt32(x.Achievements.Purchase200Items)
-                                                            + Convert.ToUInt32(x.Achievements.Open100Chests)
-                                                            + Convert.ToUInt32(x.Achievements.Send100Gifts)
-                                                            + Convert.ToUInt32(x.Achievements.IsDonator)
-                                                            + Convert.ToUInt32(x.Achievements.HasDonatedRole)
-                                                            + Convert.ToUInt32(x.Achievements.GiftToBotKeeper)
-                                                            + Convert.ToUInt32(x.Achievements.GiftToModerator)
-                                                            + Convert.ToUInt32(x.Achievements.AttackWise),
-                                    })
-                                    .FirstAsync();
+                    .Where(x => x.UserId == userId)
+                    .Select(x => new UserStatistics
+                    {
+                        UserId = x.UserId,
+                        CoinsEarnedTotal = x.CoinsEarnedTotal,
+                        TokensEarnedTotal = x.TokensEarnedTotal,
+                        ChestsEarnedTotal = x.ChestsEarnedTotal,
+                        SphereEarnedTotal = x.SphereEarnedTotal,
+                        CapsuleEarnedTotal = x.CapsuleEarnedTotal,
+                        ChestsOpenedTotal = x.ChestsOpenedTotal,
+                        SphereOpenedTotal = x.SphereEarnedTotal,
+                        CapsuleOpenedTotal = x.CapsuleEarnedTotal,
+                        AttacksDone = x.AttacksDone,
+                        AttacksReceived = x.AttacksReceived,
+                        CoinsSpentTotal = x.CoinsSpentTotal,
+                        TokensSpentTotal = x.TokensSpentTotal,
+                        GiftsSent = x.GiftsSent,
+                        GiftsReceived = x.GiftsReceived,
+                        MessagesSentTotal = x.MessagesSentTotal,
+                        BragTotal = x.BragTotal,
+                        PurchasedItemsTotal = x.PurchasedItemsTotal,
+                    })
+                    .FirstAsync();
             }
         }
 

@@ -9,7 +9,6 @@ namespace Rift.Data.Models
         public uint Level { get; set; } = 0u;
         public decimal Donate { get; set; } = 0m;
 
-        public RiftAchievements Achievements { get; set; }
         public RiftCooldowns Cooldowns { get; set; }
         public RiftInventory Inventory { get; set; }
         public RiftLolData LolData { get; set; }

@@ -223,129 +223,6 @@ namespace Rift.Services
             await chatChannel.SendEmbedAsync(EconomyEmbeds.RichUsersEmbed(topTen));
         }
 
-        public static async Task GetAchievements(ulong userId)
-        {
-            var achievements = await RiftBot.GetService<DatabaseService>().GetUserAchievementsAsync(userId);
-            RiftBot.GetService<MessageService>()
-                   .TryAddSend(new EmbedMessage(DestinationType.DM, userId, TimeSpan.Zero,
-                                                AchievementEmbeds.AchievementsEmbed(achievements)));
-        }
-
-        static async Task AddAchievement(ulong userId, string achievementName, Reward reward)
-        {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
-                return;
-
-            await reward.GiveRewardAsync(userId);
-            RiftBot.GetService<MessageService>()
-                   .TryAddSend(new EmbedMessage(DestinationType.DM, userId, TimeSpan.Zero,
-                                                AchievementEmbeds.DMEmbed(reward, achievementName)));
-            await chatChannel.SendEmbedAsync(AchievementEmbeds.ChatEmbed(userId, achievementName));
-        }
-
-        static async Task CheckAchievements(ulong userId)
-        {
-            var statistic = await RiftBot.GetService<DatabaseService>().GetUserStatisticsAsync(userId);
-            var achievements = await RiftBot.GetService<DatabaseService>().GetUserAchievementsAsync(userId);
-
-            bool hasDonatedRole = false;
-
-            var achievementsNew = new bool[11];
-            var achievementsOld = new []
-            {
-                achievements.Write100Messages,
-                achievements.Write1000Messages,
-                achievements.Reach10Level,
-                achievements.Reach30Level,
-                achievements.Brag100Times,
-                achievements.Attack200Times,
-                achievements.OpenSphere,
-                achievements.Purchase200Items,
-                achievements.Open100Chests,
-                achievements.Send100Gifts,
-                achievements.IsDonator
-            };
-            var statisticsList = new []
-            {
-                statistic.MessagesSentTotal >= 100ul,
-                statistic.MessagesSentTotal >= 1000ul,
-                statistic.Level >= 10ul,
-                statistic.Level >= 30ul,
-                statistic.BragTotal >= 100ul,
-                statistic.AttacksDone >= 200ul,
-                statistic.SphereOpenedTotal >= 1ul,
-                statistic.PurchasedItemsTotal >= 200ul,
-                statistic.ChestsOpenedTotal >= 100ul,
-                statistic.GiftsSent >= 100ul,
-                statistic.Donate > 0M
-            };
-            var rewardList = new []
-            {
-                Achievements.Write100Messages,
-                Achievements.Write1000Messages,
-                Achievements.Reach10Level,
-                Achievements.Reach30Level,
-                Achievements.Brag100Times,
-                Achievements.Attack200Times,
-                Achievements.OpenSphere,
-                Achievements.Purchase200Items,
-                Achievements.Open100Chests,
-                Achievements.Send100Gifts,
-                Achievements.IsDonator
-            };
-            var achievementsNames = new []
-            {
-                "общительный",
-                "без личной жизни",
-                "активный",
-                "постоянный",
-                "хвастунишка",
-                "линчеватель",
-                "нечто классное",
-                "транжира",
-                "золотоискатель",
-                "альтруист",
-                "спонсор"
-            };
-
-            for (int i = 0; i < achievementsNew.Length; i++)
-            {
-                if (!achievementsOld[i] && statisticsList[i])
-                {
-                    achievementsNew[i] = true;
-                    await AddAchievement(userId, achievementsNames[i], rewardList[i]);
-                }
-            }
-
-            if (!achievements.HasDonatedRole)
-            {
-                var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-                if (!(sgUser is null)
-                    && IonicClient.HasRolesAny(sgUser, Settings.RoleId.Legendary, Settings.RoleId.Absolute,
-                                               Settings.RoleId.Keepers))
-                {
-                    hasDonatedRole = true;
-                    await AddAchievement(userId, "несравненный", Achievements.HasDonatedRole);
-                }
-            }
-
-            await RiftBot.GetService<DatabaseService>()
-                         .UpdateAchievementAsync(userId,
-                                                 write100Messages: achievementsNew[0],
-                                                 write1000Messages: achievementsNew[1],
-                                                 reach10Level: achievementsNew[2],
-                                                 reach30Level: achievementsNew[3],
-                                                 brag100Times: achievementsNew[4],
-                                                 attack200Times: achievementsNew[5],
-                                                 openSphere: achievementsNew[6],
-                                                 purchase200Items: achievementsNew[7],
-                                                 open100Chests: achievementsNew[8],
-                                                 send100Gifts: achievementsNew[9],
-                                                 isDonator: achievementsNew[10],
-                                                 hasDonateRole: hasDonatedRole);
-        }
-
         static void OnDonateAdded(DonateAddedEventArgs e)
         {
             Task.Run(async delegate
@@ -404,8 +281,6 @@ namespace Rift.Services
                                                                              .ChatDonateAbsoluteRoleRewardEmbed(e.UserId)));
                     }
                 }
-
-                await CheckAchievements(e.UserId);
             });
         }
 
@@ -413,7 +288,6 @@ namespace Rift.Services
         {
             await AddExpAsync(message.Author.Id, 1u);
             await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(message.Author.Id, messagesSentTotal: 1ul);
-            await CheckAchievements(message.Author.Id);
         }
 
         static async Task AddExpAsync(ulong userId, uint exp)
@@ -455,8 +329,6 @@ namespace Rift.Services
             }
 
             await CheckDailyMessageAsync(userId);
-
-            await CheckAchievements(userId);
         }
 
         static async Task CheckDailyMessageAsync(ulong userId)
@@ -760,8 +632,6 @@ namespace Rift.Services
                 bragMutex.Release();
             }
 
-            await CheckAchievements(userId);
-
             return result;
         }
 
@@ -879,8 +749,6 @@ namespace Rift.Services
                 chestMutex.Release();
             }
 
-            await CheckAchievements(userId);
-
             return result;
         }
 
@@ -904,8 +772,6 @@ namespace Rift.Services
             {
                 chestMutex.Release();
             }
-
-            await CheckAchievements(userId);
 
             return result;
         }
@@ -956,8 +822,6 @@ namespace Rift.Services
                 capsuleMutex.Release();
             }
 
-            await CheckAchievements(userId);
-
             return result;
         }
 
@@ -1000,8 +864,6 @@ namespace Rift.Services
                 sphereMutex.Release();
             }
 
-            await CheckAchievements(userId);
-
             return result;
         }
 
@@ -1043,8 +905,6 @@ namespace Rift.Services
             {
                 storeMutex.Release();
             }
-
-            await CheckAchievements(userId);
 
             return result;
         }
@@ -1208,29 +1068,6 @@ namespace Rift.Services
                 {
                     await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(fromUser.Id, giftsSent: 1ul);
                     await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(toUser.Id, giftsReceived: 1ul);
-
-                    bool giftToModer = RiftBot.IsModerator(toUser);
-                    bool giftToBotKeeper = RiftBot.IsDeveloper(toUser);
-
-                    if (giftToModer || giftToBotKeeper)
-                    {
-                        var achievements =
-                            await RiftBot.GetService<DatabaseService>().GetUserAchievementsAsync(fromUser.Id);
-
-                        if (!achievements.GiftToBotKeeper && giftToBotKeeper)
-                        {
-                            await AddAchievement(fromUser.Id, "умный ход", Achievements.GiftToBotKeeper);
-                            await RiftBot.GetService<DatabaseService>()
-                                         .UpdateAchievementAsync(fromUser.Id, giftToBotKeeper: true);
-                        }
-
-                        if (!achievements.GiftToModerator && giftToModer)
-                        {
-                            await AddAchievement(fromUser.Id, "покажи себя", Achievements.GiftToModerator);
-                            await RiftBot.GetService<DatabaseService>()
-                                         .UpdateAchievementAsync(fromUser.Id, giftToModerator: true);
-                        }
-                    }
                 }
             }
             finally
@@ -1238,13 +1075,11 @@ namespace Rift.Services
                 giftMutex.Release();
             }
 
-            await CheckAchievements(fromUser.Id);
-
             return result;
         }
 
         static async Task<(GiftResult, Embed)> GiftInternalAsync(SocketGuildUser fromUser, SocketGuildUser toUser,
-                                                                 uint type)
+                                                                 UInt32 type)
         {
             if (fromUser.Id == toUser.Id)
             {
@@ -1395,34 +1230,17 @@ namespace Rift.Services
             try
             {
                 result = await AttackInternalAsync(sgAttacker, sgTarget).ConfigureAwait(false);
+                
                 if (result.Item1 == AttackResult.Success)
                 {
                     await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(sgAttacker.Id, attacksDone: 1ul);
                     await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(sgTarget.Id, attacksReceived: 1ul);
-
-                    if (sgTarget.Id == 178443743026872321ul
-                        && IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat,
-                                                      out var chatChannel))
-                    {
-                        var achievements =
-                            await RiftBot.GetService<DatabaseService>().GetUserAchievementsAsync(sgAttacker.Id);
-
-                        if (!achievements.AttackWise)
-                        {
-                            await AddAchievement(sgAttacker.Id, "разоритель основателя", Achievements.AttackWise);
-                            await RiftBot.GetService<DatabaseService>()
-                                         .UpdateAchievementAsync(sgAttacker.Id, attackWise: true);
-                        }
-                    }
                 }
             }
             finally
             {
                 attackMutex.Release();
             }
-
-            await CheckAchievements(sgAttacker.Id);
-            await CheckAchievements(sgTarget.Id);
 
             return result;
         }

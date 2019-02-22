@@ -151,7 +151,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.DM)]
         public async Task Exp(uint level)
         {
-            await ReplyAsync($"Level {level}: {EconomyService.GetExpForLevel(level)} XP");
+            await ReplyAsync($"Level {level.ToString()}: {EconomyService.GetExpForLevel(level).ToString()} XP");
         }
 
         [Command("getprofile")]
@@ -841,16 +841,6 @@ namespace Rift.Modules
         public async Task Gifts()
         {
             await Context.User.SendEmbedAsync(Gift.Embed);
-        }
-
-        [Command("достижения")]
-        [RequireContext(ContextType.Guild)]
-        public async Task Achievements()
-        {
-            using (Context.Channel.EnterTypingState())
-            {
-                await EconomyService.GetAchievements(Context.User.Id);
-            }
         }
 
         [Command("платные роли")]
