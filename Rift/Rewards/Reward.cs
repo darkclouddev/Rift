@@ -74,24 +74,22 @@ namespace Rift.Rewards
         {
             await RiftBot.GetService<DatabaseService>()
                          .AddInventoryAsync(userId,
-                                            coins: this.Coins,
-                                            tokens: this.Tokens,
-                                            chests: this.Chests,
-                                            spheres: this.Spheres,
-                                            capsules: this.Capsules,
-                                            doubleExps: this.PowerupsDoubleExp,
-                                            respects: this.PowerupsBotRespect,
-                                            usualTickets: this.UsualTickets,
-                                            rareTickets: this.RareTickets);
+                                            coins: Coins,
+                                            tokens: Tokens,
+                                            chests: Chests,
+                                            spheres: Spheres,
+                                            capsules: Capsules,
+                                            doubleExps: PowerupsDoubleExp,
+                                            respects: PowerupsBotRespect,
+                                            usualTickets: UsualTickets,
+                                            rareTickets: RareTickets);
 
             await RiftBot.GetService<DatabaseService>().AddExperienceAsync(userId, Experience);
         }
 
         public Reward(Loot coins = null, Loot tokens = null, Loot chests = null, Loot spheres = null,
-                      Loot capsules = null,
-                      Loot powerupsDoubleExp = null, Loot powerupsBotRespect = null,
-                      Loot customTickets = null, Loot giveawayTickets = null,
-                      Loot experience = null)
+                      Loot capsules = null, Loot powerupsDoubleExp = null, Loot powerupsBotRespect = null,
+                      Loot customTickets = null, Loot giveawayTickets = null, Loot experience = null)
         {
             CoinsLoot = coins;
             TokensLoot = tokens;
@@ -105,8 +103,8 @@ namespace Rift.Rewards
             ExperienceLoot = experience;
         }
 
-        public Reward(uint coins = 0u, uint tokens = 0u, uint chests = 0u, uint spheres = 0u, uint capsules = 0u,
-                      uint powerupsProtection = 0u, uint powerupsDoubleExp = 0u, uint powerupsBotRespect = 0u,
+        public Reward(uint coins = 0u, uint tokens = 0u, uint chests = 0u, uint spheres = 0u,
+                      uint capsules = 0u, uint powerupsDoubleExp = 0u, uint powerupsBotRespect = 0u,
                       uint customTickets = 0u, uint giveawayTickets = 0u, uint experience = 0u)
         {
             CoinsLoot = coins > 0u ? new Loot(coins) : null;
@@ -158,6 +156,7 @@ namespace Rift.Rewards
         {
             r1.CalculateReward();
             r2.CalculateReward();
+            
             return new Reward(coins: r1.Coins + r2.Coins
                               , tokens: r1.Tokens + r2.Tokens
                               , chests: r1.Chests + r2.Chests

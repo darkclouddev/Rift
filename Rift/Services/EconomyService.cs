@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -215,10 +215,7 @@ namespace Rift.Services
                 return;
 
             var topTen = await RiftBot.GetService<DatabaseService>()
-                                      .GetTopTenByCoinsAsync(x =>
-                                                                 !(IonicClient
-                                                                     .GetGuildUserById(Settings.App.MainGuildId,
-                                                                                       x.UserId) is null));
+                .GetTopTenByCoinsAsync(x => !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
 
             if (topTen.Length == 0)
                 return;
@@ -248,16 +245,13 @@ namespace Rift.Services
 
         static async Task CheckAchievements(ulong userId)
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
-                return;
-
             var statistic = await RiftBot.GetService<DatabaseService>().GetUserStatisticsAsync(userId);
             var achievements = await RiftBot.GetService<DatabaseService>().GetUserAchievementsAsync(userId);
 
             bool hasDonatedRole = false;
 
             var achievementsNew = new bool[11];
-            var achievementsOld = new bool[]
+            var achievementsOld = new []
             {
                 achievements.Write100Messages,
                 achievements.Write1000Messages,
@@ -271,7 +265,7 @@ namespace Rift.Services
                 achievements.Send100Gifts,
                 achievements.IsDonator
             };
-            var statisticsList = new bool[]
+            var statisticsList = new []
             {
                 statistic.MessagesSentTotal >= 100ul,
                 statistic.MessagesSentTotal >= 1000ul,
@@ -283,9 +277,9 @@ namespace Rift.Services
                 statistic.PurchasedItemsTotal >= 200ul,
                 statistic.ChestsOpenedTotal >= 100ul,
                 statistic.GiftsSent >= 100ul,
-                statistic.Donate >= 1
+                statistic.Donate > 0M
             };
-            var rewardList = new Reward[]
+            var rewardList = new []
             {
                 Achievements.Write100Messages,
                 Achievements.Write1000Messages,
@@ -299,7 +293,7 @@ namespace Rift.Services
                 Achievements.Send100Gifts,
                 Achievements.IsDonator
             };
-            var achievementsNames = new string[]
+            var achievementsNames = new []
             {
                 "общительный",
                 "без личной жизни",
@@ -526,9 +520,9 @@ namespace Rift.Services
             {
                 await sgUser.SendEmbedAsync(AttackEmbeds.AttacksUnlockedDM);
 
-                if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat,
-                                                out var chatChannel))
+                if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                     return;
+                
                 await chatChannel.SendEmbedAsync(AttackEmbeds.AttacksUnlockedChat(userId));
             }
         }
@@ -556,7 +550,8 @@ namespace Rift.Services
             if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.Absolute))
                 chests += 2u;
 
-            Reward reward = null;
+            Reward reward;
+            
             switch (level)
             {
                 case 3:
@@ -889,7 +884,7 @@ namespace Rift.Services
             return result;
         }
 
-        public async Task<(OpenChestResult, Embed)> OpenChestAllAsync(ulong userId)
+        public async Task<(OpenChestResult, Embed)> OpenChestAllAsync(UInt64 userId)
         {
             await chestMutex.WaitAsync().ConfigureAwait(false);
 

@@ -640,12 +640,11 @@ namespace Rift.Services
             {
                 return await context.Inventory
                                     .Join(context.Statistics, inv => inv.UserId, stat => stat.UserId,
-                                          (inventory, statistics) =>
-                                              new
-                                              {
-                                                  Inventory = inventory,
-                                                  Statistics = statistics
-                                              })
+                                        (inventory, statistics) => new
+                                        {
+                                            Inventory = inventory,
+                                            Statistics = statistics
+                                        })
                                     .Where(x => x.Inventory.UserId == userId && x.Statistics.UserId == userId)
                                     .Select(x => new UserInventory
                                     {

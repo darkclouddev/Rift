@@ -9,7 +9,7 @@ using Humanizer;
 
 namespace Rift.Embeds
 {
-    public class CooldownEmbeds
+    public static class CooldownEmbeds
     {
         public static Embed DMEmbed(UserCooldowns cooldowns)
         {

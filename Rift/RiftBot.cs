@@ -42,8 +42,6 @@ namespace Rift
 
         static CommandHandler handler;
 
-        const string revisionFileName = "revision";
-
         static readonly List<Streamer> streamers = new List<Streamer>
 		{
 			new Streamer(
@@ -131,7 +129,7 @@ namespace Rift
 
 		public static bool IsModerator(IUser user)
 		{
-			return (user is SocketGuildUser socketUser && socketUser.Roles.Any(x => x.Id == Settings.RoleId.Moderator || x.Id == Settings.RoleId.BossModerator));
+            return (user is SocketGuildUser socketUser && socketUser.Roles.Any(x => x.Id == Settings.RoleId.Moderator || x.Id == Settings.RoleId.BossModerator));
 		}
 
 		public static bool IsStreamer(ulong userId)
@@ -159,8 +157,10 @@ namespace Rift
         public static async Task Main(string[] args)
         {
             AppPath = GetContentRoot();
-            Culture = new CultureInfo("ru-RU");
-            Culture.DateTimeFormat.Calendar = new GregorianCalendar();
+            Culture = new CultureInfo("ru-RU")
+            {
+                DateTimeFormat = { Calendar = new GregorianCalendar() }
+            };
 
             Console.WriteLine($"Using content root: {AppPath}");
 
