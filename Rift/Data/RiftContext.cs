@@ -14,6 +14,7 @@ namespace Rift.Data
         public DbSet<RiftPendingUser> PendingUsers { get; set; }
         public DbSet<ScheduledEvent> ScheduledEvents { get; set; }
         public DbSet<RiftTempRole> TempRoles { get; set; }
+        public DbSet<RiftStreamer> Streamers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
             optionsBuilder
@@ -54,6 +55,7 @@ namespace Rift.Data
                        x.UserId,
                        x.RoleId
                    });
+            
             builder.Entity<RiftUser>()
                    .HasMany(users => users.TempRoles)
                    .WithOne(role => role.User)
@@ -70,6 +72,13 @@ namespace Rift.Data
             builder.Entity<ScheduledEvent>()
                    .Property(prop => prop.Id)
                    .ValueGeneratedOnAdd();
+
+            builder.Entity<RiftStreamer>().ToTable("Streamers");
+            builder.Entity<RiftStreamer>().HasKey(x => x.UserId);
+            builder.Entity<RiftUser>()
+                   .HasOne(user => user.Streamers)
+                   .WithOne(streamer => streamer.User)
+                   .HasForeignKey<RiftStreamer>(user => user.UserId);
         }
     }
 }
