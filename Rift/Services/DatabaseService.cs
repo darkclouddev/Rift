@@ -1572,6 +1572,28 @@ namespace Rift.Services
         }
 
         #endregion Temp Roles
+        
+        #region Streamers
+        
+        public async Task<List<RiftStreamer>> GetAllStreamersAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Streamers.ToListAsync();
+            }
+        }
+        
+        public async Task<RiftStreamer> GetStreamer(UInt64 userId)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Streamers
+                    .Where(x => x.UserId == userId)
+                    .FirstOrDefaultAsync();
+            }
+        }
+        
+        #endregion Streamers
     }
 
     public class DatabaseException : Exception

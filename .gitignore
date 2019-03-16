@@ -276,3 +276,9 @@ __pycache__/
 # Cake - Uncomment if you are using it
 # tools/**
 # !tools/packages.config
+
+# Dolphin directory configuration
+.directory
+.idea/
+
+Rift/appsettings\.Development\.json

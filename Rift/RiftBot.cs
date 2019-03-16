@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -42,73 +42,6 @@ namespace Rift
 
         static CommandHandler handler;
 
-        static readonly List<Streamer> streamers = new List<Streamer>
-		{
-			new Streamer(
-				119837878225338370ul, //fantastic тащ <3
-				"https://cdn.discordapp.com/attachments/365934510153662464/384016832534937612/1.png",
-				StreamPlatform.Twitch,
-				"https://www.twitch.tv/fantastictouch/"),
-			new Streamer(
-				232221573757534208ul, //teynor
-				"https://cdn.discordapp.com/attachments/365934510153662464/384036041599877121/134.png",
-				StreamPlatform.Youtube,
-				"https://www.youtube.com/c/TEYNOR/live"),
-			new Streamer(
-				247422043308556300ul, //offiners
-				"https://cdn.discordapp.com/attachments/365934510153662464/384037902763556864/134.png",
-				StreamPlatform.Twitch,
-				"https://www.twitch.tv/offiners"),
-
-            new Streamer(
-                112194571705786368ul, //jestkuimax
-				"https://cdn.discordapp.com/attachments/503168681333882891/513333717314568223/logo.png",
-                StreamPlatform.Twitch,
-                "https://www.twitch.tv/jestkuimax"),
-            new Streamer(
-                164427344889511937ul, //nomanzzz
-				"https://cdn.discordapp.com/attachments/503168681333882891/513333717314568223/logo.png",
-                StreamPlatform.Twitch,
-                "https://www.twitch.tv/nomanzzz"),
-            new Streamer(
-                114315170175516673ul, //корпорация призывателей
-				"https://cdn.discordapp.com/attachments/503168681333882891/513333717314568223/logo.png",
-                StreamPlatform.Twitch,
-                "https://www.twitch.tv/summonersinc"),
-            new Streamer(
-                178912866617786375ul, //lekcycc
-				"https://cdn.discordapp.com/attachments/503168681333882891/513333717314568223/logo.png",
-                StreamPlatform.Twitch,
-                "https://www.twitch.tv/lekcycc"),
-             new Streamer(
-                178443743026872321ul, //wise
-				"https://cdn.discordapp.com/attachments/503168681333882891/513333717314568223/logo.png",
-                StreamPlatform.Twitch,
-                "https://www.twitch.tv/leaguewise"),
-        };
-
-        public class Streamer
-        {
-            public ulong Id { get; set; }
-            public string PictureURL { get; set; }
-            public StreamPlatform Platform { get; set; }
-            public string StreamURL { get; set; }
-
-            public Streamer(ulong id, string picUrl, StreamPlatform platform, string streamUrl)
-            {
-                Id = id;
-                PictureURL = picUrl;
-                Platform = platform;
-                StreamURL = streamUrl;
-            }
-        }
-
-        public enum StreamPlatform
-        {
-            Twitch,
-            Youtube
-        }
-
 		static readonly List<ulong> adminIds = new List<ulong>
 		{
             212997107525746690ul, //me
@@ -120,21 +53,11 @@ namespace Rift
 			212997107525746690ul, //me
         };
 
-		public static Streamer GetStreamer(ulong userId)
-		{
-			return streamers.FirstOrDefault(x => x.Id == userId);
-		}
-
 		public static bool IsAdmin(IUser user) => adminIds.Contains(user.Id) || developersIds.Contains(user.Id);
 
 		public static bool IsModerator(IUser user)
 		{
             return (user is SocketGuildUser socketUser && socketUser.Roles.Any(x => x.Id == Settings.RoleId.Moderator || x.Id == Settings.RoleId.BossModerator));
-		}
-
-		public static bool IsStreamer(ulong userId)
-		{
-			return streamers.Any(x => x.Id == userId);
 		}
 
 		public static bool IsDeveloper(IUser user) => developersIds.Contains(user.Id);

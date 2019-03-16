@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using Discord.Commands;
+
+using Rift.Services;
 
 namespace Rift.Preconditions
 {
@@ -11,10 +15,9 @@ namespace Rift.Preconditions
         public override async Task<PreconditionResult> CheckPermissionsAsync(
             ICommandContext context, CommandInfo command, IServiceProvider services)
         {
-            if (await Task.Run(() => RiftBot.IsStreamer(context.User.Id)))
-                return PreconditionResult.FromSuccess();
-
-            return PreconditionResult.FromError(RiftBot.CommandDenyMessage);
+            return await services.GetService<DatabaseService>().GetStreamer(context.User.Id) is null
+                ? PreconditionResult.FromError(RiftBot.CommandDenyMessage)
+                : PreconditionResult.FromSuccess();
         }
     }
 }

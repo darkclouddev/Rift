@@ -24,10 +24,12 @@ namespace Rift.Modules
     public class RoleModule : RiftModuleBase
     {
         readonly RoleService roleService;
+        readonly DatabaseService databaseService;
 
-        public RoleModule(RoleService roleService)
+        public RoleModule(RoleService roleService, DatabaseService databaseService)
         {
             this.roleService = roleService;
+            this.databaseService = databaseService;
         }
 
         [Command("роли")]
@@ -45,7 +47,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task StreamStart([Remainder] string description)
         {
-            var streamer = RiftBot.GetStreamer(Context.User.Id);
+            var streamer = await databaseService.GetStreamer(Context.User.Id);
 
             if (streamer is null)
             {
@@ -55,29 +57,18 @@ namespace Rift.Modules
 
             var eb = new EmbedBuilder()
                      .WithAuthor("Трансляция")
-                     .WithThumbnailUrl(streamer.PictureURL)
+                     .WithThumbnailUrl(streamer.PictureUrl)
                      .WithDescription($"{description}")
-                     .AddField($"Ссылка на трансляцию", streamer.StreamURL)
+                     .AddField($"Ссылка на трансляцию", streamer.StreamUrl)
                      .Build();
 
-            var webhook = streamer.Platform == RiftBot.StreamPlatform.Twitch
-                ? new DiscordWebhookClient(505849754119569409ul,
-                                           "NuoQqSufIqYo6_K2UF-NjU2N_-JfAACdLLKPOtqcquJStJLzTQF3OHcjLRcwEQybw4kR") // Twitch
-                : new DiscordWebhookClient(505849783450206240ul,
-                                           "woiEbSnQsiSV2QfHnkgakKWwoA2E_VQcc4rY_9HWhl1MMMBS1Of3vnFGqfF3sDuvCG3T"); // Youtube
+            var webhook = new DiscordWebhookClient(505849754119569409ul,
+                "NuoQqSufIqYo6_K2UF-NjU2N_-JfAACdLLKPOtqcquJStJLzTQF3OHcjLRcwEQybw4kR");
 
             if (IonicClient.HasRolesAny(Context.Guild.Id, Context.User.Id, Settings.RoleId.Streamer))
-                await
-                    webhook.SendMessageAsync($"Стример {Context.User.Mention} запустил трансляцию, присоединяйтесь. @here",
-                                             embeds: new Embed[]
-                                             {
-                                                 eb
-                                             });
+                await webhook.SendMessageAsync($"Стример {Context.User.Mention} запустил трансляцию, присоединяйтесь. @here", embeds: new [] { eb });
             else
-                await webhook.SendMessageAsync($"{Context.User.Mention} онлайн!", embeds: new Embed[]
-                {
-                    eb
-                });
+                await webhook.SendMessageAsync($"{Context.User.Mention} онлайн!", embeds: new [] { eb });
         }
 
         [Group("роль")]
