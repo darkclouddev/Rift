@@ -27,19 +27,14 @@ namespace Rift.Modules
         readonly EconomyService economyService;
         readonly RoleService roleService;
         readonly MessageService messageService;
-        readonly DatabaseService databaseService;
         readonly EventService eventService;
 
-        public TestModule(EconomyService economyService,
-                          RoleService roleService,
-                          MessageService messageService,
-                          DatabaseService databaseService,
-                          EventService eventService)
+        public TestModule(EconomyService economyService, RoleService roleService, MessageService messageService,
+            EventService eventService)
         {
             this.economyService = economyService;
             this.roleService = roleService;
             this.messageService = messageService;
-            this.databaseService = databaseService;
             this.eventService = eventService;
         }
 

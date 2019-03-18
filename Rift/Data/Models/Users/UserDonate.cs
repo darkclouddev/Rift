@@ -1,8 +1,10 @@
-﻿namespace Rift.Data.Models.Users
+﻿using System;
+
+namespace Rift.Data.Models.Users
 {
     public class UserDonate
     {
-        public ulong UserId;
-        public decimal Donate;
+        public UInt64 UserId;
+        public Decimal Donate;
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,12 +24,10 @@ namespace Rift.Modules
     public class RoleModule : RiftModuleBase
     {
         readonly RoleService roleService;
-        readonly DatabaseService databaseService;
 
-        public RoleModule(RoleService roleService, DatabaseService databaseService)
+        public RoleModule(RoleService roleService)
         {
             this.roleService = roleService;
-            this.databaseService = databaseService;
         }
 
         [Command("роли")]
@@ -47,7 +45,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task StreamStart([Remainder] string description)
         {
-            var streamer = await databaseService.GetStreamer(Context.User.Id);
+            var streamer = await Database.GetStreamer(Context.User.Id);
 
             if (streamer is null)
             {
@@ -76,14 +74,11 @@ namespace Rift.Modules
         {
             readonly EconomyService economyService;
             readonly RoleService roleService;
-            readonly DatabaseService databaseService;
 
-            public SpecialRoleModule(EconomyService economyService, RoleService roleService,
-                                     DatabaseService databaseService)
+            public SpecialRoleModule(EconomyService economyService, RoleService roleService)
             {
                 this.economyService = economyService;
                 this.roleService = roleService;
-                this.databaseService = databaseService;
             }
 
             [Command("активные")]

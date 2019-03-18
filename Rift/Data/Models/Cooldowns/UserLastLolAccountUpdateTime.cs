@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace Rift.Data.Models.Timestamps
+namespace Rift.Data.Models.Cooldowns
 {
     public class UserLastLolAccountUpdateTime
     {
-        public ulong UserId;
+        public UInt64 UserId;
         public DateTime LastUpdateTime;
-        public string PlayerUuid;
+        public String PlayerUuid;
     }
 }

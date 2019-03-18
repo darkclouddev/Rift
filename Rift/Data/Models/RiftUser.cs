@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Rift.Data.Models
 {
     public class RiftUser
     {
-        public ulong UserId { get; set; }
-        public uint Experience { get; set; } = 0u;
-        public uint Level { get; set; } = 0u;
-        public decimal Donate { get; set; } = 0m;
+        public UInt64 UserId { get; set; }
+        public UInt32 Experience { get; set; } = 0u;
+        public UInt32 Level { get; set; } = 0u;
+        public Decimal Donate { get; set; } = 0m;
 
         public RiftCooldowns Cooldowns { get; set; }
         public RiftInventory Inventory { get; set; }

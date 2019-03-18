@@ -1,8 +1,10 @@
-﻿namespace Rift.Data.Models.Users
+﻿using System;
+
+namespace Rift.Data.Models.Users
 {
     public class UserChests
     {
-        public ulong UserId;
-        public uint Chests;
+        public UInt64 UserId;
+        public UInt32 Chests;
     }
 }

@@ -21,17 +21,12 @@ namespace Rift.Modules
     {
         readonly EconomyService economyService;
         readonly RiotService riotService;
-        readonly DatabaseService databaseService;
         readonly MessageService messageService;
 
-        public EconomyModule(EconomyService economyService,
-                             RiotService riotService,
-                             DatabaseService databaseService,
-                             MessageService messageService)
+        public EconomyModule(EconomyService economyService, RiotService riotService, MessageService messageService)
         {
             this.economyService = economyService;
             this.riotService = riotService;
-            this.databaseService = databaseService;
             this.messageService = messageService;
         }
 
@@ -136,9 +131,8 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Donators()
         {
-            var topTen =
-                await databaseService.GetTopTenDonatesAsync(x => !(IonicClient.GetGuildUserById(Settings.App.MainGuildId,
-                                                                                           x.UserId) is null));
+            var topTen = await Database.GetTopTenDonatesAsync(x =>
+                !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
 
             if (topTen.Length == 0)
                 return;
@@ -319,13 +313,6 @@ namespace Rift.Modules
         {
             const string giveText = "Основатель сервера выдал вам";
 
-            readonly DatabaseService databaseService;
-
-            public GiveModule(DatabaseService databaseService)
-            {
-                this.databaseService = databaseService;
-            }
-
             [Command("coins")]
             [RequireAdmin]
             [RequireContext(ContextType.Guild)]
@@ -334,7 +321,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.AddInventoryAsync(sgUser.Id, coins: amount);
+                await Database.AddInventoryAsync(sgUser.Id, coins: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -349,7 +336,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.AddInventoryAsync(sgUser.Id, tokens: amount);
+                await Database.AddInventoryAsync(sgUser.Id, tokens: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -364,7 +351,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.AddInventoryAsync(sgUser.Id, chests: amount);
+                await Database.AddInventoryAsync(sgUser.Id, chests: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -379,7 +366,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.AddInventoryAsync(sgUser.Id, capsules: amount);
+                await Database.AddInventoryAsync(sgUser.Id, capsules: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -394,7 +381,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.AddInventoryAsync(sgUser.Id, spheres: amount);
+                await Database.AddInventoryAsync(sgUser.Id, spheres: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -409,7 +396,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.AddInventoryAsync(sgUser.Id, doubleExps: amount);
+                await Database.AddInventoryAsync(sgUser.Id, doubleExps: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -424,7 +411,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.AddInventoryAsync(sgUser.Id, respects: amount);
+                await Database.AddInventoryAsync(sgUser.Id, respects: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -439,7 +426,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.AddInventoryAsync(sgUser.Id, usualTickets: amount);
+                await Database.AddInventoryAsync(sgUser.Id, usualTickets: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -454,7 +441,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.AddInventoryAsync(sgUser.Id, rareTickets: amount);
+                await Database.AddInventoryAsync(sgUser.Id, rareTickets: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -467,13 +454,6 @@ namespace Rift.Modules
         {
             const string takeText = "Основатель сервера забрал у вас";
 
-            readonly DatabaseService databaseService;
-
-            public TakeModule(DatabaseService databaseService)
-            {
-                this.databaseService = databaseService;
-            }
-
             [Command("coins")]
             [RequireAdmin]
             [RequireContext(ContextType.Guild)]
@@ -482,7 +462,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.RemoveInventoryAsync(sgUser.Id, coins: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, coins: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -497,7 +477,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.RemoveInventoryAsync(sgUser.Id, tokens: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, tokens: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -512,7 +492,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.RemoveInventoryAsync(sgUser.Id, doubleExps: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, doubleExps: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -527,7 +507,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.RemoveInventoryAsync(sgUser.Id, chests: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, chests: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -542,7 +522,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.RemoveInventoryAsync(sgUser.Id, capsules: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, capsules: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -557,7 +537,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.RemoveInventoryAsync(sgUser.Id, spheres: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, spheres: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -572,7 +552,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.RemoveInventoryAsync(sgUser.Id, respects: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, respects: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -587,7 +567,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.RemoveInventoryAsync(sgUser.Id, usualTickets: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, usualTickets: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -602,7 +582,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.RemoveInventoryAsync(sgUser.Id, rareTickets: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, rareTickets: amount);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -617,7 +597,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await databaseService.RemoveInventoryAsync(sgUser.Id, UInt32.MaxValue, UInt32.MaxValue, UInt32.MaxValue,
+                await Database.RemoveInventoryAsync(sgUser.Id, UInt32.MaxValue, UInt32.MaxValue, UInt32.MaxValue,
                                                            UInt32.MaxValue, UInt32.MaxValue,
                                                            UInt32.MaxValue, UInt32.MaxValue, UInt32.MaxValue,
                                                            UInt32.MaxValue);
@@ -632,12 +612,10 @@ namespace Rift.Modules
         public class OpenModule : ModuleBase
         {
             readonly EconomyService economyService;
-            readonly DatabaseService databaseService;
-
-            public OpenModule(EconomyService economyService, DatabaseService databaseService)
+            
+            public OpenModule(EconomyService economyService)
             {
                 this.economyService = economyService;
-                this.databaseService = databaseService;
             }
 
             [Command("сундук")]

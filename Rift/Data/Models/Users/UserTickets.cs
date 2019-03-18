@@ -1,9 +1,11 @@
-﻿namespace Rift.Data.Models.Users
+﻿using System;
+
+namespace Rift.Data.Models.Users
 {
     public class UserTickets
     {
-        public ulong UserId;
-        public uint UsualTickets;
-        public uint RareTickets;
+        public UInt64 UserId;
+        public UInt32 UsualTickets;
+        public UInt32 RareTickets;
     }
 }

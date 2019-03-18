@@ -1,18 +1,20 @@
-﻿namespace Rift.Data.Models.Users
+﻿using System;
+
+namespace Rift.Data.Models.Users
 {
     public class UserInventory
     {
-        public ulong UserId;
-        public uint Coins;
-        public uint Tokens;
-        public uint Chests;
-        public uint Capsules;
-        public uint Spheres;
-        public ulong CoinsEarnedTotal;
-        public ulong CoinsSpentTotal;
-        public uint PowerupsDoubleExperience;
-        public uint PowerupsBotRespect;
-        public uint UsualTickets;
-        public uint RareTickets;
+        public UInt64 UserId;
+        public UInt32 Coins;
+        public UInt32 Tokens;
+        public UInt32 Chests;
+        public UInt32 Capsules;
+        public UInt32 Spheres;
+        public UInt32 CoinsEarnedTotal;
+        public UInt32 CoinsSpentTotal;
+        public UInt32 PowerupsDoubleExperience;
+        public UInt32 PowerupsBotRespect;
+        public UInt32 UsualTickets;
+        public UInt32 RareTickets;
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,8 +12,6 @@ using IonicLib;
 
 using Discord;
 using Discord.WebSocket;
-
-using Humanizer;
 
 namespace Rift.Services
 {
@@ -29,7 +26,7 @@ namespace Rift.Services
 
         async Task TimerProcAsync()
         {
-            var expiredRoles = await RiftBot.GetService<DatabaseService>().GetExpiredTempRolesAsync();
+            var expiredRoles = await Database.GetExpiredTempRolesAsync();
 
             if (expiredRoles is null || expiredRoles.Count == 0)
                 return;
@@ -74,14 +71,12 @@ namespace Rift.Services
                 return;
 
             await sgUser.AddRoleAsync(serverRole);
-
-            await RiftBot.GetService<DatabaseService>()
-                         .AddTempRoleAsync(role);
+            await Database.AddTempRoleAsync(role);
         }
 
         public async Task<(bool, Embed)> RemoveTempRoleAsync(ulong userId, ulong roleId)
         {
-            await RiftBot.GetService<DatabaseService>().RemoveUserTempRoleAsync(userId, roleId);
+            await Database.RemoveUserTempRoleAsync(userId, roleId);
 
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
@@ -97,14 +92,14 @@ namespace Rift.Services
 
         public async Task<List<RiftTempRole>> GetUserTempRolesAsync(ulong userId)
         {
-            return await RiftBot.GetService<DatabaseService>().GetUserTempRolesAsync(userId);
+            return await Database.GetUserTempRolesAsync(userId);
         }
 
         public async Task RestoreTempRolesAsync(SocketGuildUser sgUser)
         {
             RiftBot.Log.Info($"User {sgUser} ({sgUser.Id.ToString()}) joined, checking temp roles");
 
-            var tempRoles = await RiftBot.GetService<DatabaseService>().GetUserTempRolesAsync(sgUser.Id);
+            var tempRoles = await Database.GetUserTempRolesAsync(sgUser.Id);
 
             if (tempRoles is null)
             {

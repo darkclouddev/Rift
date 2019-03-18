@@ -150,7 +150,6 @@ namespace Rift
         {
             var services = new ServiceCollection()
                            .AddSingleton(Log)
-                           .AddSingleton(new DatabaseService())
                            .AddSingleton(IonicClient.Client)
                            .AddSingleton(new EconomyService())
                            .AddSingleton(new RoleService())

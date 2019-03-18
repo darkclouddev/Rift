@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -62,7 +62,7 @@ namespace Rift.Services
         {
             RiftBot.Log.Debug($"Gifts are on the way..");
 
-            var users = await RiftBot.GetService<DatabaseService>().GetBotRespectedUsersAsync();
+            var users = await Database.GetBotRespectedUsersAsync();
             if (users.Length > 0)
             {
                 foreach (var user in users)

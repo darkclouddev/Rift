@@ -1,11 +1,14 @@
-﻿namespace Rift.Data.Models
+﻿using System;
+
+namespace Rift.Data.Models
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class ScheduledEvent
     {
-        public uint Id { get; set; }
-        public int DayId { get; set; }
-        public int EventId { get; set; }
-        public int Hour { get; set; }
-        public int Minute { get; set; }
+        public UInt32 Id { get; set; }
+        public Int32 DayId { get; set; }
+        public Int32 EventId { get; set; }
+        public Int32 Hour { get; set; }
+        public Int32 Minute { get; set; }
     }
 }

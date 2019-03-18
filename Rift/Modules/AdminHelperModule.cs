@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -26,21 +26,18 @@ namespace Rift.Modules
     {
         readonly RiotService riotService;
         readonly EconomyService economyService;
-        readonly DatabaseService databaseService;
 
-        public AdminHelperModule(RiotService riotService, EconomyService economyService,
-                                 DatabaseService databaseService)
+        public AdminHelperModule(RiotService riotService, EconomyService economyService)
         {
             this.riotService = riotService;
             this.economyService = economyService;
-            this.databaseService = databaseService;
         }
 
         [Command("code")]
         [RequireContext(ContextType.DM)]
         public async Task Code(ulong userId)
         {
-            var pendingData = await databaseService.GetPendingUserAsync(userId);
+            var pendingData = await Database.GetPendingUserAsync(userId);
 
             if (pendingData is null)
             {
@@ -93,9 +90,9 @@ namespace Rift.Modules
         async Task ModifyDonateAsync(ulong userId, decimal amount, bool add)
         {
             if (add)
-                await databaseService.AddDonateAsync(userId, amount);
+                await Database.AddDonateAsync(userId, amount);
             else
-                await databaseService.RemoveDonateAsync(userId, amount);
+                await Database.RemoveDonateAsync(userId, amount);
         }
 
         [Command("донат подарки")]
@@ -142,7 +139,7 @@ namespace Rift.Modules
 
             foreach (var user in srAbsolute.Members)
             {
-                await RiftBot.GetService<DatabaseService>().AddInventoryAsync(user.Id, coins: 10_000u, spheres: 1u);
+                await Database.AddInventoryAsync(user.Id, coins: 10_000u, spheres: 1u);
                 await user.SendEmbedAsync(absoluteEmbed);
             }
 
@@ -150,7 +147,7 @@ namespace Rift.Modules
 
             foreach (var user in srLegendary.Members)
             {
-                await RiftBot.GetService<DatabaseService>().AddInventoryAsync(user.Id, coins: 50_000u, usualTickets: 2u);
+                await Database.AddInventoryAsync(user.Id, coins: 50_000u, usualTickets: 2u);
                 await user.SendEmbedAsync(legendaryEmbed);
             }
 
@@ -166,7 +163,7 @@ namespace Rift.Modules
 
             foreach (var user in privateRoleUsers)
             {
-                await RiftBot.GetService<DatabaseService>().AddInventoryAsync(user.Id, coins: 20_000u, spheres: 1u);
+                await Database.AddInventoryAsync(user.Id, coins: 20_000u, spheres: 1u);
                 await user.SendEmbedAsync(privateEmbed);
             }
 
