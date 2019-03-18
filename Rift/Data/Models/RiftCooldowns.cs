@@ -4,7 +4,7 @@ namespace Rift.Data.Models
 {
     public class RiftCooldowns
     {
-        public ulong UserId { get; set; }
+        public UInt64 UserId { get; set; }
         public DateTime LastStoreTime { get; set; }
         public DateTime LastAttackTime { get; set; }
         public DateTime LastBeingAttackedTime { get; set; }

@@ -7,26 +7,26 @@ namespace Rift.Data.Models.Statistics
         public UInt64 UserId;
         public UInt32 Level;
 
-        public UInt64 CoinsEarnedTotal;
-        public UInt64 TokensEarnedTotal;
-        public UInt64 ChestsEarnedTotal;
-        public UInt64 SphereEarnedTotal;
-        public UInt64 CapsuleEarnedTotal;
+        public UInt32 CoinsEarnedTotal;
+        public UInt32 TokensEarnedTotal;
+        public UInt32 ChestsEarnedTotal;
+        public UInt32 SphereEarnedTotal;
+        public UInt32 CapsuleEarnedTotal;
 
-        public UInt64 ChestsOpenedTotal;
-        public UInt64 SphereOpenedTotal;
-        public UInt64 CapsuleOpenedTotal;
+        public UInt32 ChestsOpenedTotal;
+        public UInt32 SphereOpenedTotal;
+        public UInt32 CapsuleOpenedTotal;
 
-        public UInt64 AttacksDone;
-        public UInt64 AttacksReceived;
+        public UInt32 AttacksDone;
+        public UInt32 AttacksReceived;
 
-        public UInt64 CoinsSpentTotal;
-        public UInt64 TokensSpentTotal;
-        public UInt64 GiftsSent;
-        public UInt64 GiftsReceived;
-        public UInt64 MessagesSentTotal;
-        public UInt64 BragTotal;
-        public UInt64 PurchasedItemsTotal;
+        public UInt32 CoinsSpentTotal;
+        public UInt32 TokensSpentTotal;
+        public UInt32 GiftsSent;
+        public UInt32 GiftsReceived;
+        public UInt32 MessagesSentTotal;
+        public UInt32 BragTotal;
+        public UInt32 PurchasedItemsTotal;
 
         public Decimal Donate;
     }

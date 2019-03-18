@@ -1,32 +1,34 @@
 ﻿using System;
 
+using Humanizer;
+
 namespace Rift.Data.Models
 {
     public class RiftTempRole
     {
-        public ulong UserId { get; set; }
-        public ulong RoleId { get; set; }
+        public UInt64 UserId { get; set; }
+        public UInt64 RoleId { get; set; }
         public DateTime ObtainedTime { get; set; }
-        public string ObtainedFrom { get; set; }
+        public String ObtainedFrom { get; set; }
         public DateTime ExpirationTime { get; set; }
 
         public RiftUser User { get; set; }
 
-        public override int GetHashCode()
+        public override Int32 GetHashCode()
         {
             return UserId.GetHashCode() * 37 + RoleId.GetHashCode();
         }
 
-        public override bool Equals(object obj)
+        public override Boolean Equals(Object obj)
         {
             return obj is RiftTempRole role
                    && UserId == role.UserId
                    && RoleId == role.RoleId;
         }
 
-        public override string ToString()
+        public override String ToString()
         {
-            return $"RiftTempRole: {nameof(UserId)}: {UserId}, {nameof(RoleId)}: {RoleId}, {nameof(ExpirationTime)}: {ExpirationTime.ToString()}";
+            return $"RiftTempRole: {nameof(UserId)}: {UserId.ToString()}, {nameof(RoleId)}: {RoleId.ToString()}, {nameof(ExpirationTime)}: {ExpirationTime.Humanize()}";
         }
     }
 }

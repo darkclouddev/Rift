@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace Rift.Data.Models.Timestamps
+namespace Rift.Data.Models.Cooldowns
 {
     public class UserLastStoreTime
     {
-        public ulong UserId;
+        public UInt64 UserId;
         public DateTime LastStoreTime;
     }
 }

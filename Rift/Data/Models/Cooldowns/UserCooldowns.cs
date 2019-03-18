@@ -1,11 +1,12 @@
 using System;
+
 using Rift.Configuration;
 
 namespace Rift.Data.Models.Cooldowns
 {
     public class UserCooldowns
     {
-        public ulong UserId { get; }
+        public UInt64 UserId { get; }
         public DateTime LastStoreTime { get; }
         public TimeSpan StoreTimeSpan { get; }
         public DateTime LastAttackTime { get; }

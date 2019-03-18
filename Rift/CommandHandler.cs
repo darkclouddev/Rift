@@ -27,7 +27,6 @@ namespace Rift
         public readonly IServiceProvider provider;
         static DiscordSocketClient client;
         static CommandService commandService;
-        static DatabaseService databaseService;
         static EconomyService economyService;
         static RoleService roleService;
         static RiotService riotService;
@@ -41,7 +40,6 @@ namespace Rift
 
             client = provider.GetService<DiscordSocketClient>();
             commandService = provider.GetService<CommandService>();
-            databaseService = provider.GetService<DatabaseService>();
             economyService = provider.GetService<EconomyService>();
             minionService = provider.GetService<MinionService>();
             roleService = provider.GetService<RoleService>();

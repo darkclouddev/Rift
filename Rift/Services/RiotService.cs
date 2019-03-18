@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Data.Models;
+using Rift.Data.Models.Cooldowns;
 using Rift.Data.Models.LolData;
-using Rift.Data.Models.Timestamps;
 using Rift.Embeds;
 using Rift.Services.Riot;
 
@@ -309,7 +309,7 @@ namespace Rift.Services
 
         async Task<Embed> RegisterInternalAsync(ulong userId, string region, string summonerName)
         {
-            if (await RiftBot.GetService<DatabaseService>().HasLolDataAsync(userId))
+            if (await Database.HasLolDataAsync(userId))
                 return RegisterEmbeds.AlreadyHasAcc;
 
             if (await IsPending(userId))
@@ -320,7 +320,7 @@ namespace Rift.Services
             if (summonerResult != RequestResult.Success)
                 return RegisterEmbeds.WrongSummonerName(summonerName, region);
 
-            if (await RiftBot.GetService<DatabaseService>().IsTakenAsync(region, summoner.Id))
+            if (await Database.IsTakenAsync(region, summoner.Id))
                 return RegisterEmbeds.AccountIsUsed;
 
             string code = Helper.GenerateConfirmationCode(16);
@@ -344,16 +344,16 @@ namespace Rift.Services
 
         static async Task<bool> AddForApprovalAsync(RiftPendingUser pendingUser)
         {
-            if (await RiftBot.GetService<DatabaseService>().IsPendingAsync(pendingUser.UserId))
+            if (await Database.IsPendingAsync(pendingUser.UserId))
                 return false;
 
-            await RiftBot.GetService<DatabaseService>().AddPendingUserAsync(pendingUser);
+            await Database.AddPendingUserAsync(pendingUser);
             return true;
         }
 
         async Task CheckApproveAsync()
         {
-            var pendingUsers = await RiftBot.GetService<DatabaseService>().GetAllPendingUsersAsync();
+            var pendingUsers = await Database.GetAllPendingUsersAsync();
 
             if (pendingUsers is null || !pendingUsers.Any())
                 return;
@@ -366,7 +366,7 @@ namespace Rift.Services
 
                 if (expired)
                 {
-                    await RiftBot.GetService<DatabaseService>().RemovePendingUserAsync(user);
+                    await Database.RemovePendingUserAsync(user);
                 }
             }
 
@@ -398,7 +398,7 @@ namespace Rift.Services
 
                 if (requestResult != RequestResult.Success)
                 {
-                    await RiftBot.GetService<DatabaseService>().RemovePendingUserAsync(user);
+                    await Database.RemovePendingUserAsync(user);
                     continue;
                 }
 
@@ -412,7 +412,7 @@ namespace Rift.Services
                     SummonerName = summoner.Name
                 };
 
-                await RiftBot.GetService<DatabaseService>().AddLolDataAsync(lolData);
+                await Database.AddLolDataAsync(lolData);
 
                 usersValidated++;
 
@@ -429,11 +429,11 @@ namespace Rift.Services
             if (sgUser is null)
                 return;
 
-            await RiftBot.GetService<DatabaseService>().RemovePendingUserAsync(pendingUser.UserId);
+            await Database.RemovePendingUserAsync(pendingUser.UserId);
 
             await AssignRoleFromRankAsync(sgUser, pendingUser);
 
-            await RiftBot.GetService<DatabaseService>().AddInventoryAsync(sgUser.Id, chests: 2u);
+            await Database.AddInventoryAsync(sgUser.Id, chests: 2u);
 
             await sgUser.SendEmbedAsync(RegisterEmbeds.RegistrationSuccessful);
 
@@ -447,7 +447,7 @@ namespace Rift.Services
 
         async Task<bool> IsPending(ulong userId)
         {
-            return await RiftBot.GetService<DatabaseService>().IsPendingAsync(userId);
+            return await Database.IsPendingAsync(userId);
         }
 
         #endregion Validation
@@ -458,7 +458,7 @@ namespace Rift.Services
         {
             if (users == null || index == users.Length)
             {
-                users = await RiftBot.GetService<DatabaseService>().GetTenUsersForUpdateAsync();
+                users = await Database.GetTenUsersForUpdateAsync();
                 index = 0;
                 return;
             }
@@ -472,7 +472,7 @@ namespace Rift.Services
                 var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, user.UserId);
 
                 if (sgUser is null)
-                    await RiftBot.GetService<DatabaseService>().RemoveLolDataAsync(user.UserId);
+                    await Database.RemoveLolDataAsync(user.UserId);
                 else
                     await UpdateRankAsync(user.UserId, true);
             }
@@ -480,8 +480,7 @@ namespace Rift.Services
             {
             }
 
-            await RiftBot.GetService<DatabaseService>()
-                         .SetLastLolAccountUpdateTimeAsync(user.UserId, DateTime.UtcNow);
+            await Database.SetLastLolAccountUpdateTimeAsync(user.UserId, DateTime.UtcNow);
             index++;
         }
 
@@ -492,12 +491,10 @@ namespace Rift.Services
 
             RiftBot.Log.Debug($"[User|{userId}] Getting summoner for rank update");
 
-            var lolData = await RiftBot.GetService<DatabaseService>().GetUserLolDataAsync(userId);
+            var lolData = await Database.GetUserLolDataAsync(userId);
 
-            await RiftBot.GetService<DatabaseService>()
-                         .UpdateLolDataAsync(userId, lolData.SummonerRegion, lolData.PlayerUUID,
-                                             lolData.AccountId, lolData.SummonerId,
-                                             lolData.SummonerName);
+            await Database.UpdateLolDataAsync(userId, lolData.SummonerRegion, lolData.PlayerUUID, lolData.AccountId,
+                lolData.SummonerId, lolData.SummonerName);
 
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
@@ -524,6 +521,7 @@ namespace Rift.Services
             {
                 if (!silentMode)
                     await sgUser.SendEmbedAsync(LolProfileEmbeds.NoRankUpdated);
+                
                 return;
             }
 
@@ -599,7 +597,7 @@ namespace Rift.Services
                 if (newRank < LeagueRank.Bronze)
                     return;
 
-                await RiftBot.GetService<DatabaseService>().AddInventoryAsync(sgUser.Id, chests: 4u);
+                await Database.AddInventoryAsync(sgUser.Id, chests: 4u);
                 await sgUser.SendEmbedAsync(LolProfileEmbeds.DMRankUpdated);
             }
             else

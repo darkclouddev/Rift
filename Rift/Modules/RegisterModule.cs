@@ -13,12 +13,10 @@ namespace Rift.Modules
 {
     public class RegisterModule : RiftModuleBase
     {
-        readonly DatabaseService databaseService;
         readonly RiotService riotService;
 
-        public RegisterModule(DatabaseService databaseService, RiotService riotService)
+        public RegisterModule(RiotService riotService)
         {
-            this.databaseService = databaseService;
             this.riotService = riotService;
         }
 
@@ -51,7 +49,7 @@ namespace Rift.Modules
                 return;
             }
 
-            await databaseService.RemoveLolDataAsync(user.Id);
+            await Database.RemoveLolDataAsync(user.Id);
         }
     }
 }

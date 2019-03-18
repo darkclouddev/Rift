@@ -72,8 +72,7 @@ namespace Rift.Rewards
 
         public virtual async Task GiveRewardAsync(ulong userId)
         {
-            await RiftBot.GetService<DatabaseService>()
-                         .AddInventoryAsync(userId,
+            await Database.AddInventoryAsync(userId,
                                             coins: Coins,
                                             tokens: Tokens,
                                             chests: Chests,
@@ -84,7 +83,7 @@ namespace Rift.Rewards
                                             usualTickets: UsualTickets,
                                             rareTickets: RareTickets);
 
-            await RiftBot.GetService<DatabaseService>().AddExperienceAsync(userId, Experience);
+            await Database.AddExperienceAsync(userId, Experience);
         }
 
         public Reward(Loot coins = null, Loot tokens = null, Loot chests = null, Loot spheres = null,

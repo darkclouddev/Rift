@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -115,8 +115,6 @@ namespace Rift.Services
 
         public void Init()
         {
-            RiftBot.GetService<DatabaseService>().OnDonateAdded += OnDonateAdded;
-
             ratingUpdateTimer = new Timer(async delegate { await UpdateRatingAsync(); }, null, TimeSpan.FromMinutes(5), ratingTimerCooldown);
             InitActiveUsersTimer();
             InitRichUsersTimer();
@@ -149,9 +147,8 @@ namespace Rift.Services
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return;
 
-            var topTen = await RiftBot.GetService<DatabaseService>()
-                .GetTopTenByExpAsync(x =>
-                    !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
+            var topTen = await Database.GetTopTenByExpAsync(x => 
+                !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
 
             if (topTen.Length == 0)
                 return;
@@ -164,8 +161,8 @@ namespace Rift.Services
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return;
 
-            var topTen = await RiftBot.GetService<DatabaseService>()
-                .GetTopTenByCoinsAsync(x => !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
+            var topTen = await Database.GetTopTenByCoinsAsync(x => 
+                !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
 
             if (topTen.Length == 0)
                 return;
@@ -234,14 +231,14 @@ namespace Rift.Services
         public async Task ProcessMessageAsync(IUserMessage message)
         {
             await AddExpAsync(message.Author.Id, 1u);
-            await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(message.Author.Id, messagesSentTotal: 1ul);
+            await Database.AddStatisticsAsync(message.Author.Id, messagesSentTotal: 1u);
         }
 
         static async Task AddExpAsync(ulong userId, uint exp)
         {
-            await RiftBot.GetService<DatabaseService>().AddExperienceAsync(userId, exp);
+            await Database.AddExperienceAsync(userId, exp);
 
-            var dbUserLevel = await RiftBot.GetService<DatabaseService>().GetUserLevelAsync(userId);
+            var dbUserLevel = await Database.GetUserLevelAsync(userId);
 
             if (dbUserLevel.Experience != uint.MaxValue)
             {
@@ -256,7 +253,7 @@ namespace Rift.Services
 
                 if (newLevel > dbUserLevel.Level)
                 {
-                    await RiftBot.GetService<DatabaseService>().SetLevelAsync(userId, newLevel);
+                    await Database.SetLevelAsync(userId, newLevel);
 
                     RiftBot.Log.Info($"{userId.ToString()} just leveled up to {newLevel.ToString()}");
 
@@ -282,7 +279,7 @@ namespace Rift.Services
         {
             try
             {
-                var dbDaily = await RiftBot.GetService<DatabaseService>().GetUserLastDailyChestTimeAsync(userId);
+                var dbDaily = await Database.GetUserLastDailyChestTimeAsync(userId);
     
                 var diff = DateTime.UtcNow - dbDaily.LastDailyChestTime;
     
@@ -313,8 +310,7 @@ namespace Rift.Services
 
                 reward.CalculateReward();
                 await reward.GiveRewardAsync(userId);
-                await RiftBot.GetService<DatabaseService>()
-                             .SetLastDailyChestTimeAsync(userId, DateTime.UtcNow);
+                await Database.SetLastDailyChestTimeAsync(userId, DateTime.UtcNow);
                 reward.GenerateRewardString();
 
                 var dailyChestEmbed = ProfileEmbeds.DailyMessageGiftEmbed(reward.RewardString);
@@ -418,7 +414,7 @@ namespace Rift.Services
             await reward.GiveRewardAsync(userId);
             reward.GenerateRewardString();
 
-            var statistics = await RiftBot.GetService<DatabaseService>().GetUserStatisticsAsync(userId);
+            var statistics = await Database.GetUserStatisticsAsync(userId);
             var eb = LevelUpEmbeds.DM(level, statistics, reward.RewardString);
 
             await sgUser.SendEmbedAsync(eb);
@@ -431,7 +427,7 @@ namespace Rift.Services
             if (sgUser is null)
                 return GenericEmbeds.Error;
 
-            var cooldowns = await RiftBot.GetService<DatabaseService>().GetUserCooldownsAsync(userId);
+            var cooldowns = await Database.GetUserCooldownsAsync(userId);
 
             return CooldownEmbeds.DMEmbed(cooldowns);
         }
@@ -443,7 +439,7 @@ namespace Rift.Services
             if (sgUser is null)
                 return GenericEmbeds.Error;
 
-            var profile = await RiftBot.GetService<DatabaseService>().GetUserProfileAsync(userId);
+            var profile = await Database.GetUserProfileAsync(userId);
 
             string position = ratingSorted is null
                 ? "-"
@@ -506,7 +502,7 @@ namespace Rift.Services
             if (sgUser is null)
                 return GenericEmbeds.Error;
 
-            var inventory = await RiftBot.GetService<DatabaseService>().GetUserInventoryAsync(userId);
+            var inventory = await Database.GetUserInventoryAsync(userId);
 
             return ProfileEmbeds.InventoryEmbed(inventory);
         }
@@ -518,7 +514,7 @@ namespace Rift.Services
             if (sgUser is null)
                 return GenericEmbeds.Error;
 
-            var dbSummoner = await RiftBot.GetService<DatabaseService>().GetUserLolDataAsync(userId);
+            var dbSummoner = await Database.GetUserLolDataAsync(userId);
 
             if (String.IsNullOrWhiteSpace(dbSummoner.PlayerUUID))
                 return StatEmbeds.NoRankEmbed;
@@ -558,7 +554,7 @@ namespace Rift.Services
 
         public async Task<Embed> GetUserStatAsync(ulong userId)
         {
-            var statistics = await RiftBot.GetService<DatabaseService>().GetUserStatisticsAsync(userId);
+            var statistics = await Database.GetUserStatisticsAsync(userId);
             return StatEmbeds.UserStatisticsEmbed(statistics);
         }
 
@@ -572,7 +568,7 @@ namespace Rift.Services
             {
                 result = await GetUserBragInternalAsync(userId).ConfigureAwait(false);
                 if (result.Item1 == BragResult.Success)
-                    await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(userId, bragTotal: 1ul);
+                    await Database.AddStatisticsAsync(userId, bragTotal: 1u);
             }
             finally
             {
@@ -589,7 +585,7 @@ namespace Rift.Services
             if (!canBrag)
                 return (BragResult.Error, BragEmbeds.Cooldown(remaining));
 
-            var dbSummoner = await RiftBot.GetService<DatabaseService>().GetUserLolDataAsync(userId);
+            var dbSummoner = await Database.GetUserLolDataAsync(userId);
 
             if (dbSummoner is null || String.IsNullOrWhiteSpace(dbSummoner.AccountId))
                 return (BragResult.Error, BragEmbeds.NoData);
@@ -637,10 +633,10 @@ namespace Rift.Services
 
             string champThumb = RiotService.GetChampionSquareByName(champData.Image);
 
-            await RiftBot.GetService<DatabaseService>().SetLastBragTimeAsync(userId, DateTime.UtcNow);
+            await Database.SetLastBragTimeAsync(userId, DateTime.UtcNow);
 
             var brag = new Brag(player.Stats.Win);
-            await RiftBot.GetService<DatabaseService>().AddInventoryAsync(userId, coins: brag.Coins);
+            await Database.AddInventoryAsync(userId, coins: brag.Coins);
 
             var queue = RiftBot.GetService<RiotService>().GetQueueNameById(matchData.QueueId);
             return (BragResult.Success, BragEmbeds.Success(userId, champThumb, champData.Name, player, queue,
@@ -649,7 +645,7 @@ namespace Rift.Services
 
         static async Task<(bool, TimeSpan)> CanBrag(ulong userId)
         {
-            var data = await RiftBot.GetService<DatabaseService>().GetUserLastBragTimeAsync(userId);
+            var data = await Database.GetUserLastBragTimeAsync(userId);
 
             if (data.LastBragTime == DateTime.MinValue)
                 return (true, TimeSpan.Zero);
@@ -690,7 +686,7 @@ namespace Rift.Services
                 result = await OpenChestInternalAsync(userId, 1).ConfigureAwait(false);
                 
                 if (result.Item1 == OpenChestResult.Success)
-                    await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(userId, chestsOpenedTotal: 1);
+                    await Database.AddStatisticsAsync(userId, chestsOpenedTotal: 1);
             }
             finally
             {
@@ -710,10 +706,10 @@ namespace Rift.Services
 
             try
             {
-                var dbInventory = await RiftBot.GetService<DatabaseService>().GetUserInventoryAsync(userId);
+                var dbInventory = await Database.GetUserInventoryAsync(userId);
                 result = await OpenChestInternalAsync(userId, dbInventory.Chests).ConfigureAwait(false);
                 if (result.Item1 == OpenChestResult.Success)
-                    await RiftBot.GetService<DatabaseService>()
+                    await Database
                                  .AddStatisticsAsync(userId, chestsOpenedTotal: dbInventory.Chests);
             }
             finally
@@ -726,13 +722,13 @@ namespace Rift.Services
 
         static async Task<(OpenChestResult, Embed)> OpenChestInternalAsync(ulong userId, uint amount)
         {
-            var dbInventory = await RiftBot.GetService<DatabaseService>().GetUserInventoryAsync(userId);
+            var dbInventory = await Database.GetUserInventoryAsync(userId);
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
             if (dbInventory.Chests < amount || amount == 0)
                 return (OpenChestResult.NoChests, ChestEmbeds.NoChestsEmbed);
 
-            await RiftBot.GetService<DatabaseService>().RemoveInventoryAsync(userId, chests: amount);
+            await Database.RemoveInventoryAsync(userId, chests: amount);
 
             var chest = new Chest(userId, amount);
 
@@ -754,7 +750,7 @@ namespace Rift.Services
             {
                 result = await OpenCapsuleInternalAsync(userId).ConfigureAwait(false);
                 if (result.Item1 == OpenCapsuleResult.Success)
-                    await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(userId, capsuleOpenedTotal: 1ul);
+                    await Database.AddStatisticsAsync(userId, capsuleOpenedTotal: 1u);
             }
             finally
             {
@@ -766,12 +762,12 @@ namespace Rift.Services
 
         static async Task<(OpenCapsuleResult, Embed)> OpenCapsuleInternalAsync(ulong userId)
         {
-            var dbUserInventory = await RiftBot.GetService<DatabaseService>().GetUserInventoryAsync(userId);
+            var dbUserInventory = await Database.GetUserInventoryAsync(userId);
 
             if (dbUserInventory.Capsules == 0u)
                 return (OpenCapsuleResult.NoCapsules, CapsuleEmbeds.NoCapsulesEmbed);
 
-            await RiftBot.GetService<DatabaseService>().RemoveInventoryAsync(userId, capsules: 1u);
+            await Database.RemoveInventoryAsync(userId, capsules: 1u);
 
             var capsule = new Capsule(userId);
             await capsule.GiveRewardsAsync(userId);
@@ -796,7 +792,7 @@ namespace Rift.Services
             {
                 result = await OpenSphereInternalAsync(userId).ConfigureAwait(false);
                 if (result.Item1 == OpenSphereResult.Success)
-                    await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(userId, sphereOpenedTotal: 1ul);
+                    await Database.AddStatisticsAsync(userId, sphereOpenedTotal: 1u);
             }
             finally
             {
@@ -808,12 +804,12 @@ namespace Rift.Services
 
         static async Task<(OpenSphereResult, Embed)> OpenSphereInternalAsync(ulong userId)
         {
-            var dbInventory = await RiftBot.GetService<DatabaseService>().GetUserInventoryAsync(userId);
+            var dbInventory = await Database.GetUserInventoryAsync(userId);
 
             if (dbInventory.Spheres == 0u)
                 return (OpenSphereResult.NoSpheres, SphereEmbeds.NoSpheresEmbed);
 
-            await RiftBot.GetService<DatabaseService>().RemoveInventoryAsync(userId, spheres: 1u);
+            await Database.RemoveInventoryAsync(userId, spheres: 1u);
 
             var sphere = new Sphere(userId);
             await sphere.GiveRewardsAsync(userId);
@@ -838,7 +834,7 @@ namespace Rift.Services
             {
                 result = await StorePurchaseInternalAsync(userId, item).ConfigureAwait(false);
                 if (result.Item1 == StorePurchaseResult.Success)
-                    await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(userId, purchasedItemsTotal: 1ul);
+                    await Database.AddStatisticsAsync(userId, purchasedItemsTotal: 1u);
             }
             finally
             {
@@ -892,35 +888,35 @@ namespace Rift.Services
             switch (item.Type)
             {
                 case StoreItemType.DoubleExp:
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(userId, doubleExps: 1u);
+                    await Database.AddInventoryAsync(userId, doubleExps: 1u);
                     break;
 
                 case StoreItemType.Capsule:
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(userId, capsules: 1u);
+                    await Database.AddInventoryAsync(userId, capsules: 1u);
                     break;
 
                 case StoreItemType.UsualTicket:
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(userId, usualTickets: 1u);
+                    await Database.AddInventoryAsync(userId, usualTickets: 1u);
                     break;
 
                 case StoreItemType.RareTicket:
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(userId, rareTickets: 1u);
+                    await Database.AddInventoryAsync(userId, rareTickets: 1u);
                     break;
 
                 case StoreItemType.Chest:
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(userId, chests: 1u);
+                    await Database.AddInventoryAsync(userId, chests: 1u);
                     break;
 
                 case StoreItemType.Token:
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(userId, tokens: 1u);
+                    await Database.AddInventoryAsync(userId, tokens: 1u);
                     break;
 
                 case StoreItemType.Sphere:
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(userId, spheres: 1u);
+                    await Database.AddInventoryAsync(userId, spheres: 1u);
                     break;
 
                 case StoreItemType.BotRespect:
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(userId, respects: 1u);
+                    await Database.AddInventoryAsync(userId, respects: 1u);
                     break;
 
                 case StoreItemType.TempRole:
@@ -940,7 +936,7 @@ namespace Rift.Services
 
             async Task<(bool, Currency)> WithdrawCurrencyAsync()
             {
-                var dbInventory = await RiftBot.GetService<DatabaseService>().GetUserInventoryAsync(userId);
+                var dbInventory = await Database.GetUserInventoryAsync(userId);
 
                 switch (item.Currency)
                 {
@@ -949,7 +945,7 @@ namespace Rift.Services
                         if (dbInventory.Coins < item.Price)
                             return (false, item.Currency);
 
-                        await RiftBot.GetService<DatabaseService>().RemoveInventoryAsync(userId, coins: item.Price);
+                        await Database.RemoveInventoryAsync(userId, coins: item.Price);
                         break;
                     }
 
@@ -958,7 +954,7 @@ namespace Rift.Services
                         if (dbInventory.Tokens < item.Price)
                             return (false, item.Currency);
 
-                        await RiftBot.GetService<DatabaseService>().RemoveInventoryAsync(userId, tokens: item.Price);
+                        await Database.RemoveInventoryAsync(userId, tokens: item.Price);
                         break;
                     }
                 }
@@ -966,11 +962,11 @@ namespace Rift.Services
                 return (true, item.Currency);
             }
 
-            await RiftBot.GetService<DatabaseService>().SetLastStoreTimeAsync(userId, DateTime.UtcNow);
+            await Database.SetLastStoreTimeAsync(userId, DateTime.UtcNow);
 
             async Task<string> GetBalanceString()
             {
-                var dbInventory = await RiftBot.GetService<DatabaseService>().GetUserInventoryAsync(userId);
+                var dbInventory = await Database.GetUserInventoryAsync(userId);
 
                 return $"{Settings.Emote.Coin} {dbInventory.Coins.ToString()} {Settings.Emote.Token} {dbInventory.Tokens.ToString()}";
             }
@@ -980,7 +976,7 @@ namespace Rift.Services
 
         static async Task<(bool, TimeSpan)> CanBuyStoreAsync(ulong userId)
         {
-            var dbStore = await RiftBot.GetService<DatabaseService>().GetUserLastStoreTimeAsync(userId);
+            var dbStore = await Database.GetUserLastStoreTimeAsync(userId);
 
             if (dbStore.LastStoreTime == DateTime.MinValue)
                 return (true, TimeSpan.Zero);
@@ -1005,8 +1001,8 @@ namespace Rift.Services
 
                 if (result.Item1 == GiftResult.Success)
                 {
-                    await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(fromUser.Id, giftsSent: 1ul);
-                    await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(toUser.Id, giftsReceived: 1ul);
+                    await Database.AddStatisticsAsync(fromUser.Id, giftsSent: 1u);
+                    await Database.AddStatisticsAsync(toUser.Id, giftsReceived: 1u);
                 }
             }
             finally
@@ -1048,7 +1044,7 @@ namespace Rift.Services
                 }
             }
 
-            await RiftBot.GetService<DatabaseService>().SetLastGiftTimeAsync(fromUser.Id, DateTime.UtcNow);
+            await Database.SetLastGiftTimeAsync(fromUser.Id, DateTime.UtcNow);
 
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return (GiftResult.Error, GenericEmbeds.Error);
@@ -1058,48 +1054,48 @@ namespace Rift.Services
             {
                 case GiftItemType.CoinsRandom:
                     uint coins = Helper.NextUInt(1000, 3501);
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toUser.Id, coins: coins);
+                    await Database.AddInventoryAsync(toUser.Id, coins: coins);
                     giftString = $"{Settings.Emote.Coin} {coins.ToString()}";
                     break;
 
                 case GiftItemType.ChestsRandom:
                     uint chests = Helper.NextUInt(4, 12);
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toUser.Id, chests: chests);
+                    await Database.AddInventoryAsync(toUser.Id, chests: chests);
                     giftString = $"{Settings.Emote.Chest} {chests.ToString()}";
                     break;
 
                 case GiftItemType.Chest:
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toUser.Id, chests: 1);
+                    await Database.AddInventoryAsync(toUser.Id, chests: 1);
                     giftString = $"{Settings.Emote.Chest} 1";
                     break;
 
                 case GiftItemType.Sphere:
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toUser.Id, spheres: 1u);
+                    await Database.AddInventoryAsync(toUser.Id, spheres: 1u);
                     giftString = $"{Settings.Emote.Sphere} сферу";
                     break;
 
                 case GiftItemType.UsualTicket:
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toUser.Id, usualTickets: 1u);
+                    await Database.AddInventoryAsync(toUser.Id, usualTickets: 1u);
                     giftString = $"{Settings.Emote.UsualTickets} обычный билет";
                     break;
 
                 case GiftItemType.BotRespect:
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toUser.Id, respects: 1);
+                    await Database.AddInventoryAsync(toUser.Id, respects: 1);
                     giftString = $"{Settings.Emote.BotRespect} уважение ботов";
                     break;
 
                 case GiftItemType.RareTicket:
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toUser.Id, rareTickets: 1u);
+                    await Database.AddInventoryAsync(toUser.Id, rareTickets: 1u);
                     giftString = $"{Settings.Emote.RareTickets} редкий билет";
                     break;
 
                 case GiftItemType.DoubleExp:
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toUser.Id, doubleExps: 1u);
+                    await Database.AddInventoryAsync(toUser.Id, doubleExps: 1u);
                     giftString = $"{Settings.Emote.PowerupDoubleExperience} двойной опыт";
                     break;
             }
 
-            var dbInventory = await RiftBot.GetService<DatabaseService>().GetUserInventoryAsync(fromUser.Id);
+            var dbInventory = await Database.GetUserInventoryAsync(fromUser.Id);
 
             await fromUser.SendEmbedAsync(GiftEmbeds.DMFrom(toUser, dbInventory));
             await toUser.SendEmbedAsync(GiftEmbeds.DMTo(fromUser, giftString));
@@ -1113,7 +1109,7 @@ namespace Rift.Services
 
             async Task<(bool, Currency)> WithdrawCurrencyAsync()
             {
-                var dbInventory2 = await RiftBot.GetService<DatabaseService>().GetUserInventoryAsync(fromUser.Id);
+                var dbInventory2 = await Database.GetUserInventoryAsync(fromUser.Id);
 
                 switch (giftItem.Currency)
                 {
@@ -1122,8 +1118,7 @@ namespace Rift.Services
                         if (dbInventory2.Coins < giftItem.Price)
                             return (false, giftItem.Currency);
 
-                        await RiftBot.GetService<DatabaseService>()
-                                     .RemoveInventoryAsync(fromUser.Id, coins: giftItem.Price);
+                        await Database.RemoveInventoryAsync(fromUser.Id, coins: giftItem.Price);
                         break;
                     }
 
@@ -1132,8 +1127,7 @@ namespace Rift.Services
                         if (dbInventory2.Tokens < giftItem.Price)
                             return (false, giftItem.Currency);
 
-                        await RiftBot.GetService<DatabaseService>()
-                                     .RemoveInventoryAsync(fromUser.Id, tokens: giftItem.Price);
+                        await Database.RemoveInventoryAsync(fromUser.Id, tokens: giftItem.Price);
                         break;
                     }
                 }
@@ -1144,7 +1138,7 @@ namespace Rift.Services
 
         static async Task<(bool, TimeSpan)> CanGift(ulong userId)
         {
-            var data = await RiftBot.GetService<DatabaseService>().GetUserLastGiftTimeAsync(userId);
+            var data = await Database.GetUserLastGiftTimeAsync(userId);
 
             if (data.LastGiftTime == DateTime.MinValue)
                 return (true, TimeSpan.Zero);
@@ -1172,8 +1166,8 @@ namespace Rift.Services
                 
                 if (result.Item1 == AttackResult.Success)
                 {
-                    await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(sgAttacker.Id, attacksDone: 1ul);
-                    await RiftBot.GetService<DatabaseService>().AddStatisticsAsync(sgTarget.Id, attacksReceived: 1ul);
+                    await Database.AddStatisticsAsync(sgAttacker.Id, attacksDone: 1u);
+                    await Database.AddStatisticsAsync(sgTarget.Id, attacksReceived: 1u);
                 }
             }
             finally
@@ -1195,8 +1189,8 @@ namespace Rift.Services
             if (!canBeAttacked)
                 return (AttackResult.TooOftenSame, AttackEmbeds.TargetCooldown(canBeAttackedRemainingTime));
 
-            var attackerDbProfile = await RiftBot.GetService<DatabaseService>().GetUserProfileAsync(sgAttacker.Id);
-            var attackerDbInventory = await RiftBot.GetService<DatabaseService>().GetUserInventoryAsync(sgAttacker.Id);
+            var attackerDbProfile = await Database.GetUserProfileAsync(sgAttacker.Id);
+            var attackerDbInventory = await Database.GetUserInventoryAsync(sgAttacker.Id);
 
             if (attackerDbProfile.Level < Settings.Economy.AttackMinimumLevel)
                 return (AttackResult.LowUserLevel, AttackEmbeds.LowLevel);
@@ -1206,8 +1200,8 @@ namespace Rift.Services
             if (!canAttack)
                 return (AttackResult.OnUserCooldown, AttackEmbeds.Cooldown(canAttackRemainingTime));
 
-            var targetDbUserProfile = await RiftBot.GetService<DatabaseService>().GetUserProfileAsync(sgTarget.Id);
-            var targetDbUserInventory = await RiftBot.GetService<DatabaseService>().GetUserInventoryAsync(sgTarget.Id);
+            var targetDbUserProfile = await Database.GetUserProfileAsync(sgTarget.Id);
+            var targetDbUserInventory = await Database.GetUserInventoryAsync(sgTarget.Id);
 
             if (targetDbUserProfile.Level < Settings.Economy.AttackMinimumLevel)
                 return (AttackResult.LowTargetLevel, AttackEmbeds.LowTargetLevel);
@@ -1215,8 +1209,7 @@ namespace Rift.Services
             if (attackerDbInventory.Coins < Settings.Economy.AttackPrice)
                 return (AttackResult.NoCoins, AttackEmbeds.NoCoins);
 
-            await RiftBot.GetService<DatabaseService>()
-                         .RemoveInventoryAsync(sgAttacker.Id, coins: Settings.Economy.AttackPrice);
+            await Database.RemoveInventoryAsync(sgAttacker.Id, coins: Settings.Economy.AttackPrice);
 
             var attack = new Attack(sgAttacker.Id, sgTarget.Id, targetDbUserInventory.Coins,
                                     targetDbUserInventory.Chests);
@@ -1228,8 +1221,8 @@ namespace Rift.Services
                     if (targetDbUserInventory.Coins < attack.Count)
                         attack.Count = targetDbUserInventory.Coins; //stealing target's last monies :(
 
-                    await RiftBot.GetService<DatabaseService>().RemoveInventoryAsync(sgTarget.Id, coins: attack.Count);
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(sgAttacker.Id, coins: attack.Count);
+                    await Database.RemoveInventoryAsync(sgTarget.Id, coins: attack.Count);
+                    await Database.AddInventoryAsync(sgAttacker.Id, coins: attack.Count);
                     break;
                 }
                 case AttackLoot.Chests:
@@ -1237,8 +1230,8 @@ namespace Rift.Services
                     if (targetDbUserInventory.Chests < attack.Count)
                         attack.Count = targetDbUserInventory.Chests; //stealing target's last chests :(
 
-                    await RiftBot.GetService<DatabaseService>().RemoveInventoryAsync(sgTarget.Id, chests: attack.Count);
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(sgAttacker.Id, chests: attack.Count);
+                    await Database.RemoveInventoryAsync(sgTarget.Id, chests: attack.Count);
+                    await Database.AddInventoryAsync(sgAttacker.Id, chests: attack.Count);
                     break;
                 }
                 case AttackLoot.Mute:
@@ -1272,8 +1265,7 @@ namespace Rift.Services
             await sgAttacker.SendEmbedAsync(AttackEmbeds.Attacker(sgTarget, attack));
             await sgTarget.SendEmbedAsync(AttackEmbeds.Target(sgAttacker, attack));
 
-            await RiftBot.GetService<DatabaseService>()
-                         .SetLastAttackTimeAsync(sgAttacker.Id, DateTime.UtcNow); //attacker cd
+            await Database.SetLastAttackTimeAsync(sgAttacker.Id, DateTime.UtcNow); //attacker cd
 
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return (AttackResult.Error, GenericEmbeds.Error);
@@ -1289,7 +1281,7 @@ namespace Rift.Services
 
         static async Task<(bool, TimeSpan)> CanAttackAsync(ulong userId)
         {
-            var dbAttack = await RiftBot.GetService<DatabaseService>().GetUserLastAttackTimeAsync(userId);
+            var dbAttack = await Database.GetUserLastAttackTimeAsync(userId);
 
             if (dbAttack.LastAttackTime == DateTime.MinValue)
                 return (true, TimeSpan.Zero);
@@ -1302,7 +1294,7 @@ namespace Rift.Services
 
         static async Task<(bool, TimeSpan)> CanBeAttackedAgain(ulong userId)
         {
-            var dbAttacked = await RiftBot.GetService<DatabaseService>().GetUserLastBeingAttackedTimeAsync(userId);
+            var dbAttacked = await Database.GetUserLastBeingAttackedTimeAsync(userId);
 
             if (dbAttacked.LastBeingAttackedTime == DateTime.MinValue) // no cd
                 return (true, TimeSpan.Zero);
@@ -1316,8 +1308,7 @@ namespace Rift.Services
 
         static async Task UpdateLastBeingAttackedSameCooldown(ulong userId)
         {
-            await RiftBot.GetService<DatabaseService>()
-                         .SetLastBeingAttackedTimeAsync(userId, DateTime.UtcNow);
+            await Database.SetLastBeingAttackedTimeAsync(userId, DateTime.UtcNow);
         }
 
         public async Task<GiftResult> GiftSpecialAsync(ulong fromId, ulong toId, GiftSource giftSource)
@@ -1330,7 +1321,7 @@ namespace Rift.Services
             {
                 case GiftSource.Streamer:
 
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toId, coins: 300u, chests: 2u);
+                    await Database.AddInventoryAsync(toId, coins: 300u, chests: 2u);
 
                     chatEmbed
                         .WithDescription($"Стример <@{fromId.ToString()}> подарил {Settings.Emote.Coin} 300 {Settings.Emote.Chest} 2 призывателю <@{toId}>");
@@ -1338,7 +1329,7 @@ namespace Rift.Services
 
                 case GiftSource.Moderator:
 
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toId, coins: 100u, chests: 1u);
+                    await Database.AddInventoryAsync(toId, coins: 100u, chests: 1u);
 
                     chatEmbed
                         .WithDescription($"Призыватель <@{toId.ToString()}> получил {Settings.Emote.Coin} 100 {Settings.Emote.Chest} 1");
@@ -1347,7 +1338,7 @@ namespace Rift.Services
                 case GiftSource.Voice:
 
                     var coins = Helper.NextUInt(50, 350);
-                    await RiftBot.GetService<DatabaseService>().AddInventoryAsync(toId, coins: coins);
+                    await Database.AddInventoryAsync(toId, coins: coins);
 
                     chatEmbed
                         .WithAuthor("Голосовые каналы", Settings.Emote.VoiceUrl)
@@ -1371,7 +1362,7 @@ namespace Rift.Services
         public async Task ActivateDoubleExp(ulong userId)
         {
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-            var dbInventory = await RiftBot.GetService<DatabaseService>().GetUserInventoryAsync(userId);
+            var dbInventory = await Database.GetUserInventoryAsync(userId);
 
             if (dbInventory.PowerupsDoubleExperience == 0)
             {
@@ -1379,17 +1370,17 @@ namespace Rift.Services
                 return;
             }
 
-            var dbDoubleExp = await RiftBot.GetService<DatabaseService>().GetUserDoubleExpTimeAsync(userId);
+            var dbDoubleExp = await Database.GetUserDoubleExpTimeAsync(userId);
             if (dbDoubleExp.DoubleExpTime > DateTime.UtcNow)
             {
                 await sgUser.SendEmbedAsync(ActivateEmbeds.DoubleExpNotExpiredEmbed);
                 return;
             }
 
-            await RiftBot.GetService<DatabaseService>().RemoveInventoryAsync(userId, doubleExps: 1);
+            await Database.RemoveInventoryAsync(userId, doubleExps: 1);
 
             var dateTime = DateTime.UtcNow.AddHours(12.0);
-            await RiftBot.GetService<DatabaseService>().SetDoubleExpTimeAsync(userId, dateTime);
+            await Database.SetDoubleExpTimeAsync(userId, dateTime);
 
             await sgUser.SendEmbedAsync(ActivateEmbeds.DoubleExpSuccessEmbed);
 
@@ -1402,7 +1393,7 @@ namespace Rift.Services
         public async Task ActivateBotRespect(ulong userId)
         {
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-            var dbInventory = await RiftBot.GetService<DatabaseService>().GetUserInventoryAsync(userId);
+            var dbInventory = await Database.GetUserInventoryAsync(userId);
 
             if (dbInventory.PowerupsBotRespect == 0)
             {
@@ -1410,17 +1401,17 @@ namespace Rift.Services
                 return;
             }
 
-            var dbUser = await RiftBot.GetService<DatabaseService>().GetUserProfileAsync(userId);
+            var dbUser = await Database.GetUserProfileAsync(userId);
             if (dbUser.BotRespectTime > DateTime.UtcNow)
             {
                 await sgUser.SendEmbedAsync(ActivateEmbeds.BotRespectNotExpiredEmbed);
                 return;
             }
 
-            await RiftBot.GetService<DatabaseService>().RemoveInventoryAsync(userId, respects: 1);
+            await Database.RemoveInventoryAsync(userId, respects: 1);
 
             var dateTime = DateTime.UtcNow.AddHours(12.0);
-            await RiftBot.GetService<DatabaseService>().SetBotRespeсtTimeAsync(userId, dateTime);
+            await Database.SetBotRespeсtTimeAsync(userId, dateTime);
 
             await sgUser.SendEmbedAsync(ActivateEmbeds.BotRespectSuccessEmbed);
 

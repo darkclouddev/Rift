@@ -33,8 +33,8 @@ namespace Rift.Services.Giveaway
             bool isUsualTicket = Ticket == TicketType.Usual;
 
             var userList = isUsualTicket
-                ? await RiftBot.GetService<DatabaseService>().GetUsersWithUsualTicketsAsync()
-                : await RiftBot.GetService<DatabaseService>().GetUsersWithRareTicketsAsync();
+                ? await Database.GetUsersWithUsualTicketsAsync()
+                : await Database.GetUsersWithRareTicketsAsync();
 
             users = new List<ulong>();
 
@@ -42,12 +42,12 @@ namespace Rift.Services.Giveaway
             {
                 if (isUsualTicket && user.UsualTickets > 0)
                 {
-                    await RiftBot.GetService<DatabaseService>().RemoveInventoryAsync(user.UserId, usualTickets: 1);
+                    await Database.RemoveInventoryAsync(user.UserId, usualTickets: 1);
                     users.Add(user.UserId);
                 }
                 else if (!isUsualTicket && user.RareTickets > 0)
                 {
-                    await RiftBot.GetService<DatabaseService>().RemoveInventoryAsync(user.UserId, rareTickets: 1);
+                    await Database.RemoveInventoryAsync(user.UserId, rareTickets: 1);
                     users.Add(user.UserId);
                 }
             }

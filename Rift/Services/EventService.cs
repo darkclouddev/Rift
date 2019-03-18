@@ -43,16 +43,14 @@ namespace Rift.Services
 
         static async Task<ScheduledEvent> GetNextEvent(DateTime dt)
         {
-            return (await RiftBot.GetService<DatabaseService>()
-                                 .GetEventsAsync(x =>
-                                                     x.DayId == (int) dt.DayOfWeek
-                                                     && dt < dt.Date + new TimeSpan(x.Hour, x.Minute, 0)))
+            return (await Database.GetEventsAsync(x =>
+                    x.DayId == (int) dt.DayOfWeek && dt < dt.Date + new TimeSpan(x.Hour, x.Minute, 0)))
                 .FirstOrDefault();
         }
 
         async Task SetupNextEvent()
         {
-            if (!(await RiftBot.GetService<DatabaseService>().GetAllEventsAsync()).Any())
+            if (!(await Database.GetAllEventsAsync()).Any())
             {
                 RiftBot.Log.Warn($"No events in db, skipping event setup.");
                 return;
