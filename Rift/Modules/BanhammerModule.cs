@@ -96,8 +96,14 @@ namespace Rift.Modules
         [RequireModerator]
         [RequireContext(ContextType.Guild)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task Mute(String time, IUser user, String reason)
+        public async Task Mute(IUser user, String time, String reason)
         {
+            if (!(user is SocketGuildUser sgUser))
+            {
+                await Context.User.SendMessageAsync("Не удалось найти пользователя на сервере.");
+                return;
+            }
+            
             if (!Int32.TryParse(time.Remove(time.Length - 1), out var timeInt))
             {
                 await Context.User.SendMessageAsync($"Неверный формат времени: \"{time}\"");
@@ -135,12 +141,6 @@ namespace Rift.Modules
                 default:
                     await Context.User.SendMessageAsync($"Неверный модификатор времени: \"{timeMod.ToString()}\"");
                     return;
-            }
-
-            if (!(user is SocketGuildUser sgUser))
-            {
-                await Context.User.SendMessageAsync("Не удалось найти пользователя на сервере.");
-                return;
             }
 
             await roleService.AddTempRoleAsync(user.Id, Settings.RoleId.Muted, ts, $"Muted by {Context.User.Id.ToString()} with reason: {reason}");
