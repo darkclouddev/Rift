@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
@@ -29,37 +28,51 @@ namespace Rift.Modules
         [Command("kick")]
         [RequireModerator]
         [RequireContext(ContextType.Guild)]
-        public async Task Kick(IUser user)
+        public async Task Kick(IUser user, [Remainder]String reason)
         {
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return;
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Modchat, out var modChannel))
+                return;
 
+            if (String.IsNullOrEmpty(reason))
+            {
+                await Context.User.SendMessageAsync("Не указана причина.");
+                return;
+            }
+            
             if (!(user is SocketGuildUser sgUser))
             {
-                await Context.User.SendMessageAsync($"Не удалось найти пользователя на сервере!");
+                await Context.User.SendMessageAsync("Не удалось найти пользователя на сервере!");
                 return;
             }
 
             if (RiftBot.IsAdmin(sgUser) || RiftBot.IsModerator(sgUser))
             {
-                await Context.User.SendMessageAsync($"Огонь по своим недопустим!");
+                await Context.User.SendMessageAsync("Огонь по своим недопустим!");
                 return;
             }
 
             await sgUser.KickAsync();
-
-            var redColor = new Color(255, 0, 0);
-
-            await chatChannel.SendEmbedAsync(AdminEmbeds.Kick(sgUser));
+            await chatChannel.SendEmbedAsync(BanhammerEmbeds.Kick(sgUser));
+            await modChannel.SendEmbedAsync(BanhammerEmbeds.KickLog(sgUser, Context.User.ToString(), reason));
         }
 
         [Command("ban")]
         [RequireModerator]
         [RequireContext(ContextType.Guild)]
-        public async Task Ban(IUser user)
+        public async Task Ban(IUser user, [Remainder]String reason)
         {
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return;
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Modchat, out var modChannel))
+                return;
+
+            if (String.IsNullOrEmpty(reason))
+            {
+                await Context.User.SendMessageAsync("Не указана причина.");
+                return;
+            }
 
             if (!(user is SocketGuildUser sgUser))
             {
@@ -73,18 +86,19 @@ namespace Rift.Modules
                 return;
             }
 
-            await Context.Guild.AddBanAsync(sgUser, 1, $"Banned by {Context.User.ToString()}");
+            await Context.Guild.AddBanAsync(sgUser, 1, $"Banned by {Context.User}");
 
-            await chatChannel.SendEmbedAsync(AdminEmbeds.Ban(sgUser));
+            await chatChannel.SendEmbedAsync(BanhammerEmbeds.Ban(sgUser));
+            await modChannel.SendEmbedAsync(BanhammerEmbeds.BanLog(sgUser, Context.User.ToString(), reason));
         }
 
         [Command("mute")]
         [RequireModerator]
         [RequireContext(ContextType.Guild)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task Mute(string time, IUser user, string reason)
+        public async Task Mute(String time, IUser user, String reason)
         {
-            if (!Int32.TryParse(time.Remove(time.Length - 1), out int timeInt))
+            if (!Int32.TryParse(time.Remove(time.Length - 1), out var timeInt))
             {
                 await Context.User.SendMessageAsync($"Неверный формат времени: \"{time}\"");
                 return;
@@ -92,13 +106,13 @@ namespace Rift.Modules
 
             if (String.IsNullOrEmpty(reason))
             {
-                await Context.User.SendMessageAsync($"Не указана причина.");
+                await Context.User.SendMessageAsync("Не указана причина.");
                 return;
             }
 
             TimeSpan ts;
 
-            char timeMod = time.Last();
+            var timeMod = time.Last();
 
             switch (timeMod)
             {
@@ -125,7 +139,7 @@ namespace Rift.Modules
 
             if (!(user is SocketGuildUser sgUser))
             {
-                await Context.User.SendMessageAsync($"Не удалось найти пользователя на сервере.");
+                await Context.User.SendMessageAsync("Не удалось найти пользователя на сервере.");
                 return;
             }
 
@@ -133,9 +147,14 @@ namespace Rift.Modules
 
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return;
-
-            await chatChannel.SendEmbedAsync(AdminEmbeds.ChatMute(sgUser, reason));
-            await sgUser.SendEmbedAsync(AdminEmbeds.DMMute(ts, reason));
+            
+            await chatChannel.SendEmbedAsync(BanhammerEmbeds.ChatMute(sgUser, reason));
+            await sgUser.SendEmbedAsync(BanhammerEmbeds.DMMute(ts, reason));
+            
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Modchat, out var modChannel))
+                return;
+            
+            await modChannel.SendEmbedAsync(BanhammerEmbeds.MuteLog(sgUser, Context.User.ToString(), ts, reason));
         }
 
         [Command("unmute")]
@@ -167,7 +186,7 @@ namespace Rift.Modules
                 return;
             }
 
-            await chatChannel.SendEmbedAsync(AdminEmbeds.Warn(sgUser));
+            await chatChannel.SendEmbedAsync(BanhammerEmbeds.Warn(sgUser));
         }
     }
 }
