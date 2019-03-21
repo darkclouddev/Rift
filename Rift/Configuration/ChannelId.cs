@@ -9,7 +9,7 @@
         public ulong Confirmation { get; set; }
         public ulong Live { get; set; }
         public ulong News { get; set; }
-        public ulong Music { get; set; }
+        public ulong Modchat { get; set; }
         public ulong Donate { get; set; }
         public ulong Test { get; set; }
         public ulong Logs { get; set; }
