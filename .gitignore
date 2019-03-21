@@ -277,8 +277,6 @@ __pycache__/
 # tools/**
 # !tools/packages.config
 
-# Dolphin directory configuration
-.directory
-.idea/
-
-Rift/appsettings\.Development\.json
+# Dolphin directory configuration 
+.directory 
+.idea/ 

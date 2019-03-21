@@ -25,6 +25,7 @@
     <Compile Remove="Migrations\20190115211506_AddedFluentApi.Designer.cs" />
   </ItemGroup>
 
+
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="2.0.1" />
     <PackageReference Include="Discord.Net.Commands" Version="2.0.1" />
@@ -47,8 +48,9 @@
     <PackageReference Include="SharpZipLib" Version="1.1.0" />
   </ItemGroup>
 
+
   <ItemGroup>
-    <Folder Include="wwwroot" />
+    <Folder Include="Areas\Identity\Data\" />
   </ItemGroup>
 
 </Project>
