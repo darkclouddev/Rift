@@ -149,32 +149,33 @@ namespace Rift
         static IServiceProvider SetupServices()
         {
             var services = new ServiceCollection()
-                           .AddSingleton(Log)
-                           .AddSingleton(IonicClient.Client)
-                           .AddSingleton(new EconomyService())
-                           .AddSingleton(new RoleService())
-                           .AddSingleton(new RiotService())
-                           .AddSingleton(new MessageService())
-                           .AddSingleton(new GiveawayService())
-                           .AddSingleton(new AnnounceService())
-                           .AddSingleton(new EventService())
-                           .AddSingleton(new MinionService())
-                           .AddSingleton(new BotRespectService())
-                           .AddSingleton(new ReliabilityService(IonicClient.Client))
-                           .AddSingleton(new ChannelService(IonicClient.Client))
-                           .AddSingleton(new CommandService(new CommandServiceConfig
-                           {
-                               CaseSensitiveCommands = false,
-                               ThrowOnError = true,
-                               DefaultRunMode = RunMode.Async
-                           }));
+                .AddSingleton(Log)
+                .AddSingleton(IonicClient.Client)
+                .AddSingleton(new EconomyService())
+                .AddSingleton(new RoleService())
+                .AddSingleton(new RiotService())
+                .AddSingleton(new MessageService())
+                .AddSingleton(new GiveawayService())
+                .AddSingleton(new AnnounceService())
+                .AddSingleton(new EventService())
+                .AddSingleton(new MinionService())
+                .AddSingleton(new BotRespectService())
+                .AddSingleton(new QuizService())
+                .AddSingleton(new ReliabilityService(IonicClient.Client))
+                .AddSingleton(new ChannelService(IonicClient.Client))
+                .AddSingleton(new CommandService(new CommandServiceConfig
+                {
+                    CaseSensitiveCommands = false,
+                    ThrowOnError = true,
+                    DefaultRunMode = RunMode.Async
+                }));
 
             var provider = services.BuildServiceProvider();
 
             return provider;
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+        public static IWebHostBuilder CreateWebHostBuilder(String[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>();
     }
