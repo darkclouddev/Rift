@@ -33,6 +33,7 @@ namespace Rift
         static MinionService minionService;
         static MessageService messageService;
         static GiveawayService giveawayService;
+        static QuizService quizService;
 
         public CommandHandler(IServiceProvider serviceProvider)
         {
@@ -46,6 +47,7 @@ namespace Rift
             messageService = provider.GetService<MessageService>();
             riotService = provider.GetService<RiotService>();
             giveawayService = provider.GetService<GiveawayService>();
+            quizService = provider.GetService<QuizService>();
         }
 
         public async Task ConfigureAsync()
@@ -147,6 +149,9 @@ namespace Rift
         {
             if (context.Message.Channel.Id != Settings.ChannelId.Chat)
                 return;
+            
+            if (quizService.IsActive)
+                quizService.Answers.Enqueue(new QuizGuess(context.User.Id, context.Message.Content));
 
             if (Settings.Chat.AttachmentFilterEnabled && !RiftBot.IsAdmin(context.Message.Author))
             {
