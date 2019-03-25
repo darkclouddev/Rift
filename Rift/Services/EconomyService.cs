@@ -122,23 +122,23 @@ namespace Rift.Services
 
         static void InitActiveUsersTimer()
         {
-            var today = DateTime.Today.AddHours(19);
+            var today = DateTime.Today.AddHours(16);
 
-            if (DateTime.Now > today)
+            if (DateTime.UtcNow > today)
                 today = today.AddDays(1);
 
-            ActiveUsersTimer = new Timer(async delegate { await ShowActiveUsersAsync(); }, null, today - DateTime.Now,
+            ActiveUsersTimer = new Timer(async delegate { await ShowActiveUsersAsync(); }, null, today - DateTime.UtcNow,
                                          TimeSpan.FromDays(1));
         }
 
         void InitRichUsersTimer()
         {
-            var today = DateTime.Today.AddHours(21);
+            var today = DateTime.Today.AddHours(18);
 
-            if (DateTime.Now > today)
+            if (DateTime.UtcNow > today)
                 today = today.AddDays(1);
 
-            RichUsersTimer = new Timer(async delegate { await ShowRichUsersAsync(); }, null, today - DateTime.Now,
+            RichUsersTimer = new Timer(async delegate { await ShowRichUsersAsync(); }, null, today - DateTime.UtcNow,
                                        TimeSpan.FromDays(1));
         }
 
