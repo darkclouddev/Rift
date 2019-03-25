@@ -473,24 +473,27 @@ namespace Rift.Services
                 ? String.Join('\n', tempRolesList)
                 : "У вас нет временных ролей.";
 
-            var embed = new EmbedBuilder()
-                        .WithTitle($"Ваш профиль")
-                        .WithThumbnailUrl(sgUser.GetAvatarUrl())
-                        .WithDescription($"Статистика и информация о вашем аккаунте в системе:")
-                        .AddField("Уровень", $"{Settings.Emote.LevelUp} {profile.Level.ToString()}", true)
-                        .AddField("Место", $"{Settings.Emote.Rewards} {position}", true)
-                        .AddField("Статистика текущего уровня",
-                                  $"{Settings.Emote.Experience} Получено "
-                                  + $"{(100 - (100 * (GetExpForLevel(profile.Level + 1u) - profile.Experience)) / (GetExpForLevel(profile.Level + 1u) - GetExpForLevel(profile.Level))).ToString()}"
-                                  + $"% опыта до {(profile.Level + 1).ToString()} уровня.")
+            var currentLevelExp = GetExpForLevel(profile.Level);
+            var fullLevelExp = GetExpForLevel(profile.Level+1u) - currentLevelExp;
+            var remainingExp = fullLevelExp - (profile.Experience - currentLevelExp);
+            var levelPerc = 100 - (Int32)Math.Floor(((Single)remainingExp / fullLevelExp * 100));
 
-                        //.AddField("Голосовой онлайн", $"{Settings.Emote.Voice} Данная функция отключена.")
-                        .AddField("Платные роли и пожертвования", $"Текущая: -\n"
-                                                                  + $"Необходимо задонатить: - рублей,\n"
-                                                                  + $"чтобы получить {Settings.Emote.Legendary} легендарные\n\n"
-                                                                  + $"{Settings.Emote.Donate} Общая сумма пожертвований: {profile.TotalDonate:0.00} рублей.")
-                        .AddField("Временные роли", tempRolesString)
-                        .Build();
+            var embed = new EmbedBuilder()
+                .WithTitle($"Ваш профиль")
+                .WithThumbnailUrl(sgUser.GetAvatarUrl())
+                .WithDescription($"Статистика и информация о вашем аккаунте в системе:")
+                .AddField("Уровень", $"{Settings.Emote.LevelUp} {profile.Level.ToString()}", true)
+                .AddField("Место", $"{Settings.Emote.Rewards} {position}", true)
+                .AddField("Статистика текущего уровня",
+                    $"{Settings.Emote.Experience} Получено {levelPerc.ToString()}% опыта до {(profile.Level+1).ToString()} уровня.")
+
+                //.AddField("Голосовой онлайн", $"{Settings.Emote.Voice} Данная функция отключена.")
+                .AddField("Платные роли и пожертвования", $"Текущая: -\n"
+                                                          + $"Необходимо задонатить: - рублей,\n"
+                                                          + $"чтобы получить {Settings.Emote.Legendary} легендарные\n\n"
+                                                          + $"{Settings.Emote.Donate} Общая сумма пожертвований: {profile.TotalDonate:0.00} рублей.")
+                .AddField("Временные роли", tempRolesString)
+                .Build();
 
             return embed;
         }
