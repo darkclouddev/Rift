@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -101,7 +101,7 @@ namespace Rift.Services
 
             var tempRoles = await Database.GetUserTempRolesAsync(sgUser.Id);
 
-            if (tempRoles is null)
+            if (tempRoles is null || tempRoles.Count == 0)
             {
                 RiftBot.Log.Debug($"No temp roles for user {sgUser}");
                 return;
