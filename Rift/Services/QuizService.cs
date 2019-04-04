@@ -15,7 +15,7 @@ namespace Rift.Services
     {
         public Boolean IsActive { get; private set; }
 
-        readonly TimeSpan interval = TimeSpan.FromSeconds(10);
+        readonly TimeSpan intervalBetween = TimeSpan.FromSeconds(10);
         readonly TimeSpan duration = TimeSpan.FromSeconds(20);
         
         readonly List<QuizEntry> entries = new List<QuizEntry>
@@ -24,11 +24,11 @@ namespace Rift.Services
             new QuizEntry("Глава Ноксуса", "Свейн"),
             new QuizEntry("Сотый чемпион?", "Джейс"),
             new QuizEntry("Какому персонажу принадлежит скилл \"Тёмный ветер\"?", "Фиддлстикс"),
-            new QuizEntry("Какой персонаж носит нечто неразрушимое на спиной?", "Райз"),
+            new QuizEntry("Какой персонаж носит нечто неразрушимое за спиной?", "Райз"),
         };
         Stack<QuizEntry> questions;
 
-        Timer intervalTimer;
+        Timer durationTimer;
         Timer checkTimer;
 
         static QuizEntry currentEntry;
@@ -66,14 +66,14 @@ namespace Rift.Services
         {
             IsActive = true;
 
-            intervalTimer = new Timer(async delegate { await TimeIsUpAsync(); }, null, duration, TimeSpan.Zero);
+            durationTimer = new Timer(async delegate { await TimeIsUpAsync(); }, null, duration, TimeSpan.Zero);
             checkTimer = new Timer(async delegate { await CheckAnswersAsync(); }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         }
 
         void StopTimers()
         {
             IsActive = false;
-            //intervalTimer?.Dispose();
+            durationTimer?.Dispose();
             checkTimer?.Dispose();
         }
 
@@ -119,7 +119,7 @@ namespace Rift.Services
 
             await channel.SendMessageAsync("Следующий вопрос через 10 секунд!");
             
-            new Timer(async delegate { await StartAsync(); }, null, interval, TimeSpan.Zero);
+            new Timer(async delegate { await StartAsync(); }, null, intervalBetween, TimeSpan.Zero);
         }
     }
     
