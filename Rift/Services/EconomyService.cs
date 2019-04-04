@@ -1016,12 +1016,17 @@ namespace Rift.Services
             return result;
         }
 
-        static async Task<(GiftResult, Embed)> GiftInternalAsync(SocketGuildUser fromUser, SocketGuildUser toUser,
-                                                                 UInt32 type)
+        static async Task<(GiftResult, Embed)> GiftInternalAsync(SocketGuildUser fromUser, SocketGuildUser toUser, UInt32 type)
         {
+            if (toUser.IsBot)
+            {
+                RiftBot.Log.Debug("[Gift] Target is bot.");
+                return (GiftResult.TargetBot, GiftEmbeds.BotGift);
+            }
+            
             if (fromUser.Id == toUser.Id)
             {
-                RiftBot.Log.Debug($"[Gift] Ouch, self-gift.");
+                RiftBot.Log.Debug("[Gift] Ouch, self-gift.");
                 return (GiftResult.SelfGift, GiftEmbeds.SelfGift);
             }
 
@@ -1106,7 +1111,7 @@ namespace Rift.Services
             var msg = await chatChannel.SendEmbedAsync(GiftEmbeds.Chat(fromUser, toUser, giftString));
             RiftBot.GetService<MessageService>().TryAddDelete(new DeleteMessage(msg, TimeSpan.FromMinutes(3)));
 
-            RiftBot.Log.Debug($"[Gift] Success.");
+            RiftBot.Log.Debug("[Gift] Success.");
 
             return (GiftResult.Success, GenericEmbeds.Empty);
 

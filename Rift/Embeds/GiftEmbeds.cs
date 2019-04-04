@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Rift.Configuration;
 
@@ -13,6 +13,13 @@ namespace Rift.Embeds
 {
     class GiftEmbeds
     {
+        public static readonly Embed BotGift =
+            new EmbedBuilder()
+                .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
+                .WithColor(226, 87, 76)
+                .WithDescription("Невозможно отправить подарок боту.")
+                .Build();
+        
         public static readonly Embed SelfGift =
             new EmbedBuilder()
                 .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
