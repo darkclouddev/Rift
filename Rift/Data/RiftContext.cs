@@ -17,7 +17,7 @@ namespace Rift.Data
         public DbSet<RiftStreamer> Streamers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
-            optionsBuilder.UseSqlServer(@"Data Source=127.0.0.1,1434;Initial Catalog=Rift;persist security info=True;user id=Rift;password=727");
+            optionsBuilder.UseSqlServer(@"Data Source=127.0.0.1,1433;Initial Catalog=Rift;persist security info=True;user id=Rift;password=727");
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
