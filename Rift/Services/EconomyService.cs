@@ -227,22 +227,51 @@ namespace Rift.Services
                 }
             });
         }
+        
+        static ConcurrentDictionary<UInt64, SemaphoreSlim> addExpMutexes = new ConcurrentDictionary<UInt64, SemaphoreSlim>();
 
+        static SemaphoreSlim GetExpMutex(UInt64 userId)
+        {
+            if (addExpMutexes.TryGetValue(userId, out var mutex))
+                return mutex;
+
+            var newMutex = new SemaphoreSlim(1);
+
+            if (!addExpMutexes.TryAdd(userId, newMutex))
+                throw new InvalidOperationException($"Mutex was not properly added: {nameof(newMutex)}");
+                
+            return newMutex;
+        }
+        
         public async Task ProcessMessageAsync(IUserMessage message)
         {
-            await AddExpAsync(message.Author.Id, 1u);
-            await Database.AddStatisticsAsync(message.Author.Id, messagesSentTotal: 1u);
+            var userId = message.Author.Id;
+            
+            await GetExpMutex(userId).WaitAsync();
+
+            try
+            {
+                await AddExpAsync(userId, 1u);
+            }
+            catch (Exception ex)
+            {
+                RiftBot.Log.Error(ex);
+            }
+            finally
+            {
+                GetExpMutex(userId).Release();
+            }
         }
 
-        static async Task AddExpAsync(ulong userId, uint exp)
+        static async Task AddExpAsync(UInt64 userId, UInt32 exp)    
         {
             await Database.AddExperienceAsync(userId, exp);
 
             var dbUserLevel = await Database.GetUserLevelAsync(userId);
 
-            if (dbUserLevel.Experience != uint.MaxValue)
+            if (dbUserLevel.Experience != UInt32.MaxValue)
             {
-                uint newLevel = dbUserLevel.Level + 1u;
+                var newLevel = dbUserLevel.Level + 1u;
 
                 while (dbUserLevel.Experience >= GetExpForLevel(newLevel))
                 {
