@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 using Rift.Configuration;
 
@@ -39,7 +39,7 @@ namespace Rift.Embeds
                                + $"Игроку выдаются монеты за {(player.Stats.Win ? "победу" : "поражение")} в данной игре: {Settings.Emote.Coin} {coins.ToString()}")
               .AddField("Режим игры", $"{queue}", true)
               .AddField("Чемпион и счет",
-                        $"{champName} ({player.Stats.Kills.ToString()} / {player.Stats.Deaths.ToString()} / {player.Stats.Assists.ToString()}, {player.Stats.TotalMinionsKilled.ToString()} cs)", true);
+                        $"{champName} ({player.Stats.Kills.ToString()} / {player.Stats.Deaths.ToString()} / {player.Stats.Assists.ToString()}, {(player.Stats.TotalMinionsKilled + player.Stats.NeutralMinionsKilled).ToString()} cs)", true);
 
             return eb.Build();
         }
