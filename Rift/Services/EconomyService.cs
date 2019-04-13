@@ -172,7 +172,6 @@ namespace Rift.Services
         public async Task ProcessMessageAsync(IUserMessage message)
         {
             await AddExpAsync(message.Author.Id, 1u);
-            await Database.AddStatisticsAsync(message.Author.Id, messagesSentTotal: 1u);
         }
 
         static async Task AddExpAsync(ulong userId, uint exp)

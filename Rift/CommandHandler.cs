@@ -181,6 +181,8 @@ namespace Rift
 
                 return;
             }
+            
+            await Database.AddStatisticsAsync(context.User.Id, messagesSentTotal: 1u);
 
             if (IsEligibleForEconomy(context.User.Id))
                 await economyService.ProcessMessageAsync(context.Message);
