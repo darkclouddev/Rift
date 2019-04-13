@@ -126,8 +126,8 @@ namespace Rift.Services
             if (DateTime.UtcNow > today)
                 today = today.AddDays(1);
 
-            ActiveUsersTimer = new Timer(async delegate { await ShowActiveUsersAsync(); }, null, today - DateTime.UtcNow,
-                                         TimeSpan.FromDays(1));
+            ActiveUsersTimer = new Timer(async delegate { await ShowActiveUsersAsync(); }, null,
+                today - DateTime.UtcNow, TimeSpan.FromDays(1));
         }
 
         void InitRichUsersTimer()
@@ -137,8 +137,8 @@ namespace Rift.Services
             if (DateTime.UtcNow > today)
                 today = today.AddDays(1);
 
-            RichUsersTimer = new Timer(async delegate { await ShowRichUsersAsync(); }, null, today - DateTime.UtcNow,
-                                       TimeSpan.FromDays(1));
+            RichUsersTimer = new Timer(async delegate { await ShowRichUsersAsync(); }, null,
+                today - DateTime.UtcNow, TimeSpan.FromDays(1));
         }
 
         public static async Task ShowActiveUsersAsync()
@@ -657,8 +657,7 @@ namespace Rift.Services
                 var dbInventory = await Database.GetUserInventoryAsync(userId);
                 result = await OpenChestInternalAsync(userId, dbInventory.Chests).ConfigureAwait(false);
                 if (result.Item1 == OpenChestResult.Success)
-                    await Database
-                                 .AddStatisticsAsync(userId, chestsOpenedTotal: dbInventory.Chests);
+                    await Database.AddStatisticsAsync(userId, chestsOpenedTotal: dbInventory.Chests);
             }
             finally
             {
@@ -1131,8 +1130,7 @@ namespace Rift.Services
             return result;
         }
 
-        static async Task<(AttackResult, Embed)> AttackInternalAsync(SocketGuildUser sgAttacker,
-                                                                     SocketGuildUser sgTarget)
+        static async Task<(AttackResult, Embed)> AttackInternalAsync(SocketGuildUser sgAttacker, SocketGuildUser sgTarget)
         {
             if (sgAttacker.Id == sgTarget.Id)
                 return (AttackResult.SelfAttack, AttackEmbeds.SelfAttack);
@@ -1276,16 +1274,14 @@ namespace Rift.Services
 
                     await Database.AddInventoryAsync(toId, coins: 300u, chests: 2u);
 
-                    chatEmbed
-                        .WithDescription($"Стример <@{fromId.ToString()}> подарил {Settings.Emote.Coin} 300 {Settings.Emote.Chest} 2 призывателю <@{toId}>");
+                    chatEmbed.WithDescription($"Стример <@{fromId.ToString()}> подарил {Settings.Emote.Coin} 300 {Settings.Emote.Chest} 2 призывателю <@{toId.ToString()}>");
                     break;
 
                 case GiftSource.Moderator:
 
                     await Database.AddInventoryAsync(toId, coins: 100u, chests: 1u);
 
-                    chatEmbed
-                        .WithDescription($"Призыватель <@{toId.ToString()}> получил {Settings.Emote.Coin} 100 {Settings.Emote.Chest} 1");
+                    chatEmbed.WithDescription($"Призыватель <@{toId.ToString()}> получил {Settings.Emote.Coin} 100 {Settings.Emote.Chest} 1");
                     break;
 
                 case GiftSource.Voice:
@@ -1293,12 +1289,10 @@ namespace Rift.Services
                     var coins = Helper.NextUInt(50, 350);
                     await Database.AddInventoryAsync(toId, coins: coins);
 
-                    chatEmbed
-                        .WithAuthor("Голосовые каналы", Settings.Emote.VoiceUrl)
+                    chatEmbed.WithAuthor("Голосовые каналы", Settings.Emote.VoiceUrl)
                         .WithDescription($"Призыватель <@{toId.ToString()}> получил {Settings.Emote.Coin} {coins.ToString()} за активность.");
 
-                    dmEmbed
-                        .WithAuthor("Голосовые каналы", Settings.Emote.VoiceUrl)
+                    dmEmbed.WithAuthor("Голосовые каналы", Settings.Emote.VoiceUrl)
                         .WithDescription($"Вы получили {Settings.Emote.Coin} {coins.ToString()} за активность.");
                     break;
             }

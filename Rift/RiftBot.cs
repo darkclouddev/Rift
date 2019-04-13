@@ -26,6 +26,7 @@ using ILogger = NLog.ILogger;
 
 namespace Rift
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class RiftBot
     {
         public static CultureInfo Culture { get; private set; }
@@ -38,7 +39,7 @@ namespace Rift
         public const string CommandDenyMessage = "У вас нет доступа к этой команде.";
         public static string BotStatusMessage => Settings.App.MaintenanceMode ? "Тестовый режим" : "!команды";
 
-        public static bool IsReboot;
+        public static bool ShouldReboot;
 
         static CommandHandler handler;
 
@@ -88,6 +89,7 @@ namespace Rift
             Console.WriteLine($"Using content root: {AppPath}");
 
             //await CreateWebHostBuilder(args).Build().StartAsync();
+            //await Task.Delay(-1);
 
             await new IonicClient(Path.Combine(AppPath, ".token"))
                   .RunAsync()
@@ -127,7 +129,7 @@ namespace Rift
             {
                 await IonicClient.Client.StopAsync().ContinueWith(x =>
                 {
-                    if (!IsReboot)
+                    if (!ShouldReboot)
                     {
                         Console.WriteLine("Shutting down");
                         LogManager.Shutdown();

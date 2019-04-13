@@ -60,7 +60,7 @@ namespace Rift.Services
 
         public async Task StartBotGifts()
         {
-            RiftBot.Log.Debug($"Gifts are on the way..");
+            RiftBot.Log.Debug("Gifts are on the way..");
 
             var users = await Database.GetBotRespectedUsersAsync();
             if (users.Length > 0)

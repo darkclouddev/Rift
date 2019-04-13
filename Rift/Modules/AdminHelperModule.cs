@@ -45,8 +45,7 @@ namespace Rift.Modules
                 return;
             }
 
-            (var result, string code) = await riotService.GetThirdPartyCodeByEncryptedSummonerIdAsync(pendingData.Region,
-                                                                                                                                   pendingData.SummonedId);
+            (var result, var code) = await riotService.GetThirdPartyCodeByEncryptedSummonerIdAsync(pendingData.Region, pendingData.SummonedId);
 
             if (result != RequestResult.Success)
             {
@@ -441,7 +440,7 @@ namespace Rift.Modules
         [RequireAdmin]
         public async Task Reboot()
         {
-            RiftBot.IsReboot = true;
+            RiftBot.ShouldReboot = true;
 
             await Context.Message.DeleteAsync();
             await ReplyAsync($"Перезапускаюсь");

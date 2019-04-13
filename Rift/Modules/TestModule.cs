@@ -58,8 +58,7 @@ namespace Rift.Modules
         [RequireDeveloper]
         public async Task Horse()
         {
-            var url =
-                "http://www.merlinsltd.com/WebRoot/StoreLGB/Shops/62030553/54C2/CD1F/F497/BF84/54D1/C0A8/2ABB/1A80/mask_horse_brown.png";
+            var url = "http://www.merlinsltd.com/WebRoot/StoreLGB/Shops/62030553/54C2/CD1F/F497/BF84/54D1/C0A8/2ABB/1A80/mask_horse_brown.png";
 
             var request = WebRequest.Create(url);
 

@@ -489,7 +489,7 @@ namespace Rift.Services
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return;
 
-            RiftBot.Log.Debug($"[User|{userId}] Getting summoner for rank update");
+            RiftBot.Log.Debug($"[User|{userId.ToString()}] Getting summoner for rank update");
 
             var lolData = await Database.GetUserLolDataAsync(userId);
 
@@ -500,7 +500,7 @@ namespace Rift.Services
 
             if (sgUser is null)
             {
-                RiftBot.Log.Warn($"[User|{userId}] SGUser is null!");
+                RiftBot.Log.Warn($"[User|{userId.ToString()}] SGUser is null!");
                 return;
             }
 
@@ -509,7 +509,7 @@ namespace Rift.Services
 
             if (rankResult != RequestResult.Success)
             {
-                RiftBot.Log.Warn($"[User|{userId}] No rank data");
+                RiftBot.Log.Warn($"[User|{userId.ToString()}] No rank data");
                 return;
             }
 
@@ -584,7 +584,7 @@ namespace Rift.Services
 
             if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var role))
             {
-                RiftBot.Log.Warn($"[User|{userId}] Failed to get role {roleId}");
+                RiftBot.Log.Warn($"[User|{userId.ToString()}] Failed to get role {roleId}");
                 return;
             }
 
@@ -606,7 +606,7 @@ namespace Rift.Services
                     await sgUser.SendEmbedAsync(LolProfileEmbeds.NoRankUpdated);
             }
 
-            RiftBot.Log.Debug($"[User|{userId}] Rank update completed.");
+            RiftBot.Log.Debug($"[User|{userId.ToString()}] Rank update completed.");
         }
 
         static LeagueRank GetCurrentRank(IGuildUser user)
@@ -1059,12 +1059,12 @@ namespace Rift.Services
                 case 1200: return "Осада Нексуса";
 
                 default:
-                    RiftBot.Log.Warn($"Queue ID is not known: {id}");
+                    RiftBot.Log.Warn($"Unknown queue ID: {id.ToString()}");
                     return "Неизвестная очередь";
             }
         }
 
-        static async Task<GetResponse> GetAsync(string url)
+        static async Task<GetResponse> GetAsync(String url)
         {
             var request = (HttpWebRequest) WebRequest.Create(url);
 
