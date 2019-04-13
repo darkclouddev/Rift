@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using Rift.Configuration;
 using Rift.Data;
 using Rift.Embeds;
-using Rift.Events;
 using Rift.Rewards;
 using Rift.Services.Economy;
 using Rift.Services.Message;
@@ -170,64 +169,6 @@ namespace Rift.Services
             await chatChannel.SendEmbedAsync(EconomyEmbeds.RichUsersEmbed(topTen));
         }
 
-        static void OnDonateAdded(DonateAddedEventArgs e)
-        {
-            Task.Run(async delegate
-            {
-                var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, e.UserId);
-
-                if (sgUser is null)
-                    return;
-
-                ulong roleId = 0;
-                var announceRole = false;
-                var messageService = RiftBot.GetService<MessageService>();
-
-                messageService.TryAddSend(new EmbedMessage(DestinationType.GuildChannel, Settings.ChannelId.Chat,
-                    TimeSpan.Zero, DonateEmbeds.ChatDonateEmbed(e.UserId, e.DonateAmount)));
-
-                if (e.DonateTotal >= 500M && e.DonateTotal < 2_000M)
-                {
-                    announceRole = !IonicClient.HasRolesAny(e.UserId, Settings.RoleId.Legendary);
-
-                    if (announceRole)
-                        roleId = Settings.RoleId.Legendary;
-                }
-                else if (e.DonateTotal >= 2_000M && e.DonateTotal < 10_000M)
-                {
-                    announceRole = !IonicClient.HasRolesAny(sgUser, Settings.RoleId.Absolute);
-
-                    if (announceRole)
-                        roleId = Settings.RoleId.Absolute;
-                }
-                else if (e.DonateTotal >= 10_000M)
-                {
-                    var embed = new EmbedBuilder()
-                                .WithDescription($"Призыватель <@{e.UserId.ToString()}> получил личную роль\nза общую сумму пожертвований в размере **10000** рублей.")
-                                .Build();
-
-                    messageService.TryAddSend(new EmbedMessage(DestinationType.GuildChannel, Settings.ChannelId.Chat,
-                                                               TimeSpan.Zero, embed));
-                }
-
-                if (roleId != 0)
-                {
-                    await RiftBot.GetService<RoleService>().AddPermanentRoleAsync(e.UserId, roleId);
-
-                    if (announceRole)
-                    {
-                        messageService.TryAddSend(roleId == Settings.RoleId.Legendary
-                            ? new EmbedMessage(DestinationType.GuildChannel,
-                                Settings.ChannelId.Chat, TimeSpan.Zero,
-                                DonateEmbeds.ChatDonateLegendaryRoleRewardEmbed(e.UserId))
-                            : new EmbedMessage(DestinationType.GuildChannel,
-                                Settings.ChannelId.Chat, TimeSpan.Zero,
-                                DonateEmbeds.ChatDonateAbsoluteRoleRewardEmbed(e.UserId)));
-                    }
-                }
-            });
-        }
-
         public async Task ProcessMessageAsync(IUserMessage message)
         {
             await AddExpAsync(message.Author.Id, 1u);
@@ -236,13 +177,19 @@ namespace Rift.Services
 
         static async Task AddExpAsync(ulong userId, uint exp)
         {
-            await Database.AddExperienceAsync(userId, exp);
+            await Database.AddExperienceAsync(userId, exp).ContinueWith(async _ =>
+            {
+                await CheckLevelUpAsync(userId);
+            });
+        }
 
+        static async Task CheckLevelUpAsync(ulong userId)
+        {
             var dbUserLevel = await Database.GetUserLevelAsync(userId);
 
             if (dbUserLevel.Experience != uint.MaxValue)
             {
-                uint newLevel = dbUserLevel.Level + 1u;
+                var newLevel = dbUserLevel.Level + 1u;
 
                 while (dbUserLevel.Experience >= GetExpForLevel(newLevel))
                 {
@@ -260,14 +207,12 @@ namespace Rift.Services
                     if (newLevel == 1u)
                         return; //no rewards on level 1
 
-                    if (IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat,
-                                                   out var chatChannel))
+                    if (IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                     {
                         await chatChannel.SendEmbedAsync(LevelUpEmbeds.Chat(userId, newLevel));
                     }
 
-                    await CheckAchievementsAsync(userId, newLevel);
-
+                    //await CheckAchievementsAsync(userId, newLevel);
                     await GiveRewardsForLevelAsync(userId, dbUserLevel.Level, newLevel);
                 }
             }
