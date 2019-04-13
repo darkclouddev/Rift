@@ -77,6 +77,18 @@ namespace Rift.Embeds
                 .WithTimestamp(DateTime.UtcNow)
                 .Build();
         }
+        
+        public static Embed UnmuteLog(SocketGuildUser sgUser, String executorName, String reason)
+        {
+            return new EmbedBuilder()
+                .WithColor(0, 255, 0)
+                .WithAuthor("Unmuted")
+                .WithTitle(sgUser.ToString())
+                .WithDescription($"\n`{reason}`")
+                .AddField("Executor", executorName)
+                .WithTimestamp(DateTime.UtcNow)
+                .Build();
+        }
 
         public static Embed Warn(SocketGuildUser sgUser)
         {

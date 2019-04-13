@@ -269,10 +269,8 @@ namespace Rift.Services
                 }
                 else
                 {
-                    await channel.AddPermissionOverwriteAsync(role,
-                                                              new OverwritePermissions(sendMessages: enable
-                                                                                           ? PermValue.Inherit
-                                                                                           : PermValue.Deny));
+                    await channel.AddPermissionOverwriteAsync(role, 
+                        new OverwritePermissions(sendMessages: enable ? PermValue.Inherit : PermValue.Deny));
                 }
             }
         }

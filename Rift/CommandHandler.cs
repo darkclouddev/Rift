@@ -111,8 +111,7 @@ namespace Rift
                 else
                 {
                     if (result.Error != null && result.Error.Value != CommandError.UnknownCommand)
-                        RiftBot.Log
-                               .Error($"{context.Message.Author} | {context.Message.Content} | {result.ErrorReason}");
+                        RiftBot.Log.Error($"{context.Message.Author} | {context.Message.Content} | {result.ErrorReason}");
 
                     await context.User.SendMessageAsync(result.ErrorReason);
                 }
@@ -126,7 +125,7 @@ namespace Rift
 
                 if (result.IsSuccess)
                 {
-                    string command = context.Message.Content.Substring(1).TrimStart();
+                    var command = context.Message.Content.Substring(1).TrimStart();
 
                     RiftBot.Log.Info($"{context.Message.Author} sent channel command: \"{command}\"");
                 }
@@ -182,6 +181,8 @@ namespace Rift
 
                 return;
             }
+            
+            await Database.AddStatisticsAsync(context.User.Id, messagesSentTotal: 1u);
 
             if (IsEligibleForEconomy(context.User.Id))
                 await economyService.ProcessMessageAsync(context.Message);
@@ -231,19 +232,19 @@ namespace Rift
                 return;
 
             var eb = new EmbedBuilder()
-                     .WithColor(state == UserState.Joined ? new Color(46, 204, 113) : new Color(231, 76, 60))
-                     .WithAuthor(new EmbedAuthorBuilder
-                     {
-                         Name = "Призыватель " + (state == UserState.Joined ? "присоединился" : "вышел"),
-                         IconUrl = sgUser.GetAvatarUrl()
-                     })
-                     .WithDescription($"Никнейм: {sgUser.Mention} ({sgUser.Username}#{sgUser.Discriminator})")
-                     .WithFooter(new EmbedFooterBuilder
-                     {
-                         Text = $"ID: {sgUser.Id.ToString()}"
-                     })
-                     .WithCurrentTimestamp();
-
+                .WithColor(state == UserState.Joined ? new Color(46, 204, 113) : new Color(231, 76, 60))
+                .WithAuthor(new EmbedAuthorBuilder
+                {
+                    Name = "Призыватель " + (state == UserState.Joined ? "присоединился" : "вышел"),
+                    IconUrl = sgUser.GetAvatarUrl()
+                })
+                .WithDescription($"Никнейм: {sgUser.Mention} ({sgUser.Username}#{sgUser.Discriminator})")
+                .WithFooter(new EmbedFooterBuilder
+                {
+                    Text = $"ID: {sgUser.Id.ToString()}"
+                })
+                .WithCurrentTimestamp();
+            
             await usersChannel.SendEmbedAsync(eb);
         }
 
@@ -254,7 +255,7 @@ namespace Rift
 
         async Task<bool> HasCaps(string content)
         {
-            string msg = new Regex(@"\<[^>]+>")
+            var msg = new Regex(@"\<[^>]+>")
                          .Replace(content, "")
                          .Replace(" ", String.Empty)
                          .Replace("\t\n", String.Empty)
@@ -265,12 +266,11 @@ namespace Rift
             if (msg.Length == 1)
                 return false;
 
+            var upperCase = new List<char>();
 
-            List<char> upperCase = new List<char>();
+            await Task.Run(delegate { upperCase = msg.Where(x => char.IsLetter(x) && char.IsUpper(x)).ToList(); });
 
-            await Task.Run(delegate { upperCase = msg.Where(x => Char.IsLetter(x) && Char.IsUpper(x)).ToList(); });
-
-            float ratio = (float) upperCase.Count() / (float) msg.Length;
+            var ratio = upperCase.Count / (float) msg.Length;
 
             return ratio >= Settings.Chat.CapsFilterRatio;
         }
@@ -278,9 +278,12 @@ namespace Rift
         const string YoutubeRegex =
             "^(?:https?\\:\\/\\/)?(?:www\\.)?(?:youtu\\.be\\/|youtube\\.com\\/(?:embed\\/|v\\/|watch\\?v\\=))([\\w-]{10,12})(?:[\\&\\?\\#].*?)*?(?:[\\&\\?\\#]t=([\\dhm]+s))?$";
 
+        static Regex ytRegex = new Regex(YoutubeRegex);
+        static bool IsYoutubeLink(string url) => ytRegex.IsMatch(url);
+        
         static bool HasURL(string message)
         {
-            string link = message.Replace(" ", String.Empty)
+            var link = message.Replace(" ", string.Empty)
                                  .Split("\t\n ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
                                  .Where(s => s.Contains("http://")
                                              || s.Contains("www.")
@@ -289,7 +292,7 @@ namespace Rift
                                  .ToArray()
                                  .FirstOrDefault();
 
-            if (String.IsNullOrWhiteSpace(link))
+            if (string.IsNullOrWhiteSpace(link))
                 return false;
 
             if (IsYoutubeLink(link))
@@ -297,33 +300,25 @@ namespace Rift
 
             return true;
         }
-
-        static Regex ytRegex = new Regex(YoutubeRegex);
-
-        static bool IsYoutubeLink(string url)
-        {
-            return ytRegex.IsMatch(url);
-        }
-
-        static Dictionary<ulong, DateTime> lastPostTimestamps = new Dictionary<ulong, DateTime>();
+        
+        static readonly Dictionary<ulong, DateTime> LastPostTimestamps = new Dictionary<ulong, DateTime>();
 
         static bool IsEligibleForEconomy(ulong userId)
         {
-            if (!lastPostTimestamps.ContainsKey(userId))
+            if (!LastPostTimestamps.ContainsKey(userId))
             {
-                lastPostTimestamps.Add(userId, DateTime.UtcNow);
+                LastPostTimestamps.Add(userId, DateTime.UtcNow);
 
                 return true;
             }
 
             var currentTime = DateTime.UtcNow;
+            var isEligible = (currentTime - LastPostTimestamps[userId]) > Settings.Economy.MessageCooldown;
 
-            bool result = (currentTime - lastPostTimestamps[userId]) > Settings.Economy.MessageCooldown;
+            if (isEligible)
+                LastPostTimestamps[userId] = currentTime;
 
-            if (result)
-                lastPostTimestamps[userId] = currentTime;
-
-            return result;
+            return isEligible;
         }
     }
 

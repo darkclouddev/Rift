@@ -161,15 +161,26 @@ namespace Rift.Modules
         [RequireModerator]
         [RequireContext(ContextType.Guild)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task Unmute(IUser user)
+        public async Task Unmute(IUser user, String reason)
         {
             if (!(user is SocketGuildUser sgUser))
             {
-                await Context.User.SendMessageAsync($"Не удалось найти пользователя.");
+                await Context.User.SendMessageAsync("Не удалось найти пользователя.");
+                return;
+            }
+            
+            if (String.IsNullOrEmpty(reason))
+            {
+                await Context.User.SendMessageAsync("Не указана причина.");
                 return;
             }
 
             await roleService.RemoveTempRoleAsync(sgUser.Id, Settings.RoleId.Muted);
+            
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Modchat, out var modChannel))
+                return;
+            
+            await modChannel.SendEmbedAsync(BanhammerEmbeds.UnmuteLog(sgUser, Context.User.ToString(), reason));
         }
 
         [Command("warn")]
@@ -182,7 +193,7 @@ namespace Rift.Modules
 
             if (!(user is SocketGuildUser sgUser))
             {
-                await Context.User.SendMessageAsync($"Не удалось найти пользователя на сервере!");
+                await Context.User.SendMessageAsync("Не удалось найти пользователя на сервере!");
                 return;
             }
 

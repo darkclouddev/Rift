@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -10,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using Rift.Configuration;
 using Rift.Data;
 using Rift.Embeds;
-using Rift.Events;
 using Rift.Rewards;
 using Rift.Services.Economy;
 using Rift.Services.Message;
@@ -128,8 +126,8 @@ namespace Rift.Services
             if (DateTime.UtcNow > today)
                 today = today.AddDays(1);
 
-            ActiveUsersTimer = new Timer(async delegate { await ShowActiveUsersAsync(); }, null, today - DateTime.UtcNow,
-                                         TimeSpan.FromDays(1));
+            ActiveUsersTimer = new Timer(async delegate { await ShowActiveUsersAsync(); }, null,
+                today - DateTime.UtcNow, TimeSpan.FromDays(1));
         }
 
         void InitRichUsersTimer()
@@ -139,8 +137,8 @@ namespace Rift.Services
             if (DateTime.UtcNow > today)
                 today = today.AddDays(1);
 
-            RichUsersTimer = new Timer(async delegate { await ShowRichUsersAsync(); }, null, today - DateTime.UtcNow,
-                                       TimeSpan.FromDays(1));
+            RichUsersTimer = new Timer(async delegate { await ShowRichUsersAsync(); }, null,
+                today - DateTime.UtcNow, TimeSpan.FromDays(1));
         }
 
         public static async Task ShowActiveUsersAsync()
@@ -171,106 +169,24 @@ namespace Rift.Services
             await chatChannel.SendEmbedAsync(EconomyEmbeds.RichUsersEmbed(topTen));
         }
 
-        static void OnDonateAdded(DonateAddedEventArgs e)
-        {
-            Task.Run(async delegate
-            {
-                var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, e.UserId);
-
-                if (sgUser is null)
-                    return;
-
-                ulong roleId = 0;
-                var announceRole = false;
-                var messageService = RiftBot.GetService<MessageService>();
-
-                messageService.TryAddSend(new EmbedMessage(DestinationType.GuildChannel, Settings.ChannelId.Chat,
-                    TimeSpan.Zero, DonateEmbeds.ChatDonateEmbed(e.UserId, e.DonateAmount)));
-
-                if (e.DonateTotal >= 500M && e.DonateTotal < 2_000M)
-                {
-                    announceRole = !IonicClient.HasRolesAny(e.UserId, Settings.RoleId.Legendary);
-
-                    if (announceRole)
-                        roleId = Settings.RoleId.Legendary;
-                }
-                else if (e.DonateTotal >= 2_000M && e.DonateTotal < 10_000M)
-                {
-                    announceRole = !IonicClient.HasRolesAny(sgUser, Settings.RoleId.Absolute);
-
-                    if (announceRole)
-                        roleId = Settings.RoleId.Absolute;
-                }
-                else if (e.DonateTotal >= 10_000M)
-                {
-                    var embed = new EmbedBuilder()
-                                .WithDescription($"Призыватель <@{e.UserId.ToString()}> получил личную роль\nза общую сумму пожертвований в размере **10000** рублей.")
-                                .Build();
-
-                    messageService.TryAddSend(new EmbedMessage(DestinationType.GuildChannel, Settings.ChannelId.Chat,
-                                                               TimeSpan.Zero, embed));
-                }
-
-                if (roleId != 0)
-                {
-                    await RiftBot.GetService<RoleService>().AddPermanentRoleAsync(e.UserId, roleId);
-
-                    if (announceRole)
-                    {
-                        messageService.TryAddSend(roleId == Settings.RoleId.Legendary
-                            ? new EmbedMessage(DestinationType.GuildChannel,
-                                Settings.ChannelId.Chat, TimeSpan.Zero,
-                                DonateEmbeds.ChatDonateLegendaryRoleRewardEmbed(e.UserId))
-                            : new EmbedMessage(DestinationType.GuildChannel,
-                                Settings.ChannelId.Chat, TimeSpan.Zero,
-                                DonateEmbeds.ChatDonateAbsoluteRoleRewardEmbed(e.UserId)));
-                    }
-                }
-            });
-        }
-        
-        static ConcurrentDictionary<UInt64, SemaphoreSlim> addExpMutexes = new ConcurrentDictionary<UInt64, SemaphoreSlim>();
-
-        static SemaphoreSlim GetExpMutex(UInt64 userId)
-        {
-            if (addExpMutexes.TryGetValue(userId, out var mutex))
-                return mutex;
-
-            var newMutex = new SemaphoreSlim(1);
-
-            if (!addExpMutexes.TryAdd(userId, newMutex))
-                throw new InvalidOperationException($"Mutex was not properly added: {nameof(newMutex)}");
-                
-            return newMutex;
-        }
-        
         public async Task ProcessMessageAsync(IUserMessage message)
         {
-            var userId = message.Author.Id;
-            
-            await GetExpMutex(userId).WaitAsync();
-
-            try
-            {
-                await AddExpAsync(userId, 1u);
-            }
-            catch (Exception ex)
-            {
-                RiftBot.Log.Error(ex);
-            }
-            finally
-            {
-                GetExpMutex(userId).Release();
-            }
+            await AddExpAsync(message.Author.Id, 1u);
         }
 
-        static async Task AddExpAsync(UInt64 userId, UInt32 exp)    
+        static async Task AddExpAsync(ulong userId, uint exp)
         {
-            await Database.AddExperienceAsync(userId, exp);
+            await Database.AddExperienceAsync(userId, exp).ContinueWith(async _ =>
+            {
+                await CheckLevelUpAsync(userId);
+            });
+        }
 
+        static async Task CheckLevelUpAsync(ulong userId)
+        {
             var dbUserLevel = await Database.GetUserLevelAsync(userId);
 
-            if (dbUserLevel.Experience != UInt32.MaxValue)
+            if (dbUserLevel.Experience != uint.MaxValue)
             {
                 var newLevel = dbUserLevel.Level + 1u;
 
@@ -290,14 +206,12 @@ namespace Rift.Services
                     if (newLevel == 1u)
                         return; //no rewards on level 1
 
-                    if (IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat,
-                                                   out var chatChannel))
+                    if (IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                     {
                         await chatChannel.SendEmbedAsync(LevelUpEmbeds.Chat(userId, newLevel));
                     }
 
-                    await CheckAchievementsAsync(userId, newLevel);
-
+                    //await CheckAchievementsAsync(userId, newLevel);
                     await GiveRewardsForLevelAsync(userId, dbUserLevel.Level, newLevel);
                 }
             }
@@ -742,8 +656,7 @@ namespace Rift.Services
                 var dbInventory = await Database.GetUserInventoryAsync(userId);
                 result = await OpenChestInternalAsync(userId, dbInventory.Chests).ConfigureAwait(false);
                 if (result.Item1 == OpenChestResult.Success)
-                    await Database
-                                 .AddStatisticsAsync(userId, chestsOpenedTotal: dbInventory.Chests);
+                    await Database.AddStatisticsAsync(userId, chestsOpenedTotal: dbInventory.Chests);
             }
             finally
             {
@@ -1216,8 +1129,7 @@ namespace Rift.Services
             return result;
         }
 
-        static async Task<(AttackResult, Embed)> AttackInternalAsync(SocketGuildUser sgAttacker,
-                                                                     SocketGuildUser sgTarget)
+        static async Task<(AttackResult, Embed)> AttackInternalAsync(SocketGuildUser sgAttacker, SocketGuildUser sgTarget)
         {
             if (sgAttacker.Id == sgTarget.Id)
                 return (AttackResult.SelfAttack, AttackEmbeds.SelfAttack);
@@ -1361,16 +1273,14 @@ namespace Rift.Services
 
                     await Database.AddInventoryAsync(toId, coins: 300u, chests: 2u);
 
-                    chatEmbed
-                        .WithDescription($"Стример <@{fromId.ToString()}> подарил {Settings.Emote.Coin} 300 {Settings.Emote.Chest} 2 призывателю <@{toId}>");
+                    chatEmbed.WithDescription($"Стример <@{fromId.ToString()}> подарил {Settings.Emote.Coin} 300 {Settings.Emote.Chest} 2 призывателю <@{toId.ToString()}>");
                     break;
 
                 case GiftSource.Moderator:
 
                     await Database.AddInventoryAsync(toId, coins: 100u, chests: 1u);
 
-                    chatEmbed
-                        .WithDescription($"Призыватель <@{toId.ToString()}> получил {Settings.Emote.Coin} 100 {Settings.Emote.Chest} 1");
+                    chatEmbed.WithDescription($"Призыватель <@{toId.ToString()}> получил {Settings.Emote.Coin} 100 {Settings.Emote.Chest} 1");
                     break;
 
                 case GiftSource.Voice:
@@ -1378,12 +1288,10 @@ namespace Rift.Services
                     var coins = Helper.NextUInt(50, 350);
                     await Database.AddInventoryAsync(toId, coins: coins);
 
-                    chatEmbed
-                        .WithAuthor("Голосовые каналы", Settings.Emote.VoiceUrl)
+                    chatEmbed.WithAuthor("Голосовые каналы", Settings.Emote.VoiceUrl)
                         .WithDescription($"Призыватель <@{toId.ToString()}> получил {Settings.Emote.Coin} {coins.ToString()} за активность.");
 
-                    dmEmbed
-                        .WithAuthor("Голосовые каналы", Settings.Emote.VoiceUrl)
+                    dmEmbed.WithAuthor("Голосовые каналы", Settings.Emote.VoiceUrl)
                         .WithDescription($"Вы получили {Settings.Emote.Coin} {coins.ToString()} за активность.");
                     break;
             }
