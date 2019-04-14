@@ -4,7 +4,7 @@ namespace Rift.Data.Models.Cooldowns
 {
     public class UserLastGiftTime
     {
-        public UInt64 UserId;
+        public ulong UserId;
         public DateTime LastGiftTime;
     }
 }

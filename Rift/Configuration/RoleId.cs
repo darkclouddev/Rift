@@ -11,13 +11,13 @@ namespace Rift.Configuration
         {
             var dict = new Dictionary<string, string>();
 
-            PropertyInfo[] props = GetType().GetProperties();
+            var props = GetType().GetProperties();
 
             foreach (var prop in props)
             {
-                object[] customAttributes = prop.GetCustomAttributes(true);
+                var customAttributes = prop.GetCustomAttributes(true);
 
-                foreach (object attribute in customAttributes)
+                foreach (var attribute in customAttributes)
                 {
                     if (attribute is ResolveRoleAttribute resolvedAttribute)
                     {

@@ -21,7 +21,14 @@ namespace Rift.Services
 
         public RoleService()
         {
-            tempRoleTimer = new Timer(async delegate { await TimerProcAsync(); }, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(5));
+            tempRoleTimer = new Timer(
+                async delegate
+                {
+                    await TimerProcAsync();
+                },
+                null,
+                TimeSpan.FromSeconds(10),
+                TimeSpan.FromSeconds(5));
         }
 
         async Task TimerProcAsync()

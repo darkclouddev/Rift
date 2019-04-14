@@ -78,10 +78,23 @@ namespace Rift.Services
 
             api = RiotApi.NewInstance(Settings.App.RiotApiKey);
 
-            approveTimer = new Timer(async delegate { await CheckApproveAsync(); }, null, TimeSpan.FromSeconds(20),
-                                     approveCheckCooldown);
-            updateTimer = new Timer(async delegate { await UpdateUsersAsync(); }, null, TimeSpan.FromSeconds(20),
-                                    TimeSpan.FromMinutes(5));
+            approveTimer = new Timer(
+                async delegate
+                {
+                    await CheckApproveAsync();
+                },
+                null,
+                TimeSpan.FromSeconds(20),
+                approveCheckCooldown);
+            
+            updateTimer = new Timer(
+                async delegate
+                {
+                    await UpdateUsersAsync();
+                },
+                null,
+                TimeSpan.FromSeconds(20),
+                TimeSpan.FromMinutes(5));
         }
 
         #region Data
@@ -93,12 +106,11 @@ namespace Rift.Services
 
         static async Task UpdateDataAsync()
         {
-            (bool newDataAvailable, string version) = await CheckNewVersionAsync().ConfigureAwait(false);
+            (var newDataAvailable, var version) = await CheckNewVersionAsync().ConfigureAwait(false);
 
             if (!newDataAvailable)
             {
                 LoadData();
-
                 return;
             }
 
@@ -115,7 +127,7 @@ namespace Rift.Services
                     return;
                 }
 
-                string path = Path.Combine(TempFolder, $"{version}.tgz");
+                var path = Path.Combine(TempFolder, $"{version}.tgz");
 
                 await UnpackData(path, version).ContinueWith(async y =>
                 {
@@ -127,8 +139,8 @@ namespace Rift.Services
                         return;
                     }
 
-                    string tempPath = Path.Combine(TempFolder, version, "champion.json");
-                    string realPath = Path.Combine(DataDragonDataFolder, "champion.json");
+                    var tempPath = Path.Combine(TempFolder, version, "champion.json");
+                    var realPath = Path.Combine(DataDragonDataFolder, "champion.json");
 
                     try
                     {
@@ -150,8 +162,7 @@ namespace Rift.Services
 
                     RiftBot.Log.Info($"Data update completed. New version is {Settings.App.LolVersion}");
 
-                    await RiftBot.SendMessageToDevelopers($"Data update completed."
-                                                          + $" New version is {Settings.App.LolVersion}.");
+                    await RiftBot.SendMessageToDevelopers($"Data update completed. New version is {Settings.App.LolVersion}.");
                 });
             });
         }
@@ -323,7 +334,7 @@ namespace Rift.Services
             if (await Database.IsTakenAsync(region, summoner.Id))
                 return RegisterEmbeds.AccountIsUsed;
 
-            string code = Helper.GenerateConfirmationCode(16);
+            var code = Helper.GenerateConfirmationCode(16);
 
             var pendingUser = new RiftPendingUser()
             {
@@ -362,7 +373,7 @@ namespace Rift.Services
 
             foreach (var user in pendingUsers)
             {
-                bool expired = DateTime.UtcNow > user.ExpirationTime;
+                var expired = DateTime.UtcNow > user.ExpirationTime;
 
                 if (expired)
                 {
@@ -370,7 +381,7 @@ namespace Rift.Services
                 }
             }
 
-            int usersValidated = 0;
+            var usersValidated = 0;
 
             foreach (var user in pendingUsers)
             {
@@ -388,13 +399,12 @@ namespace Rift.Services
                 if (code is null || codeResult != RequestResult.Success)
                     continue;
 
-                string sanitizedCode = new string(code.Where(x => Char.IsLetterOrDigit(x)).ToArray());
+                var sanitizedCode = new string(code.Where(char.IsLetterOrDigit).ToArray());
 
                 if (sanitizedCode != user.ConfirmationCode)
                     continue;
 
-                (RequestResult requestResult, Summoner summoner) =
-                    await GetSummonerByEncryptedUUIDAsync(user.Region, user.PlayerUUID);
+                (var requestResult, var summoner) = await GetSummonerByEncryptedUUIDAsync(user.Region, user.PlayerUUID);
 
                 if (requestResult != RequestResult.Success)
                 {
@@ -445,7 +455,7 @@ namespace Rift.Services
             await channel.SendEmbedAsync(RegisterEmbeds.ChatEmbed(sgUser));
         }
 
-        async Task<bool> IsPending(ulong userId)
+        static async Task<bool> IsPending(ulong userId)
         {
             return await Database.IsPendingAsync(userId);
         }
@@ -504,8 +514,7 @@ namespace Rift.Services
                 return;
             }
 
-            (RequestResult rankResult, LeaguePosition[] rankData) =
-                await GetLeaguePositionsByEncryptedSummonerIdAsync(lolData.SummonerRegion, lolData.SummonerId);
+            (var rankResult, var rankData) = await GetLeaguePositionsByEncryptedSummonerIdAsync(lolData.SummonerRegion, lolData.SummonerId);
 
             if (rankResult != RequestResult.Success)
             {
@@ -525,14 +534,14 @@ namespace Rift.Services
                 return;
             }
 
-            bool isUp = newRank > currentRank;
+            var isUp = newRank > currentRank;
 
             if (newRank != currentRank)
                 OnRankChanged?.Invoke(new RankChangedEventArgs(userId, currentRank, newRank, isUp));
 
             await RemoveRankedRole(sgUser, currentRank);
 
-            ulong roleId = 0ul;
+            var roleId = 0ul;
 
             switch (newRank)
             {
@@ -728,15 +737,14 @@ namespace Rift.Services
 
         async Task AssignRoleFromRankAsync(SocketGuildUser guildUser, PendingUser approvedUser)
         {
-            (RequestResult rankResult, LeaguePosition[] rankData) =
-                await GetLeaguePositionsByEncryptedSummonerIdAsync(approvedUser.Region, approvedUser.SummonedId);
+            (var rankResult, var rankData) = await GetLeaguePositionsByEncryptedSummonerIdAsync(approvedUser.Region, approvedUser.SummonedId);
 
             if (rankResult != RequestResult.Success)
                 return;
 
             var soloqRank = GetRankFromPosition(rankData.FirstOrDefault(x => x.QueueType == "RANKED_SOLO_5x5"));
 
-            ulong roleId = 0ul;
+            var roleId = 0ul;
 
             switch (soloqRank)
             {
@@ -860,13 +868,11 @@ namespace Rift.Services
 
         #endregion Rank
 
-        public async Task<(RequestResult, Summoner)> GetSummonerByEncryptedSummonerIdAsync(
-            string region, string encryptedSummonerId)
+        public async Task<(RequestResult, Summoner)> GetSummonerByEncryptedSummonerIdAsync(string region, string encryptedSummonerId)
         {
             try
             {
-                var result =
-                    await api.SummonerV4.GetBySummonerIdAsync(GetRegionFromString(region), encryptedSummonerId);
+                var result = await api.SummonerV4.GetBySummonerIdAsync(GetRegionFromString(region), encryptedSummonerId);
 
                 return (RequestResult.Success, result);
             }
@@ -877,8 +883,7 @@ namespace Rift.Services
             }
         }
 
-        public async Task<(RequestResult, Summoner)> GetSummonerByEncryptedUUIDAsync(
-            string region, string encryptedUUID)
+        public async Task<(RequestResult, Summoner)> GetSummonerByEncryptedUUIDAsync(string region, string encryptedUUID)
         {
             try
             {
@@ -908,13 +913,11 @@ namespace Rift.Services
             }
         }
 
-        public async Task<(RequestResult, LeaguePosition[])> GetLeaguePositionsByEncryptedSummonerIdAsync(
-            string region, string encryptedSummonerId)
+        public async Task<(RequestResult, LeaguePosition[])> GetLeaguePositionsByEncryptedSummonerIdAsync(string region, string encryptedSummonerId)
         {
             try
             {
-                var result = await api.LeagueV4.GetAllLeaguePositionsForSummonerAsync(GetRegionFromString(region),
-                                                                                      encryptedSummonerId);
+                var result = await api.LeagueV4.GetAllLeaguePositionsForSummonerAsync(GetRegionFromString(region), encryptedSummonerId);
 
                 return (RequestResult.Success, result);
             }
@@ -925,14 +928,11 @@ namespace Rift.Services
             }
         }
 
-        public async Task<(RequestResult, string)> GetThirdPartyCodeByEncryptedSummonerIdAsync(string region, string
-                                                                                                   encryptedSummonerId)
+        public async Task<(RequestResult, string)> GetThirdPartyCodeByEncryptedSummonerIdAsync(string region, string encryptedSummonerId)
         {
             try
             {
-                var result =
-                    await api.ThirdPartyCodeV4.GetThirdPartyCodeBySummonerIdAsync(GetRegionFromString(region),
-                                                                                  encryptedSummonerId);
+                var result = await api.ThirdPartyCodeV4.GetThirdPartyCodeBySummonerIdAsync(GetRegionFromString(region), encryptedSummonerId);
 
                 return (RequestResult.Success, result);
             }
@@ -943,14 +943,11 @@ namespace Rift.Services
             }
         }
 
-        public async Task<(RequestResult, MatchReference[])> GetLast20MatchesByAccountIdAsync(string region, string
-                                                                                                  encryptedAccountId)
+        public async Task<(RequestResult, MatchReference[])> GetLast20MatchesByAccountIdAsync(string region, string encryptedAccountId)
         {
             try
             {
-                var matchlist =
-                    await api.MatchV4.GetMatchlistAsync(GetRegionFromString(region), encryptedAccountId, beginIndex: 0,
-                                                        endIndex: 19);
+                var matchlist = await api.MatchV4.GetMatchlistAsync(GetRegionFromString(region), encryptedAccountId, beginIndex: 0, endIndex: 19);
 
                 return (RequestResult.Success, matchlist.Matches);
             }
@@ -997,7 +994,7 @@ namespace Rift.Services
 
         public static string GetChampionSquareByName(ChampionImage ci)
         {
-            return String.Format(DataDragonChampPortraitTemplate, Settings.App.LolVersion, ci.Full);
+            return string.Format(DataDragonChampPortraitTemplate, Settings.App.LolVersion, ci.Full);
         }
 
         public string GetQueueNameById(int id)
@@ -1064,7 +1061,7 @@ namespace Rift.Services
             }
         }
 
-        static async Task<GetResponse> GetAsync(String url)
+        static async Task<GetResponse> GetAsync(string url)
         {
             var request = (HttpWebRequest) WebRequest.Create(url);
 
@@ -1079,7 +1076,7 @@ namespace Rift.Services
                 response = (HttpWebResponse) we.Response;
             }
 
-            HttpStatusCode statusCode = response.StatusCode;
+            var statusCode = response.StatusCode;
 
             using (var stream = response.GetResponseStream())
             using (var reader = new StreamReader(stream))
@@ -1093,7 +1090,6 @@ namespace Rift.Services
     {
         Success,
         Error,
-        RateLimited,
     }
 
     public enum LeagueRank

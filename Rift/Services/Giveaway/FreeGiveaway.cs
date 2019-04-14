@@ -25,8 +25,7 @@ namespace Rift.Services.Giveaway
         {
         }
 
-        Task Client_AddReactedUser(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel,
-                                   SocketReaction reaction)
+        Task Client_AddReactedUser(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
         {
             if (message.Id != giveawayMessageId)
                 return Task.CompletedTask;
@@ -34,7 +33,7 @@ namespace Rift.Services.Giveaway
             if (giveawayEmote is null)
                 return Task.CompletedTask;
 
-            if (users == null || users.Contains(reaction.UserId) || reaction.UserId == 404611580819537920)
+            if (users == null || users.Contains(reaction.UserId) || reaction.UserId == IonicClient.Client.CurrentUser.Id)
                 return Task.CompletedTask;
 
             if (!reaction.Emote.Name.Equals(giveawayEmote.Name, StringComparison.InvariantCultureIgnoreCase))
@@ -62,8 +61,7 @@ namespace Rift.Services.Giveaway
             try
             {
                 users = new List<ulong>();
-                if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Giveaways,
-                                                out var channel))
+                if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Giveaways, out var channel))
                     return;
 
                 await channel.SendMessageAsync(GiveawayEmbeds.FreeMessage);
@@ -74,8 +72,7 @@ namespace Rift.Services.Giveaway
 
                 await msg.AddReactionAsync(giveawayEmote);
 
-                timer = new Timer(async delegate { await FinishGiveaway(); }, null, TimeSpan.FromMinutes(duration),
-                                  TimeSpan.Zero);
+                timer = new Timer(async delegate { await FinishGiveaway(); }, null, TimeSpan.FromMinutes(duration), TimeSpan.Zero);
             }
             catch (Exception ex)
             {

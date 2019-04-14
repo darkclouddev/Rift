@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using Humanizer;
-
 using Rift.Services;
 
 using IonicLib.Extensions;
+
+using Humanizer;
 
 namespace Rift.Rewards
 {
@@ -20,7 +20,7 @@ namespace Rift.Rewards
         {
             var tempRoles = (await RiftBot.GetService<RoleService>().GetUserTempRolesAsync(userId)).Select(x => x.RoleId);
 
-            var availableRoles = AvailableRoles.Except(tempRoles);
+            var availableRoles = AvailableRoles.Except(tempRoles).ToList();
             if (availableRoles.Any())
             {
                 RoleId = availableRoles.Random();

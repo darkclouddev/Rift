@@ -24,8 +24,7 @@ namespace Rift.Modules
                 return;
             }
 
-            if (moduleState == RiftModuleState.AdminOnly
-                && !RiftBot.IsAdmin(Context.User))
+            if (moduleState == RiftModuleState.AdminOnly && !RiftBot.IsAdmin(Context.User))
             {
                 Task.Run(async () =>
                 {

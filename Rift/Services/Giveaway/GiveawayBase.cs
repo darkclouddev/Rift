@@ -42,7 +42,7 @@ namespace Rift.Services.Giveaway
             }
             else
             {
-                RiftBot.Log.Debug($"No winner");
+                RiftBot.Log.Debug("No winner");
             }
 
             await Terminate();
@@ -55,8 +55,7 @@ namespace Rift.Services.Giveaway
             await channel.SendEmbedAsync(GiveawayEmbeds.ChatWinner(winner, reward));
 
             RiftBot.GetService<MessageService>()
-                .TryAddSend(new EmbedMessage(DestinationType.DM, winner, TimeSpan.Zero,
-                                             GiveawayEmbeds.DMWinner(reward)));
+                .TryAddSend(new EmbedMessage(DestinationType.DM, winner, TimeSpan.Zero, GiveawayEmbeds.DMWinner(reward)));
 
             Clean();
         }

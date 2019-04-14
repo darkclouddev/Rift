@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 
 using Rift.Configuration;
-using Rift.Services;
 
 namespace Rift.Rewards
 {
@@ -34,7 +33,7 @@ namespace Rift.Rewards
 
         public virtual void GenerateRewardString()
         {
-            if (String.IsNullOrWhiteSpace(RewardString))
+            if (string.IsNullOrWhiteSpace(RewardString))
             {
                 if (Experience > 0u)
                     RewardString += $" {Settings.Emote.Experience} {Experience.ToString()}";

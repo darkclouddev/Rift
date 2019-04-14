@@ -35,8 +35,14 @@ namespace Rift.Services
         {
             RiftBot.Log.Info($"Starting EventService..");
 
-            startupTimer = new Timer(async delegate { await SetupNextEvent(); }, null, TimeSpan.FromSeconds(15),
-                                     TimeSpan.Zero);
+            startupTimer = new Timer(
+                async delegate
+                {
+                    await SetupNextEvent();
+                },
+                null,
+                TimeSpan.FromSeconds(15),
+                TimeSpan.Zero);
 
             RiftBot.Log.Info($"EventService loaded successfully.");
         }
@@ -114,8 +120,7 @@ namespace Rift.Services
         static List<ulong> reactionIds = new List<ulong>();
         static ulong eventMessageId = 0ul;
 
-        Task Client_AddReactedUser(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel,
-                                   SocketReaction reaction)
+        Task Client_AddReactedUser(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
         {
             if (message.Id != eventMessageId)
                 return Task.CompletedTask;

@@ -8,8 +8,7 @@ namespace Rift.Preconditions
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
     class RequireAdminAttribute : PreconditionAttribute
     {
-        public override async Task<PreconditionResult> CheckPermissionsAsync(
-            ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             if (await Task.Run(() => RiftBot.IsAdmin(context.User)))
                 return PreconditionResult.FromSuccess();

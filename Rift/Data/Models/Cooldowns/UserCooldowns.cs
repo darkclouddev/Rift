@@ -6,7 +6,7 @@ namespace Rift.Data.Models.Cooldowns
 {
     public class UserCooldowns
     {
-        public UInt64 UserId { get; }
+        public ulong UserId { get; }
         public DateTime LastStoreTime { get; }
         public TimeSpan StoreTimeSpan { get; }
         public DateTime LastAttackTime { get; }

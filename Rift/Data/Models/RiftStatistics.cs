@@ -1,27 +1,25 @@
-﻿using System;
-
-namespace Rift.Data.Models
+﻿namespace Rift.Data.Models
 {
     public class RiftStatistics
     {
-        public UInt64 UserId { get; set; }
-        public UInt32 CoinsEarnedTotal { get; set; }
-        public UInt32 TokensEarnedTotal { get; set; }
-        public UInt32 ChestsEarnedTotal { get; set; }
-        public UInt32 SphereEarnedTotal { get; set; }
-        public UInt32 CapsuleEarnedTotal { get; set; }
-        public UInt32 ChestsOpenedTotal { get; set; }
-        public UInt32 SphereOpenedTotal { get; set; }
-        public UInt32 CapsuleOpenedTotal { get; set; }
-        public UInt32 AttacksDone { get; set; }
-        public UInt32 AttacksReceived { get; set; }
-        public UInt32 CoinsSpentTotal { get; set; }
-        public UInt32 TokensSpentTotal { get; set; }
-        public UInt32 GiftsSent { get; set; }
-        public UInt32 GiftsReceived { get; set; }
-        public UInt32 MessagesSentTotal { get; set; }
-        public UInt32 BragTotal { get; set; }
-        public UInt32 PurchasedItemsTotal { get; set; }
+        public ulong UserId { get; set; }
+        public uint CoinsEarnedTotal { get; set; }
+        public uint TokensEarnedTotal { get; set; }
+        public uint ChestsEarnedTotal { get; set; }
+        public uint SphereEarnedTotal { get; set; }
+        public uint CapsuleEarnedTotal { get; set; }
+        public uint ChestsOpenedTotal { get; set; }
+        public uint SphereOpenedTotal { get; set; }
+        public uint CapsuleOpenedTotal { get; set; }
+        public uint AttacksDone { get; set; }
+        public uint AttacksReceived { get; set; }
+        public uint CoinsSpentTotal { get; set; }
+        public uint TokensSpentTotal { get; set; }
+        public uint GiftsSent { get; set; }
+        public uint GiftsReceived { get; set; }
+        public uint MessagesSentTotal { get; set; }
+        public uint BragTotal { get; set; }
+        public uint PurchasedItemsTotal { get; set; }
 
         public RiftUser User { get; set; }
     }

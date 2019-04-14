@@ -39,8 +39,8 @@ namespace Rift.Embeds
                    .WithAuthor($"Статистика донатеров сервера")
                    .WithDescription($"Топ донатеры League of Legends RU:")
                    .AddField("Призыватель",
-                             String.Join('\n', topTen.Select(x => EconomyService.GetUserNameById(x.UserId))), true)
-                   .AddField("Сумма", String.Join('\n', topTen.Select(x => x.Donate.ToString("0.00"))), true)
+                             string.Join('\n', topTen.Select(x => EconomyService.GetUserNameById(x.UserId))), true)
+                   .AddField("Сумма", string.Join('\n', topTen.Select(x => x.Donate.ToString("0.00"))), true)
                    .Build();
         }
     }

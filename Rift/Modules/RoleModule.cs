@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -54,11 +51,11 @@ namespace Rift.Modules
             }
 
             var eb = new EmbedBuilder()
-                     .WithAuthor("Трансляция")
-                     .WithThumbnailUrl(streamer.PictureUrl)
-                     .WithDescription($"{description}")
-                     .AddField($"Ссылка на трансляцию", streamer.StreamUrl)
-                     .Build();
+                .WithAuthor("Трансляция")
+                .WithThumbnailUrl(streamer.PictureUrl)
+                .WithDescription($"{description}")
+                .AddField($"Ссылка на трансляцию", streamer.StreamUrl)
+                .Build();
 
             var webhook = new DiscordWebhookClient(505849754119569409ul,
                 "NuoQqSufIqYo6_K2UF-NjU2N_-JfAACdLLKPOtqcquJStJLzTQF3OHcjLRcwEQybw4kR");
@@ -107,8 +104,9 @@ namespace Rift.Modules
                 await sgUser.AddRoleAsync(role);
 
                 var chatEmbed = new EmbedBuilder()
-                                .WithAuthor("Оповещение")
-                                .WithDescription($"Призывателю {sgUser.Mention} выдается роль **{role.Name.ToLowerInvariant()}**");
+                    .WithAuthor("Оповещение")
+                    .WithDescription($"Призывателю {sgUser.Mention} выдается роль **{role.Name.ToLowerInvariant()}**")
+                    .Build();
 
                 await chatChannel.SendEmbedAsync(chatEmbed);
             }

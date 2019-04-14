@@ -39,8 +39,7 @@ namespace Rift.Preconditions
         /// <summary>
         /// The _invoke tracker.
         /// </summary>
-        readonly Dictionary<ulong, CommandTimeout> invokeTracker =
-            new Dictionary<ulong, CommandTimeout>();
+        readonly Dictionary<ulong, CommandTimeout> invokeTracker = new Dictionary<ulong, CommandTimeout>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RateLimitAttribute"/> class.  Sets how often a user is allowed to use this command. 

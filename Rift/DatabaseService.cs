@@ -19,7 +19,7 @@ namespace Rift
     {
         #region Cooldowns
 
-        static async Task<Boolean> EnsureCooldownsExistsAsync(UInt64 userId)
+        static async Task<bool> EnsureCooldownsExistsAsync(ulong userId)
         {
             if (!await EnsureUserExistsAsync(userId))
                 return false;
@@ -50,7 +50,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserCooldowns> GetUserCooldownsAsync(UInt64 userId)
+        public static async Task<UserCooldowns> GetUserCooldownsAsync(ulong userId)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(GetUserDoubleExpTimeAsync));
@@ -64,7 +64,7 @@ namespace Rift
             }
         }
         
-        public static async Task<UserDoubleExpTime> GetUserDoubleExpTimeAsync(UInt64 userId)
+        public static async Task<UserDoubleExpTime> GetUserDoubleExpTimeAsync(ulong userId)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(GetUserDoubleExpTimeAsync));
@@ -82,7 +82,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserLastStoreTime> GetUserLastStoreTimeAsync(UInt64 userId)
+        public static async Task<UserLastStoreTime> GetUserLastStoreTimeAsync(ulong userId)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(GetUserLastStoreTimeAsync));
@@ -100,7 +100,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserLastAttackTime> GetUserLastAttackTimeAsync(UInt64 userId)
+        public static async Task<UserLastAttackTime> GetUserLastAttackTimeAsync(ulong userId)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(GetUserLastAttackTimeAsync));
@@ -118,7 +118,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserLastBeingAttackedTime> GetUserLastBeingAttackedTimeAsync(UInt64 userId)
+        public static async Task<UserLastBeingAttackedTime> GetUserLastBeingAttackedTimeAsync(ulong userId)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(GetUserLastBeingAttackedTimeAsync));
@@ -136,7 +136,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserLastDailyChestTime> GetUserLastDailyChestTimeAsync(UInt64 userId)
+        public static async Task<UserLastDailyChestTime> GetUserLastDailyChestTimeAsync(ulong userId)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(GetUserLastDailyChestTimeAsync));
@@ -154,7 +154,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserLastBragTime> GetUserLastBragTimeAsync(UInt64 userId)
+        public static async Task<UserLastBragTime> GetUserLastBragTimeAsync(ulong userId)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(GetUserLastBragTimeAsync));
@@ -172,7 +172,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserLastGiftTime> GetUserLastGiftTimeAsync(UInt64 userId)
+        public static async Task<UserLastGiftTime> GetUserLastGiftTimeAsync(ulong userId)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new InvalidOperationException();
@@ -216,14 +216,14 @@ namespace Rift
                         LastUpdateTime = x.LastLolAccountUpdateTime,
                     })
                     .OrderBy(x => x.LastUpdateTime)
-                    .Where(x => !String.IsNullOrWhiteSpace(x.PlayerUuid))
+                    .Where(x => !string.IsNullOrWhiteSpace(x.PlayerUuid))
                     .ToArrayAsync();
 
                 return list.Take(10).ToArray();
             }
         }
 
-        public static async Task SetLastStoreTimeAsync(UInt64 userId, DateTime time)
+        public static async Task SetLastStoreTimeAsync(ulong userId, DateTime time)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(SetLastStoreTimeAsync));
@@ -241,7 +241,7 @@ namespace Rift
             }
         }
 
-        public static async Task SetLastAttackTimeAsync(UInt64 userId, DateTime time)
+        public static async Task SetLastAttackTimeAsync(ulong userId, DateTime time)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(SetLastAttackTimeAsync));
@@ -259,7 +259,7 @@ namespace Rift
             }
         }
 
-        public static async Task SetLastBeingAttackedTimeAsync(UInt64 userId, DateTime time)
+        public static async Task SetLastBeingAttackedTimeAsync(ulong userId, DateTime time)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(SetLastBeingAttackedTimeAsync));
@@ -277,7 +277,7 @@ namespace Rift
             }
         }
 
-        public static async Task SetLastDailyChestTimeAsync(UInt64 userId, DateTime time)
+        public static async Task SetLastDailyChestTimeAsync(ulong userId, DateTime time)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(SetLastDailyChestTimeAsync));
@@ -295,7 +295,7 @@ namespace Rift
             }
         }
 
-        public static async Task SetDoubleExpTimeAsync(UInt64 userId, DateTime time)
+        public static async Task SetDoubleExpTimeAsync(ulong userId, DateTime time)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(SetDoubleExpTimeAsync));
@@ -313,7 +313,7 @@ namespace Rift
             }
         }
 
-        public static async Task SetBotRespeсtTimeAsync(UInt64 userId, DateTime time)
+        public static async Task SetBotRespeсtTimeAsync(ulong userId, DateTime time)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(SetBotRespeсtTimeAsync));
@@ -331,7 +331,7 @@ namespace Rift
             }
         }
 
-        public static async Task SetLastBragTimeAsync(UInt64 userId, DateTime time)
+        public static async Task SetLastBragTimeAsync(ulong userId, DateTime time)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(SetLastBragTimeAsync));
@@ -349,7 +349,7 @@ namespace Rift
             }
         }
 
-        public static async Task SetLastGiftTimeAsync(UInt64 userId, DateTime time)
+        public static async Task SetLastGiftTimeAsync(ulong userId, DateTime time)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(SetLastGiftTimeAsync));
@@ -367,7 +367,7 @@ namespace Rift
             }
         }
 
-        public static async Task SetLastLolAccountUpdateTimeAsync(UInt64 userId, DateTime time)
+        public static async Task SetLastLolAccountUpdateTimeAsync(ulong userId, DateTime time)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(SetLastLolAccountUpdateTimeAsync));
@@ -389,7 +389,7 @@ namespace Rift
 
         #region Inventory
 
-        static async Task<Boolean> EnsureInventoryExistsAsync(UInt64 userId)
+        static async Task<bool> EnsureInventoryExistsAsync(ulong userId)
         {
             if (!await EnsureUserExistsAsync(userId))
                 return false;
@@ -420,7 +420,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserInventory> GetUserInventoryAsync(UInt64 userId)
+        public static async Task<UserInventory> GetUserInventoryAsync(ulong userId)
         {
             if (!await EnsureInventoryExistsAsync(userId)
                 || !await EnsureStatisticsExistsAsync(userId))
@@ -485,9 +485,16 @@ namespace Rift
             }
         }
 
-        public static async Task AddInventoryAsync(UInt64 userId, UInt32 coins = 0u, UInt32 tokens = 0u,
-            UInt32 chests = 0u, UInt32 capsules = 0u, UInt32 spheres = 0u, UInt32 doubleExps = 0u,
-            UInt32 respects = 0u, UInt32 usualTickets = 0u, UInt32 rareTickets = 0u)
+        public static async Task AddInventoryAsync(ulong userId,
+            uint coins = 0u,
+            uint tokens = 0u,
+            uint chests = 0u,
+            uint capsules = 0u,
+            uint spheres = 0u,
+            uint doubleExps = 0u,
+            uint respects = 0u,
+            uint usualTickets = 0u,
+            uint rareTickets = 0u)
         {
             var dbInventory = await GetUserInventoryAsync(userId);
             var dbStatistics = await GetUserStatisticsAsync(userId);
@@ -500,17 +507,17 @@ namespace Rift
                 var inventoryEntry = context.Attach(inventory);
                 var statisticsEntry = context.Attach(statistics);
 
-                if (coins > UInt32.MinValue)
+                if (coins > uint.MinValue)
                 {
                     var coinsBefore = dbInventory.Coins;
 
-                    if (UInt32.MaxValue - coinsBefore < coins)
-                        inventory.Coins = UInt32.MaxValue;
+                    if (uint.MaxValue - coinsBefore < coins)
+                        inventory.Coins = uint.MaxValue;
                     else
                         inventory.Coins = coinsBefore + coins;
 
-                    if (UInt32.MaxValue - dbStatistics.CoinsEarnedTotal < coins)
-                        statistics.CoinsEarnedTotal = UInt32.MaxValue;
+                    if (uint.MaxValue - dbStatistics.CoinsEarnedTotal < coins)
+                        statistics.CoinsEarnedTotal = uint.MaxValue;
                     else
                         statistics.CoinsEarnedTotal = dbStatistics.CoinsEarnedTotal + coins;
 
@@ -520,17 +527,17 @@ namespace Rift
                     statisticsEntry.Property(x => x.CoinsEarnedTotal).IsModified = true;
                 }
 
-                if (tokens > UInt32.MinValue)
+                if (tokens > uint.MinValue)
                 {
                     var tokensBefore = dbInventory.Tokens;
 
-                    if (UInt32.MaxValue - tokensBefore < tokens)
-                        inventory.Tokens = UInt32.MaxValue;
+                    if (uint.MaxValue - tokensBefore < tokens)
+                        inventory.Tokens = uint.MaxValue;
                     else
                         inventory.Tokens = tokensBefore + tokens;
 
-                    if (UInt32.MaxValue - dbStatistics.TokensEarnedTotal < tokens)
-                        statistics.TokensEarnedTotal = UInt32.MaxValue;
+                    if (uint.MaxValue - dbStatistics.TokensEarnedTotal < tokens)
+                        statistics.TokensEarnedTotal = uint.MaxValue;
                     else
                         statistics.TokensEarnedTotal = dbStatistics.TokensEarnedTotal + tokens;
 
@@ -540,17 +547,17 @@ namespace Rift
                     statisticsEntry.Property(x => x.TokensEarnedTotal).IsModified = true;
                 }
 
-                if (chests > UInt32.MinValue)
+                if (chests > uint.MinValue)
                 {
                     var chestsBefore = dbInventory.Chests;
 
-                    if (UInt32.MaxValue - chestsBefore < chests)
-                        inventory.Chests = UInt32.MaxValue;
+                    if (uint.MaxValue - chestsBefore < chests)
+                        inventory.Chests = uint.MaxValue;
                     else
                         inventory.Chests = chestsBefore + chests;
 
-                    if (UInt32.MaxValue - dbStatistics.ChestsEarnedTotal < chests)
-                        statistics.ChestsEarnedTotal = UInt32.MaxValue;
+                    if (uint.MaxValue - dbStatistics.ChestsEarnedTotal < chests)
+                        statistics.ChestsEarnedTotal = uint.MaxValue;
                     else
                         statistics.ChestsEarnedTotal = dbStatistics.ChestsEarnedTotal + chests;
 
@@ -560,17 +567,17 @@ namespace Rift
                     statisticsEntry.Property(x => x.ChestsEarnedTotal).IsModified = true;
                 }
 
-                if (capsules > UInt32.MinValue)
+                if (capsules > uint.MinValue)
                 {
                     var capsulesBefore = dbInventory.Capsules;
 
-                    if (UInt32.MaxValue - capsulesBefore < capsules)
-                        inventory.Capsules = UInt32.MaxValue;
+                    if (uint.MaxValue - capsulesBefore < capsules)
+                        inventory.Capsules = uint.MaxValue;
                     else
                         inventory.Capsules = capsulesBefore + capsules;
 
-                    if (UInt32.MaxValue - dbStatistics.CapsuleEarnedTotal < capsules)
-                        statistics.CapsuleEarnedTotal = UInt32.MaxValue;
+                    if (uint.MaxValue - dbStatistics.CapsuleEarnedTotal < capsules)
+                        statistics.CapsuleEarnedTotal = uint.MaxValue;
                     else
                         statistics.CapsuleEarnedTotal = dbStatistics.CapsuleEarnedTotal + capsules;
 
@@ -580,17 +587,17 @@ namespace Rift
                     statisticsEntry.Property(x => x.CapsuleEarnedTotal).IsModified = true;
                 }
 
-                if (spheres > UInt32.MinValue)
+                if (spheres > uint.MinValue)
                 {
                     var spheresBefore = dbInventory.Spheres;
 
-                    if (UInt32.MaxValue - spheresBefore < spheres)
-                        inventory.Spheres = UInt32.MaxValue;
+                    if (uint.MaxValue - spheresBefore < spheres)
+                        inventory.Spheres = uint.MaxValue;
                     else
                         inventory.Spheres = spheresBefore + spheres;
 
-                    if (UInt32.MaxValue - dbStatistics.SphereEarnedTotal < spheres)
-                        statistics.SphereEarnedTotal = UInt32.MaxValue;
+                    if (uint.MaxValue - dbStatistics.SphereEarnedTotal < spheres)
+                        statistics.SphereEarnedTotal = uint.MaxValue;
                     else
                         statistics.SphereEarnedTotal = dbStatistics.SphereEarnedTotal + spheres;
 
@@ -600,12 +607,12 @@ namespace Rift
                     statisticsEntry.Property(x => x.SphereEarnedTotal).IsModified = true;
                 }
 
-                if (doubleExps > UInt32.MinValue)
+                if (doubleExps > uint.MinValue)
                 {
                     var doubleExpsBefore = dbInventory.PowerupsDoubleExperience;
 
-                    if (UInt32.MaxValue - doubleExpsBefore < doubleExps)
-                        inventory.PowerupsDoubleExp = UInt32.MaxValue;
+                    if (uint.MaxValue - doubleExpsBefore < doubleExps)
+                        inventory.PowerupsDoubleExp = uint.MaxValue;
                     else
                         inventory.PowerupsDoubleExp = doubleExpsBefore + doubleExps;
 
@@ -614,12 +621,12 @@ namespace Rift
                     RiftBot.Log.Info($"Modified {userId.ToString()}'s doubleExp(s): ({doubleExpsBefore.ToString()} => {inventory.PowerupsDoubleExp.ToString()})");
                 }
 
-                if (respects > UInt32.MinValue)
+                if (respects > uint.MinValue)
                 {
                     var respectsBefore = dbInventory.PowerupsBotRespect;
 
-                    if (UInt32.MaxValue - respectsBefore < respects)
-                        inventory.PowerupsBotRespect = UInt32.MaxValue;
+                    if (uint.MaxValue - respectsBefore < respects)
+                        inventory.PowerupsBotRespect = uint.MaxValue;
                     else
                         inventory.PowerupsBotRespect = respectsBefore + respects;
 
@@ -628,12 +635,12 @@ namespace Rift
                     RiftBot.Log.Info($"Modified {userId.ToString()}'s respect(s): ({respectsBefore.ToString()} => {inventory.PowerupsBotRespect.ToString()})");
                 }
 
-                if (usualTickets > UInt32.MinValue)
+                if (usualTickets > uint.MinValue)
                 {
                     var usualTicketsBefore = dbInventory.UsualTickets;
 
-                    if (UInt32.MaxValue - usualTicketsBefore < usualTickets)
-                        inventory.UsualTickets = UInt32.MaxValue;
+                    if (uint.MaxValue - usualTicketsBefore < usualTickets)
+                        inventory.UsualTickets = uint.MaxValue;
                     else
                         inventory.UsualTickets = usualTicketsBefore + usualTickets;
 
@@ -642,12 +649,12 @@ namespace Rift
                     RiftBot.Log.Info($"Modified {userId.ToString()}'s usual ticket(s): ({usualTicketsBefore.ToString()} => {inventory.UsualTickets.ToString()})");
                 }
 
-                if (rareTickets > UInt32.MinValue)
+                if (rareTickets > uint.MinValue)
                 {
                     var rareTicketsBefore = dbInventory.RareTickets;
 
-                    if (UInt32.MaxValue - rareTicketsBefore < rareTickets)
-                        inventory.RareTickets = UInt32.MaxValue;
+                    if (uint.MaxValue - rareTicketsBefore < rareTickets)
+                        inventory.RareTickets = uint.MaxValue;
                     else
                         inventory.RareTickets = rareTicketsBefore + rareTickets;
 
@@ -660,9 +667,16 @@ namespace Rift
             }
         }
 
-        public static async Task RemoveInventoryAsync(UInt64 userId, UInt32 coins = 0u, UInt32 tokens = 0u,
-            UInt32 chests = 0u, UInt32 capsules = 0u, UInt32 spheres = 0u, UInt32 doubleExps = 0u,
-            UInt32 respects = 0u, UInt32 usualTickets = 0u, UInt32 rareTickets = 0u)
+        public static async Task RemoveInventoryAsync(ulong userId,
+            uint coins = 0u,
+            uint tokens = 0u,
+            uint chests = 0u,
+            uint capsules = 0u,
+            uint spheres = 0u,
+            uint doubleExps = 0u,
+            uint respects = 0u,
+            uint usualTickets = 0u,
+            uint rareTickets = 0u)
         {
             var dbInventory = await GetUserInventoryAsync(userId);
             var dbStatistics = await GetUserStatisticsAsync(userId);
@@ -677,12 +691,12 @@ namespace Rift
 
                 var coinsBefore = dbInventory.Coins;
                 coins = Math.Min(coins, coinsBefore);
-                if (coins > UInt32.MinValue)
+                if (coins > uint.MinValue)
                 {
                     inventory.Coins = coinsBefore - coins;
 
-                    if (UInt32.MaxValue - dbInventory.CoinsSpentTotal < coins)
-                        statistics.CoinsSpentTotal = UInt32.MaxValue;
+                    if (uint.MaxValue - dbInventory.CoinsSpentTotal < coins)
+                        statistics.CoinsSpentTotal = uint.MaxValue;
                     else
                         statistics.CoinsSpentTotal = dbInventory.CoinsSpentTotal + coins;
 
@@ -694,12 +708,12 @@ namespace Rift
 
                 var tokensBefore = dbInventory.Tokens;
                 tokens = Math.Min(tokens, tokensBefore);
-                if (tokens > UInt32.MinValue)
+                if (tokens > uint.MinValue)
                 {
                     inventory.Tokens = tokensBefore - tokens;
 
-                    if (UInt32.MaxValue - dbStatistics.TokensSpentTotal < tokens)
-                        statistics.TokensSpentTotal = UInt32.MaxValue;
+                    if (uint.MaxValue - dbStatistics.TokensSpentTotal < tokens)
+                        statistics.TokensSpentTotal = uint.MaxValue;
                     else
                         statistics.TokensSpentTotal = dbStatistics.TokensSpentTotal + tokens;
 
@@ -711,7 +725,7 @@ namespace Rift
 
                 var chestsBefore = dbInventory.Chests;
                 chests = Math.Min(chests, chestsBefore);
-                if (chests > UInt32.MinValue)
+                if (chests > uint.MinValue)
                 {
                     inventory.Chests = chestsBefore - chests;
                     RiftBot.Log.Info($"Modified {userId.ToString()}'s chest(s): ({chestsBefore.ToString()} => {inventory.Chests.ToString()})");
@@ -720,7 +734,7 @@ namespace Rift
 
                 var capsulesBefore = dbInventory.Capsules;
                 capsules = Math.Min(capsules, capsulesBefore);
-                if (capsules > UInt32.MinValue)
+                if (capsules > uint.MinValue)
                 {
                     inventory.Capsules = capsulesBefore - capsules;
                     RiftBot.Log.Info($"Modified {userId.ToString()}'s capsule(s): ({capsulesBefore.ToString()} => {inventory.Capsules.ToString()})");
@@ -729,7 +743,7 @@ namespace Rift
 
                 var spheresBefore = dbInventory.Spheres;
                 spheres = Math.Min(spheres, spheresBefore);
-                if (spheres > UInt32.MinValue)
+                if (spheres > uint.MinValue)
                 {
                     inventory.Spheres = spheresBefore - spheres;
                     RiftBot.Log.Info($"Modified {userId.ToString()}'s sphere(s): ({spheresBefore.ToString()} => {inventory.Spheres.ToString()})");
@@ -738,7 +752,7 @@ namespace Rift
 
                 var doubleExpsBefore = dbInventory.PowerupsDoubleExperience;
                 doubleExps = Math.Min(doubleExps, doubleExpsBefore);
-                if (doubleExps > UInt32.MinValue)
+                if (doubleExps > uint.MinValue)
                 {
                     inventory.PowerupsDoubleExp = doubleExpsBefore - doubleExps;
                     inventoryEntry.Property(x => x.PowerupsDoubleExp).IsModified = true;
@@ -747,7 +761,7 @@ namespace Rift
 
                 var respectsBefore = dbInventory.PowerupsBotRespect;
                 respects = Math.Min(respects, respectsBefore);
-                if (respects > UInt32.MinValue)
+                if (respects > uint.MinValue)
                 {
                     inventory.PowerupsBotRespect = respectsBefore - respects;
                     inventoryEntry.Property(x => x.PowerupsBotRespect).IsModified = true;
@@ -756,7 +770,7 @@ namespace Rift
 
                 var usualTicketsBefore = dbInventory.UsualTickets;
                 usualTickets = Math.Min(usualTickets, usualTicketsBefore);
-                if (usualTickets > UInt32.MinValue)
+                if (usualTickets > uint.MinValue)
                 {
                     inventory.UsualTickets = usualTicketsBefore - usualTickets;
                     inventoryEntry.Property(x => x.UsualTickets).IsModified = true;
@@ -765,7 +779,7 @@ namespace Rift
 
                 var rareTicketsBefore = dbInventory.RareTickets;
                 rareTickets = Math.Min(rareTickets, rareTicketsBefore);
-                if (rareTickets > UInt32.MinValue)
+                if (rareTickets > uint.MinValue)
                 {
                     inventory.RareTickets = rareTicketsBefore - rareTickets;
                     inventoryEntry.Property(x => x.RareTickets).IsModified = true;
@@ -780,7 +794,7 @@ namespace Rift
 
         #region LolData
 
-        public static async Task<RiftLolData> GetUserLolDataAsync(UInt64 userId)
+        public static async Task<RiftLolData> GetUserLolDataAsync(ulong userId)
         {
             using (var context = new RiftContext())
             {
@@ -810,8 +824,7 @@ namespace Rift
             }
         }
 
-        public static async Task UpdateLolDataAsync(UInt64 userId, String region, String playerUuid, String accountId,
-            String summonerId, String summonerName)
+        public static async Task UpdateLolDataAsync(ulong userId, string region, string playerUuid, string accountId, string summonerId, string summonerName)
         {
             var dbSummoner = await GetUserLolDataAsync(userId);
 
@@ -844,7 +857,7 @@ namespace Rift
             }
         }
 
-        public static async Task RemoveLolDataAsync(UInt64 userId)
+        public static async Task RemoveLolDataAsync(ulong userId)
         {
             var lolData = new RiftLolData
             {
@@ -858,19 +871,18 @@ namespace Rift
             }
         }
 
-        public static async Task<Boolean> HasLolDataAsync(UInt64 userId)
+        public static async Task<bool> HasLolDataAsync(ulong userId)
         {
             var result = await GetUserLolDataAsync(userId);
 
-            return !(result is null) && !String.IsNullOrWhiteSpace(result.PlayerUUID);
+            return !(result is null) && !string.IsNullOrWhiteSpace(result.PlayerUUID);
         }
 
-        public static async Task<Boolean> IsTakenAsync(String region, String playerUUID)
+        public static async Task<bool> IsTakenAsync(string region, string playerUUID)
         {
             using (var context = new RiftContext())
             {
-                return await context.LolData.AnyAsync(x => x.PlayerUUID == playerUUID
-                                                           && x.SummonerRegion == region);
+                return await context.LolData.AnyAsync(x => x.PlayerUUID == playerUUID && x.SummonerRegion == region);
             }
         }
 
@@ -908,7 +920,7 @@ namespace Rift
             }
         }
 
-        public static async Task<RiftPendingUser> GetPendingUserAsync(UInt64 userId)
+        public static async Task<RiftPendingUser> GetPendingUserAsync(ulong userId)
         {
             using (var context = new RiftContext())
             {
@@ -933,7 +945,7 @@ namespace Rift
             await RemovePendingUserAsync(pendingUser.UserId);
         }
 
-        public static async Task RemovePendingUserAsync(UInt64 userId)
+        public static async Task RemovePendingUserAsync(ulong userId)
         {
             using (var context = new RiftContext())
             {
@@ -947,7 +959,7 @@ namespace Rift
             }
         }
 
-        public static async Task<Boolean> IsPendingAsync(UInt64 userId)
+        public static async Task<bool> IsPendingAsync(ulong userId)
         {
             using (var context = new RiftContext())
             {
@@ -969,7 +981,7 @@ namespace Rift
 
         #region Statistics
 
-        static async Task<Boolean> EnsureStatisticsExistsAsync(UInt64 userId)
+        static async Task<bool> EnsureStatisticsExistsAsync(ulong userId)
         {
             if (!await EnsureUserExistsAsync(userId))
                 return false;
@@ -1000,7 +1012,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserStatistics> GetUserStatisticsAsync(UInt64 userId)
+        public static async Task<UserStatistics> GetUserStatisticsAsync(ulong userId)
         {
             if (!await EnsureStatisticsExistsAsync(userId))
                 throw new DatabaseException(nameof(GetUserStatisticsAsync));
@@ -1034,10 +1046,10 @@ namespace Rift
             }
         }
 
-        public static async Task AddStatisticsAsync(UInt64 userId, UInt32 giftsSent = 0u, UInt32 giftsReceived = 0u,
-            UInt32 bragTotal = 0u, UInt32 chestsOpenedTotal = 0u, UInt32 sphereOpenedTotal = 0u,
-            UInt32 capsuleOpenedTotal = 0u, UInt32 attacksDone = 0u, UInt32 attacksReceived = 0u, 
-            UInt32 messagesSentTotal = 0u, UInt32 purchasedItemsTotal = 0u)
+        public static async Task AddStatisticsAsync(ulong userId, uint giftsSent = 0u, uint giftsReceived = 0u,
+            uint bragTotal = 0u, uint chestsOpenedTotal = 0u, uint sphereOpenedTotal = 0u,
+            uint capsuleOpenedTotal = 0u, uint attacksDone = 0u, uint attacksReceived = 0u, 
+            uint messagesSentTotal = 0u, uint purchasedItemsTotal = 0u)
         {
             if (!await EnsureStatisticsExistsAsync(userId))
                 throw new DatabaseException(nameof(AddStatisticsAsync));
@@ -1053,120 +1065,120 @@ namespace Rift
             {
                 var entry = context.Attach(statUser);
 
-                if (giftsSent > UInt32.MinValue)
+                if (giftsSent > uint.MinValue)
                 {
                     var before = statistics.GiftsSent;
 
-                    if (UInt32.MaxValue - before < giftsSent)
-                        statUser.GiftsSent = UInt32.MaxValue;
+                    if (uint.MaxValue - before < giftsSent)
+                        statUser.GiftsSent = uint.MaxValue;
                     else
                         statUser.GiftsSent = before + giftsSent;
 
                     entry.Property(x => x.GiftsSent).IsModified = true;
                 }
 
-                if (giftsReceived > UInt32.MinValue)
+                if (giftsReceived > uint.MinValue)
                 {
                     var before = statistics.GiftsReceived;
 
-                    if (UInt32.MaxValue - before < giftsReceived)
-                        statUser.GiftsReceived = UInt32.MaxValue;
+                    if (uint.MaxValue - before < giftsReceived)
+                        statUser.GiftsReceived = uint.MaxValue;
                     else
                         statUser.GiftsReceived = before + giftsReceived;
 
                     entry.Property(x => x.GiftsReceived).IsModified = true;
                 }
 
-                if (bragTotal > UInt32.MinValue)
+                if (bragTotal > uint.MinValue)
                 {
                     var before = statistics.BragTotal;
 
-                    if (UInt32.MaxValue - before < bragTotal)
-                        statUser.BragTotal = UInt32.MaxValue;
+                    if (uint.MaxValue - before < bragTotal)
+                        statUser.BragTotal = uint.MaxValue;
                     else
                         statUser.BragTotal = before + bragTotal;
 
                     entry.Property(x => x.BragTotal).IsModified = true;
                 }
 
-                if (chestsOpenedTotal > UInt32.MinValue)
+                if (chestsOpenedTotal > uint.MinValue)
                 {
                     var before = statistics.ChestsOpenedTotal;
 
-                    if (UInt32.MaxValue - before < chestsOpenedTotal)
-                        statUser.ChestsOpenedTotal = UInt32.MaxValue;
+                    if (uint.MaxValue - before < chestsOpenedTotal)
+                        statUser.ChestsOpenedTotal = uint.MaxValue;
                     else
                         statUser.ChestsOpenedTotal = before + chestsOpenedTotal;
 
                     entry.Property(x => x.ChestsOpenedTotal).IsModified = true;
                 }
 
-                if (sphereOpenedTotal > UInt32.MinValue)
+                if (sphereOpenedTotal > uint.MinValue)
                 {
                     var before = statistics.SphereOpenedTotal;
 
-                    if (UInt32.MaxValue - before < sphereOpenedTotal)
-                        statUser.SphereOpenedTotal = UInt32.MaxValue;
+                    if (uint.MaxValue - before < sphereOpenedTotal)
+                        statUser.SphereOpenedTotal = uint.MaxValue;
                     else
                         statUser.SphereOpenedTotal = before + sphereOpenedTotal;
 
                     entry.Property(x => x.SphereOpenedTotal).IsModified = true;
                 }
 
-                if (capsuleOpenedTotal > UInt32.MinValue)
+                if (capsuleOpenedTotal > uint.MinValue)
                 {
                     var before = statistics.CapsuleOpenedTotal;
 
-                    if (UInt32.MaxValue - before < capsuleOpenedTotal)
-                        statUser.CapsuleOpenedTotal = UInt32.MaxValue;
+                    if (uint.MaxValue - before < capsuleOpenedTotal)
+                        statUser.CapsuleOpenedTotal = uint.MaxValue;
                     else
                         statUser.CapsuleOpenedTotal = before + capsuleOpenedTotal;
 
                     entry.Property(x => x.CapsuleOpenedTotal).IsModified = true;
                 }
 
-                if (attacksDone > UInt32.MinValue)
+                if (attacksDone > uint.MinValue)
                 {
                     var before = statistics.AttacksDone;
 
-                    if (UInt32.MaxValue - before < attacksDone)
-                        statUser.AttacksDone = UInt32.MaxValue;
+                    if (uint.MaxValue - before < attacksDone)
+                        statUser.AttacksDone = uint.MaxValue;
                     else
                         statUser.AttacksDone = before + attacksDone;
 
                     entry.Property(x => x.AttacksDone).IsModified = true;
                 }
 
-                if (attacksReceived > UInt32.MinValue)
+                if (attacksReceived > uint.MinValue)
                 {
                     var before = statistics.AttacksReceived;
 
-                    if (UInt32.MaxValue - before < attacksReceived)
-                        statUser.AttacksReceived = UInt32.MaxValue;
+                    if (uint.MaxValue - before < attacksReceived)
+                        statUser.AttacksReceived = uint.MaxValue;
                     else
                         statUser.AttacksReceived = before + attacksReceived;
 
                     entry.Property(x => x.AttacksReceived).IsModified = true;
                 }
 
-                if (messagesSentTotal > UInt32.MinValue)
+                if (messagesSentTotal > uint.MinValue)
                 {
                     var before = statistics.MessagesSentTotal;
 
-                    if (UInt32.MaxValue - before < messagesSentTotal)
-                        statUser.MessagesSentTotal = UInt32.MaxValue;
+                    if (uint.MaxValue - before < messagesSentTotal)
+                        statUser.MessagesSentTotal = uint.MaxValue;
                     else
                         statUser.MessagesSentTotal = before + messagesSentTotal;
 
                     entry.Property(x => x.MessagesSentTotal).IsModified = true;
                 }
 
-                if (purchasedItemsTotal > UInt32.MinValue)
+                if (purchasedItemsTotal > uint.MinValue)
                 {
                     var before = statistics.PurchasedItemsTotal;
 
-                    if (UInt32.MaxValue - before < purchasedItemsTotal)
-                        statUser.PurchasedItemsTotal = UInt32.MaxValue;
+                    if (uint.MaxValue - before < purchasedItemsTotal)
+                        statUser.PurchasedItemsTotal = uint.MaxValue;
                     else
                         statUser.PurchasedItemsTotal = before + purchasedItemsTotal;
 
@@ -1181,7 +1193,7 @@ namespace Rift
 
         #region Users
 
-        static async Task<Boolean> EnsureUserExistsAsync(UInt64 userId)
+        static async Task<bool> EnsureUserExistsAsync(ulong userId)
         {
             using (var context = new RiftContext())
             {
@@ -1208,7 +1220,7 @@ namespace Rift
             }
         }
 
-        public static async Task<Int32> GetUserCountAsync()
+        public static async Task<int> GetUserCountAsync()
         {
             using (var context = new RiftContext())
             {
@@ -1216,7 +1228,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserProfile> GetUserProfileAsync(UInt64 userId)
+        public static async Task<UserProfile> GetUserProfileAsync(ulong userId)
         {
             if (!await EnsureUserExistsAsync(userId)
                 || !await EnsureCooldownsExistsAsync(userId))
@@ -1245,7 +1257,7 @@ namespace Rift
             }
         }
 
-        static async Task<UserDonate> GetUserDonateAsync(UInt64 userId)
+        static async Task<UserDonate> GetUserDonateAsync(ulong userId)
         {
             if (!await EnsureUserExistsAsync(userId))
                 throw new DatabaseException(nameof(GetUserDonateAsync));
@@ -1263,7 +1275,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserLevel> GetUserLevelAsync(UInt64 userId)
+        public static async Task<UserLevel> GetUserLevelAsync(ulong userId)
         {
             if (!await EnsureUserExistsAsync(userId))
                 throw new DatabaseException(nameof(GetUserLevelAsync));
@@ -1282,7 +1294,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserTopCoins[]> GetTopTenByCoinsAsync(Func<UserTopCoins, Boolean> predicate)
+        public static async Task<UserTopCoins[]> GetTopTenByCoinsAsync(Func<UserTopCoins, bool> predicate)
         {
             using (var context = new RiftContext())
             {
@@ -1300,25 +1312,25 @@ namespace Rift
             }
         }
 
-        public static async Task<UserTopExp[]> GetTopTenByExpAsync(Func<UserTopExp, Boolean> predicate)
+        public static async Task<UserTopExp[]> GetTopTenByExpAsync(Func<UserTopExp, bool> predicate)
         {
             using (var context = new RiftContext())
             {
                 var list = await context.Users
-                                        .OrderByDescending(x => x.Experience)
-                                        .Select(x => new UserTopExp
-                                        {
-                                            UserId = x.UserId,
-                                            Level = x.Level,
-                                            Experience = x.Experience,
-                                        })
-                                        .ToListAsync();
+                    .OrderByDescending(x => x.Experience)
+                    .Select(x => new UserTopExp
+                    {
+                        UserId = x.UserId,
+                        Level = x.Level,
+                        Experience = x.Experience,
+                    })
+                    .ToListAsync();
 
                 return list.Where(predicate).Take(10).ToArray();
             }
         }
 
-        public static async Task<UserDonate[]> GetTopTenDonatesAsync(Func<UserDonate, Boolean> predicate)
+        public static async Task<UserDonate[]> GetTopTenDonatesAsync(Func<UserDonate, bool> predicate)
         {
             using (var context = new RiftContext())
             {
@@ -1336,7 +1348,7 @@ namespace Rift
             }
         }
 
-        public static async Task SetLevelAsync(UInt64 userId, UInt32 level)
+        public static async Task SetLevelAsync(ulong userId, uint level)
         {
             if (!await EnsureUserExistsAsync(userId))
                 throw new DatabaseException(nameof(SetLevelAsync));
@@ -1354,7 +1366,7 @@ namespace Rift
             }
         }
 
-        public static async Task RemoveUserAsync(UInt64 userId)
+        public static async Task RemoveUserAsync(ulong userId)
         {
             using (var context = new RiftContext())
             {
@@ -1368,7 +1380,7 @@ namespace Rift
             }
         }
 
-        public static async Task AddDonateAsync(UInt64 userId, Decimal amount)
+        public static async Task AddDonateAsync(ulong userId, decimal amount)
         {
             if (!await EnsureUserExistsAsync(userId))
                 throw new DatabaseException(nameof(AddDonateAsync));
@@ -1384,8 +1396,8 @@ namespace Rift
 
                 var donateBefore = dbDonate.Donate;
 
-                if (Decimal.MaxValue - donateBefore < amount)
-                    user.Donate = Decimal.MaxValue;
+                if (decimal.MaxValue - donateBefore < amount)
+                    user.Donate = decimal.MaxValue;
                 else
                     user.Donate = donateBefore + amount;
 
@@ -1395,7 +1407,7 @@ namespace Rift
             }
         }
 
-        public static async Task RemoveDonateAsync(UInt64 userId, Decimal amount)
+        public static async Task RemoveDonateAsync(ulong userId, decimal amount)
         {
             if (!await EnsureUserExistsAsync(userId))
                 throw new DatabaseException(nameof(RemoveDonateAsync));
@@ -1411,7 +1423,7 @@ namespace Rift
 
                 amount = Math.Min(amount, dbDonate.Donate);
 
-                if (amount > UInt32.MinValue)
+                if (amount > uint.MinValue)
                 {
                     var user = new RiftUser
                     {
@@ -1427,9 +1439,9 @@ namespace Rift
             }
         }
 
-        public static async Task AddExperienceAsync(UInt64 userId, UInt32 exp = 0u)
+        public static async Task AddExperienceAsync(ulong userId, uint exp = 0u)
         {
-            if (exp == UInt32.MinValue)
+            if (exp == uint.MinValue)
                 return;
 
             if (!await EnsureUserExistsAsync(userId))
@@ -1448,8 +1460,8 @@ namespace Rift
 
                 var expBefore = profile.Experience;
 
-                if (UInt32.MaxValue - expBefore < exp)
-                    dbUser.Experience = UInt32.MaxValue;
+                if (uint.MaxValue - expBefore < exp)
+                    dbUser.Experience = uint.MaxValue;
                 else
                     dbUser.Experience = expBefore + exp;
 
@@ -1474,7 +1486,7 @@ namespace Rift
             }
         }
 
-        public static async Task<List<ScheduledEvent>> GetEventsAsync(Expression<Func<ScheduledEvent, Boolean>> predicate)
+        public static async Task<List<ScheduledEvent>> GetEventsAsync(Expression<Func<ScheduledEvent, bool>> predicate)
         {
             using (var context = new RiftContext())
             {
@@ -1497,7 +1509,7 @@ namespace Rift
             }
         }
 
-        public static async Task<List<RiftTempRole>> GetUserTempRolesAsync(UInt64 userId)
+        public static async Task<List<RiftTempRole>> GetUserTempRolesAsync(ulong userId)
         {
             using (var context = new RiftContext())
             {
@@ -1529,7 +1541,7 @@ namespace Rift
             }
         }
 
-        public static async Task<Int32> GetTempRolesCountAsync()
+        public static async Task<int> GetTempRolesCountAsync()
         {
             using (var context = new RiftContext())
             {
@@ -1537,7 +1549,7 @@ namespace Rift
             }
         }
 
-        public static async Task<Boolean> HasTempRoleAsync(UInt64 userId, UInt64 roleId)
+        public static async Task<bool> HasTempRoleAsync(ulong userId, ulong roleId)
         {
             using (var context = new RiftContext())
             {
@@ -1545,7 +1557,7 @@ namespace Rift
             }
         }
 
-        public static async Task RemoveUserTempRoleAsync(UInt64 userId, UInt64 roleId)
+        public static async Task RemoveUserTempRoleAsync(ulong userId, ulong roleId)
         {
             var rtr = new RiftTempRole
             {
@@ -1572,7 +1584,7 @@ namespace Rift
             }
         }
         
-        public static async Task<RiftStreamer> GetStreamer(UInt64 userId)
+        public static async Task<RiftStreamer> GetStreamer(ulong userId)
         {
             using (var context = new RiftContext())
             {
@@ -1587,9 +1599,9 @@ namespace Rift
 
     public class DatabaseException : Exception
     {
-        public readonly String Reason;
+        public readonly string Reason;
 
-        public DatabaseException(String message) : base(message)
+        public DatabaseException(string message) : base(message)
         {
             Reason = message;
         }

@@ -12,7 +12,7 @@ using IonicLib.Util;
 
 namespace Rift.Services
 {
-    public class MessageService //todo rewrite using scheduling timer
+    public class MessageService //TODO: rewrite using scheduling timer
     {
         static ConcurrentDictionary<Guid, SendMessageBase> toSend = new ConcurrentDictionary<Guid, SendMessageBase>();
 
@@ -23,8 +23,14 @@ namespace Rift.Services
 
         public MessageService()
         {
-            checkTimer = new Timer(async delegate { await CheckMessagesAsync(); }, null, TimeSpan.FromSeconds(10),
-                                   TimeSpan.FromSeconds(1));
+            checkTimer = new Timer(
+                async delegate
+                {
+                    await CheckMessagesAsync();
+                },
+                null,
+                TimeSpan.FromSeconds(10),
+                TimeSpan.FromSeconds(1));
         }
 
         public bool TryAddSend(SendMessageBase message) => toSend.TryAdd(message.Id, message);
@@ -41,18 +47,18 @@ namespace Rift.Services
         async Task CheckSendAsync(DateTime dt)
         {
             var unsentId = toSend.Values.ToList()
-                                 .Where(x => x.DeliveryTime < dt)
-                                 .Take(3)
-                                 .OrderBy(x => x.AddedOn)
-                                 .Select(x => x.Id)
-                                 .ToList();
+                .Where(x => x.DeliveryTime < dt)
+                .Take(3)
+                .OrderBy(x => x.AddedOn)
+                .Select(x => x.Id)
+                .ToList();
 
             if (!unsentId.Any())
                 return;
 
             foreach (var id in unsentId)
             {
-                (bool success, var message) = TryRemoveSend(id);
+                (var success, var message) = TryRemoveSend(id);
 
                 if (!success)
                     continue;
@@ -63,19 +69,18 @@ namespace Rift.Services
 
         async Task CheckDeleteAsync(DateTime dt)
         {
-            var undeletedId = toDelete.Values
-                                      .ToList()
-                                      .Where(x => x.DeletionTime < dt)
-                                      .Take(3)
-                                      .Select(x => x.Id)
-                                      .ToList();
+            var undeletedId = toDelete.Values.ToList()
+                .Where(x => x.DeletionTime < dt)
+                .Take(3)
+                .Select(x => x.Id)
+                .ToList();
 
-            if (undeletedId is null || !undeletedId.Any())
+            if (!undeletedId.Any())
                 return;
 
             foreach (var id in undeletedId)
             {
-                (bool success, var message) = TryRemoveDelete(id);
+                (var success, var message) = TryRemoveDelete(id);
 
                 if (!success)
                     continue;

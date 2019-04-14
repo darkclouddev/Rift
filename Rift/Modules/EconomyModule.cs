@@ -51,13 +51,6 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Update()
         {
-            //var eb = new EmbedBuilder()
-            //	.WithAuthor("Оповещения")
-            //	.WithDescription($"Недоступно до обновления.");
-
-            //await Context.User.SendEmbedAsync(eb);
-            //return;
-
             await riotService.UpdateRankAsync(Context.User.Id);
         }
 
@@ -284,13 +277,6 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Brag()
         {
-            //var eb = new EmbedBuilder()
-            //	.WithAuthor("Оповещения")
-            //	.WithDescription($"Недоступно до обновления.");
-
-            //await Context.User.SendEmbedAsync(eb);
-            //return;
-
             using (Context.Channel.EnterTypingState())
             {
                 (var state, var embed) = await economyService.GetUserBragAsync(Context.User.Id);
@@ -597,10 +583,8 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.RemoveInventoryAsync(sgUser.Id, UInt32.MaxValue, UInt32.MaxValue, UInt32.MaxValue,
-                                                           UInt32.MaxValue, UInt32.MaxValue,
-                                                           UInt32.MaxValue, UInt32.MaxValue, UInt32.MaxValue,
-                                                           UInt32.MaxValue);
+                await Database.RemoveInventoryAsync(sgUser.Id, uint.MaxValue, uint.MaxValue, uint.MaxValue, uint.MaxValue,
+                    uint.MaxValue, uint.MaxValue, uint.MaxValue, uint.MaxValue, uint.MaxValue);
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -697,7 +681,7 @@ namespace Rift.Modules
 
                     if (storeItem is null)
                     {
-                        await Context.User.SendMessageAsync($"Данный номер отсутствует в магазине.");
+                        await Context.User.SendMessageAsync("Данный номер отсутствует в магазине.");
                         return;
                     }
 
@@ -769,7 +753,7 @@ namespace Rift.Modules
 
             [Command]
             [RequireContext(ContextType.Guild)]
-            public async Task Default([Remainder] String mention)
+            public async Task Default([Remainder] string mention)
             {
                 using (Context.Channel.EnterTypingState())
                 {

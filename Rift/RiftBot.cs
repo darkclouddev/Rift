@@ -177,7 +177,7 @@ namespace Rift
             return provider;
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(String[] args) =>
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>();
     }

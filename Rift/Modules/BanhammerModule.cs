@@ -28,14 +28,14 @@ namespace Rift.Modules
         [Command("kick")]
         [RequireModerator]
         [RequireContext(ContextType.Guild)]
-        public async Task Kick(IUser user, [Remainder]String reason)
+        public async Task Kick(IUser user, [Remainder] string reason)
         {
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return;
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Modchat, out var modChannel))
                 return;
 
-            if (String.IsNullOrEmpty(reason))
+            if (string.IsNullOrEmpty(reason))
             {
                 await Context.User.SendMessageAsync("Не указана причина.");
                 return;
@@ -61,14 +61,14 @@ namespace Rift.Modules
         [Command("ban")]
         [RequireModerator]
         [RequireContext(ContextType.Guild)]
-        public async Task Ban(IUser user, [Remainder]String reason)
+        public async Task Ban(IUser user, [Remainder] string reason)
         {
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return;
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Modchat, out var modChannel))
                 return;
 
-            if (String.IsNullOrEmpty(reason))
+            if (string.IsNullOrEmpty(reason))
             {
                 await Context.User.SendMessageAsync("Не указана причина.");
                 return;
@@ -96,7 +96,7 @@ namespace Rift.Modules
         [RequireModerator]
         [RequireContext(ContextType.Guild)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task Mute(IUser user, String time, String reason)
+        public async Task Mute(IUser user, string time, string reason)
         {
             if (!(user is SocketGuildUser sgUser))
             {
@@ -104,13 +104,13 @@ namespace Rift.Modules
                 return;
             }
             
-            if (!Int32.TryParse(time.Remove(time.Length - 1), out var timeInt))
+            if (!int.TryParse(time.Remove(time.Length - 1), out var timeInt))
             {
                 await Context.User.SendMessageAsync($"Неверный формат времени: \"{time}\"");
                 return;
             }
 
-            if (String.IsNullOrEmpty(reason))
+            if (string.IsNullOrEmpty(reason))
             {
                 await Context.User.SendMessageAsync("Не указана причина.");
                 return;
@@ -161,7 +161,7 @@ namespace Rift.Modules
         [RequireModerator]
         [RequireContext(ContextType.Guild)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task Unmute(IUser user, String reason)
+        public async Task Unmute(IUser user, string reason)
         {
             if (!(user is SocketGuildUser sgUser))
             {
@@ -169,7 +169,7 @@ namespace Rift.Modules
                 return;
             }
             
-            if (String.IsNullOrEmpty(reason))
+            if (string.IsNullOrEmpty(reason))
             {
                 await Context.User.SendMessageAsync("Не указана причина.");
                 return;

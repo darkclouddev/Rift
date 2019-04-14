@@ -11,7 +11,7 @@ using Rift.Data.Models.Users;
 
 namespace Rift.Embeds
 {
-    class GiftEmbeds
+    static class GiftEmbeds
     {
         public static readonly Embed BotGift =
             new EmbedBuilder()

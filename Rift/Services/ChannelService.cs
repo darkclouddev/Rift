@@ -19,18 +19,17 @@ namespace Rift.Services
             client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
         }
 
-        static async Task Client_UserVoiceStateUpdated(SocketUser user, SocketVoiceState fromState,
-                                                       SocketVoiceState toState)
+        static async Task Client_UserVoiceStateUpdated(SocketUser user, SocketVoiceState fromState, SocketVoiceState toState)
         {
-            bool prevChannelNull = fromState.VoiceChannel is null;
-            bool nextChannelNull = toState.VoiceChannel is null;
-            bool joinedSetupChannel = !nextChannelNull && toState.VoiceChannel.Id == Settings.ChannelId.VoiceSetup;
+            var prevChannelNull = fromState.VoiceChannel is null;
+            var nextChannelNull = toState.VoiceChannel is null;
+            var joinedSetupChannel = !nextChannelNull && toState.VoiceChannel.Id == Settings.ChannelId.VoiceSetup;
 
             if (joinedSetupChannel)
             {
-                (bool result, var channel) = await CreateRoomForUser(user);
+                (var isSuccess, var channel) = await CreateRoomForUser(user);
 
-                if (result && user is SocketGuildUser sgUser)
+                if (isSuccess && user is SocketGuildUser sgUser)
                 {
                     await sgUser.ModifyAsync(x => { x.Channel = channel; });
 
@@ -41,8 +40,7 @@ namespace Rift.Services
                 }
             }
 
-            bool leftChannel = !prevChannelNull
-                               && (nextChannelNull || toState.VoiceChannel.Id != fromState.VoiceChannel.Id);
+            bool leftChannel = !prevChannelNull && (nextChannelNull || toState.VoiceChannel.Id != fromState.VoiceChannel.Id);
 
             if (leftChannel)
             {

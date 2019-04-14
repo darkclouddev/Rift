@@ -4,7 +4,7 @@ namespace Rift.Data.Models.Cooldowns
 {
     public class UserLastAttackTime
     {
-        public UInt64 UserId;
+        public ulong UserId;
         public DateTime LastAttackTime;
     }
 }

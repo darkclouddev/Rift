@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 
 using Newtonsoft.Json;
@@ -103,7 +102,7 @@ namespace Rift.Configuration
             if (!File.Exists(path))
                 return new T();
 
-            string jsonContent = File.ReadAllText(path);
+            var jsonContent = File.ReadAllText(path);
             return JsonConvert.DeserializeObject<T>(jsonContent);
         }
 

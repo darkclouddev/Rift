@@ -59,45 +59,45 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Moderation()
         {
-            if (String.IsNullOrEmpty(ModHelpMessage))
+            if (string.IsNullOrEmpty(ModHelpMessage))
             {
                 var sb = new StringBuilder();
-                sb.AppendLine(Format.Underline(Format.Bold("Список команд")));
+                sb.AppendLine("__**Список команд**__");
                 sb.AppendLine();
-                sb.AppendLine($"{Format.Bold("mute")} - накладывает мут на упомянутый аккаунт. Снимается автоматически по истечении указанного времени.");
-                sb.AppendLine($"Доступные модификаторы времени: {Format.Bold("s")} (секунды), {Format.Bold("m")} (минуты), {Format.Bold("h")} (часы), {Format.Bold("d")} (дни).");
+                sb.AppendLine("**mute** - накладывает мут на упомянутый аккаунт. Снимается автоматически по истечении указанного времени.");
+                sb.AppendLine("Доступные модификаторы времени: **s** (секунды), **m** (минуты), **h** (часы), **d** (дни).");
                 sb.AppendLine("Комбинации модификаторов не допускается.");
                 sb.AppendLine("При накладывании мута на уже замученный аккаунт старый мут заменяется новым.");
                 sb.AppendLine();
-                sb.AppendLine(Format.Underline("Примеры использования:"));
+                sb.AppendLine("__Примеры использования:__");
                 sb.AppendLine("Замутить аккаунт на 1 час");
-                sb.AppendLine(Format.Code($"!mute 1h @Yasuo"));
+                sb.AppendLine("`!mute 1h @Yasuo`");
                 sb.AppendLine();
                 sb.AppendLine("Замутить аккаунт на 29 секунд");
-                sb.AppendLine(Format.Code($"!mute 29s @Yasuo"));
+                sb.AppendLine("`!mute 29s @Yasuo`");
                 sb.AppendLine();
-                sb.AppendLine($"{Format.Bold("unmute")} - снимает мут с упомянутого аккаунта. Просто и понятно.");
+                sb.AppendLine("**unmute** - снимает мут с упомянутого аккаунта. Просто и понятно.");
                 sb.AppendLine();
-                sb.AppendLine(Format.Underline("Пример использования:"));
-                sb.AppendLine(Format.Code($"!unmute @Yasuo"));
-                sb.AppendLine();
-                sb.AppendLine();
-                sb.AppendLine($"{Format.Bold("warn")} - выдаёт предупреждение упомянутому аккаунту.");
-                sb.AppendLine();
-                sb.AppendLine(Format.Underline("Пример использования:"));
-                sb.AppendLine(Format.Code($"!warn @Yasuo"));
+                sb.AppendLine("__Пример использования:__");
+                sb.AppendLine("`!unmute @Yasuo`");
                 sb.AppendLine();
                 sb.AppendLine();
-                sb.AppendLine($"{Format.Bold("kick")} - кикает упомянутый аккаунт с сервера.");
+                sb.AppendLine("**warn** - выдаёт предупреждение упомянутому аккаунту.");
                 sb.AppendLine();
-                sb.AppendLine(Format.Underline("Пример использования:"));
-                sb.AppendLine(Format.Code($"!kick @Yasuo"));
+                sb.AppendLine("__Пример использования:__");
+                sb.AppendLine("`!warn @Yasuo`");
                 sb.AppendLine();
                 sb.AppendLine();
-                sb.AppendLine($"{Format.Bold("ban")} - банит упомянутый аккаунт на сервере и удаляет все его сообщения за последние 24 часа.");
+                sb.AppendLine("**kick** - кикает упомянутый аккаунт с сервера.");
                 sb.AppendLine();
-                sb.AppendLine(Format.Underline("Пример использования:"));
-                sb.AppendLine(Format.Code($"!ban @Yasuo"));
+                sb.AppendLine("__Пример использования:__");
+                sb.AppendLine("`!kick @Yasuo`");
+                sb.AppendLine();
+                sb.AppendLine();
+                sb.AppendLine($"**ban** - банит упомянутый аккаунт на сервере и удаляет все его сообщения за последние 24 часа.");
+                sb.AppendLine();
+                sb.AppendLine("__Пример использования:__");
+                sb.AppendLine("`!ban @Yasuo`");
 
                 ModHelpMessage = sb.ToString();
             }
