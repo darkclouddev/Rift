@@ -8,8 +8,7 @@ namespace Rift.Preconditions
     [AttributeUsage(AttributeTargets.Method)]
     public class RequireModeratorAttribute : PreconditionAttribute
     {
-        public override async Task<PreconditionResult> CheckPermissionsAsync(
-            ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             if (await Task.Run(() => RiftBot.IsModerator(context.User) || RiftBot.IsAdmin(context.User)))
                 return PreconditionResult.FromSuccess();

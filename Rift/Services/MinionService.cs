@@ -29,10 +29,10 @@ namespace Rift.Services
         Timer MinionTimer;
         Timer MinionSuicideTimer;
         Timer MinionKillTimer;
-        private ulong killerId;
+        ulong killerId;
 
-        private MinionColor minionColor;
-        private string minionImage;
+        MinionColor minionColor;
+        string minionImage;
 
         static List<string> RedMinionImages = new List<string>
         {
@@ -60,22 +60,52 @@ namespace Rift.Services
         {
             RiftBot.Log.Info("Starting MinionService..");
 
-            StartupTimer = new Timer(async delegate { await SetupNextMinionAsync(); }, null, TimeSpan.FromSeconds(30),
-                                     TimeSpan.Zero);
-            MinionKillTimer = new Timer(async delegate { await KillMinion(); }, null, Timeout.Infinite, 0);
-            MinionSuicideTimer = new Timer(async delegate { await Suicide(); }, null, Timeout.Infinite, 0);
-            MinionTimer = new Timer(async delegate { await SpawnMinion(); }, null, Timeout.Infinite, 0);
+            StartupTimer = new Timer(
+                async delegate
+                {
+                    await SetupNextMinionAsync();
+                },
+                null,
+                TimeSpan.FromSeconds(30),
+                TimeSpan.Zero);
+            
+            MinionKillTimer = new Timer(
+                async delegate
+                {
+                    await KillMinion();
+                },
+                null,
+                Timeout.Infinite,
+                0);
+            
+            MinionSuicideTimer = new Timer(
+                async delegate
+                {
+                    await Suicide();
+                },
+                null,
+                Timeout.Infinite,
+                0);
+            
+            MinionTimer = new Timer(
+                async delegate
+                {
+                    await SpawnMinion();
+                },
+                null,
+                Timeout.Infinite,
+                0);
 
             RiftBot.Log.Info("MinionService loaded successfully.");
         }
 
-        private void DropTimers()
+        void DropTimers()
         {
             MinionKillTimer.Change(Timeout.Infinite, 0);
             MinionSuicideTimer.Change(Timeout.Infinite, 0);
         }
 
-        public Task SetupNextMinionAsync(uint minionTs = UInt32.MaxValue)
+        public Task SetupNextMinionAsync(uint minionTs = uint.MaxValue)
         {
             DropTimers();
 
@@ -90,13 +120,12 @@ namespace Rift.Services
                 minionColor = MinionColor.Red;
             }
 
-            if (minionTs == UInt32.MaxValue) // default value
+            if (minionTs == uint.MaxValue) // default value
                 minionTs = Helper.NextUInt(60, 90); // 1 - 1.5 hours
 
             minionTs *= 60;
 
-            RiftBot.Log.Debug(nameof(MinionService),
-                              $"Next Minion: {Helper.FromTimestamp(Helper.CurrentUnixTimestamp + minionTs).ToString()}");
+            RiftBot.Log.Debug(nameof(MinionService), $"Next Minion: {Helper.FromTimestamp(Helper.CurrentUnixTimestamp + minionTs).ToString()}");
 
             reward = GetReward(AvailableRewards).Copy();
             reward.CalculateReward();

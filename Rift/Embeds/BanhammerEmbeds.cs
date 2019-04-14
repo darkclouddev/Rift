@@ -16,7 +16,7 @@ namespace Rift.Embeds
                 .Build();
         }
 
-        public static Embed KickLog(SocketGuildUser sgUser, String executorName, String reason)
+        public static Embed KickLog(SocketGuildUser sgUser, string executorName, string reason)
         {
             return new EmbedBuilder()
                 .WithColor(255, 0, 0)
@@ -35,7 +35,7 @@ namespace Rift.Embeds
                 .Build();
         }
         
-        public static Embed BanLog(SocketGuildUser sgUser, String executorName, String reason)
+        public static Embed BanLog(SocketGuildUser sgUser, string executorName, string reason)
         {
             return new EmbedBuilder()
                 .WithColor(255, 0, 0)
@@ -47,7 +47,7 @@ namespace Rift.Embeds
                 .Build();
         }
 
-        public static Embed ChatMute(SocketGuildUser user, String reason)
+        public static Embed ChatMute(SocketGuildUser user, string reason)
         {
             return new EmbedBuilder()
                 .WithAuthor("Оповещение")
@@ -56,7 +56,7 @@ namespace Rift.Embeds
                 .Build();
         }
 
-        public static Embed DMMute(TimeSpan ts, String reason)
+        public static Embed DMMute(TimeSpan ts, string reason)
         {
             return new EmbedBuilder()
                 .WithAuthor("Оповещение")
@@ -65,7 +65,7 @@ namespace Rift.Embeds
                 .Build();
         }
         
-        public static Embed MuteLog(SocketGuildUser sgUser, String executorName, TimeSpan duration, String reason)
+        public static Embed MuteLog(SocketGuildUser sgUser, string executorName, TimeSpan duration, string reason)
         {
             return new EmbedBuilder()
                 .WithColor(255, 0, 0)
@@ -78,7 +78,7 @@ namespace Rift.Embeds
                 .Build();
         }
         
-        public static Embed UnmuteLog(SocketGuildUser sgUser, String executorName, String reason)
+        public static Embed UnmuteLog(SocketGuildUser sgUser, string executorName, string reason)
         {
             return new EmbedBuilder()
                 .WithColor(0, 255, 0)

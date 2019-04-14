@@ -17,8 +17,7 @@ namespace Rift.Rewards
             Settings.RoleId.Meta
         };
 
-        static Reward PossibleReward =
-            new Reward(coins: new Loot(70_000, 140_000),
+        static Reward PossibleReward = new Reward(coins: new Loot(70_000, 140_000),
                        tokens: new Loot(8, 16),
                        powerupsDoubleExp: new Loot(2, 6),
                        customTickets: new Loot(4, 10),

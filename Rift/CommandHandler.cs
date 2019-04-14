@@ -70,9 +70,10 @@ namespace Rift
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
                 return;
 
-            await channel.SendEmbedAsync(new EmbedBuilder()
-                                         .WithDescription("Основной бот сервера включен.")
-                                         .Build());
+            await channel.SendEmbedAsync(
+                new EmbedBuilder()
+                    .WithDescription("Основной бот сервера включен.")
+                    .Build());
         }
 
         async Task ProcessMessage(SocketMessage socketMsg)
@@ -98,7 +99,7 @@ namespace Rift
 
         async Task<bool> HandleCommand(CommandContext context)
         {
-            int argPos = 0;
+            var argPos = 0;
 
             if (context.IsPrivate)
             {
@@ -256,12 +257,12 @@ namespace Rift
         async Task<bool> HasCaps(string content)
         {
             var msg = new Regex(@"\<[^>]+>")
-                         .Replace(content, "")
-                         .Replace(" ", String.Empty)
-                         .Replace("\t\n", String.Empty)
-                         .Replace("\n", String.Empty)
-                         .Replace(" ︀︀", String.Empty)
-                         .Trim();
+                .Replace(content, "")
+                .Replace(" ", string.Empty)
+                .Replace("\t\n", string.Empty)
+                .Replace("\n", string.Empty)
+                .Replace(" ︀︀", string.Empty)
+                .Trim();
 
             if (msg.Length == 1)
                 return false;
@@ -284,13 +285,13 @@ namespace Rift
         static bool HasURL(string message)
         {
             var link = message.Replace(" ", string.Empty)
-                                 .Split("\t\n ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
-                                 .Where(s => s.Contains("http://")
-                                             || s.Contains("www.")
-                                             || s.Contains("https://")
-                                             || s.Contains("ftp://"))
-                                 .ToArray()
-                                 .FirstOrDefault();
+                .Split("\t\n ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+                .Where(s => s.Contains("http://")
+                            || s.Contains("www.")
+                            || s.Contains("https://")
+                            || s.Contains("ftp://"))
+                .ToArray()
+                .FirstOrDefault();
 
             if (string.IsNullOrWhiteSpace(link))
                 return false;
@@ -308,7 +309,6 @@ namespace Rift
             if (!LastPostTimestamps.ContainsKey(userId))
             {
                 LastPostTimestamps.Add(userId, DateTime.UtcNow);
-
                 return true;
             }
 

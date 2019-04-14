@@ -237,9 +237,8 @@ namespace Rift.Services
                 if (sgUser is null)
                     return;
 
-                uint coins = Helper.NextUInt(1000, 2001);
-                uint chests = 0;
-                uint tokens = 0;
+                var coins = Helper.NextUInt(1000, 2001);
+                var tokens = 0u;
 
                 if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.Legendary))
                     coins += 1000u;
@@ -250,7 +249,7 @@ namespace Rift.Services
                 if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.Active))
                     coins += 500u;
 
-                var reward = new Reward(coins: coins, chests: chests, tokens: tokens);
+                var reward = new Reward(coins: coins, tokens: tokens);
 
                 reward.CalculateReward();
                 await reward.GiveRewardAsync(userId);
@@ -301,7 +300,7 @@ namespace Rift.Services
             if (sgUser is null)
                 return;
 
-            uint chests = 1u;
+            var chests = 1u;
 
             if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.Legendary))
                 chests += 1u;
@@ -316,39 +315,51 @@ namespace Rift.Services
                 case 3:
                     reward = new Reward(coins: 1000, powerupsDoubleExp: 1, chests: chests);
                     break;
+                
                 case 5:
                     reward = new Reward(coins: 1000, powerupsBotRespect: 1, chests: chests);
                     break;
+                
                 case 7:
                     reward = new Reward(coins: 1000, customTickets: 2, chests: chests);
                     break;
+                
                 case 10:
                     reward = new Reward(coins: 1000, giveawayTickets: 1, chests: chests);
                     break;
+                
                 case 15:
                     reward = new Reward(coins: 2000, tokens: 4, chests: chests);
                     break;
+                
                 case 20:
                     reward = new Reward(experience: 100, customTickets: 4, chests: chests);
                     break;
+                
                 case 30:
                     reward = new Reward(coins: 2000, chests: 4 + chests);
                     break;
+                
                 case 40:
                     reward = new Reward(experience: 200, spheres: 1, chests: chests);
                     break;
+                
                 case 50:
                     reward = new Reward(coins: 2000, tokens: 10, chests: chests);
                     break;
+                
                 case 60:
                     reward = new Reward(experience: 300, giveawayTickets: 2, chests: chests);
                     break;
+                
                 case 70:
                     reward = new Reward(coins: 2000, chests: 10 + chests);
                     break;
+                
                 case 80:
                     reward = new Reward(experience: 100, chests: 15 + chests);
                     break;
+                
                 default:
                     reward = new Reward(chests: level % 10 == 0 ? chests + 5 : chests);
                     break;
@@ -385,12 +396,11 @@ namespace Rift.Services
 
             var profile = await Database.GetUserProfileAsync(userId);
 
-            string position = ratingSorted is null
+            var position = ratingSorted is null
                 ? "-"
                 : $"{(ratingSorted.IndexOf(userId) + 1).ToString()} / {ratingSorted.Count.ToString()}";
 
             var tempRoles = await RiftBot.GetService<RoleService>().GetUserTempRolesAsync(userId);
-            var donateRoleString = $"{Settings.Emote.Donate} Узнайте больше о донате: <#{Settings.ChannelId.Donate.ToString()}>";
             var tempRolesList = new List<string>();
 
             foreach (var role in tempRoles)
@@ -414,28 +424,27 @@ namespace Rift.Services
             }
 
             var tempRolesString = tempRolesList.Any()
-                ? String.Join('\n', tempRolesList)
+                ? string.Join('\n', tempRolesList)
                 : "У вас нет временных ролей.";
 
             var currentLevelExp = GetExpForLevel(profile.Level);
             var fullLevelExp = GetExpForLevel(profile.Level+1u) - currentLevelExp;
             var remainingExp = fullLevelExp - (profile.Experience - currentLevelExp);
-            var levelPerc = 100 - (Int32)Math.Floor(((Single)remainingExp / fullLevelExp * 100));
+            var levelPerc = 100 - (int)Math.Floor(((float)remainingExp / fullLevelExp * 100));
 
             var embed = new EmbedBuilder()
-                .WithTitle($"Ваш профиль")
+                .WithTitle("Ваш профиль")
                 .WithThumbnailUrl(sgUser.GetAvatarUrl())
                 .WithDescription($"Статистика и информация о вашем аккаунте в системе:")
                 .AddField("Уровень", $"{Settings.Emote.LevelUp} {profile.Level.ToString()}", true)
                 .AddField("Место", $"{Settings.Emote.Rewards} {position}", true)
                 .AddField("Статистика текущего уровня",
                     $"{Settings.Emote.Experience} Получено {levelPerc.ToString()}% опыта до {(profile.Level+1).ToString()} уровня.")
-
-                //.AddField("Голосовой онлайн", $"{Settings.Emote.Voice} Данная функция отключена.")
-                .AddField("Платные роли и пожертвования", $"Текущая: -\n"
-                                                          + $"Необходимо задонатить: - рублей,\n"
-                                                          + $"чтобы получить {Settings.Emote.Legendary} легендарные\n\n"
-                                                          + $"{Settings.Emote.Donate} Общая сумма пожертвований: {profile.TotalDonate:0.00} рублей.")
+                .AddField("Платные роли и пожертвования",
+                    $"Текущая: -\n"
+                    + $"Необходимо задонатить: - рублей,\n"
+                    + $"чтобы получить {Settings.Emote.Legendary} легендарные\n\n"
+                    + $"{Settings.Emote.Donate} Общая сумма пожертвований: {profile.TotalDonate:0.00} рублей.")
                 .AddField("Временные роли", tempRolesString)
                 .Build();
 
@@ -488,10 +497,11 @@ namespace Rift.Services
                 soloqRanking = "Недостаточно игр";
             else
             {
-                int totalGames = league.Wins + league.Losses;
-                int winratePerc = (int) Math.Round(((double) league.Wins / (double) totalGames) * 100);
-                soloqRanking =
-                    $"{RiotService.GetStatStringFromRank(RiotService.GetRankFromPosition(league))} {league.Rank} ({league.LeaguePoints.ToString()} LP) ({league.Wins.ToString()}W / {league.Losses.ToString()}L Winrate: {winratePerc.ToString()}%)";
+                var totalGames = league.Wins + league.Losses;
+                var winRatePerc = (int) Math.Round(((double) league.Wins / (double) totalGames) * 100);
+                soloqRanking = $"{RiotService.GetStatStringFromRank(RiotService.GetRankFromPosition(league))} {league.Rank}" +
+                               $" ({league.LeaguePoints.ToString()} LP) ({league.Wins.ToString()}W / {league.Losses.ToString()}L" +
+                               $" Winrate: {winRatePerc.ToString()}%)";
             }
 
             var thumbnail = RiftBot.GetService<RiotService>().GetSummonerIconUrlById(summoner.ProfileIconId);
@@ -527,28 +537,24 @@ namespace Rift.Services
 
         static async Task<(BragResult, Embed)> GetUserBragInternalAsync(ulong userId)
         {
-            (bool canBrag, TimeSpan remaining) = await CanBrag(userId);
+            (var canBrag, var remaining) = await CanBrag(userId);
 
             if (!canBrag)
-                return (BragResult.Error, BragEmbeds.Cooldown(remaining));
+                return (BragResult.Cooldown, BragEmbeds.Cooldown(remaining));
 
             var dbSummoner = await Database.GetUserLolDataAsync(userId);
 
-            if (dbSummoner is null || String.IsNullOrWhiteSpace(dbSummoner.AccountId))
+            if (dbSummoner is null || string.IsNullOrWhiteSpace(dbSummoner.AccountId))
                 return (BragResult.Error, BragEmbeds.NoData);
 
-            (var matchlistResult, var matchlist) = await RiftBot
-                                                         .GetService<RiotService>()
-                                                         .GetLast20MatchesByAccountIdAsync(dbSummoner.SummonerRegion,
-                                                                                           dbSummoner.AccountId);
+            (var matchlistResult, var matchlist) = await RiftBot.GetService<RiotService>()
+                .GetLast20MatchesByAccountIdAsync(dbSummoner.SummonerRegion, dbSummoner.AccountId);
 
             if (matchlistResult != RequestResult.Success)
                 return (BragResult.Error, BragEmbeds.NoMatches);
 
-            (var matchDataResult, var matchData) = await RiftBot
-                                                         .GetService<RiotService>()
-                                                         .GetMatchById(dbSummoner.SummonerRegion,
-                                                                       matchlist.Random().GameId);
+            (var matchDataResult, var matchData) = await RiftBot.GetService<RiotService>()
+                .GetMatchById(dbSummoner.SummonerRegion, matchlist.Random().GameId);
 
             if (matchDataResult != RequestResult.Success)
             {
@@ -557,12 +563,10 @@ namespace Rift.Services
             }
 
             long participantId = matchData.ParticipantIdentities
-                                          .First(x => x.Player.CurrentAccountId == dbSummoner.AccountId
-                                                      || x.Player.AccountId == dbSummoner.AccountId)
-                                          .ParticipantId;
+                .First(x => x.Player.CurrentAccountId == dbSummoner.AccountId || x.Player.AccountId == dbSummoner.AccountId)
+                .ParticipantId;
 
-            var player = matchData.Participants
-                                  .First(x => x.ParticipantId == participantId);
+            var player = matchData.Participants.First(x => x.ParticipantId == participantId);
 
             if (player is null)
             {
@@ -578,7 +582,7 @@ namespace Rift.Services
                 return (BragResult.Error, GenericEmbeds.Error);
             }
 
-            string champThumb = RiotService.GetChampionSquareByName(champData.Image);
+            var champThumb = RiotService.GetChampionSquareByName(champData.Image);
 
             await Database.SetLastBragTimeAsync(userId, DateTime.UtcNow);
 
@@ -586,8 +590,7 @@ namespace Rift.Services
             await Database.AddInventoryAsync(userId, coins: brag.Coins);
 
             var queue = RiftBot.GetService<RiotService>().GetQueueNameById(matchData.QueueId);
-            return (BragResult.Success, BragEmbeds.Success(userId, champThumb, champData.Name, player, queue,
-                                                           brag.Coins));
+            return (BragResult.Success, BragEmbeds.Success(userId, champThumb, champData.Name, player, queue, brag.Coins));
         }
 
         static async Task<(bool, TimeSpan)> CanBrag(ulong userId)
@@ -599,11 +602,9 @@ namespace Rift.Services
 
             var diff = DateTime.UtcNow - data.LastBragTime;
 
-            Boolean result = diff > Settings.Economy.BragCooldown;
+            var result = diff > Settings.Economy.BragCooldown;
 
-            return (result, result
-                        ? TimeSpan.Zero
-                        : Settings.Economy.BragCooldown - diff);
+            return (result, result ? TimeSpan.Zero : Settings.Economy.BragCooldown - diff);
         }
 
         static async Task UpdateRatingAsync()
@@ -643,7 +644,7 @@ namespace Rift.Services
             return result;
         }
 
-        public async Task<(OpenChestResult, Embed)> OpenChestAllAsync(UInt64 userId)
+        public async Task<(OpenChestResult, Embed)> OpenChestAllAsync(ulong userId)
         {
             await chestMutex.WaitAsync().ConfigureAwait(false);
 
@@ -772,10 +773,10 @@ namespace Rift.Services
         {
             await storeMutex.WaitAsync().ConfigureAwait(false);
 
-            (StorePurchaseResult, Embed) result;
-
             RiftBot.Log.Info($"Store purchase: #{item.Id.ToString()} by {userId.ToString()}.");
 
+            (StorePurchaseResult, Embed) result;
+            
             try
             {
                 result = await StorePurchaseInternalAsync(userId, item).ConfigureAwait(false);
@@ -797,9 +798,9 @@ namespace Rift.Services
             if (sgUser is null)
                 return (StorePurchaseResult.Error, GenericEmbeds.Error);
 
-            (bool canBuy, TimeSpan remaining) = await CanBuyStoreAsync(userId);
+            (var canPurchase, var remaining) = await CanBuyStoreAsync(userId);
 
-            if (!RiftBot.IsAdmin(sgUser) && !canBuy)
+            if (!RiftBot.IsAdmin(sgUser) && !canPurchase)
                 return (StorePurchaseResult.Cooldown, StoreEmbeds.Cooldown(remaining));
 
             // if buying temp role over existing one
@@ -816,14 +817,14 @@ namespace Rift.Services
                 }
             }
 
-            (bool result, var currencyType) = await WithdrawCurrencyAsync();
+            (var result, var currencyType) = await WithdrawCurrencyAsync();
 
             if (!result)
             {
                 switch (currencyType)
                 {
                     case Currency.Coins: return (StorePurchaseResult.NoCoins, StoreEmbeds.NoCoins);
-
+                    
                     case Currency.Tokens: return (StorePurchaseResult.NoTokens, StoreEmbeds.NoTokens);
                 }
             }
@@ -878,7 +879,7 @@ namespace Rift.Services
                     break;
             }
 
-            string balance = await GetBalanceString();
+            var balance = await GetBalanceString();
 
             async Task<(bool, Currency)> WithdrawCurrencyAsync()
             {
@@ -973,7 +974,7 @@ namespace Rift.Services
                 return (GiftResult.SelfGift, GiftEmbeds.SelfGift);
             }
 
-            (bool canGift, TimeSpan remainingTime) = await CanGift(fromUser.Id);
+            (var canGift, var remainingTime) = await CanGift(fromUser.Id);
 
             if (!RiftBot.IsAdmin(fromUser) && !canGift)
                 return (GiftResult.Cooldown, GiftEmbeds.Cooldown(remainingTime));
@@ -983,7 +984,7 @@ namespace Rift.Services
             if (giftItem is null)
                 return (GiftResult.NoItem, GiftEmbeds.IncorrectNumber);
 
-            (bool result, var currencyType) = await WithdrawCurrencyAsync();
+            (var result, var currencyType) = await WithdrawCurrencyAsync();
 
             if (!result)
             {
@@ -1000,17 +1001,17 @@ namespace Rift.Services
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
                 return (GiftResult.Error, GenericEmbeds.Error);
 
-            string giftString = "";
+            var giftString = "";
             switch (giftItem.Type)
             {
                 case GiftItemType.CoinsRandom:
-                    uint coins = Helper.NextUInt(1000, 3501);
+                    var coins = Helper.NextUInt(1000, 3501);
                     await Database.AddInventoryAsync(toUser.Id, coins: coins);
                     giftString = $"{Settings.Emote.Coin} {coins.ToString()}";
                     break;
 
                 case GiftItemType.ChestsRandom:
-                    uint chests = Helper.NextUInt(4, 12);
+                    var chests = Helper.NextUInt(4, 12);
                     await Database.AddInventoryAsync(toUser.Id, chests: chests);
                     giftString = $"{Settings.Emote.Chest} {chests.ToString()}";
                     break;
@@ -1096,20 +1097,18 @@ namespace Rift.Services
 
             var diff = DateTime.UtcNow - data.LastGiftTime;
 
-            bool result = diff > Settings.Economy.GiftCooldown;
+            var result = diff > Settings.Economy.GiftCooldown;
 
-            return (result, result
-                        ? TimeSpan.Zero
-                        : Settings.Economy.GiftCooldown - diff);
+            return (result, result ? TimeSpan.Zero : Settings.Economy.GiftCooldown - diff);
         }
 
         public async Task<(AttackResult, Embed)> AttackAsync(SocketGuildUser sgAttacker, SocketGuildUser sgTarget)
         {
             await attackMutex.WaitAsync().ConfigureAwait(false);
 
-            (AttackResult, Embed) result;
-
             RiftBot.Log.Info($"Attacktime! {sgAttacker.Id.ToString()} want to kick {sgTarget.Id.ToString()}'s ass.");
+            
+            (AttackResult, Embed) result;
 
             try
             {
@@ -1134,7 +1133,7 @@ namespace Rift.Services
             if (sgAttacker.Id == sgTarget.Id)
                 return (AttackResult.SelfAttack, AttackEmbeds.SelfAttack);
 
-            (bool canBeAttacked, TimeSpan canBeAttackedRemainingTime) = await CanBeAttackedAgain(sgTarget.Id);
+            (var canBeAttacked, var canBeAttackedRemainingTime) = await CanBeAttackedAgain(sgTarget.Id);
 
             if (!canBeAttacked)
                 return (AttackResult.TooOftenSame, AttackEmbeds.TargetCooldown(canBeAttackedRemainingTime));
@@ -1145,7 +1144,7 @@ namespace Rift.Services
             if (attackerDbProfile.Level < Settings.Economy.AttackMinimumLevel)
                 return (AttackResult.LowUserLevel, AttackEmbeds.LowLevel);
 
-            (bool canAttack, TimeSpan canAttackRemainingTime) = await CanAttackAsync(sgAttacker.Id);
+            (var canAttack, var canAttackRemainingTime) = await CanAttackAsync(sgAttacker.Id);
 
             if (!canAttack)
                 return (AttackResult.OnUserCooldown, AttackEmbeds.Cooldown(canAttackRemainingTime));
@@ -1161,8 +1160,7 @@ namespace Rift.Services
 
             await Database.RemoveInventoryAsync(sgAttacker.Id, coins: Settings.Economy.AttackPrice);
 
-            var attack = new Attack(sgAttacker.Id, sgTarget.Id, targetDbUserInventory.Coins,
-                                    targetDbUserInventory.Chests);
+            var attack = new Attack(sgAttacker.Id, sgTarget.Id, targetDbUserInventory.Coins, targetDbUserInventory.Chests);
 
             switch (attack.Loot)
             {
@@ -1187,25 +1185,21 @@ namespace Rift.Services
                 case AttackLoot.Mute:
                 {
                     await RiftBot.GetService<RoleService>()
-                                 .AddTempRoleAsync(sgTarget.Id, Settings.RoleId.Attacked,
-                                                   TimeSpan.FromMinutes(attack.Count), "Attack mute");
+                        .AddTempRoleAsync(sgTarget.Id, Settings.RoleId.Attacked, TimeSpan.FromMinutes(attack.Count), "Attack mute");
                     break;
                 }
                 case AttackLoot.ReversedMute:
                 {
                     await RiftBot.GetService<RoleService>()
-                                 .AddTempRoleAsync(sgAttacker.Id, Settings.RoleId.Attacked,
-                                                   TimeSpan.FromMinutes(attack.Count), "Attack mute");
+                        .AddTempRoleAsync(sgAttacker.Id, Settings.RoleId.Attacked, TimeSpan.FromMinutes(attack.Count), "Attack mute");
                     break;
                 }
                 case AttackLoot.MutualMute:
                 {
                     await RiftBot.GetService<RoleService>()
-                                 .AddTempRoleAsync(sgTarget.Id, Settings.RoleId.Attacked,
-                                                   TimeSpan.FromMinutes(attack.Count), "Attack mute");
+                        .AddTempRoleAsync(sgTarget.Id, Settings.RoleId.Attacked, TimeSpan.FromMinutes(attack.Count), "Attack mute");
                     await RiftBot.GetService<RoleService>()
-                                 .AddTempRoleAsync(sgAttacker.Id, Settings.RoleId.Attacked,
-                                                   TimeSpan.FromMinutes(attack.Count), "Attack mute");
+                        .AddTempRoleAsync(sgAttacker.Id, Settings.RoleId.Attacked, TimeSpan.FromMinutes(attack.Count), "Attack mute");
                     break;
                 }
             }
@@ -1378,7 +1372,7 @@ namespace Rift.Services
 
             if (!(sgUser is null))
             {
-                return String.IsNullOrWhiteSpace(sgUser.Nickname)
+                return string.IsNullOrWhiteSpace(sgUser.Nickname)
                     ? sgUser.Username
                     : sgUser.Nickname;
             }
@@ -1411,15 +1405,11 @@ namespace Rift.Services
     public enum AttackResult
     {
         Error,
-        TargetModerator,
-        TargetWise,
-        TargetIon,
         SelfAttack,
         TooOftenSame,
         LowUserLevel,
         LowTargetLevel,
         NoCoins,
-        OnGlobalCooldown,
         OnUserCooldown,
         Success,
     }
@@ -1428,7 +1418,6 @@ namespace Rift.Services
     {
         Error,
         Cooldown,
-        HasBotRespect,
         HasRole,
         NoCoins,
         NoTokens,

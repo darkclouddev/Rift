@@ -17,11 +17,9 @@ namespace Rift.Embeds
                    .WithTitle($"Активные призыватели")
                    .WithColor(70, 178, 214)
                    .WithDescription($"Десять самых активных призывателей нашего сервера:\n")
-                   .AddField("Призыватель",
-                             String.Join('\n', topTen.Select(x => EconomyService.GetUserNameById(x.UserId))),
-                             true)
-                   .AddField("Уровень", String.Join('\n', topTen.Select(x => x.Level)), true)
-                   .AddField("Очки опыта", String.Join('\n', topTen.Select(x => x.Experience)), true)
+                   .AddField("Призыватель", String.Join('\n', topTen.Select(x => EconomyService.GetUserNameById(x.UserId))), true)
+                   .AddField("Уровень", string.Join('\n', topTen.Select(x => x.Level)), true)
+                   .AddField("Очки опыта", string.Join('\n', topTen.Select(x => x.Experience)), true)
                    .Build();
         }
 
@@ -31,11 +29,9 @@ namespace Rift.Embeds
                    .WithTitle($"Богатые призыватели")
                    .WithColor(70, 178, 214)
                    .WithDescription($"Десять самых богатых призывателей нашего сервера:")
-                   .AddField("Призыватель",
-                             String.Join('\n', topTen.Select(x => EconomyService.GetUserNameById(x.UserId))),
-                             true)
-                   .AddField("Монеты", String.Join('\n', topTen.Select(x => x.Coins)), true)
-                   .AddField("Жетоны", String.Join('\n', topTen.Select(x => x.Tokens)), true)
+                   .AddField("Призыватель", string.Join('\n', topTen.Select(x => EconomyService.GetUserNameById(x.UserId))), true)
+                   .AddField("Монеты", string.Join('\n', topTen.Select(x => x.Coins)), true)
+                   .AddField("Жетоны", string.Join('\n', topTen.Select(x => x.Tokens)), true)
                    .Build();
         }
     }

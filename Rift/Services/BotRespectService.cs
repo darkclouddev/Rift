@@ -33,10 +33,9 @@ namespace Rift.Services
 
         public BotRespectService()
         {
-            RiftBot.Log.Info($"Starting BotRespectService..");
+            RiftBot.Log.Info("Starting BotRespectService..");
 
-            Starttimer = new Timer(async delegate { await InitTimer(); }, null, TimeSpan.FromSeconds(30),
-                                   TimeSpan.Zero);
+            Starttimer = new Timer(async delegate { await InitTimer(); }, null, TimeSpan.FromSeconds(30), TimeSpan.Zero);
             foreach (var item in AvailableRewards)
             {
                 item.Item2.CalculateReward();
@@ -45,7 +44,7 @@ namespace Rift.Services
 
             timer = new Timer(async delegate { await StartBotGifts(); }, null, Timeout.Infinite, 0);
 
-            RiftBot.Log.Info($"BotRespectService loaded successfully.");
+            RiftBot.Log.Info("BotRespectService loaded successfully.");
         }
 
         public Task InitTimer()
@@ -83,9 +82,9 @@ namespace Rift.Services
                 await chatChannel.SendEmbedAsync(BotRespectEmbeds.ChatEmbed);
             }
             else
-                RiftBot.Log.Debug($"There was no users with bot respect");
+                RiftBot.Log.Debug("There was no users with bot respect");
 
-            RiftBot.Log.Debug($"Finished sending gifts");
+            RiftBot.Log.Debug("Finished sending gifts");
 
             await InitTimer();
         }

@@ -1,33 +1,31 @@
-﻿using System;
-
-namespace Rift.Data.Models.Statistics
+﻿namespace Rift.Data.Models.Statistics
 {
     public class UserStatistics
     {
-        public UInt64 UserId;
-        public UInt32 Level;
+        public ulong UserId;
+        public uint Level;
 
-        public UInt32 CoinsEarnedTotal;
-        public UInt32 TokensEarnedTotal;
-        public UInt32 ChestsEarnedTotal;
-        public UInt32 SphereEarnedTotal;
-        public UInt32 CapsuleEarnedTotal;
+        public uint CoinsEarnedTotal;
+        public uint TokensEarnedTotal;
+        public uint ChestsEarnedTotal;
+        public uint SphereEarnedTotal;
+        public uint CapsuleEarnedTotal;
 
-        public UInt32 ChestsOpenedTotal;
-        public UInt32 SphereOpenedTotal;
-        public UInt32 CapsuleOpenedTotal;
+        public uint ChestsOpenedTotal;
+        public uint SphereOpenedTotal;
+        public uint CapsuleOpenedTotal;
 
-        public UInt32 AttacksDone;
-        public UInt32 AttacksReceived;
+        public uint AttacksDone;
+        public uint AttacksReceived;
 
-        public UInt32 CoinsSpentTotal;
-        public UInt32 TokensSpentTotal;
-        public UInt32 GiftsSent;
-        public UInt32 GiftsReceived;
-        public UInt32 MessagesSentTotal;
-        public UInt32 BragTotal;
-        public UInt32 PurchasedItemsTotal;
+        public uint CoinsSpentTotal;
+        public uint TokensSpentTotal;
+        public uint GiftsSent;
+        public uint GiftsReceived;
+        public uint MessagesSentTotal;
+        public uint BragTotal;
+        public uint PurchasedItemsTotal;
 
-        public Decimal Donate;
+        public decimal Donate;
     }
 }

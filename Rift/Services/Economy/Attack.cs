@@ -77,7 +77,7 @@ namespace Rift.Services.Economy
 
         void FillData()
         {
-            List<(uint, AttackLoot)> chancedLoot = new List<(uint, AttackLoot)>
+            var chancedLoot = new List<(uint, AttackLoot)>
             {
                 (3, AttackLoot.Mute),
                 (5, AttackLoot.Nothing),
@@ -109,6 +109,7 @@ namespace Rift.Services.Economy
                     Count = Helper.NextUInt(2, 7);
                     Skill = MuteSkills.Random();
                     break;
+                
                 case AttackLoot.MutualMute:
                     Count = Helper.NextUInt(2, 7);
                     Skill = SkillResult.IgniteMutualMute;

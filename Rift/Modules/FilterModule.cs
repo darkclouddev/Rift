@@ -46,9 +46,7 @@ namespace Rift.Modules
 
             Settings.Chat.CapsFilterEnabled = !Settings.Chat.CapsFilterEnabled;
 
-            await
-                chatChannel
-                    .SendMessageAsync($"Фильтр чата {(Settings.Chat.CapsFilterEnabled ? "включён" : "выключен")}.");
+            await chatChannel.SendMessageAsync($"Фильтр чата {(Settings.Chat.CapsFilterEnabled ? "включён" : "выключен")}.");
         }
 
         [Command("attach")]
@@ -61,9 +59,7 @@ namespace Rift.Modules
 
             Settings.Chat.AttachmentFilterEnabled = !Settings.Chat.AttachmentFilterEnabled;
 
-            await
-                chatChannel
-                    .SendMessageAsync($"Фильтр вложений {(Settings.Chat.AttachmentFilterEnabled ? "включён" : "выключен")}.");
+            await chatChannel.SendMessageAsync($"Фильтр вложений {(Settings.Chat.AttachmentFilterEnabled ? "включён" : "выключен")}.");
         }
 
         [Command("url")]
@@ -76,9 +72,7 @@ namespace Rift.Modules
 
             Settings.Chat.UrlFilterEnabled = !Settings.Chat.UrlFilterEnabled;
 
-            await
-                chatChannel
-                    .SendMessageAsync($"Фильтр ссылок {(Settings.Chat.UrlFilterEnabled ? "включён" : "выключен")}.");
+            await chatChannel.SendMessageAsync($"Фильтр ссылок {(Settings.Chat.UrlFilterEnabled ? "включён" : "выключен")}.");
         }
     }
 }

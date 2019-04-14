@@ -64,7 +64,6 @@ namespace Rift.Modules
             if (amount <= 0M)
             {
                 await Context.User.SendMessageAsync("Сумма доната не может быть меньше или равна нулю!");
-
                 return;
             }
 
@@ -79,7 +78,6 @@ namespace Rift.Modules
             if (amount <= 0M)
             {
                 await Context.User.SendMessageAsync("Сумма доната не может быть меньше или равна нулю!");
-
                 return;
             }
 
@@ -107,8 +105,7 @@ namespace Rift.Modules
                 return;
             if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateKayn, out var pvtKayn))
                 return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateMellifluous,
-                                     out var pvtMellifluous))
+            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateMellifluous, out var pvtMellifluous))
                 return;
             if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateOctopusMom, out var pvtOctopus))
                 return;
@@ -176,10 +173,10 @@ namespace Rift.Modules
         [RequireDeveloper]
         public async Task SelfTest()
         {
-            bool skipChecks = false;
+            var skipChecks = false; // TODO: Make it configurable
 
             var errors = new List<string>();
-            uint fixedRoles = 0u;
+            var fixedRoles = 0u;
 
             var eb = new EmbedBuilder();
 
@@ -326,11 +323,11 @@ namespace Rift.Modules
             {
                 eb.WithColor(255, 0, 0);
 
-                string errorList = String.Join('\n', errors);
+                var errorList = String.Join('\n', errors);
 
                 if (errorList.Length >= 1024)
                 {
-                    errorList = String.Join('\n', errors.Take(10));
+                    errorList = string.Join('\n', errors.Take(10));
                     eb.AddField($"{errors.Count.ToString()} error(s)", "Displaying first 10\n\n" + errorList);
                 }
                 else
@@ -358,8 +355,8 @@ namespace Rift.Modules
         {
             var roles = new Queue<IRole>(Context.Guild.Roles);
 
-            int amount = roles.Count;
-            int page = 0;
+            var amount = roles.Count;
+            var page = 0;
 
             while (amount > 0)
             {
@@ -369,10 +366,10 @@ namespace Rift.Modules
                          .WithAuthor($"Server roles")
                          .WithFooter($"Page {page.ToString()}");
 
-                List<ulong> ids = new List<ulong>();
-                List<string> names = new List<string>();
+                var ids = new List<ulong>();
+                var names = new List<string>();
 
-                int remove = amount >= 20 ? 20 : amount;
+                var remove = amount >= 20 ? 20 : amount;
 
                 for (int i = 0; i < remove; i++)
                 {
@@ -385,8 +382,8 @@ namespace Rift.Modules
                     names.Add(role.Name);
                 }
 
-                eb.AddField("Role ID", String.Join('\n', ids), true);
-                eb.AddField("Name", String.Join('\n', names), true);
+                eb.AddField("Role ID", string.Join('\n', ids), true);
+                eb.AddField("Name", string.Join('\n', names), true);
 
                 await Context.Channel.SendEmbedAsync(eb);
 
@@ -406,8 +403,7 @@ namespace Rift.Modules
                 await client.SetGameAsync(RiftBot.BotStatusMessage);
             }
 
-            var message =
-                await ReplyAsync($"Maintenance mode **{(Settings.App.MaintenanceMode ? "enabled" : "disabled")}**");
+            var message = await ReplyAsync($"Maintenance mode **{(Settings.App.MaintenanceMode ? "enabled" : "disabled")}**");
         }
 
         [Command("whois")]
@@ -443,7 +439,7 @@ namespace Rift.Modules
             RiftBot.ShouldReboot = true;
 
             await Context.Message.DeleteAsync();
-            await ReplyAsync($"Перезапускаюсь");
+            await ReplyAsync("Перезапускаюсь");
 
             IonicClient.TokenSource.Cancel();
         }
@@ -457,10 +453,10 @@ namespace Rift.Modules
 
             var eb = new EmbedBuilder();
 
-            eb.WithAuthor($"Server emotes");
+            eb.WithAuthor("Server emotes");
 
-            eb.AddField("Emote", String.Join('\n', emotes.Select(x => x.Name)), true);
-            eb.AddField("ID", String.Join('\n', emotes.Select(x => x.Id)), true);
+            eb.AddField("Emote", string.Join('\n', emotes.Select(x => x.Name)), true);
+            eb.AddField("ID", string.Join('\n', emotes.Select(x => x.Id)), true);
 
             await ReplyAsync("", embed: eb.Build());
         }
@@ -470,7 +466,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task AppStatus()
         {
-            string infoText =
+            var infoText =
                 $"{Format.Underline($"{Format.Bold(nameof(Rift))} v{RiftBot.InternalVersion} {RuntimeInformation.OSArchitecture.ToString()}")}\n"
                 + $"- Автор: <@212997107525746690>\n"
                 + $"- Аптайм: {GetUptime()}\n"

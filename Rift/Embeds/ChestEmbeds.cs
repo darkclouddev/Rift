@@ -47,10 +47,12 @@ namespace Rift.Embeds
                      .WithTitle($"Открытие сундука")
                      .WithColor(243, 205, 87)
                      .WithThumbnailUrl(Settings.Thumbnail.Chest);
+            
             if (amount == 1)
                 eb.WithDescription($"Призыватель, вы только что открыли сундук.\n\nВ сундуке: {reward.RewardString}");
             else
                 eb.WithDescription($"Призыватель, вы только что открыли {amount.ToString()} сундук(ов).\n\nВ сундуках: {reward.RewardString}");
+            
             return eb.Build();
         }
     }

@@ -1,11 +1,9 @@
-﻿using System;
-
-namespace Rift.Data.Models.Users
+﻿namespace Rift.Data.Models.Users
 {
     public class UserLevel
     {
-        public UInt64 UserId;
-        public UInt32 Level;
-        public UInt32 Experience;
+        public ulong UserId;
+        public uint Level;
+        public uint Experience;
     }
 }

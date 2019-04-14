@@ -19,7 +19,7 @@ namespace Rift.Modules
             {
                 Settings.ReloadAll();
 
-                await ReplyAsync($"All settings reloaded successfully.");
+                await ReplyAsync("All settings reloaded successfully.");
             }
 
             [Command("app")]
@@ -27,7 +27,7 @@ namespace Rift.Modules
             {
                 Settings.ReloadApp();
 
-                await ReplyAsync($"App settings reloaded successfully.");
+                await ReplyAsync("App settings reloaded successfully.");
             }
 
             [Command("channels")]
@@ -35,7 +35,7 @@ namespace Rift.Modules
             {
                 Settings.ReloadChannels();
 
-                await ReplyAsync($"Channels reloaded successfully.");
+                await ReplyAsync("Channels reloaded successfully.");
             }
 
             [Command("chat")]
@@ -43,7 +43,7 @@ namespace Rift.Modules
             {
                 Settings.ReloadChat();
 
-                await ReplyAsync($"Chat settings reloaded successfully.");
+                await ReplyAsync("Chat settings reloaded successfully.");
             }
 
             [Command("economy")]
@@ -51,7 +51,7 @@ namespace Rift.Modules
             {
                 Settings.ReloadEconomy();
 
-                await ReplyAsync($"Economy settings reloaded successfully.");
+                await ReplyAsync("Economy settings reloaded successfully.");
             }
 
             [Command("emote")]
@@ -59,7 +59,7 @@ namespace Rift.Modules
             {
                 Settings.ReloadEmotes();
 
-                await ReplyAsync($"Emotes reloaded successfully.");
+                await ReplyAsync("Emotes reloaded successfully.");
             }
 
             [Command("roles")]
@@ -67,7 +67,7 @@ namespace Rift.Modules
             {
                 Settings.ReloadRoles();
 
-                await ReplyAsync($"Roles reloaded successfully.");
+                await ReplyAsync("Roles reloaded successfully.");
             }
         }
 

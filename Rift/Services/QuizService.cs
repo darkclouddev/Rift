@@ -13,7 +13,7 @@ namespace Rift.Services
 {
     public class QuizService
     {
-        public Boolean IsActive { get; private set; }
+        public bool IsActive { get; private set; }
 
         readonly TimeSpan intervalBetween = TimeSpan.FromSeconds(10);
         readonly TimeSpan duration = TimeSpan.FromSeconds(20);
@@ -54,7 +54,7 @@ namespace Rift.Services
             return questions.Pop();
         }
 
-        static async Task PostQuestion(String question)
+        static async Task PostQuestion(string question)
         {
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
                 return;
@@ -102,7 +102,7 @@ namespace Rift.Services
             await DeclareWinnerAsync(guess.UserId);
         }
 
-        async Task DeclareWinnerAsync(UInt64 userId)
+        async Task DeclareWinnerAsync(ulong userId)
         {
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
                 return;
@@ -125,10 +125,10 @@ namespace Rift.Services
     
     public class QuizGuess
     {
-        public UInt64 UserId { get; }
-        public String Guess { get; }
+        public ulong UserId { get; }
+        public string Guess { get; }
 
-        public QuizGuess(UInt64 userId, String guess)
+        public QuizGuess(ulong userId, string guess)
         {
             UserId = userId;
             Guess = guess;
@@ -137,16 +137,16 @@ namespace Rift.Services
 
     public class QuizEntry
     {
-        public String Question { get; }
-        public String Answer { get; }
+        public string Question { get; }
+        public string Answer { get; }
 
-        public QuizEntry(String question, String answer)
+        public QuizEntry(string question, string answer)
         {
             Question = question;
             Answer = answer;
         }
 
-        public Boolean IsRightAnswer(String guess)
+        public bool IsRightAnswer(string guess)
             => guess.Equals(Answer, StringComparison.InvariantCultureIgnoreCase);
     }
 }
