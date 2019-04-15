@@ -281,7 +281,7 @@ namespace Rift.Modules
             {
                 (var state, var embed) = await economyService.GetUserBragAsync(Context.User.Id);
 
-                if (state == BragResult.Error)
+                if (state != BragResult.Success)
                 {
                     await Context.User.SendEmbedAsync(embed);
                     return;
