@@ -980,6 +980,7 @@ namespace Rift.Services
                 case "ru":   return Region.RU;
                 case "euw":  return Region.EUW;
                 case "eune": return Region.EUNE;
+                case "na": return Region.NA;
 
                 default:
                     RiftBot.Log.Error($"Invalid region: {regionName}");
