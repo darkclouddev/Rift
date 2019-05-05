@@ -1595,15 +1595,37 @@ namespace Rift
         }
         
         #endregion Streamers
+        
+        #region Stored Messages
+
+        public static async Task<RiftMapping> GetMessageMappingByNameAsync(string identifier)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.MessageMappings.FirstOrDefaultAsync(x => 
+                    x.Identifier.Equals(identifier, StringComparison.InvariantCultureIgnoreCase));
+            }
+        }
+        
+        public static async Task<RiftMessage> GetMessageByIdAsync(int id)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.StoredMessages
+                    .FirstOrDefaultAsync(x => x.MessageId == id);
+            }
+        }
+        
+        #endregion Stored Messages
     }
 
     public class DatabaseException : Exception
     {
-        public readonly string Reason;
+        public new readonly string Message;
 
         public DatabaseException(string message) : base(message)
         {
-            Reason = message;
+            Message = message;
         }
     }
 }

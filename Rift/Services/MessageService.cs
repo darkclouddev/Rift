@@ -1,28 +1,27 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
+using Rift.Data.Models;
 using Rift.Services.Message;
+using Rift.Services.Message.Formatters;
 
 using IonicLib;
 using IonicLib.Util;
 
 namespace Rift.Services
 {
-    public class MessageService //TODO: rewrite using scheduling timer
+    public class MessageService
     {
-        static ConcurrentDictionary<Guid, SendMessageBase> toSend = new ConcurrentDictionary<Guid, SendMessageBase>();
-
-        static ConcurrentDictionary<Guid, DeleteMessageBase> toDelete =
-            new ConcurrentDictionary<Guid, DeleteMessageBase>();
-
-        static Timer checkTimer;
-
         public MessageService()
         {
+            formatters = GetFormatters();
+            
             checkTimer = new Timer(
                 async delegate
                 {
@@ -32,6 +31,16 @@ namespace Rift.Services
                 TimeSpan.FromSeconds(10),
                 TimeSpan.FromSeconds(1));
         }
+        
+        //TODO: refactor using scheduling timer
+        #region Delayed messages
+        
+        static ConcurrentDictionary<Guid, SendMessageBase> toSend = new ConcurrentDictionary<Guid, SendMessageBase>();
+
+        static ConcurrentDictionary<Guid, DeleteMessageBase> toDelete =
+            new ConcurrentDictionary<Guid, DeleteMessageBase>();
+
+        static Timer checkTimer;
 
         public bool TryAddSend(SendMessageBase message) => toSend.TryAdd(message.Id, message);
         public bool TryAddDelete(DeleteMessageBase message) => toDelete.TryAdd(message.Id, message);
@@ -48,8 +57,8 @@ namespace Rift.Services
         {
             var unsentId = toSend.Values.ToList()
                 .Where(x => x.DeliveryTime < dt)
-                .Take(3)
                 .OrderBy(x => x.AddedOn)
+                .Take(3)
                 .Select(x => x.Id)
                 .ToList();
 
@@ -69,16 +78,16 @@ namespace Rift.Services
 
         async Task CheckDeleteAsync(DateTime dt)
         {
-            var undeletedId = toDelete.Values.ToList()
+            var undeletedIds = toDelete.Values.ToList()
                 .Where(x => x.DeletionTime < dt)
                 .Take(3)
                 .Select(x => x.Id)
                 .ToList();
 
-            if (!undeletedId.Any())
+            if (!undeletedIds.Any())
                 return;
 
-            foreach (var id in undeletedId)
+            foreach (var id in undeletedIds)
             {
                 (var success, var message) = TryRemoveDelete(id);
 
@@ -161,28 +170,101 @@ namespace Rift.Services
                 if (msg is null)
                     return;
 
-                await msg?.DeleteAsync();
+                await msg.DeleteAsync();
             }
-            catch
+            catch(Exception ex) // fails when message is already deleted, no delete perms or discord outage
             {
+                RiftBot.Log.Error(ex);
             }
         }
 
         static (bool, SendMessageBase) TryRemoveSend(Guid id)
         {
-            bool result = toSend.TryRemove(id, out var message);
+            var result = toSend.TryRemove(id, out var message);
 
             return (result, message);
         }
 
         static (bool, DeleteMessageBase) TryRemoveDelete(Guid id)
         {
-            bool result = toDelete.TryRemove(id, out var message);
+            var result = toDelete.TryRemove(id, out var message);
 
             return (result, message);
         }
 
         public int GetSendQueueLength() => toSend.Count;
         public int GetDeleteQueueLength() => toDelete.Count;
+        
+        #endregion Delayed messages
+        
+        #region Message formatting
+
+        static List<Type> formatters;
+
+        static List<Type> GetFormatters()
+        {
+            var assembly = Assembly.GetEntryAssembly();
+
+            if (assembly is null)
+            {
+                RiftBot.Log.Error("Unable to obtain entry assembly, disabling formatting service.");
+                return null;
+            }
+            
+            return assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(FormatterBase))).ToList();
+        }
+
+        public async Task<(bool, IonicMessage)> GetMessageAsync(string identifier, ulong userId)
+        {
+            var mapping = await Database.GetMessageMappingByNameAsync(identifier);
+
+            if (mapping is null)
+            {
+                RiftBot.Log.Warn($"Message mapping \"{identifier}\" does not exist.");
+                return (false, null);
+            }
+
+            var dbMessage = await Database.GetMessageByIdAsync(mapping.MessageId);
+            
+            if (dbMessage is null)
+            {
+                RiftBot.Log.Warn($"Message with ID \"{mapping.MessageId.ToString()}\" does not exist.");
+                return (false, null);
+            }
+
+            return (true, FormatMessage(dbMessage, userId));
+        }
+        
+        public IonicMessage FormatMessage(RiftMessage message, ulong userId)
+        {
+            if (message is null || userId == 0ul)
+                return null;
+
+            if (string.IsNullOrWhiteSpace(message.Text)
+                && string.IsNullOrWhiteSpace(message.Embed)
+                && string.IsNullOrWhiteSpace(message.ImageUrl))
+                return null;
+
+            if (message.ApplyFormat)
+            {
+                try
+                {
+                    foreach (var type in formatters)
+                    {
+                        var formatter = (FormatterBase) Activator.CreateInstance(type);
+                        message = formatter.Format(message, userId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    RiftBot.Log.Warn(ex);
+                    throw;
+                }
+            }
+            
+            return new IonicMessage(message);
+        }
+
+        #endregion Message formatting
     }
 }

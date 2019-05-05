@@ -15,9 +15,11 @@ namespace Rift.Data
         public DbSet<ScheduledEvent> ScheduledEvents { get; set; }
         public DbSet<RiftTempRole> TempRoles { get; set; }
         public DbSet<RiftStreamer> Streamers { get; set; }
+        public DbSet<RiftMessage> StoredMessages { get; set; }
+        public DbSet<RiftMapping> MessageMappings { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
-            optionsBuilder.UseSqlServer(@"Data Source=127.0.0.1,1433;Initial Catalog=Rift;persist security info=True;user id=Rift;password=727");
+            optionsBuilder.UseMySql(@"Server=localhost;Database=rift;Uid=rift;Pwd=;");
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -78,6 +80,10 @@ namespace Rift.Data
                    .HasOne(user => user.Streamers)
                    .WithOne(streamer => streamer.User)
                    .HasForeignKey<RiftStreamer>(user => user.UserId);
+
+            builder.Entity<RiftMapping>().HasKey(key => key.Identifier);
+            
+            builder.Entity<RiftMessage>().HasKey(key => key.MessageId);
         }
     }
 }

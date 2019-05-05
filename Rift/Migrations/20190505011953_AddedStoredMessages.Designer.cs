@@ -2,27 +2,26 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rift.Data;
 
 namespace Rift.Migrations
 {
     [DbContext(typeof(RiftContext))]
-    partial class RiftContextModelSnapshot : ModelSnapshot
+    [Migration("20190505011953_AddedStoredMessages")]
+    partial class AddedStoredMessages
     {
-protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.2.2-servicing-10034")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "2.2.4-servicing-10062")
+                .HasAnnotation("Relational:MaxIdentifierLength", 255);
 
             modelBuilder.Entity("Rift.Data.Models.RiftCooldowns", b =>
                 {
-                    b.Property<decimal>("UserId")
-                        .HasConversion(new ValueConverter<decimal, decimal>(v => default(decimal), v => default(decimal), new ConverterMappingHints(precision: 20, scale: 0)));
+                    b.Property<ulong>("UserId");
 
                     b.Property<DateTime>("BotRespectTime");
 
@@ -49,26 +48,25 @@ protected override void BuildModel(ModelBuilder modelBuilder)
 
             modelBuilder.Entity("Rift.Data.Models.RiftInventory", b =>
                 {
-                    b.Property<decimal>("UserId")
-                        .HasConversion(new ValueConverter<decimal, decimal>(v => default(decimal), v => default(decimal), new ConverterMappingHints(precision: 20, scale: 0)));
+                    b.Property<ulong>("UserId");
 
-                    b.Property<long>("Capsules");
+                    b.Property<uint>("Capsules");
 
-                    b.Property<long>("Chests");
+                    b.Property<uint>("Chests");
 
-                    b.Property<long>("Coins");
+                    b.Property<uint>("Coins");
 
-                    b.Property<long>("PowerupsBotRespect");
+                    b.Property<uint>("PowerupsBotRespect");
 
-                    b.Property<long>("PowerupsDoubleExp");
+                    b.Property<uint>("PowerupsDoubleExp");
 
-                    b.Property<long>("RareTickets");
+                    b.Property<uint>("RareTickets");
 
-                    b.Property<long>("Spheres");
+                    b.Property<uint>("Spheres");
 
-                    b.Property<long>("Tokens");
+                    b.Property<uint>("Tokens");
 
-                    b.Property<long>("UsualTickets");
+                    b.Property<uint>("UsualTickets");
 
                     b.HasKey("UserId");
 
@@ -77,8 +75,7 @@ protected override void BuildModel(ModelBuilder modelBuilder)
 
             modelBuilder.Entity("Rift.Data.Models.RiftLolData", b =>
                 {
-                    b.Property<decimal>("UserId")
-                        .HasConversion(new ValueConverter<decimal, decimal>(v => default(decimal), v => default(decimal), new ConverterMappingHints(precision: 20, scale: 0)));
+                    b.Property<ulong>("UserId");
 
                     b.Property<string>("AccountId");
 
@@ -95,10 +92,41 @@ protected override void BuildModel(ModelBuilder modelBuilder)
                     b.ToTable("LolData");
                 });
 
+            modelBuilder.Entity("Rift.Data.Models.RiftMapping", b =>
+                {
+                    b.Property<string>("Identifier")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("MessageId");
+
+                    b.HasKey("Identifier");
+
+                    b.ToTable("MessageMappings");
+                });
+
+            modelBuilder.Entity("Rift.Data.Models.RiftMessage", b =>
+                {
+                    b.Property<int>("MessageId")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<bool>("ApplyFormat");
+
+                    b.Property<string>("Embed");
+
+                    b.Property<string>("ImageUrl");
+
+                    b.Property<string>("MessageName");
+
+                    b.Property<string>("Text");
+
+                    b.HasKey("MessageId");
+
+                    b.ToTable("StoredMessages");
+                });
+
             modelBuilder.Entity("Rift.Data.Models.RiftPendingUser", b =>
                 {
-                    b.Property<decimal>("UserId")
-                        .HasConversion(new ValueConverter<decimal, decimal>(v => default(decimal), v => default(decimal), new ConverterMappingHints(precision: 20, scale: 0)));
+                    b.Property<ulong>("UserId");
 
                     b.Property<string>("AccountId");
 
@@ -119,42 +147,41 @@ protected override void BuildModel(ModelBuilder modelBuilder)
 
             modelBuilder.Entity("Rift.Data.Models.RiftStatistics", b =>
                 {
-                    b.Property<decimal>("UserId")
-                        .HasConversion(new ValueConverter<decimal, decimal>(v => default(decimal), v => default(decimal), new ConverterMappingHints(precision: 20, scale: 0)));
+                    b.Property<ulong>("UserId");
 
-                    b.Property<long>("AttacksDone");
+                    b.Property<uint>("AttacksDone");
 
-                    b.Property<long>("AttacksReceived");
+                    b.Property<uint>("AttacksReceived");
 
-                    b.Property<long>("BragTotal");
+                    b.Property<uint>("BragTotal");
 
-                    b.Property<long>("CapsuleEarnedTotal");
+                    b.Property<uint>("CapsuleEarnedTotal");
 
-                    b.Property<long>("CapsuleOpenedTotal");
+                    b.Property<uint>("CapsuleOpenedTotal");
 
-                    b.Property<long>("ChestsEarnedTotal");
+                    b.Property<uint>("ChestsEarnedTotal");
 
-                    b.Property<long>("ChestsOpenedTotal");
+                    b.Property<uint>("ChestsOpenedTotal");
 
-                    b.Property<long>("CoinsEarnedTotal");
+                    b.Property<uint>("CoinsEarnedTotal");
 
-                    b.Property<long>("CoinsSpentTotal");
+                    b.Property<uint>("CoinsSpentTotal");
 
-                    b.Property<long>("GiftsReceived");
+                    b.Property<uint>("GiftsReceived");
 
-                    b.Property<long>("GiftsSent");
+                    b.Property<uint>("GiftsSent");
 
-                    b.Property<long>("MessagesSentTotal");
+                    b.Property<uint>("MessagesSentTotal");
 
-                    b.Property<long>("PurchasedItemsTotal");
+                    b.Property<uint>("PurchasedItemsTotal");
 
-                    b.Property<long>("SphereEarnedTotal");
+                    b.Property<uint>("SphereEarnedTotal");
 
-                    b.Property<long>("SphereOpenedTotal");
+                    b.Property<uint>("SphereOpenedTotal");
 
-                    b.Property<long>("TokensEarnedTotal");
+                    b.Property<uint>("TokensEarnedTotal");
 
-                    b.Property<long>("TokensSpentTotal");
+                    b.Property<uint>("TokensSpentTotal");
 
                     b.HasKey("UserId");
 
@@ -163,8 +190,7 @@ protected override void BuildModel(ModelBuilder modelBuilder)
 
             modelBuilder.Entity("Rift.Data.Models.RiftStreamer", b =>
                 {
-                    b.Property<decimal>("UserId")
-                        .HasConversion(new ValueConverter<decimal, decimal>(v => default(decimal), v => default(decimal), new ConverterMappingHints(precision: 20, scale: 0)));
+                    b.Property<ulong>("UserId");
 
                     b.Property<string>("PictureUrl");
 
@@ -177,11 +203,9 @@ protected override void BuildModel(ModelBuilder modelBuilder)
 
             modelBuilder.Entity("Rift.Data.Models.RiftTempRole", b =>
                 {
-                    b.Property<decimal>("UserId")
-                        .HasConversion(new ValueConverter<decimal, decimal>(v => default(decimal), v => default(decimal), new ConverterMappingHints(precision: 20, scale: 0)));
+                    b.Property<ulong>("UserId");
 
-                    b.Property<decimal>("RoleId")
-                        .HasConversion(new ValueConverter<decimal, decimal>(v => default(decimal), v => default(decimal), new ConverterMappingHints(precision: 20, scale: 0)));
+                    b.Property<ulong>("RoleId");
 
                     b.Property<DateTime>("ExpirationTime");
 
@@ -196,15 +220,14 @@ protected override void BuildModel(ModelBuilder modelBuilder)
 
             modelBuilder.Entity("Rift.Data.Models.RiftUser", b =>
                 {
-                    b.Property<decimal>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasConversion(new ValueConverter<decimal, decimal>(v => default(decimal), v => default(decimal), new ConverterMappingHints(precision: 20, scale: 0)));
+                    b.Property<ulong>("UserId")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<decimal>("Donate");
 
-                    b.Property<long>("Experience");
+                    b.Property<uint>("Experience");
 
-                    b.Property<long>("Level");
+                    b.Property<uint>("Level");
 
                     b.HasKey("UserId");
 
@@ -213,7 +236,7 @@ protected override void BuildModel(ModelBuilder modelBuilder)
 
             modelBuilder.Entity("Rift.Data.Models.ScheduledEvent", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<uint>("Id")
                         .ValueGeneratedOnAdd();
 
                     b.Property<int>("DayId");
@@ -286,5 +309,6 @@ protected override void BuildModel(ModelBuilder modelBuilder)
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
-        }    }
+        }
+    }
 }
