@@ -16,7 +16,7 @@ namespace Rift.Configuration
         public int BragWinCoinsMax { get; set; } = 0;
         public int BragLossCoinsMin { get; set; } = 0;
         public int BragLossCoinsMax { get; set; } = 0;
-        public TimeSpan PendingUserLifeTime { get; set; } = TimeSpan.FromHours(3);
+        public TimeSpan PendingUserLifeTime { get; set; } = TimeSpan.FromHours(4);
         public TimeSpan LolAccountUpdateCooldown { get; set; } = TimeSpan.FromHours(6);
     }
 }
