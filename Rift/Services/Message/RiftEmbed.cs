@@ -1,5 +1,5 @@
 using System;
-
+using System.Linq;
 using Discord;
 
 namespace Rift.Services.Message
@@ -13,9 +13,9 @@ namespace Rift.Services.Message
         public string ThumbnailUrl { get; set; }
         public string ImageUrl { get; set; }
         public bool HasTimestamp { get; set; } = false;
-        public int ColorRed { get; set; } = -1;
-        public int ColorGreen { get; set; } = -1;
-        public int ColorBlue { get; set; } = -1;
+        public int ColorRed { get; private set; } = -1;
+        public int ColorGreen { get; private set; } = -1;
+        public int ColorBlue { get; private set; } = -1;
 
         public string Footer { get; set; }
         public RiftField[] Fields { get; set; }
@@ -23,6 +23,12 @@ namespace Rift.Services.Message
         public RiftEmbed WithTitle(string title)
         {
             Title = title;
+            return this;
+        }
+
+        public RiftEmbed WithAuthor(string name, string iconUrl = null)
+        {
+            Author = new RiftAuthor(name, iconUrl);
             return this;
         }
 
@@ -35,6 +41,33 @@ namespace Rift.Services.Message
         public RiftEmbed WithThumbnailUrl(string url)
         {
             ThumbnailUrl = url;
+            return this;
+        }
+
+        public RiftEmbed WithColor(int red, int green, int blue)
+        {
+            ColorRed = red;
+            ColorGreen = green;
+            ColorBlue = blue;
+
+            return this;
+        }
+
+        public RiftEmbed WithFooter(string footer)
+        {
+            Footer = footer;
+            return this;
+        }
+
+        public RiftEmbed AddField(string header, string content, bool isInline = false)
+        {
+            if (Fields is null)
+                Fields = new RiftField[1];
+
+            var list = Fields.ToList();
+            list.Add(new RiftField(header, content, isInline));
+
+            Fields = list.ToArray();
             return this;
         }
 
@@ -99,8 +132,14 @@ namespace Rift.Services.Message
     
     public class RiftAuthor
     {
-        public string IconUrl { get; set; }
         public string Name { get; set; }
+        public string IconUrl { get; set; }
+
+        public RiftAuthor(string name, string iconUrl = null)
+        {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            IconUrl = iconUrl;
+        }
     }
 
     public class RiftField
@@ -108,5 +147,12 @@ namespace Rift.Services.Message
         public string Header { get; set; }
         public string Content { get; set; }
         public bool IsInline { get; set; } = false;
+        
+        public RiftField(string header, string content, bool isInline = false)
+        {
+            Header = header ?? throw new ArgumentNullException(nameof(header));
+            Content = content ?? throw new ArgumentNullException(nameof(content));
+            IsInline = isInline;
+        }
     }
 }

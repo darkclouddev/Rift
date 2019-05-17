@@ -1612,7 +1612,7 @@ namespace Rift
             using (var context = new RiftContext())
             {
                 return await context.StoredMessages
-                    .FirstOrDefaultAsync(x => x.MessageId == id);
+                    .FirstOrDefaultAsync(x => x.Id == id);
             }
         }
         

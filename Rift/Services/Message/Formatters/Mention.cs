@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 using Rift.Data.Models;
 
 namespace Rift.Services.Message.Formatters
@@ -6,7 +8,7 @@ namespace Rift.Services.Message.Formatters
     {
         public Mention() : base("$mention") {}
 
-        public override RiftMessage Format(RiftMessage message, ulong userId)
+        public override Task<RiftMessage> Format(RiftMessage message, ulong userId)
         {
             return ReplaceData(message, $"<@{userId.ToString()}>");
         }

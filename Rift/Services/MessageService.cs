@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,7 +13,10 @@ using Rift.Configuration;
 using Rift.Data.Models;
 using Rift.Services.Message;
 using Rift.Services.Message.Formatters;
+using MessageType = Rift.Services.Message.MessageType;
 
+using Discord;
+using Humanizer;
 using IonicLib;
 using IonicLib.Util;
 
@@ -18,10 +24,47 @@ namespace Rift.Services
 {
     public class MessageService
     {
+        public static readonly IonicMessage Error =
+            new IonicMessage(new EmbedBuilder()
+                    .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
+                    .WithColor(226, 87, 76)
+                    .WithDescription("Обратитесь к хранителю ботов и опишите ваши действия, которые привели к возникновению данной ошибки.")
+                    .Build());
+        
+        public static readonly IonicMessage UserNotFound =
+            new IonicMessage(new EmbedBuilder()
+                    .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
+                    .WithColor(255, 0, 0)
+                    .WithDescription("Пользователь не найден!")
+                    .Build());
+        
+        public static readonly IonicMessage RoleNotFound =
+            new IonicMessage(new EmbedBuilder()
+                    .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
+                    .WithColor(255, 0, 0)
+                    .WithDescription("Роль не найдена!")
+                    .Build());
+        
         public MessageService()
         {
-            formatters = GetFormatters();
-            
+            RiftBot.Log.Info($"Starting up {nameof(MessageService)}.");
+
+            var sw = new Stopwatch();
+            sw.Restart();
+
+            formatters = new ConcurrentDictionary<string, FormatterBase>();
+
+            foreach (var type in GetFormatters())
+            {
+                var formatter = (FormatterBase)Activator.CreateInstance(type);
+                formatters.TryAdd(formatter.Template, formatter);
+            }
+
+            sw.Stop();
+            RiftBot.Log.Info($"Loaded {formatters.Count.ToString()} message formatters in" +
+                $" {sw.Elapsed.Humanize(1, new CultureInfo("en-US")).ToLowerInvariant()}.");
+
+            RiftBot.Log.Info($"Starting up message scheduler.");
             checkTimer = new Timer(
                 async delegate
                 {
@@ -29,7 +72,7 @@ namespace Rift.Services
                 },
                 null,
                 TimeSpan.FromSeconds(10),
-                TimeSpan.FromSeconds(1));
+                TimeSpan.FromSeconds(1)); 
         }
         
         //TODO: refactor using scheduling timer
@@ -199,7 +242,7 @@ namespace Rift.Services
         
         #region Message formatting
 
-        static List<Type> formatters;
+        static ConcurrentDictionary<string, FormatterBase> formatters;
 
         static List<Type> GetFormatters()
         {
@@ -214,14 +257,14 @@ namespace Rift.Services
             return assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(FormatterBase))).ToList();
         }
 
-        public async Task<(bool, IonicMessage)> GetMessageAsync(string identifier, ulong userId)
+        public async Task<IonicMessage> GetMessageAsync(string identifier, FormatData data)
         {
             var mapping = await Database.GetMessageMappingByNameAsync(identifier);
 
             if (mapping is null)
             {
                 RiftBot.Log.Warn($"Message mapping \"{identifier}\" does not exist.");
-                return (false, null);
+                return Error;
             }
 
             var dbMessage = await Database.GetMessageByIdAsync(mapping.MessageId);
@@ -229,37 +272,64 @@ namespace Rift.Services
             if (dbMessage is null)
             {
                 RiftBot.Log.Warn($"Message with ID \"{mapping.MessageId.ToString()}\" does not exist.");
-                return (false, null);
+                return Error;
             }
 
-            return (true, FormatMessage(dbMessage, userId));
+            return await FormatMessageAsync(dbMessage, data);
         }
-        
-        public IonicMessage FormatMessage(RiftMessage message, ulong userId)
+
+        const string TemplateRegex = @"\$\w+";
+
+        public async Task<IonicMessage> FormatMessageAsync(RiftMessage message, FormatData data = null)
         {
-            if (message is null || userId == 0ul)
-                return null;
+            if (formatters.Count == 0)
+                return new IonicMessage(message);
+
+            if (message is null)
+            {
+                RiftBot.Log.Error("Message is empty!");
+                return Error;
+            }
 
             if (string.IsNullOrWhiteSpace(message.Text)
                 && string.IsNullOrWhiteSpace(message.Embed)
                 && string.IsNullOrWhiteSpace(message.ImageUrl))
-                return null;
+            {
+                RiftBot.Log.Error($"Message \"{message.Id.ToString()}\" has no data!");
+                return Error;
+            }
 
             if (message.ApplyFormat)
             {
-                try
+                //var sw = new Stopwatch();
+                //sw.Restart();
+
+                var matches = new List<Match>();
+
+                if (!string.IsNullOrWhiteSpace(message.Text))
+                    matches.AddRange(Regex.Matches(message.Text, TemplateRegex));
+
+                if (!string.IsNullOrWhiteSpace(message.Embed))
+                    matches.AddRange(Regex.Matches(message.Embed, TemplateRegex));
+
+                foreach (var match in matches)
                 {
-                    foreach (var type in formatters)
+                    if (!formatters.TryGetValue(match.Value, out var f))
+                        continue;
+
+                    try
                     {
-                        var formatter = (FormatterBase) Activator.CreateInstance(type);
-                        message = formatter.Format(message, userId);
+                        await f.Format(message, data);
+                    }
+                    catch (Exception ex)
+                    {
+                        RiftBot.Log.Error(ex);
                     }
                 }
-                catch (Exception ex)
-                {
-                    RiftBot.Log.Warn(ex);
-                    throw;
-                }
+
+                //sw.Stop();
+                //RiftBot.Log.Info($"Message {message.Name} formatted with {matches.Count.ToString()} variables in" +
+                //                 $" {sw.Elapsed.Humanize(1, new CultureInfo("en-US")).ToLowerInvariant()}.");
             }
             
             return new IonicMessage(message);

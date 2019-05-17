@@ -83,7 +83,7 @@ namespace Rift.Data
 
             builder.Entity<RiftMapping>().HasKey(key => key.Identifier);
             
-            builder.Entity<RiftMessage>().HasKey(key => key.MessageId);
+            builder.Entity<RiftMessage>().HasKey(key => key.Id);
         }
     }
 }

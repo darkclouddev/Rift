@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 using Rift.Configuration;
 using Rift.Data.Models;
 
@@ -9,7 +11,7 @@ namespace Rift.Services.Message.Formatters
     {
         public User() : base("$user") {}
 
-        public override RiftMessage Format(RiftMessage message, ulong userId)
+        public override Task<RiftMessage> Format(RiftMessage message, ulong userId)
         {
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 

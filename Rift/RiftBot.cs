@@ -21,7 +21,8 @@ using NLog;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-
+using Rift.Services.Message;
+using Rift.Services.Message.Formatters;
 using ILogger = NLog.ILogger;
 
 namespace Rift
@@ -78,6 +79,11 @@ namespace Rift
             }
         }
 
+        public static async Task<IonicMessage> GetMessageAsync(string identifier, FormatData data)
+        {
+            return await GetService<MessageService>().GetMessageAsync(identifier, data);
+        }
+        
         public static async Task Main(string[] args)
         {
             AppPath = GetContentRoot();
