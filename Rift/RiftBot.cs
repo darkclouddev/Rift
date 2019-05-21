@@ -8,21 +8,17 @@ using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Services;
-
-using IonicLib;
-using IonicLib.Services;
+using Rift.Services.Message;
 
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
-using NLog;
-
+using IonicLib;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Rift.Services.Message;
-using Rift.Services.Message.Formatters;
+using NLog;
+using Rift.Util;
 using ILogger = NLog.ILogger;
 
 namespace Rift
@@ -82,6 +78,19 @@ namespace Rift
         public static async Task<IonicMessage> GetMessageAsync(string identifier, FormatData data)
         {
             return await GetService<MessageService>().GetMessageAsync(identifier, data);
+        }
+
+        public static async Task SendChatMessageAsync(string identifier, FormatData data)
+        {
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
+                return;
+
+            var msg = await GetService<MessageService>().GetMessageAsync(identifier, data);
+
+            if (msg is null)
+                return;
+
+            await channel.SendIonicMessageAsync(msg);
         }
         
         public static async Task Main(string[] args)
@@ -159,18 +168,19 @@ namespace Rift
             var services = new ServiceCollection()
                 .AddSingleton(Log)
                 .AddSingleton(IonicClient.Client)
-                .AddSingleton(new EconomyService())
+                //.AddSingleton(new EconomyService())
                 .AddSingleton(new RoleService())
-                .AddSingleton(new RiotService())
+                //.AddSingleton(new RiotService())
                 .AddSingleton(new MessageService())
-                .AddSingleton(new GiveawayService())
-                .AddSingleton(new AnnounceService())
-                .AddSingleton(new EventService())
-                .AddSingleton(new MinionService())
-                .AddSingleton(new BotRespectService())
-                .AddSingleton(new QuizService())
-                .AddSingleton(new ReliabilityService(IonicClient.Client))
-                .AddSingleton(new ChannelService(IonicClient.Client))
+                //.AddSingleton(new GiveawayService())
+                //.AddSingleton(new AnnounceService())
+                //.AddSingleton(new EventService())
+                //.AddSingleton(new MinionService())
+                //.AddSingleton(new BotRespectService())
+                //.AddSingleton(new QuizService())
+                .AddSingleton(new ModerationService())
+                //.AddSingleton(new ReliabilityService(IonicClient.Client))
+                //.AddSingleton(new ChannelService(IonicClient.Client))
                 .AddSingleton(new CommandService(new CommandServiceConfig
                 {
                     CaseSensitiveCommands = false,
