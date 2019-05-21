@@ -31,7 +31,6 @@ namespace Rift
         static RiotService riotService;
         static MinionService minionService;
         static MessageService messageService;
-        static GiveawayService giveawayService;
         static QuizService quizService;
 
         public CommandHandler(IServiceProvider serviceProvider)
@@ -45,21 +44,20 @@ namespace Rift
             roleService = provider.GetService<RoleService>();
             messageService = provider.GetService<MessageService>();
             riotService = provider.GetService<RiotService>();
-            giveawayService = provider.GetService<GiveawayService>();
             quizService = provider.GetService<QuizService>();
         }
 
         public async Task ConfigureAsync()
         {
             await commandService.AddModulesAsync(Assembly.GetEntryAssembly(), provider);
-            economyService.Init();
+            //economyService.Init();
 
-            await riotService.InitAsync();
+            //await riotService.InitAsync();
 
             client.MessageReceived += ProcessMessage;
-            client.UserJoined += UserJoined;
-            client.UserLeft += UserLeft;
-            client.Ready += Ready;
+            //client.UserJoined += UserJoined;
+            //client.UserLeft += UserLeft;
+            //client.Ready += Ready;
         }
 
         public static async Task Ready()
