@@ -9,15 +9,15 @@ using Rift.Data;
 namespace Rift.Migrations
 {
     [DbContext(typeof(RiftContext))]
-    [Migration("20190505011953_AddedStoredMessages")]
-    partial class AddedStoredMessages
+    [Migration("20190517204714_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.2.4-servicing-10062")
-                .HasAnnotation("Relational:MaxIdentifierLength", 255);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("Rift.Data.Models.RiftCooldowns", b =>
                 {
@@ -26,10 +26,6 @@ namespace Rift.Migrations
                     b.Property<DateTime>("BotRespectTime");
 
                     b.Property<DateTime>("DoubleExpTime");
-
-                    b.Property<DateTime>("LastAttackTime");
-
-                    b.Property<DateTime>("LastBeingAttackedTime");
 
                     b.Property<DateTime>("LastBragTime");
 
@@ -106,7 +102,7 @@ namespace Rift.Migrations
 
             modelBuilder.Entity("Rift.Data.Models.RiftMessage", b =>
                 {
-                    b.Property<int>("MessageId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
                     b.Property<bool>("ApplyFormat");
@@ -115,11 +111,11 @@ namespace Rift.Migrations
 
                     b.Property<string>("ImageUrl");
 
-                    b.Property<string>("MessageName");
+                    b.Property<string>("Name");
 
                     b.Property<string>("Text");
 
-                    b.HasKey("MessageId");
+                    b.HasKey("Id");
 
                     b.ToTable("StoredMessages");
                 });
