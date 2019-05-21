@@ -129,8 +129,6 @@ namespace Rift
             LogManager.LoadConfiguration("nlog.config");
             Log = LogManager.GetCurrentClassLogger();
 
-            Log.Info($"Using content root: {AppPath}");
-
             var serviceProvider = SetupServices();
 
             handler = new CommandHandler(serviceProvider);

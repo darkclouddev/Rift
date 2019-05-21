@@ -104,7 +104,7 @@ namespace Rift
 
                 if (result.IsSuccess)
                 {
-                    RiftBot.Log.Info($"{context.Message.Author} sent DM command: \"{context.Message.Content}\"");
+                    RiftBot.Log.Info($"[{context.Message.Author}|{context.Message.Author.Id}] sent DM command: \"{context.Message.Content}\"");
                 }
                 else
                 {
