@@ -9,7 +9,7 @@ namespace Rift.Services.Message.Formatters.Emotes
     {
         public EmotePowerupDoubleExperience() : base("$emotePowerupDoubleExperience") {}
 
-        public override Task<RiftMessage> Format(RiftMessage message, ulong userId)
+        public override Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
             return ReplaceData(message, Settings.Emote.PowerupDoubleExperience);
         }

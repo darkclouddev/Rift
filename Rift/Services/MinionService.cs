@@ -4,13 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
-using Rift.Embeds;
 using Rift.Rewards;
 using Rift.Services.Message;
+using Rift.Util;
 
 using IonicLib;
 using IonicLib.Extensions;
-using IonicLib.Util;
 
 namespace Rift.Services
 {
@@ -140,12 +139,13 @@ namespace Rift.Services
         {
             killerId = 0;
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
             RiftBot.Log.Debug("Minion spawned");
 
-            var msg = await channel.SendEmbedAsync(MinionEmbeds.MinionSpawned(minionColor, minionImage));
+            var msgMinionSpawned = await RiftBot.GetMessageAsync("minion-spawned", null);
+            var msg = await channel.SendIonicMessageAsync(msgMinionSpawned);
             RiftBot.GetService<MessageService>().TryAddDelete(new DeleteMessage(msg, TimeSpan.FromHours(1)));
 
             MinionKillTimer.Change(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
@@ -162,10 +162,15 @@ namespace Rift.Services
 
             RiftBot.Log.Debug($"Minion was killed by {killerId.ToString()}");
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
-            await channel.SendEmbedAsync(MinionEmbeds.MinionKilled(minionColor, killerId, reward));
+            var msgMinionKilled = await RiftBot.GetMessageAsync("minion-killed", new FormatData(killerId)
+            {
+
+            });
+            //await channel.SendEmbedAsync(MinionEmbeds.MinionKilled(minionColor, killerId, reward));
+            await channel.SendIonicMessageAsync(msgMinionKilled);
             await SetupNextMinionAsync();
         }
 
@@ -175,10 +180,11 @@ namespace Rift.Services
 
             RiftBot.Log.Debug("Minion suicide");
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
-            await channel.SendEmbedAsync(MinionEmbeds.MinionSuicided);
+            var msgMinionSuicide = await RiftBot.GetMessageAsync("minion-suicide", null);
+            await channel.SendIonicMessageAsync(msgMinionSuicide);
             await SetupNextMinionAsync();
         }
 

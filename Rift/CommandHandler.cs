@@ -8,14 +8,13 @@ using System.Reflection;
 using Rift.Configuration;
 using Rift.Services;
 using Rift.Services.Message;
-
-using IonicLib;
-using IonicLib.Util;
+using Rift.Util;
 
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
+using IonicLib;
+using IonicLib.Util;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Rift
@@ -67,7 +66,7 @@ namespace Rift
         {
             await client.SetGameAsync(RiftBot.BotStatusMessage);
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
             await channel.SendEmbedAsync(
@@ -147,7 +146,7 @@ namespace Rift
 
         async Task HandlePlainText(CommandContext context)
         {
-            if (context.Message.Channel.Id != Settings.ChannelId.Chat)
+            if (context.Message.Channel.Id != Settings.ChannelId.Comms)
                 return;
             
             if (quizService.IsActive)
@@ -167,7 +166,6 @@ namespace Rift
                     .WithDescription($":no_entry_sign: {context.Message.Author.Mention} капсить на сервере запрещено!");
 
                 await context.User.SendEmbedAsync(eb);
-
                 return;
             }
 
@@ -179,7 +177,6 @@ namespace Rift
                     .WithDescription($"{Settings.Emote.ExMark} {context.Message.Author.Mention} ссылки на сервере запрещены!");
 
                 await context.User.SendEmbedAsync(eb);
-
                 return;
             }
             
@@ -196,13 +193,7 @@ namespace Rift
 
             await RegisterJoinedLeft(user, UserState.Joined);
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
-                return;
-
-            var eb = new EmbedBuilder()
-                .WithDescription($"Призыватель **{user.Username}** подключился к серверу.");
-
-            await chatChannel.SendEmbedAsync(eb);
+            await RiftBot.SendChatMessageAsync("user-joined", new FormatData(user.Id));
         }
 
         async Task RegisterJoinedLeft(SocketGuildUser sgUser, UserState state)
@@ -213,40 +204,24 @@ namespace Rift
 
                 if (sgUser.Guild.Id == Settings.App.MainGuildId)
                 {
-                    //if (welcomeEmbed == null)
-                    //{
-                    //	var eb2 = new EmbedBuilder()
-                    //		.WithImageUrl("https://cdn.discordapp.com/attachments/404205665893089280/404734705934532608/00386e05e1aa5211.png")
-                    //		.WithTitle($"Добро пожаловать на {sgUser.Guild.Name}")
-                    //		.AddField($"Боевая система сервера", $"Общение <#{Settings.ChannelId.Chat}> - поднимайте уровень и получайте награды.\n" +
-                    //					$"Узнайте всё о боевой системе более подробно: <#{Settings.ChannelId.Information}>\n\n" +
-                    //					$"{Settings.Emote.QuestionMark} Команда в чат: `!помощь`. (все команды бота)");
-
-                    //	welcomeEmbed = eb2.Build();
-                    //}
-
-                    //await sgUser.SendEmbedAsync(welcomeEmbed);
+                    var msg = await RiftBot.GetMessageAsync("welcome", null);
+                    await sgUser.SendIonicMessageAsync(msg);
                 }
             }
 
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Logs, out var usersChannel))
                 return;
 
-            var eb = new EmbedBuilder()
-                .WithColor(state == UserState.Joined ? new Color(46, 204, 113) : new Color(231, 76, 60))
-                .WithAuthor(new EmbedAuthorBuilder
-                {
-                    Name = "Призыватель " + (state == UserState.Joined ? "присоединился" : "вышел"),
-                    IconUrl = sgUser.GetAvatarUrl()
-                })
+            var eb = new RiftEmbed()
+                .WithColor(state == UserState.Joined
+                    ? new Color(46, 204, 113)
+                    : new Color(231, 76, 60))
+                .WithAuthor("Призыватель " + (state == UserState.Joined ? "присоединился" : "вышел"), sgUser.GetAvatarUrl())
                 .WithDescription($"Никнейм: {sgUser.Mention} ({sgUser.Username}#{sgUser.Discriminator})")
-                .WithFooter(new EmbedFooterBuilder
-                {
-                    Text = $"ID: {sgUser.Id.ToString()}"
-                })
+                .WithFooter($"ID: {sgUser.Id.ToString()}")
                 .WithCurrentTimestamp();
             
-            await usersChannel.SendEmbedAsync(eb);
+            //await usersChannel.SendIonicMessageAsync(eb);
         }
 
         async Task UserLeft(SocketGuildUser user)

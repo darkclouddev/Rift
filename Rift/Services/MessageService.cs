@@ -15,35 +15,32 @@ using Rift.Services.Message;
 using Rift.Services.Message.Formatters;
 using MessageType = Rift.Services.Message.MessageType;
 
-using Discord;
 using Humanizer;
 using IonicLib;
 using IonicLib.Util;
+using Newtonsoft.Json;
 
 namespace Rift.Services
 {
     public class MessageService
     {
         public static readonly IonicMessage Error =
-            new IonicMessage(new EmbedBuilder()
+            new IonicMessage(new RiftEmbed()
                     .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                     .WithColor(226, 87, 76)
-                    .WithDescription("Обратитесь к хранителю ботов и опишите ваши действия, которые привели к возникновению данной ошибки.")
-                    .Build());
+                    .WithDescription("Обратитесь к хранителю ботов и опишите ваши действия, которые привели к возникновению данной ошибки."));
         
         public static readonly IonicMessage UserNotFound =
-            new IonicMessage(new EmbedBuilder()
+            new IonicMessage(new RiftEmbed()
                     .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                     .WithColor(255, 0, 0)
-                    .WithDescription("Пользователь не найден!")
-                    .Build());
+                    .WithDescription("Пользователь не найден!"));
         
         public static readonly IonicMessage RoleNotFound =
-            new IonicMessage(new EmbedBuilder()
+            new IonicMessage(new RiftEmbed()
                     .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
                     .WithColor(255, 0, 0)
-                    .WithDescription("Роль не найдена!")
-                    .Build());
+                    .WithDescription("Роль не найдена!"));
         
         public MessageService()
         {
@@ -301,9 +298,6 @@ namespace Rift.Services
 
             if (message.ApplyFormat)
             {
-                //var sw = new Stopwatch();
-                //sw.Restart();
-
                 var matches = new List<Match>();
 
                 if (!string.IsNullOrWhiteSpace(message.Text))
@@ -326,13 +320,33 @@ namespace Rift.Services
                         RiftBot.Log.Error(ex);
                     }
                 }
-
-                //sw.Stop();
-                //RiftBot.Log.Info($"Message {message.Name} formatted with {matches.Count.ToString()} variables in" +
-                //                 $" {sw.Elapsed.Humanize(1, new CultureInfo("en-US")).ToLowerInvariant()}.");
             }
             
             return new IonicMessage(message);
+        }
+
+        public async Task PutEmbedToDatabase(string name, RiftEmbed embed)
+        {
+            string json = null;
+
+            try
+            {
+                json = JsonConvert.SerializeObject(embed, Formatting.Indented,
+                    new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore});
+            }
+            catch (Exception ex)
+            {
+                RiftBot.Log.Error(ex);
+            }
+
+            var message = new RiftMessage
+            {
+                ApplyFormat = true,
+                Name = name,
+                Embed = json,
+            };
+
+            await Database.AddStoredMessage(message);
         }
 
         #endregion Message formatting

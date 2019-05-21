@@ -41,12 +41,13 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Chat()
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
             Settings.Chat.CapsFilterEnabled = !Settings.Chat.CapsFilterEnabled;
+            await Settings.Save(SettingsType.Chat);
 
-            await chatChannel.SendMessageAsync($"Фильтр чата {(Settings.Chat.CapsFilterEnabled ? "включён" : "выключен")}.");
+            await channel.SendMessageAsync($"Фильтр чата {(Settings.Chat.CapsFilterEnabled ? "включён" : "выключен")}.");
         }
 
         [Command("attach")]
@@ -54,12 +55,13 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Attach()
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
             Settings.Chat.AttachmentFilterEnabled = !Settings.Chat.AttachmentFilterEnabled;
+            await Settings.Save(SettingsType.Chat);
 
-            await chatChannel.SendMessageAsync($"Фильтр вложений {(Settings.Chat.AttachmentFilterEnabled ? "включён" : "выключен")}.");
+            await channel.SendMessageAsync($"Фильтр вложений {(Settings.Chat.AttachmentFilterEnabled ? "включён" : "выключен")}.");
         }
 
         [Command("url")]
@@ -67,12 +69,13 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task URL()
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
             Settings.Chat.UrlFilterEnabled = !Settings.Chat.UrlFilterEnabled;
+            await Settings.Save(SettingsType.Chat);
 
-            await chatChannel.SendMessageAsync($"Фильтр ссылок {(Settings.Chat.UrlFilterEnabled ? "включён" : "выключен")}.");
+            await channel.SendMessageAsync($"Фильтр ссылок {(Settings.Chat.UrlFilterEnabled ? "включён" : "выключен")}.");
         }
     }
 }

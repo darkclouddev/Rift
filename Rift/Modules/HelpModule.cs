@@ -1,12 +1,9 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 using System.Threading.Tasks;
 
-using Rift.Embeds;
 using Rift.Configuration;
 using Rift.Preconditions;
-
-using IonicLib.Util;
+using Rift.Util;
 
 using Discord;
 using Discord.Commands;
@@ -22,7 +19,8 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Help()
         {
-            await Context.User.SendEmbedAsync(HelpEmbeds.Commands);
+            var msg = await RiftBot.GetMessageAsync("help-commands", null);
+            await Context.Channel.SendIonicMessageAsync(msg);
         }
 
         [Command("правила")]
@@ -30,7 +28,7 @@ namespace Rift.Modules
         public async Task Rules()
         {
             var sb = new StringBuilder()
-                     .AppendLine($"1. Текстовый канал <#{Settings.ChannelId.Chat.ToString()}>")
+                     .AppendLine($"1. Текстовый канал <#{Settings.ChannelId.Comms.ToString()}>")
                      .AppendLine("1.1 Любой 18+ контент запрещён. Наказание: блокировка чата 2-4 часа/бан.")
                      .AppendLine("1.2 Запрещено использование ненормативной лексики. Наказание: блокировка чата 2-6 часов.")
                      .AppendLine("1.3 Запрещено оскорблять или провоцировать других призывателей. Наказание: блокировка чата 4-12 часов.")
@@ -42,7 +40,7 @@ namespace Rift.Modules
                      .AppendLine("2.1 Излишнее общение в данном чате не рекомендуется. Наказание: предупреждение/блокировка чата 1-2 часа.")
                      .AppendLine("2.2 Чат используется только для поиска игроков и любое другое его использование не приветствуется. Наказание: предупреждение/блокировка чата 1-2 часа.")
                      .AppendLine()
-                     .AppendLine($"3. Текстовый канал <#{Settings.ChannelId.Screenshots.ToString()}>")
+                     .AppendLine($"3. Текстовый канал <#{Settings.ChannelId.Comms.ToString()}>")
                      .AppendLine("3.1 Размещение скриншотов не связанных с League of Legends запрещено. Наказание: предупреждение/блокировка чата 2-4 часа.")
                      .AppendLine("3.2 Обсуждения вне рамок размещенных скриншотов не приветствуется. Наказание: предупреждение/блокировка чата 1-2 часа.")
                      .AppendLine()
@@ -50,8 +48,8 @@ namespace Rift.Modules
                      .AppendLine("Обсуждение и тем более осуждение действий модерации не рекомендуется. Все претензии вы можете высказать Гл. Модераторам или самим Модераторам в личных сообщения.")
                      .AppendLine("Модераторы имеют право принимать решения по наказаниям самостоятельно, но рамках выше описанных правил, а вы имеете право их оспаривать, обратившись к Гл.Модераторам.");
 
-            await Context.User.SendEmbedAsync(HelpEmbeds.Rules);
-            await Context.User.SendMessageAsync(text: sb.ToString());
+            var msg = await RiftBot.GetMessageAsync("help-rules", null);
+            await Context.Channel.SendIonicMessageAsync(msg);
         }
 
         [Command("модерация")]

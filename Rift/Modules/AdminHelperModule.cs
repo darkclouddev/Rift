@@ -1,15 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
-using Rift.Embeds;
 using Rift.Preconditions;
 using Rift.Services;
+using Rift.Services.Message;
+using Rift.Util;
 
 using IonicLib;
 using IonicLib.Util;
@@ -17,8 +16,6 @@ using IonicLib.Util;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
-using Humanizer;
 
 namespace Rift.Modules
 {
@@ -54,42 +51,6 @@ namespace Rift.Modules
             }
 
             await ReplyAsync($"Expected code: \"{pendingData.ConfirmationCode}\"\nActual code: \"{code}\"");
-        }
-
-        [Command("добавить донат")]
-        [RequireAdmin]
-        [RequireContext(ContextType.Guild)]
-        public async Task GiveDonateAsync(decimal amount, IUser mention)
-        {
-            if (amount <= 0M)
-            {
-                await Context.User.SendMessageAsync("Сумма доната не может быть меньше или равна нулю!");
-                return;
-            }
-
-            await ModifyDonateAsync(mention.Id, amount, true);
-        }
-
-        [Command("удалить донат")]
-        [RequireAdmin]
-        [RequireContext(ContextType.Guild)]
-        public async Task RemoveDonateAsync(decimal amount, IUser mention)
-        {
-            if (amount <= 0M)
-            {
-                await Context.User.SendMessageAsync("Сумма доната не может быть меньше или равна нулю!");
-                return;
-            }
-
-            await ModifyDonateAsync(mention.Id, amount, false);
-        }
-
-        async Task ModifyDonateAsync(ulong userId, decimal amount, bool add)
-        {
-            if (add)
-                await Database.AddDonateAsync(userId, amount);
-            else
-                await Database.RemoveDonateAsync(userId, amount);
         }
 
         [Command("донат подарки")]
@@ -131,23 +92,15 @@ namespace Rift.Modules
             if (!(pvtToxic is SocketRole srToxic))
                 return;
 
-            var absoluteEmbed = GiftEmbeds.RoleReward($"{Settings.Emote.Coin} 10000 {Settings.Emote.Sphere} 1");
-
             foreach (var user in srAbsolute.Members)
             {
                 await Database.AddInventoryAsync(user.Id, coins: 10_000u, spheres: 1u);
-                await user.SendEmbedAsync(absoluteEmbed);
             }
-
-            var legendaryEmbed = GiftEmbeds.RoleReward($"{Settings.Emote.Coin} 5000 {Settings.Emote.UsualTickets} 2");
 
             foreach (var user in srLegendary.Members)
             {
                 await Database.AddInventoryAsync(user.Id, coins: 50_000u, usualTickets: 2u);
-                await user.SendEmbedAsync(legendaryEmbed);
             }
-
-            var privateEmbed = GiftEmbeds.RoleReward($"{Settings.Emote.Coin} 20000 {Settings.Emote.Sphere} 1");
 
             var privateRoleUsers = new List<SocketGuildUser>();
             privateRoleUsers.AddRange(srBore.Members);
@@ -160,7 +113,6 @@ namespace Rift.Modules
             foreach (var user in privateRoleUsers)
             {
                 await Database.AddInventoryAsync(user.Id, coins: 20_000u, spheres: 1u);
-                await user.SendEmbedAsync(privateEmbed);
             }
 
             await Context.User.SendMessageAsync($"Выдача подарков завершена!\n\n"
@@ -427,7 +379,7 @@ namespace Rift.Modules
         public async Task FF()
         {
             await Context.Message.DeleteAsync();
-            await ReplyAsync(embed: AdminEmbeds.ShutDown);
+            //await ReplyAsync(embed: AdminEmbeds.ShutDown); // TODO
 
             IonicClient.TokenSource.Cancel();
         }
@@ -451,32 +403,37 @@ namespace Rift.Modules
         {
             var emotes = Context.Guild.Emotes.ToList();
 
-            var eb = new EmbedBuilder();
+            var re = new RiftEmbed()
+                .WithAuthor("Server emotes")
+                .AddField("Emote", string.Join('\n', emotes.Select(x => x.Name)), true)
+                .AddField("ID", string.Join('\n', emotes.Select(x => x.Id)), true);
 
-            eb.WithAuthor("Server emotes");
-
-            eb.AddField("Emote", string.Join('\n', emotes.Select(x => x.Name)), true);
-            eb.AddField("ID", string.Join('\n', emotes.Select(x => x.Id)), true);
-
-            await ReplyAsync("", embed: eb.Build());
+            await Context.Channel.SendIonicMessageAsync(new IonicMessage(re));
         }
 
-        [Command("бот")]
+        [Command("about")]
         [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
         public async Task AppStatus()
         {
-            var infoText =
-                $"{Format.Underline($"{Format.Bold(nameof(Rift))} v{RiftBot.InternalVersion} {RuntimeInformation.OSArchitecture.ToString()}")}\n"
-                + $"- Автор: <@212997107525746690>\n"
-                + $"- Аптайм: {GetUptime()}\n"
-                + $"- Память: {GetHeapSize()} MB\n"
-                + $"- API: {DiscordConfig.Version}";
-
-            await ReplyAsync(infoText);
+            await RiftBot.SendChatMessageAsync("bot-about", new FormatData(212997107525746690ul));
         }
 
-        static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).Humanize(5);
-        static string GetHeapSize() => Math.Round(GC.GetTotalMemory(true) / (1024.0 * 1024.0), 2).ToString();
+        [Command("edb")]
+        [RequireDeveloper]
+        public async Task EmbedToDatabase()
+        {
+
+        }
+
+        [Command("sm")]
+        [RequireDeveloper]
+        public async Task TestSavedMessage(string identifier)
+        {
+            var msg = await RiftBot.GetMessageAsync(identifier, null);
+
+            await Context.Channel.SendIonicMessageAsync(
+                msg ?? new IonicMessage($"No messages with ID \"{identifier}\"!", null, null));
+        }
     }
 }

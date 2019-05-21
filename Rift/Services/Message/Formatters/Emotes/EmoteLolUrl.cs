@@ -5,13 +5,13 @@ using Rift.Data.Models;
 
 namespace Rift.Services.Message.Formatters.Emotes
 {
-    public class EmoteBotRespect : FormatterBase
+    public class EmoteLolUrl : FormatterBase
     {
-        public EmoteBotRespect() : base("$emoteBotRespect") {}
+        public EmoteLolUrl() : base("$emoteLolUrl") {}
 
         public override Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
-            return ReplaceData(message, Settings.Emote.BotRespect);
+            return ReplaceData(message, Settings.Emote.LolUrl);
         }
     }
 }

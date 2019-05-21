@@ -4,12 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
-using Rift.Embeds;
 using Rift.Rewards;
+using Rift.Util;
 
 using IonicLib;
 using IonicLib.Extensions;
-using IonicLib.Util;
 
 namespace Rift.Services
 {
@@ -72,14 +71,13 @@ namespace Rift.Services
 
                     var reward = GetReward(AvailableRewards);
                     await reward.GiveRewardAsync(user.UserId);
-                    await sgUser.SendEmbedAsync(BotRespectEmbeds.DMEmbed(reward));
                 }
 
-
-                if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
+                if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var commsChannel))
                     return;
 
-                await chatChannel.SendEmbedAsync(BotRespectEmbeds.ChatEmbed);
+                var rewardMsg = await RiftBot.GetMessageAsync("botrespect-success", null);
+                await commsChannel.SendIonicMessageAsync(rewardMsg);
             }
             else
                 RiftBot.Log.Debug("There was no users with bot respect");

@@ -41,11 +41,12 @@ namespace Rift.Services.Message
 
             try
             {
-                Embed = JsonConvert.DeserializeObject<RiftEmbed>(msg.Embed).ToEmbed();
+                Embed = JsonConvert.DeserializeObject<RiftEmbed>(msg.Embed, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore}).ToEmbed();
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error($"{ex.Message}\n{ex.InnerException}");
+                RiftBot.Log.Error($"Failed to deserialize \"{nameof(RiftMessage)}\"!");
+                RiftBot.Log.Error(ex);
                 Embed = null;
             }
         }

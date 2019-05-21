@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Data.Models;
-using Rift.Embeds;
 using Rift.Rewards;
+using Rift.Services.Message;
+using Rift.Util;
 
 using IonicLib;
 using IonicLib.Extensions;
-using IonicLib.Util;
 
 using Discord;
 using Discord.WebSocket;
@@ -151,39 +151,39 @@ namespace Rift.Services
 
             await EnableChat(false);
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
-            Embed eventEmbed = null;
+            IonicMessage eventMessage = null;
 
             switch (eventType)
             {
                 case EventType.Baron:
-                    eventEmbed = EventEmbeds.Baron(reward);
+                    eventMessage = await RiftBot.GetMessageAsync("event-start-baron", null);
                     break;
 
                 case EventType.Drake:
-                    eventEmbed = EventEmbeds.Drake(reward);
+                    eventMessage = await RiftBot.GetMessageAsync("event-start-drake", null);
                     break;
 
                 case EventType.Wolves:
-                    eventEmbed = EventEmbeds.Wolves(reward);
+                    eventMessage = await RiftBot.GetMessageAsync("event-start-", null);
                     break;
 
                 case EventType.Razorfins:
-                    eventEmbed = EventEmbeds.Razorfins(reward);
+                    eventMessage = await RiftBot.GetMessageAsync("event-start-razorfins", null);
                     break;
 
                 case EventType.Krug:
-                    eventEmbed = EventEmbeds.Krug(reward);
+                    eventMessage = await RiftBot.GetMessageAsync("event-start-krug", null);
                     break;
 
                 case EventType.RedBuff:
-                    eventEmbed = EventEmbeds.RedBuff(reward);
+                    eventMessage = await RiftBot.GetMessageAsync("event-start-redbuff", null);
                     break;
 
                 case EventType.BlueBuff:
-                    eventEmbed = EventEmbeds.BlueBuff(reward);
+                    eventMessage = await RiftBot.GetMessageAsync("event-start-bluebuff", null);
                     break;
 
                 default:
@@ -191,13 +191,14 @@ namespace Rift.Services
                     return;
             }
 
-            await channel.SendEmbedAsync(EventEmbeds.embedMsg);
+            eventMessage = new IonicMessage("Призыватели, @here, атакуйте и получайте награды.", eventMessage.Embed, eventMessage.ImageUrl);
+
+            var msgEventStart = await RiftBot.GetMessageAsync("event-start", null);
+            await channel.SendIonicMessageAsync(msgEventStart);
 
             IonicClient.Client.ReactionAdded += Client_AddReactedUser;
 
-            var msg = await channel.SendMessageAsync($"Призыватели, @here, атакуйте и получайте награды.",
-                                                     embed: eventEmbed);
-
+            var msg = await channel.SendIonicMessageAsync(eventMessage);
             await msg.AddReactionAsync(eventEmote);
 
             eventMessageId = msg.Id;
@@ -212,7 +213,7 @@ namespace Rift.Services
         {
             IonicClient.Client.ReactionAdded -= Client_AddReactedUser;
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
             RiftBot.Log.Debug($"EndEvent Reactions: {reactionIds.Count.ToString()}");
@@ -232,13 +233,15 @@ namespace Rift.Services
                         ulong winnerId = reactionIds.Random();
                         await winnerReward.GiveRewardAsync(winnerId);
 
-                        await channel.SendEmbedAsync(EventEmbeds.Winner(winnerId, winnerReward.RewardString));
+                        var msgEventWinner = await RiftBot.GetMessageAsync("event-winner", null);
+                        await channel.SendIonicMessageAsync(msgEventWinner);
                         break;
                     }
                 }
             }
 
-            await channel.SendEmbedAsync(EventEmbeds.UserCount(reactionIds.Count));
+            var msgEventParticipants = await RiftBot.GetMessageAsync("event-end-participants", null);
+            await channel.SendIonicMessageAsync(msgEventParticipants);
 
             reactionIds = new List<ulong>();
             eventMessageId = 0ul;
@@ -253,7 +256,7 @@ namespace Rift.Services
             if (!IonicClient.GetGuild(Settings.App.MainGuildId, out var guild))
                 return;
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
             await DoEnableChatForRole(guild.EveryoneRole)

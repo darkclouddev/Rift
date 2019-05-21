@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+
 using Discord;
 
 namespace Rift.Services.Message
@@ -44,11 +45,26 @@ namespace Rift.Services.Message
             return this;
         }
 
+        public RiftEmbed WithImageUrl(string url)
+        {
+            ImageUrl = url;
+            return this;
+        }
+
         public RiftEmbed WithColor(int red, int green, int blue)
         {
             ColorRed = red;
             ColorGreen = green;
             ColorBlue = blue;
+
+            return this;
+        }
+
+        public RiftEmbed WithColor(Color color)
+        {
+            ColorRed = color.R;
+            ColorGreen = color.G;
+            ColorBlue = color.B;
 
             return this;
         }
@@ -68,6 +84,12 @@ namespace Rift.Services.Message
             list.Add(new RiftField(header, content, isInline));
 
             Fields = list.ToArray();
+            return this;
+        }
+
+        public RiftEmbed WithCurrentTimestamp()
+        {
+            HasTimestamp = true;
             return this;
         }
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -1445,6 +1445,15 @@ namespace Rift
             {
                 return await context.StoredMessages
                     .FirstOrDefaultAsync(x => x.Id == id);
+            }
+        }
+
+        public static async Task AddStoredMessage(RiftMessage message)
+        {
+            using (var context = new RiftContext())
+            {
+                await context.StoredMessages.AddAsync(message);
+                await context.SaveChangesAsync();
             }
         }
         

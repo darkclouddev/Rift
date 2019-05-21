@@ -1,10 +1,9 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 
-using Rift.Embeds;
 using Rift.Preconditions;
 using Rift.Services;
-
-using IonicLib.Util;
+using Rift.Services.Message;
+using Rift.Util;
 
 using Discord;
 using Discord.Commands;
@@ -21,21 +20,12 @@ namespace Rift.Modules
         }
 
         [Command("регистрация")]
-        [RateLimit(2, 1, Measure.Hours)]
         [RequireContext(ContextType.Guild)]
         public async Task RegisterAsync(string region, [Remainder] string summonerName)
         {
-            //var eb = new EmbedBuilder()
-            //	.WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
-            //	.WithColor(226, 87, 76)
-            //	.WithDescription($"Функция регистрации аккаунтов в нашей системе временно отключена.");
-
-            //await Context.User.SendEmbedAsync(eb);
-            //return;
-
-            var responseEmbed = await riotService.RegisterAsync(Context.User.Id, region, summonerName);
-
-            await Context.User.SendEmbedAsync(responseEmbed);
+            var message = await riotService.RegisterAsync(Context.User.Id, region, summonerName);
+            
+            await Context.Channel.SendIonicMessageAsync(message);
         }
 
         [Command("отвязать")]
@@ -45,11 +35,13 @@ namespace Rift.Modules
         {
             if (user is null)
             {
-                await Context.User.SendEmbedAsync(RegisterEmbeds.UserNotExists);
+                await Context.Channel.SendIonicMessageAsync(MessageService.UserNotFound);
                 return;
             }
 
             await Database.RemoveLolDataAsync(user.Id);
+            var msg = await RiftBot.GetMessageAsync("loldata-removed", new FormatData(user.Id));
+            await Context.Channel.SendIonicMessageAsync(msg);
         }
     }
 }

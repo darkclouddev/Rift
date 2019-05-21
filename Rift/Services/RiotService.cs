@@ -10,27 +10,23 @@ using Rift.Configuration;
 using Rift.Data.Models;
 using Rift.Data.Models.Cooldowns;
 using Rift.Data.Models.LolData;
-using Rift.Embeds;
+using Rift.Services.Message;
 using Rift.Services.Riot;
-
-using IonicLib;
-using IonicLib.Extensions;
-using IonicLib.Util;
-
-using Newtonsoft.Json;
+using Rift.Util;
 
 using Discord;
 using Discord.WebSocket;
-
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
-
+using IonicLib;
+using IonicLib.Extensions;
 using MingweiSamuel.Camille;
 using MingweiSamuel.Camille.Enums;
 using MingweiSamuel.Camille.LeagueV4;
 using MingweiSamuel.Camille.MatchV4;
 using MingweiSamuel.Camille.SummonerV4;
+using Newtonsoft.Json;
 
 namespace Rift.Services
 {
@@ -304,7 +300,7 @@ namespace Rift.Services
 
         #region Validation
 
-        public async Task<Embed> RegisterAsync(ulong userId, string region, string summonerName)
+        public async Task<IonicMessage> RegisterAsync(ulong userId, string region, string summonerName)
         {
             await registerMutex.WaitAsync().ConfigureAwait(false);
 
@@ -318,25 +314,25 @@ namespace Rift.Services
             }
         }
 
-        async Task<Embed> RegisterInternalAsync(ulong userId, string region, string summonerName)
+        async Task<IonicMessage> RegisterInternalAsync(ulong userId, string region, string summonerName)
         {
             if (await Database.HasLolDataAsync(userId))
-                return RegisterEmbeds.AlreadyHasAcc;
+                return await RiftBot.GetMessageAsync("loldata-hasAcc", new FormatData(userId));
 
-            if (await IsPending(userId))
-                return RegisterEmbeds.AcceptPending;
+            if (await Database.IsPendingAsync(userId))
+                return await RiftBot.GetMessageAsync("loldata-pending", new FormatData(userId));
 
             (var summonerResult, var summoner) = await GetSummonerByNameAsync(region.ToLowerInvariant(), summonerName);
 
             if (summonerResult != RequestResult.Success)
-                return RegisterEmbeds.WrongSummonerName(summonerName, region);
+                return await RiftBot.GetMessageAsync("loldata-namenotfound", new FormatData(userId));
 
             if (await Database.IsTakenAsync(region, summoner.Id))
-                return RegisterEmbeds.AccountIsUsed;
+                return await RiftBot.GetMessageAsync("loldata-taken", new FormatData(userId));
 
             var code = Helper.GenerateConfirmationCode(16);
 
-            var pendingUser = new RiftPendingUser()
+            var pendingUser = new RiftPendingUser
             {
                 UserId = userId,
                 Region = region.ToLowerInvariant(),
@@ -348,9 +344,9 @@ namespace Rift.Services
             };
 
             if (!await AddForApprovalAsync(pendingUser))
-                return GenericEmbeds.Error;
-
-            return RegisterEmbeds.CodeGenerated(code);
+                return MessageService.Error;
+            
+            return await RiftBot.GetMessageAsync("loldata-code", new FormatData(userId));
         }
 
         static async Task<bool> AddForApprovalAsync(RiftPendingUser pendingUser)
@@ -369,7 +365,7 @@ namespace Rift.Services
             if (pendingUsers is null || !pendingUsers.Any())
                 return;
 
-            RiftBot.Log.Debug($"Checking {pendingUsers.Count} pending users...");
+            RiftBot.Log.Debug($"Checking {pendingUsers.Count.ToString()} pending users...");
 
             foreach (var user in pendingUsers)
             {
@@ -434,6 +430,9 @@ namespace Rift.Services
 
         async Task PostValidateAsync(PendingUser pendingUser)
         {
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
+                return;
+
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, pendingUser.UserId);
 
             if (sgUser is null)
@@ -445,19 +444,13 @@ namespace Rift.Services
 
             await Database.AddInventoryAsync(sgUser.Id, chests: 2u);
 
-            await sgUser.SendEmbedAsync(RegisterEmbeds.RegistrationSuccessful);
+            var msgRegSuccess = await RiftBot.GetMessageAsync("reg-success", new FormatData(pendingUser.UserId));
 
-            await sgUser.SendEmbedAsync(RegisterEmbeds.RegistrationReward);
+            await channel.SendIonicMessageAsync(msgRegSuccess);
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
-                return;
+            var msgRegReward = await RiftBot.GetMessageAsync("reg-reward", new FormatData(pendingUser.UserId));
 
-            await channel.SendEmbedAsync(RegisterEmbeds.ChatEmbed(sgUser));
-        }
-
-        static async Task<bool> IsPending(ulong userId)
-        {
-            return await Database.IsPendingAsync(userId);
+            await channel.SendIonicMessageAsync(msgRegReward);
         }
 
         #endregion Validation
@@ -496,7 +489,7 @@ namespace Rift.Services
 
         public async Task UpdateRankAsync(ulong userId, bool silentMode = false)
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
             RiftBot.Log.Debug($"[User|{userId.ToString()}] Getting summoner for rank update");
@@ -529,7 +522,10 @@ namespace Rift.Services
             if (currentRank == newRank)
             {
                 if (!silentMode)
-                    await sgUser.SendEmbedAsync(LolProfileEmbeds.NoRankUpdated);
+                {
+                    var msg = await RiftBot.GetMessageAsync("lol-samerank", new FormatData(userId));
+                    await channel.SendIonicMessageAsync(msg);
+                }
                 
                 return;
             }
@@ -601,21 +597,24 @@ namespace Rift.Services
 
             if (isUp)
             {
-                await chatChannel.SendEmbedAsync(LolProfileEmbeds.ChatRankUpdated(sgUser, GetStatStringFromRank(newRank)));
+                var msgRankUp = await RiftBot.GetMessageAsync("lol-rank-up", new FormatData(userId));
+                await channel.SendIonicMessageAsync(msgRankUp);
 
                 if (newRank < LeagueRank.Bronze)
                     return;
 
                 await Database.AddInventoryAsync(sgUser.Id, chests: 4u);
-                await sgUser.SendEmbedAsync(LolProfileEmbeds.DMRankUpdated);
             }
             else
             {
                 if (!silentMode)
-                    await sgUser.SendEmbedAsync(LolProfileEmbeds.NoRankUpdated);
+                {
+                    var msg = await RiftBot.GetMessageAsync("lol-samerank", new FormatData(userId));
+                    await channel.SendIonicMessageAsync(msg);
+                }
             }
 
-            RiftBot.Log.Debug($"[User|{userId.ToString()}] Rank update completed.");
+            RiftBot.Log.Debug($"{sgUser.ToLogString()} Rank update completed.");
         }
 
         static LeagueRank GetCurrentRank(IGuildUser user)

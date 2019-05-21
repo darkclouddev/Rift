@@ -19,7 +19,7 @@ namespace Rift.Modules
         [RequireModerator]
         public async Task LvlHelp()
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var commsChannel))
                 return;
 
             if (lvlHelpEmbed is null)
@@ -32,7 +32,7 @@ namespace Rift.Modules
                     .Build();
             }
 
-            await chatChannel.SendEmbedAsync(lvlHelpEmbed);
+            await commsChannel.SendEmbedAsync(lvlHelpEmbed);
         }
     }
 }

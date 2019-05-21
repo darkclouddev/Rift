@@ -2,18 +2,17 @@ using System;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
-using Rift.Embeds;
 using Rift.Preconditions;
 using Rift.Services;
 using Rift.Services.Economy;
 using Rift.Services.Message;
-
-using IonicLib;
-using IonicLib.Util;
+using Rift.Util;
 
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using IonicLib;
+using IonicLib.Util;
 
 namespace Rift.Modules
 {
@@ -132,9 +131,12 @@ namespace Rift.Modules
         [RequireContext(ContextType.DM)]
         public async Task GetProfile(ulong userId)
         {
-            var embedResult = await economyService.GetUserProfileAsync(userId);
+            var message = await economyService.GetUserProfileAsync(userId);
 
-            await Context.User.SendEmbedAsync(embedResult);
+            if (message is null)
+                return;
+
+            await Context.Channel.SendIonicMessageAsync(message);
         }
 
         [Command("getinventory")]
@@ -142,9 +144,12 @@ namespace Rift.Modules
         [RequireContext(ContextType.DM)]
         public async Task GetInventory(ulong userId)
         {
-            var embedResult = await economyService.GetUserInventoryAsync(userId);
+            var message = await economyService.GetUserInventoryAsync(userId);
 
-            await Context.User.SendEmbedAsync(embedResult);
+            if (message is null)
+                return;
+
+            await Context.Channel.SendIonicMessageAsync(message);
         }
 
         [Command("getgamestat")]
@@ -152,16 +157,12 @@ namespace Rift.Modules
         [RequireContext(ContextType.DM)]
         public async Task GetGameStat(ulong userId)
         {
-            //var eb = new EmbedBuilder()
-            //	.WithAuthor("Оповещения")
-            //	.WithDescription($"Недоступно до обновления.");
+            var message = await economyService.GetUserGameStatAsync(userId);
 
-            //await Context.User.SendEmbedAsync(eb);
-            //return;
+            if (message is null)
+                return;
 
-            var embedResult = await economyService.GetUserGameStatAsync(userId);
-
-            await Context.User.SendEmbedAsync(embedResult);
+            await Context.Channel.SendIonicMessageAsync(message);
         }
 
         [Command("getstat")]
@@ -170,7 +171,7 @@ namespace Rift.Modules
         public async Task GetStat(ulong userId)
         {
             var embedResult = await economyService.GetUserStatAsync(userId);
-            await Context.User.SendEmbedAsync(embedResult);
+            await Context.User.SendIonicMessageAsync(embedResult);
         }
 
         [Command("профиль")]
@@ -192,7 +193,7 @@ namespace Rift.Modules
             using (Context.Channel.EnterTypingState())
             {
                 var result = await economyService.GetUserCooldownsAsync(Context.User.Id);
-                await Context.User.SendEmbedAsync(result);
+                await Context.Channel.SendIonicMessageAsync(result);
             }
         }
 
@@ -265,16 +266,9 @@ namespace Rift.Modules
         {
             using (Context.Channel.EnterTypingState())
             {
-                (var state, var embed) = await economyService.GetUserBragAsync(Context.User.Id);
+                var message = await economyService.GetUserBragAsync(Context.User.Id);
 
-                if (state != BragResult.Success)
-                {
-                    await Context.User.SendEmbedAsync(embed);
-                    return;
-                }
-
-                var msg = await Context.Channel.SendEmbedAsync(embed);
-                messageService.TryAddDelete(new DeleteMessage(msg, TimeSpan.FromMinutes(15)));
+                await Context.Channel.SendIonicMessageAsync(message);
             }
         }
 
@@ -594,9 +588,12 @@ namespace Rift.Modules
             {
                 using (Context.Channel.EnterTypingState())
                 {
-                    var (state, embed) = await economyService.OpenChestAsync(Context.User.Id);
+                    var message = await economyService.OpenChestAsync(Context.User.Id);
 
-                    await PostOpenAsync(state, embed);
+                    if (message is null)
+                        return;
+
+                    await Context.Channel.SendIonicMessageAsync(message);
                 }
             }
 
@@ -606,25 +603,12 @@ namespace Rift.Modules
             {
                 using (Context.Channel.EnterTypingState())
                 {
-                    var (state, embed) = await economyService.OpenChestAllAsync(Context.User.Id);
+                    var message = await economyService.OpenChestAllAsync(Context.User.Id);
 
-                    await PostOpenAsync(state, embed);
-                }
-            }
+                    if (message is null)
+                        return;
 
-            async Task PostOpenAsync(OpenChestResult state, Embed embed)
-            {
-                switch (state)
-                {
-                    case OpenChestResult.Error:
-
-                        await Context.User.SendEmbedAsync(embed);
-                        break;
-
-                    case OpenChestResult.NoChests:
-
-                        await Context.User.SendEmbedAsync(embed);
-                        break;
+                    await Context.Channel.SendIonicMessageAsync(message);
                 }
             }
 
@@ -632,29 +616,29 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Capsule()
             {
-                (var state, var embed) = await economyService.OpenCapsuleAsync(Context.User.Id);
+                var message = await economyService.OpenCapsuleAsync(Context.User.Id);
 
-                await Context.User.SendEmbedAsync(embed);
+                await Context.Channel.SendIonicMessageAsync(message);
             }
 
             [Command("сферу")]
             [RequireContext(ContextType.Guild)]
             public async Task Sphere()
             {
-                (var state, var embed) = await economyService.OpenSphereAsync(Context.User.Id);
+                var embed = await economyService.OpenSphereAsync(Context.User.Id);
 
-                await Context.User.SendEmbedAsync(embed);
+                await Context.Channel.SendIonicMessageAsync(embed);
             }
         }
 
         [Group("купить")]
         public class BuyModule : ModuleBase
         {
-            readonly EconomyService economy;
+            readonly EconomyService economyService;
 
-            public BuyModule(EconomyService service)
+            public BuyModule(/*EconomyService economyService*/)
             {
-                economy = service;
+                this.economyService = economyService;
             }
 
             [Command]
@@ -667,19 +651,12 @@ namespace Rift.Modules
 
                     if (storeItem is null)
                     {
-                        await Context.User.SendMessageAsync("Данный номер отсутствует в магазине.");
+                        await Context.Channel.SendMessageAsync("Данный номер отсутствует в магазине.");
                         return;
                     }
 
-                    var result = await economy.StorePurchaseAsync(Context.User.Id, storeItem);
-
-                    switch (result.Item1)
-                    {
-                        default:
-
-                            await Context.User.SendEmbedAsync(result.Item2);
-                            break;
-                    }
+                    var result = await economyService.StorePurchaseAsync(Context.User.Id, storeItem);
+                    await Context.Channel.SendIonicMessageAsync(result);
                 }
             }
         }

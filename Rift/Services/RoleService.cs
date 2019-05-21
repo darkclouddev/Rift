@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Data.Models;
-using Rift.Embeds;
+using Rift.Services.Message;
 
 using IonicLib;
 
@@ -44,15 +44,15 @@ namespace Rift.Services
             }
         }
 
-        public async Task<(bool, Embed)> AddPermanentRoleAsync(ulong userId, ulong roleId)
+        public async Task<(bool, IonicMessage)> AddPermanentRoleAsync(ulong userId, ulong roleId)
         {
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
             if (sgUser is null)
-                return (false, GenericEmbeds.UserNotFound);
+                return (false, MessageService.UserNotFound);
 
             if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var role))
-                return (false, GenericEmbeds.RoleNotFound);
+                return (false, MessageService.RoleNotFound);
 
             await sgUser.AddRoleAsync(role);
             return (true, null);

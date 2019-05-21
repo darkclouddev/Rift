@@ -8,9 +8,9 @@ namespace Rift.Services.Message.Formatters.LolData
     {
         public LolSummonerName() : base("$lolSummonerName") {}
 
-        public override async Task<RiftMessage> Format(RiftMessage message, ulong userId)
+        public override async Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
-            var lolData = await Database.GetUserLolDataAsync(userId);
+            var lolData = await Database.GetUserLolDataAsync(data.UserId);
             
             return await ReplaceData(message, lolData.SummonerName);
         }

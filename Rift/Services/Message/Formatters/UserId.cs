@@ -8,9 +8,9 @@ namespace Rift.Services.Message.Formatters
     {
         public UserId() : base("$userId") {}
 
-        public override Task<RiftMessage> Format(RiftMessage message, ulong userId)
+        public override Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
-            return ReplaceData(message, userId.ToString());
+            return ReplaceData(message, data.UserId.ToString());
         }
     }
 }

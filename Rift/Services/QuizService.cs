@@ -56,7 +56,7 @@ namespace Rift.Services
 
         static async Task PostQuestion(string question)
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
             await channel.SendMessageAsync(question);
@@ -81,7 +81,7 @@ namespace Rift.Services
         {
             StopTimers();
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
             await channel.SendMessageAsync($"Время вышло! Правильный ответ: `{currentEntry.Answer}`");
@@ -104,7 +104,7 @@ namespace Rift.Services
 
         async Task DeclareWinnerAsync(ulong userId)
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
             await channel.SendMessageAsync($"Правильный ответ дал(а): <@{userId.ToString()}> !");
@@ -114,7 +114,7 @@ namespace Rift.Services
 
         async Task NextQuiz()
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
                 return;
 
             await channel.SendMessageAsync("Следующий вопрос через 10 секунд!");

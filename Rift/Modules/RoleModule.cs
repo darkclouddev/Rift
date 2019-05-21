@@ -2,19 +2,16 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
-using Rift.Embeds;
 using Rift.Preconditions;
 using Rift.Services;
-
-using IonicLib;
-using IonicLib.Util;
+using Rift.Util;
 
 using Discord;
 using Discord.Commands;
 using Discord.Webhook;
 using Discord.WebSocket;
-
-using Newtonsoft.Json;
+using IonicLib;
+using IonicLib.Util;
 
 namespace Rift.Modules
 {
@@ -33,7 +30,8 @@ namespace Rift.Modules
         {
             using (Context.Channel.EnterTypingState())
             {
-                await Context.User.SendEmbedAsync(RoleEmbeds.Roles);
+                var msg = await RiftBot.GetMessageAsync("roles-list", null);
+                await Context.Channel.SendIonicMessageAsync(msg);
             }
         }
 
@@ -83,7 +81,7 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Active(IUser user)
             {
-                if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
+                if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var commsChannel))
                     return;
 
                 if (!(user is SocketGuildUser sgUser))
@@ -108,7 +106,7 @@ namespace Rift.Modules
                     .WithDescription($"Призывателю {sgUser.Mention} выдается роль **{role.Name.ToLowerInvariant()}**")
                     .Build();
 
-                await chatChannel.SendEmbedAsync(chatEmbed);
+                await commsChannel.SendEmbedAsync(chatEmbed);
             }
         }
     }
