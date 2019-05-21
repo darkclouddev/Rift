@@ -25,7 +25,5 @@
         public uint MessagesSentTotal;
         public uint BragTotal;
         public uint PurchasedItemsTotal;
-
-        public decimal Donate;
     }
 }

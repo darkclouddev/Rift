@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -186,16 +186,6 @@ namespace Rift.Services
             new EmbedBuilder()
                 .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
                 .WithDescription($"Все платные роли отображаются справа в списке пользователей.")
-                .Build(),
-            
-            new EmbedBuilder()
-                .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
-                .WithDescription($"Покупайте наборы в <#{Settings.ChannelId.Donate.ToString()}> и получайте подарки.")
-                .Build(),
-            
-            new EmbedBuilder()
-                .WithAuthor("Подсказка", Settings.Emote.QuestionMarkUrl)
-                .WithDescription($"Поддерживайте сервер и получайте уникальные роли: <#{Settings.ChannelId.Donate.ToString()}>")
                 .Build(),
             
             new EmbedBuilder()

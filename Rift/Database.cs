@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -95,42 +95,6 @@ namespace Rift
                     {
                         UserId = x.UserId,
                         LastStoreTime = x.LastStoreTime,
-                    })
-                    .FirstAsync();
-            }
-        }
-
-        public static async Task<UserLastAttackTime> GetUserLastAttackTimeAsync(ulong userId)
-        {
-            if (!await EnsureCooldownsExistsAsync(userId))
-                throw new DatabaseException(nameof(GetUserLastAttackTimeAsync));
-
-            using (var context = new RiftContext())
-            {
-                return await context.Cooldowns
-                    .Where(x => x.UserId == userId)
-                    .Select(x => new UserLastAttackTime
-                    {
-                        UserId = x.UserId,
-                        LastAttackTime = x.LastAttackTime,
-                    })
-                    .FirstAsync();
-            }
-        }
-
-        public static async Task<UserLastBeingAttackedTime> GetUserLastBeingAttackedTimeAsync(ulong userId)
-        {
-            if (!await EnsureCooldownsExistsAsync(userId))
-                throw new DatabaseException(nameof(GetUserLastBeingAttackedTimeAsync));
-
-            using (var context = new RiftContext())
-            {
-                return await context.Cooldowns
-                    .Where(x => x.UserId == userId)
-                    .Select(x => new UserLastBeingAttackedTime
-                    {
-                        UserId = x.UserId,
-                        LastBeingAttackedTime = x.LastBeingAttackedTime,
                     })
                     .FirstAsync();
             }
@@ -237,42 +201,6 @@ namespace Rift
             using (var context = new RiftContext())
             {
                 context.Attach(cd).Property(x => x.LastStoreTime).IsModified = true;
-                await context.SaveChangesAsync();
-            }
-        }
-
-        public static async Task SetLastAttackTimeAsync(ulong userId, DateTime time)
-        {
-            if (!await EnsureCooldownsExistsAsync(userId))
-                throw new DatabaseException(nameof(SetLastAttackTimeAsync));
-
-            var cd = new RiftCooldowns
-            {
-                UserId = userId,
-                LastAttackTime = time,
-            };
-
-            using (var context = new RiftContext())
-            {
-                context.Attach(cd).Property(x => x.LastAttackTime).IsModified = true;
-                await context.SaveChangesAsync();
-            }
-        }
-
-        public static async Task SetLastBeingAttackedTimeAsync(ulong userId, DateTime time)
-        {
-            if (!await EnsureCooldownsExistsAsync(userId))
-                throw new DatabaseException(nameof(SetLastBeingAttackedTimeAsync));
-
-            var cd = new RiftCooldowns
-            {
-                UserId = userId,
-                LastBeingAttackedTime = time,
-            };
-
-            using (var context = new RiftContext())
-            {
-                context.Attach(cd).Property(x => x.LastBeingAttackedTime).IsModified = true;
                 await context.SaveChangesAsync();
             }
         }
@@ -1249,27 +1177,8 @@ namespace Rift
                         UserId = x.User.UserId,
                         Experience = x.User.Experience,
                         Level = x.User.Level,
-                        TotalDonate = x.User.Donate,
                         DoubleExpTime = x.Cooldowns.DoubleExpTime,
                         BotRespectTime = x.Cooldowns.BotRespectTime,
-                    })
-                    .FirstOrDefaultAsync();
-            }
-        }
-
-        static async Task<UserDonate> GetUserDonateAsync(ulong userId)
-        {
-            if (!await EnsureUserExistsAsync(userId))
-                throw new DatabaseException(nameof(GetUserDonateAsync));
-
-            using (var context = new RiftContext())
-            {
-                return await context.Users
-                    .Where(x => x.UserId == userId)
-                    .Select(x => new UserDonate
-                    {
-                        UserId = x.UserId,
-                        Donate = x.Donate
                     })
                     .FirstOrDefaultAsync();
             }
@@ -1330,24 +1239,6 @@ namespace Rift
             }
         }
 
-        public static async Task<UserDonate[]> GetTopTenDonatesAsync(Func<UserDonate, bool> predicate)
-        {
-            using (var context = new RiftContext())
-            {
-                var list = await context.Users
-                    .Where(x => x.Donate > 0M)
-                    .OrderByDescending(x => x.Donate)
-                    .Select(x => new UserDonate
-                    {
-                        UserId = x.UserId,
-                        Donate = x.Donate,
-                    })
-                    .ToListAsync();
-
-                return list.Where(predicate).Take(10).ToArray();
-            }
-        }
-
         public static async Task SetLevelAsync(ulong userId, uint level)
         {
             if (!await EnsureUserExistsAsync(userId))
@@ -1377,65 +1268,6 @@ namespace Rift
 
                 context.Users.Remove(dbUser);
                 await context.SaveChangesAsync();
-            }
-        }
-
-        public static async Task AddDonateAsync(ulong userId, decimal amount)
-        {
-            if (!await EnsureUserExistsAsync(userId))
-                throw new DatabaseException(nameof(AddDonateAsync));
-
-            var dbDonate = await GetUserDonateAsync(userId);
-
-            using (var context = new RiftContext())
-            {
-                var user = new RiftUser
-                {
-                    UserId = userId
-                };
-
-                var donateBefore = dbDonate.Donate;
-
-                if (decimal.MaxValue - donateBefore < amount)
-                    user.Donate = decimal.MaxValue;
-                else
-                    user.Donate = donateBefore + amount;
-
-                context.Attach(user).Property(x => x.Donate).IsModified = true;
-
-                await context.SaveChangesAsync();
-            }
-        }
-
-        public static async Task RemoveDonateAsync(ulong userId, decimal amount)
-        {
-            if (!await EnsureUserExistsAsync(userId))
-                throw new DatabaseException(nameof(RemoveDonateAsync));
-
-            var dbDonate = await GetUserDonateAsync(userId);
-
-            if (dbDonate.Donate == 0M)
-                return;
-
-            using (var context = new RiftContext())
-            {
-                var donateBefore = dbDonate.Donate;
-
-                amount = Math.Min(amount, dbDonate.Donate);
-
-                if (amount > uint.MinValue)
-                {
-                    var user = new RiftUser
-                    {
-                        UserId = userId,
-                        Donate = donateBefore - amount
-                    };
-
-                    context.Attach(user).Property(x => x.Donate).IsModified = true;
-                    await context.SaveChangesAsync();
-
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s donate ({donateBefore.ToString()} => {user.Donate.ToString()})");
-                }
             }
         }
 

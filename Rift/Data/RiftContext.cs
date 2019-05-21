@@ -27,63 +27,62 @@ namespace Rift.Data
 
             builder.Entity<RiftCooldowns>().HasKey(key => key.UserId);
             builder.Entity<RiftUser>()
-                   .HasOne(user => user.Cooldowns)
-                   .WithOne(cd => cd.User)
-                   .HasForeignKey<RiftCooldowns>(user => user.UserId);
+                .HasOne(user => user.Cooldowns)
+                .WithOne(cd => cd.User)
+                .HasForeignKey<RiftCooldowns>(user => user.UserId);
 
             builder.Entity<RiftInventory>().HasKey(key => key.UserId);
             builder.Entity<RiftUser>()
-                   .HasOne(user => user.Inventory)
-                   .WithOne(inv => inv.User)
-                   .HasForeignKey<RiftInventory>(user => user.UserId);
+                .HasOne(user => user.Inventory)
+                .WithOne(inv => inv.User)
+                .HasForeignKey<RiftInventory>(user => user.UserId);
 
             builder.Entity<RiftLolData>().HasKey(key => key.UserId);
             builder.Entity<RiftUser>()
-                   .HasOne(user => user.LolData)
-                   .WithOne(lol => lol.User)
-                   .HasForeignKey<RiftLolData>(user => user.UserId);
+                .HasOne(user => user.LolData)
+                .WithOne(lol => lol.User)
+                .HasForeignKey<RiftLolData>(user => user.UserId);
 
             builder.Entity<RiftPendingUser>().HasKey(key => key.UserId);
             builder.Entity<RiftUser>()
-                   .HasOne(user => user.PendingUser)
-                   .WithOne(pending => pending.User)
-                   .HasForeignKey<RiftPendingUser>(user => user.UserId);
+                .HasOne(user => user.PendingUser)
+                .WithOne(pending => pending.User)
+                .HasForeignKey<RiftPendingUser>(user => user.UserId);
 
             builder.Entity<RiftTempRole>().ToTable("TempRoles");
             builder.Entity<RiftTempRole>()
-                   .HasKey(x => new
-                   {
-                       x.UserId,
-                       x.RoleId
-                   });
+                .HasKey(x => new
+                {
+                    x.UserId,
+                    x.RoleId
+                });
             
             builder.Entity<RiftUser>()
-                   .HasMany(users => users.TempRoles)
-                   .WithOne(role => role.User)
-                   .HasForeignKey(role => role.UserId)
-                   .HasConstraintName($"FK_RiftTempRoles_Users_UserId");
+                .HasMany(users => users.TempRoles)
+                .WithOne(role => role.User)
+                .HasForeignKey(role => role.UserId)
+                .HasConstraintName("FK_RiftTempRoles_Users_UserId");
 
             builder.Entity<RiftStatistics>().HasKey(key => key.UserId);
             builder.Entity<RiftUser>()
-                   .HasOne(user => user.Statistics)
-                   .WithOne(stat => stat.User)
-                   .HasForeignKey<RiftStatistics>(user => user.UserId);
+                .HasOne(user => user.Statistics)
+                .WithOne(stat => stat.User)
+                .HasForeignKey<RiftStatistics>(user => user.UserId);
 
             builder.Entity<ScheduledEvent>().HasKey(key => key.Id);
-            builder.Entity<ScheduledEvent>()
-                   .Property(prop => prop.Id)
-                   .ValueGeneratedOnAdd();
+            builder.Entity<ScheduledEvent>().Property(prop => prop.Id).ValueGeneratedOnAdd();
 
             builder.Entity<RiftStreamer>().ToTable("Streamers");
             builder.Entity<RiftStreamer>().HasKey(x => x.UserId);
             builder.Entity<RiftUser>()
-                   .HasOne(user => user.Streamers)
-                   .WithOne(streamer => streamer.User)
-                   .HasForeignKey<RiftStreamer>(user => user.UserId);
+                .HasOne(user => user.Streamers)
+                .WithOne(streamer => streamer.User)
+                .HasForeignKey<RiftStreamer>(user => user.UserId);
 
             builder.Entity<RiftMapping>().HasKey(key => key.Identifier);
             
             builder.Entity<RiftMessage>().HasKey(key => key.Id);
+            builder.Entity<RiftMessage>().Property(key => key.Id).ValueGeneratedOnAdd();
         }
     }
 }

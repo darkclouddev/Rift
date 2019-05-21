@@ -6,8 +6,6 @@ namespace Rift.Data.Models
     {
         public ulong UserId { get; set; }
         public DateTime LastStoreTime { get; set; }
-        public DateTime LastAttackTime { get; set; }
-        public DateTime LastBeingAttackedTime { get; set; }
         public DateTime LastDailyChestTime { get; set; }
         public DateTime LastBragTime { get; set; }
         public DateTime LastGiftTime { get; set; }

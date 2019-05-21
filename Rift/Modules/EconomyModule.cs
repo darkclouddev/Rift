@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
@@ -117,20 +117,6 @@ namespace Rift.Modules
         public async Task RichBitch()
         {
             await EconomyService.ShowRichUsersAsync();
-        }
-
-        [Command("донатеры")]
-        [RequireAdmin]
-        [RequireContext(ContextType.Guild)]
-        public async Task Donators()
-        {
-            var topTen = await Database.GetTopTenDonatesAsync(x =>
-                !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
-
-            if (topTen.Length == 0)
-                return;
-
-            await Context.Channel.SendEmbedAsync(DonateEmbeds.StatisticEmbed(topTen));
         }
 
         [Command("exp")]
@@ -726,64 +712,13 @@ namespace Rift.Modules
 
             async Task SendGiftAsync(SocketGuildUser fromSgUser, SocketGuildUser toSgUser, uint id)
             {
-                var result = await economy.GiftAsync(fromSgUser, toSgUser, id);
+                var message = await economyService.GiftAsync(fromSgUser, toSgUser, id);
 
-                if (result.Item1 != GiftResult.Success)
-                {
-                    switch (result.Item1)
-                    {
-                        default:
-
-                            await Context.User.SendEmbedAsync(result.Item2);
-                            break;
-                    }
-                }
-            }
-        }
-
-        [Group("атаковать")]
-        public class AttackModule : ModuleBase
-        {
-            readonly EconomyService economy;
-
-            public AttackModule(EconomyService service)
-            {
-                economy = service;
-            }
-
-            [Command]
-            [RequireContext(ContextType.Guild)]
-            public async Task Default([Remainder] string mention)
-            {
-                using (Context.Channel.EnterTypingState())
-                {
-                    var sgTarget = await MentionHelper.ResolveFirstMentionedUser(Context);
-
-                    if (sgTarget == null || !(Context.User is SocketGuildUser sgUser))
-                    {
-                        await Context.User.SendMessageAsync($"Пользователь не найден!");
-                        return;
-                    }
-
-                    await AttackAsync(sgUser, sgTarget);
-                }
-            }
-
-            async Task AttackAsync(SocketGuildUser sgAttacker, SocketGuildUser sgTarget)
-            {
-                var (attackResult, embed) = await economy.AttackAsync(sgAttacker, sgTarget);
-
-                if (attackResult == AttackResult.Success)
+                if (message is null)
                     return;
-
-                await Context.User.SendEmbedAsync(embed);
+                
+                await Context.Channel.SendIonicMessageAsync(message);
             }
-        }
-
-        [Command("атаки")]
-        public async Task Attacks()
-        {
-            await Context.User.SendEmbedAsync(AttackEmbeds.Help);
         }
 
         [Command("магазин")]
@@ -796,16 +731,6 @@ namespace Rift.Modules
         public async Task Gifts()
         {
             await Context.User.SendEmbedAsync(Gift.Embed);
-        }
-
-        [Command("платные роли")]
-        [RequireContext(ContextType.Guild)]
-        public async Task DonateRoles()
-        {
-            using (Context.Channel.EnterTypingState())
-            {
-                await Context.User.SendEmbedAsync(RoleEmbeds.DonatedRoles);
-            }
         }
     }
 }

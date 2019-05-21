@@ -9,8 +9,8 @@ using Rift.Data;
 namespace Rift.Migrations
 {
     [DbContext(typeof(RiftContext))]
-    [Migration("20190513195458_RenamedMessageColumns")]
-    partial class RenamedMessageColumns
+    [Migration("20190520111652_RemovedDonate")]
+    partial class RemovedDonate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -26,10 +26,6 @@ namespace Rift.Migrations
                     b.Property<DateTime>("BotRespectTime");
 
                     b.Property<DateTime>("DoubleExpTime");
-
-                    b.Property<DateTime>("LastAttackTime");
-
-                    b.Property<DateTime>("LastBeingAttackedTime");
 
                     b.Property<DateTime>("LastBragTime");
 
@@ -222,8 +218,6 @@ namespace Rift.Migrations
                 {
                     b.Property<ulong>("UserId")
                         .ValueGeneratedOnAdd();
-
-                    b.Property<decimal>("Donate");
 
                     b.Property<uint>("Experience");
 

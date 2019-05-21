@@ -7,7 +7,6 @@ namespace Rift.Data.Models.Users
         public ulong UserId;
         public uint Experience;
         public uint Level;
-        public decimal TotalDonate;
         public DateTime DoubleExpTime;
         public DateTime BotRespectTime;
     }

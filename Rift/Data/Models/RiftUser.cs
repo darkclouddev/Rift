@@ -7,7 +7,6 @@ namespace Rift.Data.Models
         public ulong UserId { get; set; }
         public uint Experience { get; set; } = 0u;
         public uint Level { get; set; } = 0u;
-        public decimal Donate { get; set; } = 0m;
 
         public RiftCooldowns Cooldowns { get; set; }
         public RiftInventory Inventory { get; set; }

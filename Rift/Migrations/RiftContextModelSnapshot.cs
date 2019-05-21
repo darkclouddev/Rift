@@ -25,10 +25,6 @@ namespace Rift.Migrations
 
                     b.Property<DateTime>("DoubleExpTime");
 
-                    b.Property<DateTime>("LastAttackTime");
-
-                    b.Property<DateTime>("LastBeingAttackedTime");
-
                     b.Property<DateTime>("LastBragTime");
 
                     b.Property<DateTime>("LastDailyChestTime");
@@ -220,8 +216,6 @@ namespace Rift.Migrations
                 {
                     b.Property<ulong>("UserId")
                         .ValueGeneratedOnAdd();
-
-                    b.Property<decimal>("Donate");
 
                     b.Property<uint>("Experience");
 

@@ -432,7 +432,7 @@ namespace Rift.Services
             var remainingExp = fullLevelExp - (profile.Experience - currentLevelExp);
             var levelPerc = 100 - (int)Math.Floor(((float)remainingExp / fullLevelExp * 100));
 
-            var embed = new EmbedBuilder()
+            var embed = new RiftEmbed()
                 .WithTitle("Ваш профиль")
                 .WithThumbnailUrl(sgUser.GetAvatarUrl())
                 .WithDescription($"Статистика и информация о вашем аккаунте в системе:")
@@ -440,54 +440,39 @@ namespace Rift.Services
                 .AddField("Место", $"{Settings.Emote.Rewards} {position}", true)
                 .AddField("Статистика текущего уровня",
                     $"{Settings.Emote.Experience} Получено {levelPerc.ToString()}% опыта до {(profile.Level+1).ToString()} уровня.")
-                .AddField("Платные роли и пожертвования",
-                    $"Текущая: -\n"
-                    + $"Необходимо задонатить: - рублей,\n"
-                    + $"чтобы получить {Settings.Emote.Legendary} легендарные\n\n"
-                    + $"{Settings.Emote.Donate} Общая сумма пожертвований: {profile.TotalDonate:0.00} рублей.")
-                .AddField("Временные роли", tempRolesString)
-                .Build();
-
-            return embed;
+                .AddField("Временные роли", tempRolesString);
+            
+            return new IonicMessage(embed.ToEmbed());
         }
 
-        public async Task<Embed> GetUserInventoryAsync(ulong userId)
+        public async Task<IonicMessage> GetUserInventoryAsync(ulong userId)
+        {
+            return await RiftBot.GetMessageAsync("user-inventory", new FormatData(userId));
+        }
+
+        public async Task<IonicMessage> GetUserGameStatAsync(ulong userId)
         {
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
             if (sgUser is null)
-                return GenericEmbeds.Error;
-
-            var inventory = await Database.GetUserInventoryAsync(userId);
-
-            return ProfileEmbeds.InventoryEmbed(inventory);
-        }
-
-        public async Task<Embed> GetUserGameStatAsync(ulong userId)
-        {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (sgUser is null)
-                return GenericEmbeds.Error;
+                return MessageService.Error;
 
             var dbSummoner = await Database.GetUserLolDataAsync(userId);
 
-            if (String.IsNullOrWhiteSpace(dbSummoner.PlayerUUID))
-                return StatEmbeds.NoRankEmbed;
+            if (string.IsNullOrWhiteSpace(dbSummoner.PlayerUUID))
+                return await RiftBot.GetMessageAsync("loldata-nodata", new FormatData(userId));
 
-            (var summonerResult, var summoner) =
-                await RiftBot.GetService<RiotService>()
-                             .GetSummonerByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
+            (var summonerResult, var summoner) = await RiftBot.GetService<RiotService>()
+                .GetSummonerByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
 
             if (summonerResult != RequestResult.Success)
-                return GenericEmbeds.Error;
+                return MessageService.Error;
 
             var summonerLeagues = await RiftBot.GetService<RiotService>()
-                                               .GetLeaguePositionsByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion,
-                                                                                             dbSummoner.SummonerId);
+                .GetLeaguePositionsByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
 
             if (summonerLeagues.Item1 != RequestResult.Success)
-                return GenericEmbeds.Error;
+                return MessageService.Error;
 
             var league = summonerLeagues.Item2.FirstOrDefault(x => x.QueueType == "RANKED_SOLO_5x5");
 
@@ -1102,160 +1087,7 @@ namespace Rift.Services
             return (result, result ? TimeSpan.Zero : Settings.Economy.GiftCooldown - diff);
         }
 
-        public async Task<(AttackResult, Embed)> AttackAsync(SocketGuildUser sgAttacker, SocketGuildUser sgTarget)
-        {
-            await attackMutex.WaitAsync().ConfigureAwait(false);
-
-            RiftBot.Log.Info($"Attacktime! {sgAttacker.Id.ToString()} want to kick {sgTarget.Id.ToString()}'s ass.");
-            
-            (AttackResult, Embed) result;
-
-            try
-            {
-                result = await AttackInternalAsync(sgAttacker, sgTarget).ConfigureAwait(false);
-                
-                if (result.Item1 == AttackResult.Success)
-                {
-                    await Database.AddStatisticsAsync(sgAttacker.Id, attacksDone: 1u);
-                    await Database.AddStatisticsAsync(sgTarget.Id, attacksReceived: 1u);
-                }
-            }
-            finally
-            {
-                attackMutex.Release();
-            }
-
-            return result;
-        }
-
-        static async Task<(AttackResult, Embed)> AttackInternalAsync(SocketGuildUser sgAttacker, SocketGuildUser sgTarget)
-        {
-            if (sgAttacker.Id == sgTarget.Id)
-                return (AttackResult.SelfAttack, AttackEmbeds.SelfAttack);
-
-            (var canBeAttacked, var canBeAttackedRemainingTime) = await CanBeAttackedAgain(sgTarget.Id);
-
-            if (!canBeAttacked)
-                return (AttackResult.TooOftenSame, AttackEmbeds.TargetCooldown(canBeAttackedRemainingTime));
-
-            var attackerDbProfile = await Database.GetUserProfileAsync(sgAttacker.Id);
-            var attackerDbInventory = await Database.GetUserInventoryAsync(sgAttacker.Id);
-
-            if (attackerDbProfile.Level < Settings.Economy.AttackMinimumLevel)
-                return (AttackResult.LowUserLevel, AttackEmbeds.LowLevel);
-
-            (var canAttack, var canAttackRemainingTime) = await CanAttackAsync(sgAttacker.Id);
-
-            if (!canAttack)
-                return (AttackResult.OnUserCooldown, AttackEmbeds.Cooldown(canAttackRemainingTime));
-
-            var targetDbUserProfile = await Database.GetUserProfileAsync(sgTarget.Id);
-            var targetDbUserInventory = await Database.GetUserInventoryAsync(sgTarget.Id);
-
-            if (targetDbUserProfile.Level < Settings.Economy.AttackMinimumLevel)
-                return (AttackResult.LowTargetLevel, AttackEmbeds.LowTargetLevel);
-
-            if (attackerDbInventory.Coins < Settings.Economy.AttackPrice)
-                return (AttackResult.NoCoins, AttackEmbeds.NoCoins);
-
-            await Database.RemoveInventoryAsync(sgAttacker.Id, coins: Settings.Economy.AttackPrice);
-
-            var attack = new Attack(sgAttacker.Id, sgTarget.Id, targetDbUserInventory.Coins, targetDbUserInventory.Chests);
-
-            switch (attack.Loot)
-            {
-                case AttackLoot.Coins:
-                {
-                    if (targetDbUserInventory.Coins < attack.Count)
-                        attack.Count = targetDbUserInventory.Coins; //stealing target's last monies :(
-
-                    await Database.RemoveInventoryAsync(sgTarget.Id, coins: attack.Count);
-                    await Database.AddInventoryAsync(sgAttacker.Id, coins: attack.Count);
-                    break;
-                }
-                case AttackLoot.Chests:
-                {
-                    if (targetDbUserInventory.Chests < attack.Count)
-                        attack.Count = targetDbUserInventory.Chests; //stealing target's last chests :(
-
-                    await Database.RemoveInventoryAsync(sgTarget.Id, chests: attack.Count);
-                    await Database.AddInventoryAsync(sgAttacker.Id, chests: attack.Count);
-                    break;
-                }
-                case AttackLoot.Mute:
-                {
-                    await RiftBot.GetService<RoleService>()
-                        .AddTempRoleAsync(sgTarget.Id, Settings.RoleId.Attacked, TimeSpan.FromMinutes(attack.Count), "Attack mute");
-                    break;
-                }
-                case AttackLoot.ReversedMute:
-                {
-                    await RiftBot.GetService<RoleService>()
-                        .AddTempRoleAsync(sgAttacker.Id, Settings.RoleId.Attacked, TimeSpan.FromMinutes(attack.Count), "Attack mute");
-                    break;
-                }
-                case AttackLoot.MutualMute:
-                {
-                    await RiftBot.GetService<RoleService>()
-                        .AddTempRoleAsync(sgTarget.Id, Settings.RoleId.Attacked, TimeSpan.FromMinutes(attack.Count), "Attack mute");
-                    await RiftBot.GetService<RoleService>()
-                        .AddTempRoleAsync(sgAttacker.Id, Settings.RoleId.Attacked, TimeSpan.FromMinutes(attack.Count), "Attack mute");
-                    break;
-                }
-            }
-
-            await UpdateLastBeingAttackedSameCooldown(sgTarget.Id);
-
-            await sgAttacker.SendEmbedAsync(AttackEmbeds.Attacker(sgTarget, attack));
-            await sgTarget.SendEmbedAsync(AttackEmbeds.Target(sgAttacker, attack));
-
-            await Database.SetLastAttackTimeAsync(sgAttacker.Id, DateTime.UtcNow); //attacker cd
-
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var chatChannel))
-                return (AttackResult.Error, GenericEmbeds.Error);
-
-            var msg = await chatChannel.SendEmbedAsync(AttackEmbeds.Chat(sgAttacker, sgTarget));
-            RiftBot.GetService<MessageService>().TryAddDelete(new DeleteMessage(msg, TimeSpan.FromMinutes(3)));
-
-            msg = await chatChannel.SendEmbedAsync(AttackEmbeds.AttackDesc(sgAttacker, sgTarget, attack));
-            RiftBot.GetService<MessageService>().TryAddDelete(new DeleteMessage(msg, TimeSpan.FromMinutes(3)));
-
-            return (AttackResult.Success, GenericEmbeds.Empty);
-        }
-
-        static async Task<(bool, TimeSpan)> CanAttackAsync(ulong userId)
-        {
-            var dbAttack = await Database.GetUserLastAttackTimeAsync(userId);
-
-            if (dbAttack.LastAttackTime == DateTime.MinValue)
-                return (true, TimeSpan.Zero);
-
-            var diff = DateTime.UtcNow - dbAttack.LastAttackTime;
-
-            return (diff > Settings.Economy.AttackPerUserCooldown,
-                    Settings.Economy.AttackPerUserCooldown - diff);
-        }
-
-        static async Task<(bool, TimeSpan)> CanBeAttackedAgain(ulong userId)
-        {
-            var dbAttacked = await Database.GetUserLastBeingAttackedTimeAsync(userId);
-
-            if (dbAttacked.LastBeingAttackedTime == DateTime.MinValue) // no cd
-                return (true, TimeSpan.Zero);
-
-            var diff = DateTime.UtcNow - dbAttacked.LastBeingAttackedTime;
-
-            bool result = diff > Settings.Economy.AttackSameUserCooldown;
-
-            return (result, Settings.Economy.AttackSameUserCooldown - diff);
-        }
-
-        static async Task UpdateLastBeingAttackedSameCooldown(ulong userId)
-        {
-            await Database.SetLastBeingAttackedTimeAsync(userId, DateTime.UtcNow);
-        }
-
-        public async Task<GiftResult> GiftSpecialAsync(ulong fromId, ulong toId, GiftSource giftSource)
+        public async Task GiftSpecialAsync(ulong fromId, ulong toId, GiftSource giftSource)
         {
             var user = IonicClient.GetGuildUserById(Settings.App.MainGuildId, toId);
             var chatEmbed = new EmbedBuilder();
@@ -1381,73 +1213,11 @@ namespace Rift.Services
         }
     }
 
-    public enum OpenChestResult
-    {
-        Success,
-        NoChests,
-        Error,
-    }
-
-    public enum OpenCapsuleResult
-    {
-        Success,
-        NoCapsules,
-        Error,
-    }
-
-    public enum OpenSphereResult
-    {
-        Success,
-        NoSpheres,
-        Error,
-    }
-
-    public enum AttackResult
-    {
-        Error,
-        SelfAttack,
-        TooOftenSame,
-        LowUserLevel,
-        LowTargetLevel,
-        NoCoins,
-        OnUserCooldown,
-        Success,
-    }
-
-    public enum StorePurchaseResult
-    {
-        Error,
-        Cooldown,
-        HasRole,
-        NoCoins,
-        NoTokens,
-        Success,
-    }
-
-    public enum GiftResult
-    {
-        Error,
-        TargetBot,
-        Cooldown,
-        SelfGift,
-        NoCoins,
-        NoTokens,
-        NoItem,
-        Success,
-    }
-
     public enum GiftSource
     {
         Streamer,
         Voice,
         Moderator,
-    }
-
-    public enum BragResult
-    {
-        Error,
-        Cooldown,
-        Success,
     }
 
     public enum Currency

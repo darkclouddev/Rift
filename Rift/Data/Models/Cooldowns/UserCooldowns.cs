@@ -9,10 +9,6 @@ namespace Rift.Data.Models.Cooldowns
         public ulong UserId { get; }
         public DateTime LastStoreTime { get; }
         public TimeSpan StoreTimeSpan { get; }
-        public DateTime LastAttackTime { get; }
-        public TimeSpan AttackTimeSpan { get; }
-        public DateTime LastBeingAttackedTime { get; }
-        public TimeSpan BeingAttackedTimeSpan { get; }
         public DateTime LastDailyChestTime { get; }
         public TimeSpan DailyChestTimeSpan { get; }
         public DateTime LastBragTime { get; }
@@ -35,14 +31,6 @@ namespace Rift.Data.Models.Cooldowns
             LastStoreTime = cooldowns.LastStoreTime;
             var nextStoreTime = LastStoreTime + Settings.Economy.StoreCooldown;
             StoreTimeSpan = nextStoreTime > dt ? nextStoreTime - dt : TimeSpan.Zero;
-            
-            LastAttackTime = cooldowns.LastAttackTime;
-            var nextAttackTime = LastAttackTime + Settings.Economy.AttackPerUserCooldown;
-            AttackTimeSpan = nextAttackTime > dt ? nextAttackTime - dt : TimeSpan.Zero;
-            
-            LastBeingAttackedTime = cooldowns.LastBeingAttackedTime;
-            var nextAttackedTime = LastBeingAttackedTime + Settings.Economy.AttackSameUserCooldown;
-            BeingAttackedTimeSpan = nextAttackedTime > dt ? nextAttackedTime - dt : TimeSpan.Zero;
             
             LastDailyChestTime = cooldowns.LastDailyChestTime;
             var nextDailyTime = LastDailyChestTime + TimeSpan.FromDays(1);
