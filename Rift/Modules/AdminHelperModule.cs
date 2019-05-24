@@ -94,12 +94,12 @@ namespace Rift.Modules
 
             foreach (var user in srAbsolute.Members)
             {
-                await Database.AddInventoryAsync(user.Id, coins: 10_000u, spheres: 1u);
+                await Database.AddInventoryAsync(user.Id, new InventoryData { Coins = 10_000u, Spheres = 1u });
             }
 
             foreach (var user in srLegendary.Members)
             {
-                await Database.AddInventoryAsync(user.Id, coins: 50_000u, usualTickets: 2u);
+                await Database.AddInventoryAsync(user.Id, new InventoryData { Coins = 50_000u, Tickets = 2u });
             }
 
             var privateRoleUsers = new List<SocketGuildUser>();
@@ -112,7 +112,7 @@ namespace Rift.Modules
 
             foreach (var user in privateRoleUsers)
             {
-                await Database.AddInventoryAsync(user.Id, coins: 20_000u, spheres: 1u);
+                await Database.AddInventoryAsync(user.Id, new InventoryData { Coins = 20_000u, Spheres = 1u });
             }
 
             await Context.User.SendMessageAsync($"Выдача подарков завершена!\n\n"

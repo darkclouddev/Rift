@@ -4,8 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
-using Rift.Rewards;
 using Rift.Services.Message;
+using Rift.Services.Reward;
 using Rift.Util;
 
 using IonicLib;
@@ -13,16 +13,14 @@ using IonicLib.Extensions;
 
 namespace Rift.Services
 {
-    public class MinionService : RandomChanceReward
+    public class MinionService
     {
         static readonly TimeSpan MinionLifeTime = TimeSpan.FromMinutes(5);
 
-        static readonly List<(uint, Reward)> AvailableRewards = new List<(uint, Reward)>
+        static readonly List<(uint, ItemReward)> AvailableRewards = new List<(uint, ItemReward)>
         {
-            (100, new Reward(coins: new Loot(100, 500)))
+            (100, new ItemReward().AddCoins(Helper.NextUInt(100, 501)))
         };
-
-        Reward reward = null;
 
         Timer StartupTimer;
         Timer MinionTimer;
@@ -126,10 +124,6 @@ namespace Rift.Services
 
             RiftBot.Log.Debug(nameof(MinionService), $"Next Minion: {Helper.FromTimestamp(Helper.CurrentUnixTimestamp + minionTs).ToString()}");
 
-            reward = GetReward(AvailableRewards).Copy();
-            reward.CalculateReward();
-            reward.GenerateRewardString();
-
             MinionTimer.Change(TimeSpan.FromSeconds(minionTs), TimeSpan.Zero);
 
             return Task.CompletedTask;
@@ -158,7 +152,7 @@ namespace Rift.Services
                 return;
 
             DropTimers();
-            await reward.GiveRewardAsync(killerId);
+            await AvailableRewards.Random().Item2.DeliverToAsync(killerId);
 
             RiftBot.Log.Debug($"Minion was killed by {killerId.ToString()}");
 

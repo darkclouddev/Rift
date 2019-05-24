@@ -6,15 +6,13 @@ using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Data.Models;
-using Rift.Rewards;
 using Rift.Services.Message;
+using Rift.Services.Reward;
 using Rift.Util;
-
-using IonicLib;
-using IonicLib.Extensions;
 
 using Discord;
 using Discord.WebSocket;
+using IonicLib;
 
 namespace Rift.Services
 {
@@ -27,8 +25,8 @@ namespace Rift.Services
         Timer eventTimer;
         Timer eventEndTimer;
         GuildEmote eventEmote;
-        Reward reward;
-        Reward winnerReward;
+        ItemReward reward;
+        ItemReward rewardWinner;
         EventType eventType;
 
         public EventService()
@@ -78,29 +76,36 @@ namespace Rift.Services
             eventType = (EventType) eventData.EventId;
             switch (eventType)
             {
-                case EventType.Baron:
-                    reward = EventReward.BaronGeneral;
-                    winnerReward = EventReward.BaronWinner;
-                    winnerReward.CalculateReward();
-                    winnerReward.GenerateRewardString();
-                    break;
-                case EventType.Drake:
-                    reward = EventReward.DrakeGeneral;
-                    winnerReward = EventReward.DrakeWinner;
-                    winnerReward.CalculateReward();
-                    winnerReward.GenerateRewardString();
-                    break;
                 case EventType.BlueBuff:
-                case EventType.Krug:
-                case EventType.Razorfins:
                 case EventType.RedBuff:
+                    reward = new ItemReward().AddCoins(1_000u).AddTokens(1u).AddDoubleExps(1u);
+                    break;
+
+                case EventType.Razorfins:
+                case EventType.ScuttleCrab:
+                case EventType.Krugs:
+                    reward = new ItemReward().AddCoins(1_000u).AddChests(1u);
+                    break;
+
                 case EventType.Wolves:
-                    reward = EventReward.RandomReward;
+                case EventType.Gromp:
+                    reward = new ItemReward().AddCoins(1_000u).AddTokens(1u);
+                    break;
+
+                case EventType.Drake:
+                case EventType.Baron:
+                    reward = new ItemReward().AddCoins(13_000u).AddTokens(6u).AddChests(3u);
+                    rewardWinner = new ItemReward().AddCoins(30_000u).AddTokens(6u).AddTickets(1u);
+                    break;
+
+                case EventType.Armadillo:
+                case EventType.BigEyes:
+                case EventType.DevastatorCrab:
+                case EventType.CrookedTail:
+                    reward = new ItemReward().AddTokens(8u).AddSpheres(1u);
+                    rewardWinner = new ItemReward().AddCoins(50_000u).AddTokens(10u).AddTickets(1u);
                     break;
             }
-
-            reward.CalculateReward();
-            reward.GenerateRewardString();
 
             var eventTs = GetEventTimeSpan(dt, eventData.Hour, eventData.Minute);
 
@@ -167,15 +172,15 @@ namespace Rift.Services
                     break;
 
                 case EventType.Wolves:
-                    eventMessage = await RiftBot.GetMessageAsync("event-start-", null);
+                    eventMessage = await RiftBot.GetMessageAsync("event-start-wolves", null);
                     break;
 
                 case EventType.Razorfins:
                     eventMessage = await RiftBot.GetMessageAsync("event-start-razorfins", null);
                     break;
 
-                case EventType.Krug:
-                    eventMessage = await RiftBot.GetMessageAsync("event-start-krug", null);
+                case EventType.Krugs:
+                    eventMessage = await RiftBot.GetMessageAsync("event-start-krugs", null);
                     break;
 
                 case EventType.RedBuff:
@@ -222,22 +227,22 @@ namespace Rift.Services
             {
                 foreach (var id in reactionIds)
                 {
-                    await reward.GiveRewardAsync(id);
+                    await reward.DeliverToAsync(id);
                 }
 
-                switch (eventType)
-                {
-                    case EventType.Baron:
-                    case EventType.Drake:
-                    {
-                        ulong winnerId = reactionIds.Random();
-                        await winnerReward.GiveRewardAsync(winnerId);
+                //switch (eventType)
+                //{
+                //    case EventType.Baron:
+                //    case EventType.Drake:
+                //    {
+                //        ulong winnerId = reactionIds.Random();
+                //        await winnerReward.GiveRewardAsync(winnerId);
 
-                        var msgEventWinner = await RiftBot.GetMessageAsync("event-winner", null);
-                        await channel.SendIonicMessageAsync(msgEventWinner);
-                        break;
-                    }
-                }
+                //        var msgEventWinner = await RiftBot.GetMessageAsync("event-winner", null);
+                //        await channel.SendIonicMessageAsync(msgEventWinner);
+                //        break;
+                //    }
+                //}
             }
 
             var msgEventParticipants = await RiftBot.GetMessageAsync("event-end-participants", null);
@@ -286,12 +291,18 @@ namespace Rift.Services
 
     public enum EventType
     {
-        Baron = 0,
-        Drake = 1,
-        Wolves = 2,
-        Razorfins = 3,
-        Krug = 4,
-        RedBuff = 5,
-        BlueBuff = 6,
+        Wolves = 0,
+        Razorfins = 1,
+        Krugs = 2,
+        Gromp = 3,
+        ScuttleCrab = 4,
+        BlueBuff = 5,
+        RedBuff = 6,
+        Drake = 7,
+        Baron = 8,
+        Armadillo = 9,
+        BigEyes = 10,
+        DevastatorCrab = 11,
+        CrookedTail = 12,
     }
 }

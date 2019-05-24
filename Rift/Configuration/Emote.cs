@@ -84,10 +84,8 @@
         public string Oh { get; set; }
         public string ChestLol { get; set; }
         public string ChestLolUrl { get; set; }
-        public string RareTickets { get; set; }
-        public string RareTicketsUrl { get; set; }
-        public string UsualTickets { get; set; }
-        public string UsualTicketsUrl { get; set; }
+        public string Tickets { get; set; }
+        public string TicketsUrl { get; set; }
         public string Roles { get; set; }
         public string RolesUrl { get; set; }
         public string Voice { get; set; }

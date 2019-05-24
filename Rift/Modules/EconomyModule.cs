@@ -287,11 +287,12 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.AddInventoryAsync(sgUser.Id, coins: amount);
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Coins = amount });
 
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.Coin} {amount.ToString()}"));
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} {Settings.Emote.Coin} {amount.ToString()}"));
             }
 
             [Command("tokens")]
@@ -302,11 +303,12 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.AddInventoryAsync(sgUser.Id, tokens: amount);
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Tokens = amount });
 
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.Token} {amount.ToString()}"));
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} {Settings.Emote.Token} {amount.ToString()}"));
             }
 
             [Command("chests")]
@@ -317,11 +319,12 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.AddInventoryAsync(sgUser.Id, chests: amount);
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Chests = amount });
 
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.Chest} {amount.ToString()}"));
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} {Settings.Emote.Chest} {amount.ToString()}"));
             }
 
             [Command("capsules")]
@@ -332,11 +335,12 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.AddInventoryAsync(sgUser.Id, capsules: amount);
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Capsules = amount });
 
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.Capsule} {amount.ToString()}"));
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} {Settings.Emote.Capsule} {amount.ToString()}"));
             }
 
             [Command("spheres")]
@@ -347,11 +351,12 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.AddInventoryAsync(sgUser.Id, spheres: amount);
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Spheres = amount });
 
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.Sphere} {amount.ToString()}"));
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} {Settings.Emote.Sphere} {amount.ToString()}"));
             }
 
             [Command("lvl2")]
@@ -362,11 +367,12 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.AddInventoryAsync(sgUser.Id, doubleExps: amount);
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { DoubleExps = amount });
 
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.PowerupDoubleExperience} {amount.ToString()}"));
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} {Settings.Emote.PowerupDoubleExperience} {amount.ToString()}"));
             }
 
             [Command("respects")]
@@ -377,14 +383,15 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.AddInventoryAsync(sgUser.Id, respects: amount);
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { BotRespects = amount });
 
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.BotRespect} {amount.ToString()}"));
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} {Settings.Emote.BotRespect} {amount.ToString()}"));
             }
 
-            [Command("ctickets")]
+            [Command("tickets")]
             [RequireAdmin]
             [RequireContext(ContextType.Guild)]
             public async Task CustomTickets(uint amount, IUser user)
@@ -392,26 +399,12 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.AddInventoryAsync(sgUser.Id, usualTickets: amount);
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Tickets = amount });
 
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.UsualTickets} {amount.ToString()}"));
-            }
-
-            [Command("gtickets")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task GiveawayTickets(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.AddInventoryAsync(sgUser.Id, rareTickets: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.RareTickets} {amount.ToString()}"));
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} {Settings.Emote.Tickets} {amount.ToString()}"));
             }
         }
 
@@ -428,7 +421,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.RemoveInventoryAsync(sgUser.Id, coins: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { Coins = amount });
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -443,7 +436,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.RemoveInventoryAsync(sgUser.Id, tokens: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { Tokens = amount });
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -458,7 +451,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.RemoveInventoryAsync(sgUser.Id, doubleExps: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { DoubleExps = amount });
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -473,7 +466,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.RemoveInventoryAsync(sgUser.Id, chests: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { Chests = amount });
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -488,7 +481,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.RemoveInventoryAsync(sgUser.Id, capsules: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { Capsules = amount });
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -503,7 +496,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.RemoveInventoryAsync(sgUser.Id, spheres: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { Spheres = amount });
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -518,14 +511,15 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.RemoveInventoryAsync(sgUser.Id, respects: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { BotRespects = amount });
 
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.BotRespect} {amount.ToString()}"));
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{takeText} {Settings.Emote.BotRespect} {amount.ToString()}"));
             }
 
-            [Command("ctickets")]
+            [Command("tickets")]
             [RequireAdmin]
             [RequireContext(ContextType.Guild)]
             public async Task CustomTickets(uint amount, IUser user)
@@ -533,42 +527,12 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await Database.RemoveInventoryAsync(sgUser.Id, usualTickets: amount);
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { Tickets = amount });
 
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.UsualTickets} {amount.ToString()}"));
-            }
-
-            [Command("gtickets")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task GiveawayTickets(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.RemoveInventoryAsync(sgUser.Id, rareTickets: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.RareTickets} {amount.ToString()}"));
-            }
-
-            [Command("all")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task All(IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.RemoveInventoryAsync(sgUser.Id, uint.MaxValue, uint.MaxValue, uint.MaxValue, uint.MaxValue,
-                    uint.MaxValue, uint.MaxValue, uint.MaxValue, uint.MaxValue, uint.MaxValue);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"Основатель сервера очистил ваш инвентарь."));
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{takeText} {Settings.Emote.Tickets} {amount.ToString()}"));
             }
         }
 
@@ -577,7 +541,7 @@ namespace Rift.Modules
         {
             readonly EconomyService economyService;
             
-            public OpenModule(EconomyService economyService)
+            public OpenModule(/*EconomyService economyService*/)
             {
                 this.economyService = economyService;
             }

@@ -82,8 +82,7 @@ namespace Rift.Services.Economy
 
         static readonly List<StoreItem> StoreTickets = new List<StoreItem>
         {
-            new StoreItem(4u, Settings.Emote.UsualTickets, "Обычный билет", StoreItemType.UsualTicket, 4_000u, Currency.Coins),
-            new StoreItem(5u, Settings.Emote.RareTickets, "Редкий билет", StoreItemType.RareTicket, 20_000u, Currency.Coins),
+            new StoreItem(4u, Settings.Emote.Tickets, "Билет", StoreItemType.Ticket, 4_000u, Currency.Coins),
         };
 
         static readonly List<StoreItem> StoreTempRoles = new List<StoreItem>
@@ -168,8 +167,7 @@ namespace Rift.Services.Economy
         Sphere,
         DoubleExp,
         BotRespect,
-        UsualTicket,
-        RareTicket,
+        Ticket,
         TempRole,
         PermanentRole,
     }

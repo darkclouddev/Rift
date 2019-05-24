@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -357,72 +357,25 @@ namespace Rift
             using (var context = new RiftContext())
             {
                 return await context.Inventory
-                    .Join(context.Statistics, inv => inv.UserId, stat => stat.UserId,
-                        (inventory, statistics) => new
-                        {
-                            Inventory = inventory,
-                            Statistics = statistics
-                        })
-                    .Where(x => x.Inventory.UserId == userId && x.Statistics.UserId == userId)
+                    .Where(x => x.UserId == userId)
                     .Select(x => new UserInventory
                     {
-                        UserId = x.Inventory.UserId,
-                        Coins = x.Inventory.Coins,
-                        Tokens = x.Inventory.Tokens,
-                        Chests = x.Inventory.Chests,
-                        Capsules = x.Inventory.Capsules,
-                        Spheres = x.Inventory.Spheres,
-                        PowerupsDoubleExperience = x.Inventory.PowerupsDoubleExp,
-                        PowerupsBotRespect = x.Inventory.PowerupsBotRespect,
-                        CoinsEarnedTotal = x.Statistics.CoinsEarnedTotal,
-                        CoinsSpentTotal = x.Statistics.CoinsSpentTotal,
-                        UsualTickets = x.Inventory.UsualTickets,
-                        RareTickets = x.Inventory.RareTickets,
+                        UserId = x.UserId,
+                        Coins = x.Coins,
+                        Tokens = x.Tokens,
+                        Chests = x.Chests,
+                        Capsules = x.Capsules,
+                        Spheres = x.Spheres,
+                        BonusDoubleExp = x.BonusDoubleExp,
+                        BonusBotRespect = x.BonusBotRespect,
+                        BonusRewind = x.BonusRewind,
+                        Tickets = x.Tickets,
                     })
                     .FirstOrDefaultAsync();
             }
         }
 
-        public static async Task<UserTickets[]> GetUsersWithUsualTicketsAsync()
-        {
-            using (var context = new RiftContext())
-            {
-                return await context.Inventory
-                    .Select(x => new UserTickets
-                    {
-                        UserId = x.UserId,
-                        UsualTickets = x.UsualTickets,
-                    })
-                    .Where(x => x.UsualTickets > 0)
-                    .ToArrayAsync();
-            }
-        }
-
-        public static async Task<UserTickets[]> GetUsersWithRareTicketsAsync()
-        {
-            using (var context = new RiftContext())
-            {
-                return await context.Inventory
-                    .Select(x => new UserTickets
-                    {
-                        UserId = x.UserId,
-                        RareTickets = x.RareTickets,
-                    })
-                    .Where(x => x.RareTickets > 0)
-                    .ToArrayAsync();
-            }
-        }
-
-        public static async Task AddInventoryAsync(ulong userId,
-            uint coins = 0u,
-            uint tokens = 0u,
-            uint chests = 0u,
-            uint capsules = 0u,
-            uint spheres = 0u,
-            uint doubleExps = 0u,
-            uint respects = 0u,
-            uint usualTickets = 0u,
-            uint rareTickets = 0u)
+        public static async Task AddInventoryAsync(ulong userId, InventoryData data)
         {
             var dbInventory = await GetUserInventoryAsync(userId);
             var dbStatistics = await GetUserStatisticsAsync(userId);
@@ -435,19 +388,19 @@ namespace Rift
                 var inventoryEntry = context.Attach(inventory);
                 var statisticsEntry = context.Attach(statistics);
 
-                if (coins > uint.MinValue)
+                if (data.Coins > uint.MinValue)
                 {
                     var coinsBefore = dbInventory.Coins;
 
-                    if (uint.MaxValue - coinsBefore < coins)
+                    if (uint.MaxValue - coinsBefore < data.Coins)
                         inventory.Coins = uint.MaxValue;
                     else
-                        inventory.Coins = coinsBefore + coins;
+                        inventory.Coins = coinsBefore + data.Coins;
 
-                    if (uint.MaxValue - dbStatistics.CoinsEarnedTotal < coins)
+                    if (uint.MaxValue - dbStatistics.CoinsEarnedTotal < data.Coins)
                         statistics.CoinsEarnedTotal = uint.MaxValue;
                     else
-                        statistics.CoinsEarnedTotal = dbStatistics.CoinsEarnedTotal + coins;
+                        statistics.CoinsEarnedTotal = dbStatistics.CoinsEarnedTotal + data.Coins;
 
                     RiftBot.Log.Info($"Modified {userId.ToString()}'s coin(s): ({coinsBefore.ToString()} => {inventory.Coins.ToString()})");
 
@@ -455,19 +408,19 @@ namespace Rift
                     statisticsEntry.Property(x => x.CoinsEarnedTotal).IsModified = true;
                 }
 
-                if (tokens > uint.MinValue)
+                if (data.Tokens > uint.MinValue)
                 {
                     var tokensBefore = dbInventory.Tokens;
 
-                    if (uint.MaxValue - tokensBefore < tokens)
+                    if (uint.MaxValue - tokensBefore < data.Tokens)
                         inventory.Tokens = uint.MaxValue;
                     else
-                        inventory.Tokens = tokensBefore + tokens;
+                        inventory.Tokens = tokensBefore + data.Tokens;
 
-                    if (uint.MaxValue - dbStatistics.TokensEarnedTotal < tokens)
+                    if (uint.MaxValue - dbStatistics.TokensEarnedTotal < data.Tokens)
                         statistics.TokensEarnedTotal = uint.MaxValue;
                     else
-                        statistics.TokensEarnedTotal = dbStatistics.TokensEarnedTotal + tokens;
+                        statistics.TokensEarnedTotal = dbStatistics.TokensEarnedTotal + data.Tokens;
 
                     RiftBot.Log.Info($"Modified {userId.ToString()}'s token(s): ({tokensBefore.ToString()} => {inventory.Tokens.ToString()})");
 
@@ -475,19 +428,19 @@ namespace Rift
                     statisticsEntry.Property(x => x.TokensEarnedTotal).IsModified = true;
                 }
 
-                if (chests > uint.MinValue)
+                if (data.Chests > uint.MinValue)
                 {
                     var chestsBefore = dbInventory.Chests;
 
-                    if (uint.MaxValue - chestsBefore < chests)
+                    if (uint.MaxValue - chestsBefore < data.Chests)
                         inventory.Chests = uint.MaxValue;
                     else
-                        inventory.Chests = chestsBefore + chests;
+                        inventory.Chests = chestsBefore + data.Chests;
 
-                    if (uint.MaxValue - dbStatistics.ChestsEarnedTotal < chests)
+                    if (uint.MaxValue - dbStatistics.ChestsEarnedTotal < data.Chests)
                         statistics.ChestsEarnedTotal = uint.MaxValue;
                     else
-                        statistics.ChestsEarnedTotal = dbStatistics.ChestsEarnedTotal + chests;
+                        statistics.ChestsEarnedTotal = dbStatistics.ChestsEarnedTotal + data.Chests;
 
                     RiftBot.Log.Info($"Modified {userId.ToString()}'s chest(s): ({chestsBefore.ToString()} => {inventory.Chests.ToString()})");
 
@@ -495,39 +448,19 @@ namespace Rift
                     statisticsEntry.Property(x => x.ChestsEarnedTotal).IsModified = true;
                 }
 
-                if (capsules > uint.MinValue)
-                {
-                    var capsulesBefore = dbInventory.Capsules;
-
-                    if (uint.MaxValue - capsulesBefore < capsules)
-                        inventory.Capsules = uint.MaxValue;
-                    else
-                        inventory.Capsules = capsulesBefore + capsules;
-
-                    if (uint.MaxValue - dbStatistics.CapsuleEarnedTotal < capsules)
-                        statistics.CapsuleEarnedTotal = uint.MaxValue;
-                    else
-                        statistics.CapsuleEarnedTotal = dbStatistics.CapsuleEarnedTotal + capsules;
-
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s capsule(s): ({capsulesBefore.ToString()} => {inventory.Capsules.ToString()})");
-
-                    inventoryEntry.Property(x => x.Capsules).IsModified = true;
-                    statisticsEntry.Property(x => x.CapsuleEarnedTotal).IsModified = true;
-                }
-
-                if (spheres > uint.MinValue)
+                if (data.Spheres > uint.MinValue)
                 {
                     var spheresBefore = dbInventory.Spheres;
 
-                    if (uint.MaxValue - spheresBefore < spheres)
+                    if (uint.MaxValue - spheresBefore < data.Spheres)
                         inventory.Spheres = uint.MaxValue;
                     else
-                        inventory.Spheres = spheresBefore + spheres;
+                        inventory.Spheres = spheresBefore + data.Spheres;
 
-                    if (uint.MaxValue - dbStatistics.SphereEarnedTotal < spheres)
+                    if (uint.MaxValue - dbStatistics.SphereEarnedTotal < data.Spheres)
                         statistics.SphereEarnedTotal = uint.MaxValue;
                     else
-                        statistics.SphereEarnedTotal = dbStatistics.SphereEarnedTotal + spheres;
+                        statistics.SphereEarnedTotal = dbStatistics.SphereEarnedTotal + data.Spheres;
 
                     RiftBot.Log.Info($"Modified {userId.ToString()}'s sphere(s): ({spheresBefore.ToString()} => {inventory.Spheres.ToString()})");
 
@@ -535,76 +468,73 @@ namespace Rift
                     statisticsEntry.Property(x => x.SphereEarnedTotal).IsModified = true;
                 }
 
-                if (doubleExps > uint.MinValue)
+                if (data.Capsules > uint.MinValue)
                 {
-                    var doubleExpsBefore = dbInventory.PowerupsDoubleExperience;
+                    var capsulesBefore = dbInventory.Capsules;
 
-                    if (uint.MaxValue - doubleExpsBefore < doubleExps)
-                        inventory.PowerupsDoubleExp = uint.MaxValue;
+                    if (uint.MaxValue - capsulesBefore < data.Capsules)
+                        inventory.Capsules = uint.MaxValue;
                     else
-                        inventory.PowerupsDoubleExp = doubleExpsBefore + doubleExps;
+                        inventory.Capsules = capsulesBefore + data.Capsules;
 
-                    inventoryEntry.Property(x => x.PowerupsDoubleExp).IsModified = true;
+                    if (uint.MaxValue - dbStatistics.CapsuleEarnedTotal < data.Capsules)
+                        statistics.CapsuleEarnedTotal = uint.MaxValue;
+                    else
+                        statistics.CapsuleEarnedTotal = dbStatistics.CapsuleEarnedTotal + data.Capsules;
 
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s doubleExp(s): ({doubleExpsBefore.ToString()} => {inventory.PowerupsDoubleExp.ToString()})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s capsule(s): ({capsulesBefore.ToString()} => {inventory.Capsules.ToString()})");
+
+                    inventoryEntry.Property(x => x.Capsules).IsModified = true;
+                    statisticsEntry.Property(x => x.CapsuleEarnedTotal).IsModified = true;
                 }
 
-                if (respects > uint.MinValue)
+                if (data.BotRespects > uint.MinValue)
                 {
-                    var respectsBefore = dbInventory.PowerupsBotRespect;
+                    var doubleExpsBefore = dbInventory.BonusDoubleExp;
 
-                    if (uint.MaxValue - respectsBefore < respects)
-                        inventory.PowerupsBotRespect = uint.MaxValue;
+                    if (uint.MaxValue - doubleExpsBefore < data.BotRespects)
+                        inventory.BonusDoubleExp = uint.MaxValue;
                     else
-                        inventory.PowerupsBotRespect = respectsBefore + respects;
+                        inventory.BonusDoubleExp = doubleExpsBefore + data.BotRespects;
 
-                    inventoryEntry.Property(x => x.PowerupsBotRespect).IsModified = true;
+                    inventoryEntry.Property(x => x.BonusDoubleExp).IsModified = true;
 
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s respect(s): ({respectsBefore.ToString()} => {inventory.PowerupsBotRespect.ToString()})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s doubleExp(s): ({doubleExpsBefore.ToString()} => {inventory.BonusDoubleExp.ToString()})");
                 }
 
-                if (usualTickets > uint.MinValue)
+                if (data.BotRespects > uint.MinValue)
                 {
-                    var usualTicketsBefore = dbInventory.UsualTickets;
+                    var respectsBefore = dbInventory.BonusBotRespect;
 
-                    if (uint.MaxValue - usualTicketsBefore < usualTickets)
-                        inventory.UsualTickets = uint.MaxValue;
+                    if (uint.MaxValue - respectsBefore < data.BotRespects)
+                        inventory.BonusBotRespect = uint.MaxValue;
                     else
-                        inventory.UsualTickets = usualTicketsBefore + usualTickets;
+                        inventory.BonusBotRespect = respectsBefore + data.BotRespects;
 
-                    inventoryEntry.Property(x => x.UsualTickets).IsModified = true;
+                    inventoryEntry.Property(x => x.BonusBotRespect).IsModified = true;
 
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s usual ticket(s): ({usualTicketsBefore.ToString()} => {inventory.UsualTickets.ToString()})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s respect(s): ({respectsBefore.ToString()} => {inventory.BonusBotRespect.ToString()})");
                 }
 
-                if (rareTickets > uint.MinValue)
+                if (data.Rewinds > uint.MinValue)
                 {
-                    var rareTicketsBefore = dbInventory.RareTickets;
+                    var rewindsBefore = dbInventory.BonusRewind;
 
-                    if (uint.MaxValue - rareTicketsBefore < rareTickets)
-                        inventory.RareTickets = uint.MaxValue;
+                    if (uint.MaxValue - rewindsBefore < data.Rewinds)
+                        inventory.BonusRewind = uint.MaxValue;
                     else
-                        inventory.RareTickets = rareTicketsBefore + rareTickets;
+                        inventory.BonusRewind = rewindsBefore + data.Rewinds;
 
-                    inventoryEntry.Property(x => x.RareTickets).IsModified = true;
+                    inventoryEntry.Property(x => x.BonusRewind).IsModified = true;
 
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s rare ticket(s): ({rareTicketsBefore.ToString()} => {inventory.RareTickets.ToString()})");
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s rewind(s): ({rewindsBefore.ToString()} => {inventory.BonusRewind.ToString()})");
                 }
 
                 await context.SaveChangesAsync();
             }
         }
 
-        public static async Task RemoveInventoryAsync(ulong userId,
-            uint coins = 0u,
-            uint tokens = 0u,
-            uint chests = 0u,
-            uint capsules = 0u,
-            uint spheres = 0u,
-            uint doubleExps = 0u,
-            uint respects = 0u,
-            uint usualTickets = 0u,
-            uint rareTickets = 0u)
+        public static async Task RemoveInventoryAsync(ulong userId, InventoryData data)
         {
             var dbInventory = await GetUserInventoryAsync(userId);
             var dbStatistics = await GetUserStatisticsAsync(userId);
@@ -618,15 +548,15 @@ namespace Rift
                 var statisticsEntry = context.Attach(statistics);
 
                 var coinsBefore = dbInventory.Coins;
-                coins = Math.Min(coins, coinsBefore);
-                if (coins > uint.MinValue)
+                data.Coins = Math.Min(data.Coins, coinsBefore);
+                if (data.Coins > uint.MinValue)
                 {
-                    inventory.Coins = coinsBefore - coins;
+                    inventory.Coins = coinsBefore - data.Coins;
 
-                    if (uint.MaxValue - dbInventory.CoinsSpentTotal < coins)
+                    if (uint.MaxValue - dbStatistics.CoinsSpentTotal < data.Coins)
                         statistics.CoinsSpentTotal = uint.MaxValue;
                     else
-                        statistics.CoinsSpentTotal = dbInventory.CoinsSpentTotal + coins;
+                        statistics.CoinsSpentTotal = dbStatistics.CoinsSpentTotal + data.Coins;
 
                     RiftBot.Log.Info($"Modified {userId.ToString()}'s coin(s): ({coinsBefore.ToString()} => {inventory.Coins.ToString()})");
 
@@ -635,15 +565,15 @@ namespace Rift
                 }
 
                 var tokensBefore = dbInventory.Tokens;
-                tokens = Math.Min(tokens, tokensBefore);
-                if (tokens > uint.MinValue)
+                data.Tokens = Math.Min(data.Tokens, tokensBefore);
+                if (data.Tokens > uint.MinValue)
                 {
-                    inventory.Tokens = tokensBefore - tokens;
+                    inventory.Tokens = tokensBefore - data.Tokens;
 
-                    if (uint.MaxValue - dbStatistics.TokensSpentTotal < tokens)
+                    if (uint.MaxValue - dbStatistics.TokensSpentTotal < data.Tokens)
                         statistics.TokensSpentTotal = uint.MaxValue;
                     else
-                        statistics.TokensSpentTotal = dbStatistics.TokensSpentTotal + tokens;
+                        statistics.TokensSpentTotal = dbStatistics.TokensSpentTotal + data.Tokens;
 
                     RiftBot.Log.Info($"Modified {userId.ToString()}'s token(s): ({tokensBefore.ToString()} => {inventory.Tokens.ToString()})");
 
@@ -652,66 +582,66 @@ namespace Rift
                 }
 
                 var chestsBefore = dbInventory.Chests;
-                chests = Math.Min(chests, chestsBefore);
-                if (chests > uint.MinValue)
+                data.Chests = Math.Min(data.Chests, chestsBefore);
+                if (data.Chests > uint.MinValue)
                 {
-                    inventory.Chests = chestsBefore - chests;
+                    inventory.Chests = chestsBefore - data.Chests;
                     RiftBot.Log.Info($"Modified {userId.ToString()}'s chest(s): ({chestsBefore.ToString()} => {inventory.Chests.ToString()})");
                     inventoryEntry.Property(x => x.Chests).IsModified = true;
                 }
 
-                var capsulesBefore = dbInventory.Capsules;
-                capsules = Math.Min(capsules, capsulesBefore);
-                if (capsules > uint.MinValue)
-                {
-                    inventory.Capsules = capsulesBefore - capsules;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s capsule(s): ({capsulesBefore.ToString()} => {inventory.Capsules.ToString()})");
-                    inventoryEntry.Property(x => x.Capsules).IsModified = true;
-                }
-
                 var spheresBefore = dbInventory.Spheres;
-                spheres = Math.Min(spheres, spheresBefore);
-                if (spheres > uint.MinValue)
+                data.Spheres = Math.Min(data.Spheres, spheresBefore);
+                if (data.Spheres > uint.MinValue)
                 {
-                    inventory.Spheres = spheresBefore - spheres;
+                    inventory.Spheres = spheresBefore - data.Spheres;
                     RiftBot.Log.Info($"Modified {userId.ToString()}'s sphere(s): ({spheresBefore.ToString()} => {inventory.Spheres.ToString()})");
                     inventoryEntry.Property(x => x.Spheres).IsModified = true;
                 }
 
-                var doubleExpsBefore = dbInventory.PowerupsDoubleExperience;
-                doubleExps = Math.Min(doubleExps, doubleExpsBefore);
-                if (doubleExps > uint.MinValue)
+                var capsulesBefore = dbInventory.Capsules;
+                data.Capsules = Math.Min(data.Capsules, capsulesBefore);
+                if (data.Capsules > uint.MinValue)
                 {
-                    inventory.PowerupsDoubleExp = doubleExpsBefore - doubleExps;
-                    inventoryEntry.Property(x => x.PowerupsDoubleExp).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s doubleExp(s): ({doubleExpsBefore.ToString()} => {inventory.PowerupsDoubleExp.ToString()})");
+                    inventory.Capsules = capsulesBefore - data.Capsules;
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s capsule(s): ({capsulesBefore.ToString()} => {inventory.Capsules.ToString()})");
+                    inventoryEntry.Property(x => x.Capsules).IsModified = true;
                 }
 
-                var respectsBefore = dbInventory.PowerupsBotRespect;
-                respects = Math.Min(respects, respectsBefore);
-                if (respects > uint.MinValue)
+                var ticketsBefore = dbInventory.Tickets;
+                data.Tickets = Math.Min(data.Tickets, ticketsBefore);
+                if (data.Tickets > uint.MinValue)
                 {
-                    inventory.PowerupsBotRespect = respectsBefore - respects;
-                    inventoryEntry.Property(x => x.PowerupsBotRespect).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s respect(s): ({respectsBefore.ToString()} => {inventory.PowerupsBotRespect.ToString()})");
+                    inventory.Tickets = ticketsBefore - data.Tickets;
+                    inventoryEntry.Property(x => x.Tickets).IsModified = true;
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s usual ticket(s): ({ticketsBefore.ToString()} => {inventory.Tickets.ToString()})");
                 }
 
-                var usualTicketsBefore = dbInventory.UsualTickets;
-                usualTickets = Math.Min(usualTickets, usualTicketsBefore);
-                if (usualTickets > uint.MinValue)
+                var doubleExpsBefore = dbInventory.BonusDoubleExp;
+                data.DoubleExps = Math.Min(data.DoubleExps, doubleExpsBefore);
+                if (data.DoubleExps > uint.MinValue)
                 {
-                    inventory.UsualTickets = usualTicketsBefore - usualTickets;
-                    inventoryEntry.Property(x => x.UsualTickets).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s usual ticket(s): ({usualTicketsBefore.ToString()} => {inventory.UsualTickets.ToString()})");
+                    inventory.BonusDoubleExp = doubleExpsBefore - data.DoubleExps;
+                    inventoryEntry.Property(x => x.BonusDoubleExp).IsModified = true;
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s doubleExp(s): ({doubleExpsBefore.ToString()} => {inventory.BonusDoubleExp.ToString()})");
                 }
 
-                var rareTicketsBefore = dbInventory.RareTickets;
-                rareTickets = Math.Min(rareTickets, rareTicketsBefore);
-                if (rareTickets > uint.MinValue)
+                var respectsBefore = dbInventory.BonusBotRespect;
+                data.BotRespects = Math.Min(data.BotRespects, respectsBefore);
+                if (data.BotRespects > uint.MinValue)
                 {
-                    inventory.RareTickets = rareTicketsBefore - rareTickets;
-                    inventoryEntry.Property(x => x.RareTickets).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s rare ticket(s): ({rareTicketsBefore.ToString()} => {inventory.RareTickets.ToString()})");
+                    inventory.BonusBotRespect = respectsBefore - data.BotRespects;
+                    inventoryEntry.Property(x => x.BonusBotRespect).IsModified = true;
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s respect(s): ({respectsBefore.ToString()} => {inventory.BonusBotRespect.ToString()})");
+                }
+
+                var rewindsBefore = dbInventory.BonusRewind;
+                data.Rewinds = Math.Min(data.Rewinds, rewindsBefore);
+                if (data.Rewinds > uint.MinValue)
+                {
+                    inventory.BonusRewind = rewindsBefore - data.Rewinds;
+                    inventoryEntry.Property(x => x.BonusRewind).IsModified = true;
+                    RiftBot.Log.Info($"Modified {userId.ToString()}'s rewind(s): ({rewindsBefore.ToString()} => {inventory.BonusRewind.ToString()})");
                 }
 
                 await context.SaveChangesAsync();
@@ -1184,7 +1114,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserLevel> GetUserLevelAsync(ulong userId)
+        public static async Task<RiftUser> GetUserLevelAsync(ulong userId)
         {
             if (!await EnsureUserExistsAsync(userId))
                 throw new DatabaseException(nameof(GetUserLevelAsync));
@@ -1193,12 +1123,6 @@ namespace Rift
             {
                 return await context.Users
                     .Where(x => x.UserId == userId)
-                    .Select(x => new UserLevel
-                    {
-                        UserId = x.UserId,
-                        Level = x.Level,
-                        Experience = x.Experience,
-                    })
                     .FirstAsync();
             }
         }
@@ -1468,5 +1392,18 @@ namespace Rift
         {
             Message = message;
         }
+    }
+
+    public class InventoryData
+    {
+        public uint Coins { get; set; } = 0u;
+        public uint Tokens { get; set; } = 0u;
+        public uint Chests { get; set; } = 0u;
+        public uint Spheres { get; set; } = 0u;
+        public uint Capsules { get; set; } = 0u;
+        public uint Tickets { get; set; } = 0u;
+        public uint DoubleExps { get; set; } = 0u;
+        public uint BotRespects { get; set; } = 0u;
+        public uint Rewinds { get; set; } = 0u;
     }
 }

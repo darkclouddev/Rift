@@ -1,9 +1,11 @@
 ﻿using System;
 
-using Rift.Rewards;
-
-using MingweiSamuel.Camille.MatchV4;
 using Rift.Data.Models.Users;
+using Rift.Services.Reward;
+
+using MingweiSamuel.Camille.LeagueV4;
+using MingweiSamuel.Camille.MatchV4;
+using MingweiSamuel.Camille.SummonerV4;
 
 namespace Rift.Services.Message
 {
@@ -17,6 +19,8 @@ namespace Rift.Services.Message
 
         public BragData Brag { get; set; }
 
+        public LolStatData LolStat { get; set; }
+
         public ModerationData Moderation { get; set; }
 
         public FormatData() {}
@@ -29,7 +33,7 @@ namespace Rift.Services.Message
 
     public class BotRespectData
     {
-        public Reward Reward { get; set; }
+        public ItemReward Reward { get; set; }
     }
 
     public class BragData
@@ -45,6 +49,13 @@ namespace Rift.Services.Message
     {
         public UserTopExp[] Top10Exp { get; set; }
         public UserTopCoins[] Top10Coins { get; set; }
+    }
+
+    public class LolStatData
+    {
+        public Summoner Summoner { get; set; }
+        public LeaguePosition SoloQueue { get; set; }
+        public LeaguePosition Flex5v5 { get; set; }
     }
 
     public class ModerationData

@@ -4,44 +4,53 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
-using Rift.Rewards;
+using Rift.Services.Reward;
 using Rift.Util;
 
+using Humanizer;
 using IonicLib;
 using IonicLib.Extensions;
 
 namespace Rift.Services
 {
-    public class BotRespectService : RandomChanceReward
+    public class BotRespectService
     {
         Timer timer;
         readonly Timer Starttimer;
 
-        static readonly List<(uint, Reward)> AvailableRewards = new List<(uint, Reward)>
+        static readonly List<(uint, ItemReward)> AvailableRewards = new List<(uint, ItemReward)>
         {
-            (13, new Reward(chests: 1)),
-            (13, new Reward(customTickets: 2)),
-            (13, new Reward(chests: 2)),
-            (13, new Reward(giveawayTickets: 1)),
-            (13, new Reward(coins: 1000)),
-            (5, new Reward(powerupsDoubleExp: 1)),
-            (1, new Reward(tokens: 1)),
-            (10, new Reward(chests: 3)),
-            (100, new Reward(coins: 500)),
+            (13, new ItemReward().AddChests(1)),
+            (13, new ItemReward().AddTickets(2)),
+            (13, new ItemReward().AddChests(2)),
+            (13, new ItemReward().AddCoins(1000)),
+            (5, new ItemReward().AddDoubleExps(1)),
+            (1, new ItemReward().AddTokens(1)),
+            (10, new ItemReward().AddChests(3)),
+            (100, new ItemReward().AddCoins(500)),
         };
 
         public BotRespectService()
         {
             RiftBot.Log.Info("Starting BotRespectService..");
 
-            Starttimer = new Timer(async delegate { await InitTimer(); }, null, TimeSpan.FromSeconds(30), TimeSpan.Zero);
-            foreach (var item in AvailableRewards)
-            {
-                item.Item2.CalculateReward();
-                item.Item2.GenerateRewardString();
-            }
+            Starttimer = new Timer(
+                async delegate
+                {
+                    await InitTimer();
+                },
+                null,
+                TimeSpan.FromSeconds(30),
+                TimeSpan.Zero);
 
-            timer = new Timer(async delegate { await StartBotGifts(); }, null, Timeout.Infinite, 0);
+            timer = new Timer(
+                async delegate
+                {
+                    await StartBotGifts();
+                },
+                null,
+                Timeout.Infinite,
+                0);
 
             RiftBot.Log.Info("BotRespectService loaded successfully.");
         }
@@ -51,7 +60,7 @@ namespace Rift.Services
             var nextGiftsTimeSpan = Helper.NextUInt(210, 330) * 60;
             timer.Change(TimeSpan.FromSeconds(nextGiftsTimeSpan), TimeSpan.Zero);
 
-            RiftBot.Log.Debug($"Next gifts: {Helper.FromTimestamp(Helper.CurrentUnixTimestamp + nextGiftsTimeSpan).ToString()}");
+            RiftBot.Log.Debug($"Next gifts: {Helper.FromTimestamp(Helper.CurrentUnixTimestamp + nextGiftsTimeSpan).Humanize()}");
 
             return Task.CompletedTask;
         }
@@ -69,8 +78,8 @@ namespace Rift.Services
                     if (sgUser is null)
                         continue;
 
-                    var reward = GetReward(AvailableRewards);
-                    await reward.GiveRewardAsync(user.UserId);
+                    (var chance, var reward) = AvailableRewards.Random();
+                    await reward.DeliverToAsync(user.UserId);
                 }
 
                 if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var commsChannel))

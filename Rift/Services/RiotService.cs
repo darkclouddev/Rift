@@ -430,9 +430,6 @@ namespace Rift.Services
 
         async Task PostValidateAsync(PendingUser pendingUser)
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
-                return;
-
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, pendingUser.UserId);
 
             if (sgUser is null)
@@ -442,15 +439,10 @@ namespace Rift.Services
 
             await AssignRoleFromRankAsync(sgUser, pendingUser);
 
-            await Database.AddInventoryAsync(sgUser.Id, chests: 2u);
+            await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Chests = 2u });
 
-            var msgRegSuccess = await RiftBot.GetMessageAsync("reg-success", new FormatData(pendingUser.UserId));
-
-            await channel.SendIonicMessageAsync(msgRegSuccess);
-
-            var msgRegReward = await RiftBot.GetMessageAsync("reg-reward", new FormatData(pendingUser.UserId));
-
-            await channel.SendIonicMessageAsync(msgRegReward);
+            await RiftBot.SendChatMessageAsync("register-success", new FormatData(pendingUser.UserId));
+            await RiftBot.SendChatMessageAsync("register-reward", new FormatData(pendingUser.UserId));
         }
 
         #endregion Validation
@@ -603,7 +595,7 @@ namespace Rift.Services
                 if (newRank < LeagueRank.Bronze)
                     return;
 
-                await Database.AddInventoryAsync(sgUser.Id, chests: 4u);
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Chests = 4u });
             }
             else
             {
