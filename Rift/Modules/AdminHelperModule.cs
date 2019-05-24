@@ -10,12 +10,11 @@ using Rift.Services;
 using Rift.Services.Message;
 using Rift.Util;
 
-using IonicLib;
-using IonicLib.Util;
-
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using IonicLib;
+using IonicLib.Util;
 
 namespace Rift.Modules
 {
@@ -417,23 +416,6 @@ namespace Rift.Modules
         public async Task AppStatus()
         {
             await RiftBot.SendChatMessageAsync("bot-about", new FormatData(212997107525746690ul));
-        }
-
-        [Command("edb")]
-        [RequireDeveloper]
-        public async Task EmbedToDatabase()
-        {
-
-        }
-
-        [Command("sm")]
-        [RequireDeveloper]
-        public async Task TestSavedMessage(string identifier)
-        {
-            var msg = await RiftBot.GetMessageAsync(identifier, null);
-
-            await Context.Channel.SendIonicMessageAsync(
-                msg ?? new IonicMessage($"No messages with ID \"{identifier}\"!", null, null));
         }
     }
 }

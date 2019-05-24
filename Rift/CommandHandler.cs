@@ -50,27 +50,24 @@ namespace Rift
         public async Task ConfigureAsync()
         {
             await commandService.AddModulesAsync(Assembly.GetEntryAssembly(), provider);
-            //economyService.Init();
+            economyService.Init();
 
-            //await riotService.InitAsync();
+            await riotService.InitAsync();
 
             client.MessageReceived += ProcessMessage;
             //client.UserJoined += UserJoined;
             //client.UserLeft += UserLeft;
-            //client.Ready += Ready;
+            client.Ready += ReadyAsync;
         }
 
-        public static async Task Ready()
+        public static async Task ReadyAsync()
         {
             await client.SetGameAsync(RiftBot.BotStatusMessage);
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
-                return;
+            //if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
+            //    return;
 
-            await channel.SendEmbedAsync(
-                new EmbedBuilder()
-                    .WithDescription("Основной бот сервера включен.")
-                    .Build());
+            //await channel.SendIonicMessageAsync(new IonicMessage(new RiftEmbed().WithDescription("Основной бот сервера включен.")));
         }
 
         async Task ProcessMessage(SocketMessage socketMsg)
@@ -124,7 +121,6 @@ namespace Rift
                 if (result.IsSuccess)
                 {
                     var command = context.Message.Content.Substring(1).TrimStart();
-
                     RiftBot.Log.Info($"{context.Message.Author} sent channel command: \"{command}\"");
                 }
                 else

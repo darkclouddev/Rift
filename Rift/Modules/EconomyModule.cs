@@ -1,17 +1,14 @@
-using System;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Preconditions;
 using Rift.Services;
 using Rift.Services.Economy;
-using Rift.Services.Message;
 using Rift.Util;
 
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using IonicLib;
 using IonicLib.Util;
 
 namespace Rift.Modules
@@ -35,13 +32,6 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Update(ulong userId)
         {
-            //var eb = new EmbedBuilder()
-            //	.WithAuthor("Оповещения")
-            //	.WithDescription($"Недоступно до обновления.");
-
-            //await Context.User.SendEmbedAsync(eb);
-            //return;
-
             await riotService.UpdateRankAsync(userId);
         }
 
@@ -201,11 +191,11 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public class ActivateModule : ModuleBase
         {
-            readonly EconomyService economy;
+            readonly EconomyService economyService;
 
-            public ActivateModule(EconomyService service)
+            public ActivateModule(EconomyService economyService)
             {
-                economy = service;
+                this.economyService = economyService;
             }
 
             [Command("двойной опыт")]
@@ -214,7 +204,7 @@ namespace Rift.Modules
             {
                 using (Context.Channel.EnterTypingState())
                 {
-                    await economy.ActivateDoubleExp(Context.User.Id);
+                    await economyService.ActivateDoubleExp(Context.User.Id);
                 }
             }
 
@@ -224,7 +214,7 @@ namespace Rift.Modules
             {
                 using (Context.Channel.EnterTypingState())
                 {
-                    await economy.ActivateBotRespect(Context.User.Id);
+                    await economyService.ActivateBotRespect(Context.User.Id);
                 }
             }
         }
@@ -541,7 +531,7 @@ namespace Rift.Modules
         {
             readonly EconomyService economyService;
             
-            public OpenModule(/*EconomyService economyService*/)
+            public OpenModule(EconomyService economyService)
             {
                 this.economyService = economyService;
             }
@@ -600,7 +590,7 @@ namespace Rift.Modules
         {
             readonly EconomyService economyService;
 
-            public BuyModule(/*EconomyService economyService*/)
+            public BuyModule(EconomyService economyService)
             {
                 this.economyService = economyService;
             }
@@ -628,11 +618,11 @@ namespace Rift.Modules
         [Group("подарить")]
         public class GiftModule : ModuleBase
         {
-            readonly EconomyService economy;
+            readonly EconomyService economyService;
 
-            public GiftModule(EconomyService service)
+            public GiftModule(EconomyService economyService)
             {
-                economy = service;
+                this.economyService = economyService;
             }
 
             [Command]
@@ -671,7 +661,8 @@ namespace Rift.Modules
         [Command("подарки")]
         public async Task Gifts()
         {
-            await Context.User.SendEmbedAsync(Gift.Embed);
+            await ReplyAsync("Not implemented yet.");
+            //await Context.User.SendEmbedAsync(Gift.Embed);
         }
     }
 }
