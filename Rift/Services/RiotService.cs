@@ -74,23 +74,23 @@ namespace Rift.Services
 
             api = RiotApi.NewInstance(Settings.App.RiotApiKey);
 
-            approveTimer = new Timer(
-                async delegate
-                {
-                    await CheckApproveAsync();
-                },
-                null,
-                TimeSpan.FromSeconds(20),
-                approveCheckCooldown);
+            //approveTimer = new Timer(
+            //    async delegate
+            //    {
+            //        await CheckApproveAsync();
+            //    },
+            //    null,
+            //    TimeSpan.FromSeconds(20),
+            //    approveCheckCooldown);
             
-            updateTimer = new Timer(
-                async delegate
-                {
-                    await UpdateUsersAsync();
-                },
-                null,
-                TimeSpan.FromSeconds(20),
-                TimeSpan.FromMinutes(5));
+            //updateTimer = new Timer(
+            //    async delegate
+            //    {
+            //        await UpdateUsersAsync();
+            //    },
+            //    null,
+            //    TimeSpan.FromSeconds(20),
+            //    TimeSpan.FromMinutes(5));
         }
 
         #region Data
@@ -317,18 +317,18 @@ namespace Rift.Services
         async Task<IonicMessage> RegisterInternalAsync(ulong userId, string region, string summonerName)
         {
             if (await Database.HasLolDataAsync(userId))
-                return await RiftBot.GetMessageAsync("loldata-hasAcc", new FormatData(userId));
+                return await RiftBot.GetMessageAsync("register-hasAcc", new FormatData(userId));
 
             if (await Database.IsPendingAsync(userId))
-                return await RiftBot.GetMessageAsync("loldata-pending", new FormatData(userId));
+                return await RiftBot.GetMessageAsync("register-pending", new FormatData(userId));
 
             (var summonerResult, var summoner) = await GetSummonerByNameAsync(region.ToLowerInvariant(), summonerName);
 
             if (summonerResult != RequestResult.Success)
-                return await RiftBot.GetMessageAsync("loldata-namenotfound", new FormatData(userId));
+                return await RiftBot.GetMessageAsync("register-namenotfound", new FormatData(userId));
 
             if (await Database.IsTakenAsync(region, summoner.Id))
-                return await RiftBot.GetMessageAsync("loldata-taken", new FormatData(userId));
+                return await RiftBot.GetMessageAsync("register-taken", new FormatData(userId));
 
             var code = Helper.GenerateConfirmationCode(16);
 
@@ -346,7 +346,7 @@ namespace Rift.Services
             if (!await AddForApprovalAsync(pendingUser))
                 return MessageService.Error;
             
-            return await RiftBot.GetMessageAsync("loldata-code", new FormatData(userId));
+            return await RiftBot.GetMessageAsync("register-code", new FormatData(userId));
         }
 
         static async Task<bool> AddForApprovalAsync(RiftPendingUser pendingUser)
@@ -374,6 +374,7 @@ namespace Rift.Services
                 if (expired)
                 {
                     await Database.RemovePendingUserAsync(user);
+                    await RiftBot.SendChatMessageAsync("register-pending-expired", new FormatData(user.UserId));
                 }
             }
 

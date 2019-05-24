@@ -18,7 +18,7 @@ namespace Rift.Services.Message.Formatters.Moderation
             if (sgUser is null)
             {
                 RiftBot.Log.Error($"Template \"{nameof(ModName)}\": No user data found.");
-                return null;
+                return Task.FromResult(message);
             }
 
             return ReplaceData(message, sgUser.ToString());

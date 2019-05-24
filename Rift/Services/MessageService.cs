@@ -25,22 +25,22 @@ namespace Rift.Services
     public class MessageService
     {
         public static readonly IonicMessage Error =
-            new IonicMessage(new RiftEmbed()
-                    .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
-                    .WithColor(226, 87, 76)
-                    .WithDescription("Обратитесь к хранителю ботов и опишите ваши действия, которые привели к возникновению данной ошибки."));
+            new IonicMessage("$mention", new RiftEmbed()
+                .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
+                .WithColor(226, 87, 76)
+                .WithDescription("Обратитесь к хранителю ботов и опишите ваши действия, которые привели к возникновению данной ошибки."));
         
         public static readonly IonicMessage UserNotFound =
-            new IonicMessage(new RiftEmbed()
-                    .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
-                    .WithColor(255, 0, 0)
-                    .WithDescription("Пользователь не найден!"));
+            new IonicMessage("$mention", new RiftEmbed()
+                .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
+                .WithColor(255, 0, 0)
+                .WithDescription("Пользователь не найден!"));
         
         public static readonly IonicMessage RoleNotFound =
-            new IonicMessage(new RiftEmbed()
-                    .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
-                    .WithColor(255, 0, 0)
-                    .WithDescription("Роль не найдена!"));
+            new IonicMessage("$mention", new RiftEmbed()
+                .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
+                .WithColor(255, 0, 0)
+                .WithDescription("Роль не найдена!"));
         
         public MessageService()
         {

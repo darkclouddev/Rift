@@ -4,15 +4,15 @@ using Rift.Data.Models;
 
 namespace Rift.Services.Message.Formatters.LolData
 {
-    public class LolRegion : FormatterBase
+    public class LoldataSummonerName : FormatterBase
     {
-        public LolRegion() : base("$lolRegion") {}
+        public LoldataSummonerName() : base("$loldataSummonerName") {}
 
         public override async Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
             var lolData = await Database.GetUserLolDataAsync(data.UserId);
             
-            return await ReplaceData(message, lolData.SummonerRegion);
+            return await ReplaceData(message, lolData.SummonerName);
         }
     }
 }
