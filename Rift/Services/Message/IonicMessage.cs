@@ -13,10 +13,17 @@ namespace Rift.Services.Message
         public Embed Embed { get; }
         public string ImageUrl { get; }
 
-        public IonicMessage(string text, Embed embed, string imageUrl)
+        public IonicMessage(string text, Embed embed, string imageUrl = null)
         {
             Text = text;
             Embed = embed;
+            ImageUrl = imageUrl;
+        }
+
+        public IonicMessage(string text, RiftEmbed embed, string imageUrl = null)
+        {
+            Text = text;
+            Embed = embed.ToEmbed();
             ImageUrl = imageUrl;
         }
 
