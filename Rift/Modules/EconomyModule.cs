@@ -46,7 +46,7 @@ namespace Rift.Modules
         }
 
         [Command("обновить")]
-        [RateLimit(1, 10, Measure.Minutes)]
+        [RateLimit(1, 10, Measure.Minutes, ErrorMessage = "Запрашивать обновление ранга можно не чаще 1 раза в 10 минут!")]
         [RequireContext(ContextType.Guild)]
         public async Task Update()
         {
