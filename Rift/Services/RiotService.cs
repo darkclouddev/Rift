@@ -154,7 +154,7 @@ namespace Rift.Services
                     LoadData();
 
                     Settings.App.LolVersion = version;
-                    await Settings.Save(SettingsType.App);
+                    await Settings.SaveAppAsync();
 
                     RiftBot.Log.Info($"Data update completed. New version is {Settings.App.LolVersion}");
 
@@ -844,15 +844,15 @@ namespace Rift.Services
         {
             switch (rank)
             {
-                case LeagueRank.Iron:        return $"{Settings.Emote.RankIron} Железо";
-                case LeagueRank.Bronze:      return $"{Settings.Emote.RankBronze} Бронза";
-                case LeagueRank.Silver:      return $"{Settings.Emote.RankSilver} Серебро";
-                case LeagueRank.Gold:        return $"{Settings.Emote.RankGold} Золото";
-                case LeagueRank.Platinum:    return $"{Settings.Emote.RankPlatinum} Платина";
-                case LeagueRank.Diamond:     return $"{Settings.Emote.RankDiamond} Алмаз";
-                case LeagueRank.Master:      return $"{Settings.Emote.RankMaster} Мастер";
-                case LeagueRank.GrandMaster: return $"{Settings.Emote.RankGrandmaster} Грандмастер";
-                case LeagueRank.Challenger:  return $"{Settings.Emote.RankChallenger} Претендент";
+                case LeagueRank.Iron:        return "$emoteRankIron Железо";
+                case LeagueRank.Bronze:      return "$emoteRankBronze Бронза";
+                case LeagueRank.Silver:      return "$emoteRankSilver Серебро";
+                case LeagueRank.Gold:        return "$emoteRankGold Золото";
+                case LeagueRank.Platinum:    return "$emoteRankPlatinum Платина";
+                case LeagueRank.Diamond:     return "$emoteRankDiamond Алмаз";
+                case LeagueRank.Master:      return "$emoteRankMaster Мастер";
+                case LeagueRank.GrandMaster: return "$emoteRankGrandmaster Грандмастер";
+                case LeagueRank.Challenger:  return "$emoteRankChallenger Претендент";
             }
 
             return string.Empty;

@@ -32,6 +32,7 @@ namespace Rift
         static MinionService minionService;
         static MessageService messageService;
         static QuizService quizService;
+        static EmoteService emoteService;
 
         public CommandHandler(IServiceProvider serviceProvider)
         {
@@ -45,6 +46,7 @@ namespace Rift
             messageService = provider.GetService<MessageService>();
             riotService = provider.GetService<RiotService>();
             quizService = provider.GetService<QuizService>();
+            emoteService = provider.GetService<EmoteService>();
         }
 
         public async Task ConfigureAsync()
@@ -62,6 +64,7 @@ namespace Rift
 
         public static async Task ReadyAsync()
         {
+            await emoteService.ReloadEmotes();
             await client.SetGameAsync(RiftBot.BotStatusMessage);
 
             //if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
@@ -168,7 +171,7 @@ namespace Rift
                 await context.Message.DeleteAsync();
 
                 var eb = new EmbedBuilder()
-                    .WithDescription($"{Settings.Emote.ExMark} {context.Message.Author.Mention} ссылки на сервере запрещены!");
+                    .WithDescription($":no_entry_sign: {context.Message.Author.Mention} ссылки на сервере запрещены!");
 
                 await context.User.SendEmbedAsync(eb);
                 return;

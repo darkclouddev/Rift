@@ -356,10 +356,10 @@ namespace Rift.Services
                 .WithTitle("Ваш профиль")
                 .WithThumbnailUrl(sgUser.GetAvatarUrl())
                 .WithDescription($"Статистика и информация о вашем аккаунте в системе:")
-                .AddField("Уровень", $"{Settings.Emote.LevelUp} {profile.Level.ToString()}", true)
-                .AddField("Место", $"{Settings.Emote.Rewards} {position}", true)
+                .AddField("Уровень", $"{profile.Level.ToString()}", true)
+                .AddField("Место", $"{position}", true)
                 .AddField("Статистика текущего уровня",
-                    $"{Settings.Emote.Experience} Получено {levelPerc.ToString()}% опыта до {(profile.Level+1).ToString()} уровня.")
+                    $" Получено {levelPerc.ToString()}% опыта до {(profile.Level+1).ToString()} уровня.")
                 .AddField("Временные роли", tempRolesString);
             
             return new IonicMessage(embed.ToEmbed());
@@ -763,8 +763,6 @@ namespace Rift.Services
                     break;
             }
 
-            var balance = await GetBalanceString();
-
             async Task<(bool, Currency)> WithdrawCurrencyAsync()
             {
                 var dbInventory = await Database.GetUserInventoryAsync(userId);
@@ -795,13 +793,6 @@ namespace Rift.Services
 
             await Database.SetLastStoreTimeAsync(userId, DateTime.UtcNow);
             await Database.AddStatisticsAsync(userId, purchasedItemsTotal: 1u);
-
-            async Task<string> GetBalanceString()
-            {
-                var dbInventory = await Database.GetUserInventoryAsync(userId);
-
-                return $"{Settings.Emote.Coin} {dbInventory.Coins.ToString()} {Settings.Emote.Token} {dbInventory.Tokens.ToString()}";
-            }
 
             return await RiftBot.GetMessageAsync("store-success", new FormatData(userId));
         }

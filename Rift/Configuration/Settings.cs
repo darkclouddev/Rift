@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Threading.Tasks;
 
 using Newtonsoft.Json;
@@ -23,7 +23,6 @@ namespace Rift.Configuration
         public static ChannelId ChannelId;
         public static Chat Chat;
         public static Economy Economy;
-        public static Emote Emote;
         public static RoleId RoleId;
         public static Thumbnail Thumbnail;
 
@@ -35,7 +34,6 @@ namespace Rift.Configuration
             channelIdSettingsFilePath = Path.Combine(settingsFolderPath, "channels.json");
             chatSettingsFilePath = Path.Combine(settingsFolderPath, "chat.json");
             economySettingsFilePath = Path.Combine(settingsFolderPath, "economy.json");
-            emoteSettingsFilePath = Path.Combine(settingsFolderPath, "emotes.json");
             roleIdSettingsFilePath = Path.Combine(settingsFolderPath, "roles.json");
             thumbnailSettingsFilePath = Path.Combine(settingsFolderPath, "thumbnails.json");
 
@@ -56,7 +54,6 @@ namespace Rift.Configuration
             ReloadChannels();
             ReloadChat();
             ReloadEconomy();
-            ReloadEmotes();
             ReloadRoles();
             ReloadThumbnails();
         }
@@ -81,9 +78,9 @@ namespace Rift.Configuration
             Economy = LoadSettingsFromFile<Economy>(economySettingsFilePath);
         }
 
-        public static void ReloadEmotes()
+        public static async Task ReloadRolesAsync()
         {
-            Emote = LoadSettingsFromFile<Emote>(emoteSettingsFilePath);
+            RoleId = await LoadSettingsAsync<RoleId>(SettingsType.RoleId);
         }
 
         public static void ReloadRoles()
@@ -126,9 +123,6 @@ namespace Rift.Configuration
                     await File.WriteAllTextAsync(economySettingsFilePath, JsonConvert.SerializeObject(Economy, Formatting.Indented));
                     break;
 
-                case SettingsType.Emote:
-                    await File.WriteAllTextAsync(emoteSettingsFilePath, JsonConvert.SerializeObject(Emote, Formatting.Indented));
-                    break;
 
                 case SettingsType.RoleId:
                     await File.WriteAllTextAsync(roleIdSettingsFilePath, JsonConvert.SerializeObject(RoleId, Formatting.Indented));
@@ -147,7 +141,7 @@ namespace Rift.Configuration
         ChannelId,
         Chat,
         Economy,
-        Emote,
+        RoleId = 4,
         RoleId,
         Thumbnail,
     }

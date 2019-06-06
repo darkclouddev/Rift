@@ -169,6 +169,7 @@ namespace Rift
                 .AddSingleton(new EconomyService())
                 .AddSingleton(new RoleService())
                 .AddSingleton(new RiotService())
+                .AddSingleton(new EmoteService())
                 .AddSingleton(new MessageService())
                 //.AddSingleton(new AnnounceService())
                 //.AddSingleton(new EventService())

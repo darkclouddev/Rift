@@ -25,20 +25,20 @@ namespace Rift.Services
     public class MessageService
     {
         public static readonly IonicMessage Error =
-            new IonicMessage("$mention", new RiftEmbed()
-                .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
+            new IonicMessage(new RiftEmbed()
+                .WithAuthor("Ошибка")
                 .WithColor(226, 87, 76)
                 .WithDescription("Обратитесь к хранителю ботов и опишите ваши действия, которые привели к возникновению данной ошибки."));
         
         public static readonly IonicMessage UserNotFound =
-            new IonicMessage("$mention", new RiftEmbed()
-                .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
+            new IonicMessage(new RiftEmbed()
+                .WithAuthor("Ошибка")
                 .WithColor(255, 0, 0)
                 .WithDescription("Пользователь не найден!"));
         
         public static readonly IonicMessage RoleNotFound =
-            new IonicMessage("$mention", new RiftEmbed()
-                .WithAuthor("Ошибка", Settings.Emote.ExMarkUrl)
+            new IonicMessage(new RiftEmbed()
+                .WithAuthor("Ошибка")
                 .WithColor(255, 0, 0)
                 .WithDescription("Роль не найдена!"));
         
@@ -61,7 +61,7 @@ namespace Rift.Services
             RiftBot.Log.Info($"Loaded {formatters.Count.ToString()} message formatters in" +
                 $" {sw.Elapsed.Humanize(1, new CultureInfo("en-US")).ToLowerInvariant()}.");
 
-            RiftBot.Log.Info($"Starting up message scheduler.");
+            RiftBot.Log.Info("Starting up message scheduler.");
             checkTimer = new Timer(
                 async delegate
                 {
@@ -69,7 +69,7 @@ namespace Rift.Services
                 },
                 null,
                 TimeSpan.FromSeconds(10),
-                TimeSpan.FromSeconds(1)); 
+                TimeSpan.FromSeconds(1));
         }
         
         //TODO: refactor using scheduling timer
@@ -276,6 +276,7 @@ namespace Rift.Services
         }
 
         const string TemplateRegex = @"\$\w+";
+        const string EmotePrefix = "$emote";
 
         public async Task<IonicMessage> FormatMessageAsync(RiftMessage message, FormatData data = null)
         {
@@ -309,7 +310,13 @@ namespace Rift.Services
                 foreach (var match in matches)
                 {
                     if (!formatters.TryGetValue(match.Value, out var f))
+                    {
+                        if (!match.Value.StartsWith(EmotePrefix))
+                            continue;
+
+                        RiftBot.GetService<EmoteService>().FormatMessage(match.Value, message);
                         continue;
+                    }
 
                     try
                     {

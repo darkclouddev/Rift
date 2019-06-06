@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Preconditions;
@@ -25,10 +25,10 @@ namespace Rift.Modules
             if (lvlHelpEmbed is null)
             {
                 var lvlHelpEmbed = new EmbedBuilder()
-                    .WithDescription($"{Settings.Emote.QuestionMark} Награды за уровни на сервере\n\n"
+                    .WithDescription($"Награды за уровни на сервере\n\n"
                                          + $"Проявляйте активность в общем чате и получайте монеты, сундуки и редкие жетоны. С поднятием уровня вам будут открываться дополнительные возможности с ботом и награды будут увеличиваться.\n\n"
                                          + $"Награды за 2 уровень:\n"
-                                         + $"Все призыватели получают {Settings.Emote.Coin} 100 {Settings.Emote.Chest} 1")
+                                         + $"Все призыватели получают 100 1")
                     .Build();
             }
 

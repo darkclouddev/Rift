@@ -208,20 +208,6 @@ namespace Rift.Modules
                 }
             }
 
-            foreach (var field in Settings.Emote.GetType().GetProperties())
-            {
-                if (skipChecks)
-                    break;
-
-                if (field.GetValue(Settings.Emote, null) is string value)
-                {
-                    if (String.IsNullOrWhiteSpace(value))
-                    {
-                        errors.Add($"Emote undefined: {field.Name}");
-                    }
-                }
-            }
-
             if (!IonicClient.GetGuild(Settings.App.MainGuildId, out var guild))
             {
                 errors.Add($"Guild is null: {nameof(Settings.App.MainGuildId)}");

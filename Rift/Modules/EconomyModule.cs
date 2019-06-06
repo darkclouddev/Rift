@@ -282,7 +282,7 @@ namespace Rift.Modules
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
                         .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} {Settings.Emote.Coin} {amount.ToString()}"));
+                        .WithDescription($"{giveText} $emotecoins {amount.ToString()}"));
             }
 
             [Command("tokens")]
@@ -298,7 +298,7 @@ namespace Rift.Modules
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
                         .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} {Settings.Emote.Token} {amount.ToString()}"));
+                        .WithDescription($"{giveText} $emotetokens {amount.ToString()}"));
             }
 
             [Command("chests")]
@@ -314,7 +314,7 @@ namespace Rift.Modules
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
                         .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} {Settings.Emote.Chest} {amount.ToString()}"));
+                        .WithDescription($"{giveText} $emotechest {amount.ToString()}"));
             }
 
             [Command("capsules")]
@@ -330,7 +330,7 @@ namespace Rift.Modules
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
                         .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} {Settings.Emote.Capsule} {amount.ToString()}"));
+                        .WithDescription($"{giveText} $emotecapsule {amount.ToString()}"));
             }
 
             [Command("spheres")]
@@ -346,7 +346,7 @@ namespace Rift.Modules
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
                         .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} {Settings.Emote.Sphere} {amount.ToString()}"));
+                        .WithDescription($"{giveText} $emotesphere {amount.ToString()}"));
             }
 
             [Command("lvl2")]
@@ -362,7 +362,7 @@ namespace Rift.Modules
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
                         .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} {Settings.Emote.PowerupDoubleExperience} {amount.ToString()}"));
+                        .WithDescription($"{giveText} $emote2exp {amount.ToString()}"));
             }
 
             [Command("respects")]
@@ -378,7 +378,7 @@ namespace Rift.Modules
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
                         .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} {Settings.Emote.BotRespect} {amount.ToString()}"));
+                        .WithDescription($"{giveText} $emoterespect {amount.ToString()}"));
             }
 
             [Command("tickets")]
@@ -394,7 +394,7 @@ namespace Rift.Modules
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
                         .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} {Settings.Emote.Tickets} {amount.ToString()}"));
+                        .WithDescription($"{giveText} $emoteticket {amount.ToString()}"));
             }
         }
 
@@ -415,7 +415,7 @@ namespace Rift.Modules
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.Coin} {amount.ToString()}"));
+                                            .WithDescription($"{takeText} $emotecoins {amount.ToString()}"));
             }
 
             [Command("tokens")]
@@ -430,10 +430,10 @@ namespace Rift.Modules
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.Token} {amount.ToString()}"));
+                                            .WithDescription($"{takeText} $emotetoken {amount.ToString()}"));
             }
 
-            [Command("lvl2")]
+            [Command("2exp")]
             [RequireAdmin]
             [RequireContext(ContextType.Guild)]
             public async Task Level(uint amount, IUser user)
@@ -445,7 +445,7 @@ namespace Rift.Modules
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.PowerupDoubleExperience} {amount.ToString()}"));
+                                            .WithDescription($"{takeText} $emote2exp {amount.ToString()}"));
             }
 
             [Command("chests")]
@@ -460,7 +460,7 @@ namespace Rift.Modules
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.Chest} {amount.ToString()}"));
+                                            .WithDescription($"{takeText} $emotechest {amount.ToString()}"));
             }
 
             [Command("capsules")]
@@ -475,7 +475,7 @@ namespace Rift.Modules
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.Capsule} {amount.ToString()}"));
+                                            .WithDescription($"{takeText} $emotecapsule {amount.ToString()}"));
             }
 
             [Command("spheres")]
@@ -490,7 +490,7 @@ namespace Rift.Modules
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.Sphere} {amount.ToString()}"));
+                                            .WithDescription($"{takeText} $emotesphere {amount.ToString()}"));
             }
 
             [Command("respects")]
@@ -506,7 +506,7 @@ namespace Rift.Modules
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
                         .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{takeText} {Settings.Emote.BotRespect} {amount.ToString()}"));
+                        .WithDescription($"{takeText} $emoterespect {amount.ToString()}"));
             }
 
             [Command("tickets")]
@@ -522,7 +522,7 @@ namespace Rift.Modules
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
                         .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{takeText} {Settings.Emote.Tickets} {amount.ToString()}"));
+                        .WithDescription($"{takeText} $emoteticket {amount.ToString()}"));
             }
         }
 
