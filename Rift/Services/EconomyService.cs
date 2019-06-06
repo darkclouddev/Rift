@@ -526,7 +526,7 @@ namespace Rift.Services
             }
         }
 
-        public async Task<IonicMessage> OpenChestAsync(ulong userId)
+        public async Task<IonicMessage> OpenChestAsync(ulong userId, uint amount)
         {
             await chestMutex.WaitAsync().ConfigureAwait(false);
 
@@ -536,7 +536,7 @@ namespace Rift.Services
 
             try
             {
-                result = await OpenChestInternalAsync(userId, 1).ConfigureAwait(false);
+                result = await OpenChestInternalAsync(userId, amount).ConfigureAwait(false);
             }
             finally
             {
