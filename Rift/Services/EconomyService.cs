@@ -106,7 +106,6 @@ namespace Rift.Services
         static SemaphoreSlim capsuleMutex = new SemaphoreSlim(1);
         static SemaphoreSlim sphereMutex = new SemaphoreSlim(1);
         static SemaphoreSlim storeMutex = new SemaphoreSlim(1);
-        static SemaphoreSlim attackMutex = new SemaphoreSlim(1);
         static SemaphoreSlim dailyChestMutex = new SemaphoreSlim(1);
         static SemaphoreSlim bragMutex = new SemaphoreSlim(1);
 
