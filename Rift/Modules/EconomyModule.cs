@@ -43,55 +43,6 @@ namespace Rift.Modules
             await riotService.UpdateRankAsync(Context.User.Id);
         }
 
-        [Group("gift")]
-        public class SpecialGiftModule : ModuleBase
-        {
-            readonly EconomyService economyService;
-
-            public SpecialGiftModule(EconomyService economyService)
-            {
-                this.economyService = economyService;
-            }
-
-            [Command("stream")]
-            [RequireStreamer]
-            [RequireContext(ContextType.Guild)]
-            public async Task Stream(IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await GiftAsync(Context.User.Id, sgUser.Id, GiftSource.Streamer);
-            }
-
-            [Command("mod")]
-            [RequireModerator]
-            [RequireContext(ContextType.Guild)]
-            public async Task Moderator(IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await GiftAsync(Context.User.Id, sgUser.Id, GiftSource.Moderator);
-            }
-
-            [Command("voice")]
-            [RequireModerator]
-            [RequireContext(ContextType.Guild)]
-            public async Task Voice(IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await GiftAsync(Context.User.Id, sgUser.Id, GiftSource.Voice);
-            }
-
-            async Task GiftAsync(ulong fromId, ulong toId, GiftSource giftSource)
-            {
-                await economyService.GiftSpecialAsync(fromId, toId, giftSource);
-            }
-        }
-
         [Command("активные")]
         [RequireAdmin]
         [RequireContext(ContextType.Guild)]
@@ -585,70 +536,22 @@ namespace Rift.Modules
             }
         }
 
-        [Group("купить")]
-        public class BuyModule : ModuleBase
+        [Command("купить")]
+        [RequireContext(ContextType.Guild)]
+        public async Task Buy(uint id)
         {
-            readonly EconomyService economyService;
-
-            public BuyModule(EconomyService economyService)
+            using (Context.Channel.EnterTypingState())
             {
-                this.economyService = economyService;
-            }
+                var storeItem = Store.GetShopItemById(id);
 
-            [Command]
-            [RequireContext(ContextType.Guild)]
-            public async Task Default(uint id)
-            {
-                using (Context.Channel.EnterTypingState())
+                if (storeItem is null)
                 {
-                    var storeItem = Store.GetShopItemById(id);
-
-                    if (storeItem is null)
-                    {
-                        await Context.Channel.SendMessageAsync("Данный номер отсутствует в магазине.");
-                        return;
-                    }
-
-                    var result = await economyService.StorePurchaseAsync(Context.User.Id, storeItem);
-                    await Context.Channel.SendIonicMessageAsync(result);
-                }
-            }
-        }
-
-        [Group("подарить")]
-        public class GiftModule : ModuleBase
-        {
-            readonly EconomyService economyService;
-
-            public GiftModule(EconomyService economyService)
-            {
-                this.economyService = economyService;
-            }
-
-            [Command]
-            [RequireContext(ContextType.Guild)]
-            public async Task Default(uint id, IUser user)
-            {
-                using (Context.Channel.EnterTypingState())
-                {
-                    if (user is null || !(user is SocketGuildUser sgUser))
-                    {
-                        await Context.User.SendMessageAsync($"Пользователь не найден!");
-                        return;
-                    }
-
-                    await SendGiftAsync((SocketGuildUser) Context.User, sgUser, id);
-                }
-            }
-
-            async Task SendGiftAsync(SocketGuildUser fromSgUser, SocketGuildUser toSgUser, uint id)
-            {
-                var message = await economyService.GiftAsync(fromSgUser, toSgUser, id);
-
-                if (message is null)
+                    await Context.Channel.SendMessageAsync("Данный номер отсутствует в магазине.");
                     return;
-                
-                await Context.Channel.SendIonicMessageAsync(message);
+                }
+
+                var result = await economyService.StorePurchaseAsync(Context.User.Id, storeItem);
+                await Context.Channel.SendIonicMessageAsync(result);
             }
         }
 
@@ -656,13 +559,6 @@ namespace Rift.Modules
         public async Task Shop()
         {
             await Context.User.SendEmbedAsync(Store.Embed);
-        }
-
-        [Command("подарки")]
-        public async Task Gifts()
-        {
-            await ReplyAsync("Not implemented yet.");
-            //await Context.User.SendEmbedAsync(Gift.Embed);
         }
     }
 }

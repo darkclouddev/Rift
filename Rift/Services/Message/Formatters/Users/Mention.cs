@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 using Rift.Data.Models;
 
-namespace Rift.Services.Message.Formatters
+namespace Rift.Services.Message.Formatters.Users
 {
     public class Mention : FormatterBase
     {

@@ -6,10 +6,16 @@ namespace Rift.Services.Reward
     {
         public ChestReward()
         {
-            AddCoins(Helper.NextUInt(1600, 2301));
+            AddRandomCoins(1_600, 2_301);
 
             if (Helper.GetChance(3u))
+            {
                 AddTickets(1u);
+            }
+            else
+            {
+                AddBotRespects(1u);
+            }
         }
     }
 }

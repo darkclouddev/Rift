@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using IonicLib.Extensions;
 
 namespace Rift.Services.Reward
 {
@@ -9,7 +6,17 @@ namespace Rift.Services.Reward
     {
         public GiftReward()
         {
+            AddRandomCoins(4_000, 10_001);
+            AddRandomChests(1, 6);
 
+            if (Helper.GetChance(1u))
+                AddDoubleExps(1u);
+
+            if (Helper.GetChance(1u))
+                AddTickets(1u);
+
+            if (Helper.GetChance(1u))
+                AddBotRespects(1u);
         }
     }
 }

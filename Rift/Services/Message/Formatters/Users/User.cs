@@ -1,15 +1,15 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Data.Models;
 
 using IonicLib;
 
-namespace Rift.Services.Message.Formatters
+namespace Rift.Services.Message.Formatters.Users
 {
-    public class UserName : FormatterBase
+    public class User : FormatterBase
     {
-        public UserName() : base("$userName") {}
+        public User() : base("$user") {}
 
         public override Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
@@ -17,11 +17,11 @@ namespace Rift.Services.Message.Formatters
 
             if (sgUser is null)
             {
-                RiftBot.Log.Error($"Template \"{nameof(UserName)}\": No user data found.");
+                RiftBot.Log.Error($"Template \"{nameof(User)}\": No user data found.");
                 return null;
             }
 
-            return ReplaceData(message, sgUser.Username);
+            return ReplaceData(message, sgUser.ToString());
         }
     }
 }

@@ -19,6 +19,8 @@ namespace Rift.Services.Message
 
         public BragData Brag { get; set; }
 
+        public GiftData Gift { get; set; }
+
         public LolStatData LolStat { get; set; }
 
         public ModerationData Moderation { get; set; }
@@ -49,6 +51,14 @@ namespace Rift.Services.Message
     {
         public UserTopExp[] Top10Exp { get; set; }
         public UserTopCoins[] Top10Coins { get; set; }
+    }
+
+    public class GiftData
+    {
+        public ulong TargetId { get; set; }
+        public ItemReward Reward { get; set; }
+        public TimeSpan Cooldown { get; set; }
+        public uint NecessaryCoins { get; set; }
     }
 
     public class LolStatData

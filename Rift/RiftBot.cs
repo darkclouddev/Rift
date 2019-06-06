@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Rift.Configuration;
 using Rift.Services;
 using Rift.Services.Message;
+using Rift.Util;
 
 using Discord;
 using Discord.Commands;
@@ -18,7 +19,6 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
-using Rift.Util;
 using ILogger = NLog.ILogger;
 
 namespace Rift
@@ -102,16 +102,17 @@ namespace Rift
             };
 
             Console.WriteLine($"Using content root: {AppPath}");
-
+            
             //await CreateWebHostBuilder(args).Build().StartAsync();
             //await Task.Delay(-1);
 
             await new IonicClient(Path.Combine(AppPath, ".token"))
-                  .RunAsync()
-                  .ConfigureAwait(false);
+                .RunAsync()
+                .ConfigureAwait(false);
+
             await new RiftBot()
-                  .RunAsync()
-                  .ConfigureAwait(false);
+                .RunAsync()
+                .ConfigureAwait(false);
         }
 
         public static string GetContentRoot()
@@ -167,6 +168,7 @@ namespace Rift
                 .AddSingleton(Log)
                 .AddSingleton(IonicClient.Client)
                 .AddSingleton(new EconomyService())
+                .AddSingleton(new GiftService())
                 .AddSingleton(new RoleService())
                 .AddSingleton(new RiotService())
                 .AddSingleton(new EmoteService())
