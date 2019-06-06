@@ -15,9 +15,9 @@ namespace Rift.Services.Message
         public string ThumbnailUrl { get; set; }
         public string ImageUrl { get; set; }
         public bool HasTimestamp { get; set; } = false;
-        public int ColorRed { get; private set; } = -1;
-        public int ColorGreen { get; private set; } = -1;
-        public int ColorBlue { get; private set; } = -1;
+        public int ColorRed { get; set; } = -1;
+        public int ColorGreen { get; set; } = -1;
+        public int ColorBlue { get; set; } = -1;
 
         public string Footer { get; set; }
         public RiftField[] Fields { get; set; }
@@ -137,7 +137,7 @@ namespace Rift.Services.Message
             if (HasTimestamp)
                 eb.WithCurrentTimestamp();
 
-            if (ColorRed >= 0 && ColorGreen >= 0 && ColorBlue >= 0)
+            if (ColorRed > -1 && ColorGreen > -1 && ColorBlue > -1)
                 eb.WithColor(ColorRed, ColorGreen, ColorBlue);
 
             if (!string.IsNullOrWhiteSpace(Footer))
