@@ -12,11 +12,9 @@ using Rift.Services.Reward;
 using Rift.Util;
 
 using Discord;
-using Discord.WebSocket;
 using Humanizer;
 using IonicLib;
 using IonicLib.Extensions;
-using IonicLib.Util;
 using Microsoft.EntityFrameworkCore;
 
 namespace Rift.Services

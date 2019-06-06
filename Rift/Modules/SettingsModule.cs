@@ -17,7 +17,7 @@ namespace Rift.Modules
             [Command]
             public async Task Default()
             {
-                Settings.ReloadAll();
+                await Settings.ReloadAllAsync();
 
                 await ReplyAsync("All settings reloaded successfully.");
             }
@@ -25,7 +25,7 @@ namespace Rift.Modules
             [Command("app")]
             public async Task App()
             {
-                Settings.ReloadApp();
+                await Settings.ReloadAppAsync();
 
                 await ReplyAsync("App settings reloaded successfully.");
             }
@@ -33,7 +33,7 @@ namespace Rift.Modules
             [Command("channels")]
             public async Task Channels()
             {
-                Settings.ReloadChannels();
+                await Settings.ReloadChannelsAsync();
 
                 await ReplyAsync("Channels reloaded successfully.");
             }
@@ -41,7 +41,7 @@ namespace Rift.Modules
             [Command("chat")]
             public async Task Chat()
             {
-                Settings.ReloadChat();
+                await Settings.ReloadChatAsync();
 
                 await ReplyAsync("Chat settings reloaded successfully.");
             }
@@ -49,23 +49,15 @@ namespace Rift.Modules
             [Command("economy")]
             public async Task Economy()
             {
-                Settings.ReloadEconomy();
+                await Settings.ReloadEconomyAsync();
 
                 await ReplyAsync("Economy settings reloaded successfully.");
-            }
-
-            [Command("emote")]
-            public async Task Emote()
-            {
-                Settings.ReloadEmotes();
-
-                await ReplyAsync("Emotes reloaded successfully.");
             }
 
             [Command("roles")]
             public async Task Roles()
             {
-                Settings.ReloadRoles();
+                await Settings.ReloadRolesAsync();
 
                 await ReplyAsync("Roles reloaded successfully.");
             }
@@ -78,49 +70,42 @@ namespace Rift.Modules
             [Command("app")]
             public async Task App()
             {
-                await Settings.Save(SettingsType.App);
+                await Settings.SaveAppAsync();
                 await ReplyAsync("App settings saved successfully.");
             }
 
             [Command("channels")]
             public async Task Channels()
             {
-                await Settings.Save(SettingsType.ChannelId);
+                await Settings.SaveChannelsAsync();
                 await ReplyAsync("Channels saved successfully.");
             }
 
             [Command("chat")]
             public async Task Chat()
             {
-                await Settings.Save(SettingsType.Chat);
+                await Settings.SaveChatAsync();
                 await ReplyAsync("Chat settings saved successfully.");
             }
 
             [Command("economy")]
             public async Task Economy()
             {
-                await Settings.Save(SettingsType.Economy);
+                await Settings.SaveEconomyAsync();
                 await ReplyAsync("Economy settings saved successfully.");
-            }
-
-            [Command("emote")]
-            public async Task Emote()
-            {
-                await Settings.Save(SettingsType.Emote);
-                await ReplyAsync("Emotes saved successfully.");
             }
 
             [Command("roles")]
             public async Task Roles()
             {
-                await Settings.Save(SettingsType.RoleId);
+                await Settings.SaveRolesAsync();
                 await ReplyAsync("Roles saved successfully.");
             }
 
             [Command("thumbnails")]
             public async Task Thumbnails()
             {
-                await Settings.Save(SettingsType.Thumbnail);
+                await Settings.SaveThumbnailsAsync();
                 await ReplyAsync("Thumbnails saved successfully.");
             }
         }

@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System;
 using System.Threading.Tasks;
 
 using Newtonsoft.Json;
@@ -7,18 +7,6 @@ namespace Rift.Configuration
 {
     public static class Settings
     {
-        const string SettingsFolderName = "config";
-
-        static readonly string settingsFolderPath;
-
-        static readonly string appSettingsFilePath;
-        static readonly string channelIdSettingsFilePath;
-        static readonly string chatSettingsFilePath;
-        static readonly string economySettingsFilePath;
-        static readonly string emoteSettingsFilePath;
-        static readonly string roleIdSettingsFilePath;
-        static readonly string thumbnailSettingsFilePath;
-
         public static App App;
         public static ChannelId ChannelId;
         public static Chat Chat;
@@ -26,123 +14,123 @@ namespace Rift.Configuration
         public static RoleId RoleId;
         public static Thumbnail Thumbnail;
 
-        static Settings()
+        public static async Task ReloadAllAsync()
         {
-            settingsFolderPath = Path.Combine(RiftBot.GetContentRoot(), SettingsFolderName);
-
-            appSettingsFilePath = Path.Combine(settingsFolderPath, "app.json");
-            channelIdSettingsFilePath = Path.Combine(settingsFolderPath, "channels.json");
-            chatSettingsFilePath = Path.Combine(settingsFolderPath, "chat.json");
-            economySettingsFilePath = Path.Combine(settingsFolderPath, "economy.json");
-            roleIdSettingsFilePath = Path.Combine(settingsFolderPath, "roles.json");
-            thumbnailSettingsFilePath = Path.Combine(settingsFolderPath, "thumbnails.json");
-
-            ReloadAll();
+            await ReloadAppAsync();
+            await ReloadChannelsAsync();
+            await ReloadChatAsync();
+            await ReloadEconomyAsync();
+            await ReloadRolesAsync();
+            await ReloadThumbnailsAsync();
         }
 
-        static void EnsureConfigDirCreated()
+        public static async Task ReloadAppAsync()
         {
-            if (!Directory.Exists(settingsFolderPath)) 
-                Directory.CreateDirectory(settingsFolderPath);
+            App = await LoadSettingsAsync<App>(SettingsType.App);
+        }
+        public static async Task SaveAppAsync()
+        {
+            await SaveAsync(SettingsType.App, App);
         }
 
-        public static void ReloadAll()
+        public static async Task ReloadChannelsAsync()
         {
-            EnsureConfigDirCreated();
-
-            ReloadApp();
-            ReloadChannels();
-            ReloadChat();
-            ReloadEconomy();
-            ReloadRoles();
-            ReloadThumbnails();
+            ChannelId = await LoadSettingsAsync<ChannelId>(SettingsType.ChannelId);
+        }
+        public static async Task SaveChannelsAsync()
+        {
+            await SaveAsync(SettingsType.ChannelId, ChannelId);
         }
 
-        public static void ReloadApp()
+        public static async Task ReloadChatAsync()
         {
-            App = LoadSettingsFromFile<App>(appSettingsFilePath);
+            Chat = await LoadSettingsAsync<Chat>(SettingsType.Chat);
+        }
+        public static async Task SaveChatAsync()
+        {
+            await SaveAsync(SettingsType.Chat, Chat);
         }
 
-        public static void ReloadChannels()
+        public static async Task ReloadEconomyAsync()
         {
-            ChannelId = LoadSettingsFromFile<ChannelId>(channelIdSettingsFilePath);
+            Economy = await LoadSettingsAsync<Economy>(SettingsType.Economy);
         }
-
-        public static void ReloadChat()
+        public static async Task SaveEconomyAsync()
         {
-            Chat = LoadSettingsFromFile<Chat>(chatSettingsFilePath);
-        }
-
-        public static void ReloadEconomy()
-        {
-            Economy = LoadSettingsFromFile<Economy>(economySettingsFilePath);
+            await SaveAsync(SettingsType.Economy, Economy);
         }
 
         public static async Task ReloadRolesAsync()
         {
             RoleId = await LoadSettingsAsync<RoleId>(SettingsType.RoleId);
         }
-
-        public static void ReloadRoles()
+        public static async Task SaveRolesAsync()
         {
-            RoleId = LoadSettingsFromFile<RoleId>(roleIdSettingsFilePath);
+            await SaveAsync(SettingsType.RoleId, RoleId);
         }
 
-        public static void ReloadThumbnails()
+        public static async Task ReloadThumbnailsAsync()
         {
-            Thumbnail = LoadSettingsFromFile<Thumbnail>(thumbnailSettingsFilePath);
+            Thumbnail = await LoadSettingsAsync<Thumbnail>(SettingsType.Thumbnail);
+        }
+        public static async Task SaveThumbnailsAsync()
+        {
+            await SaveAsync(SettingsType.Thumbnail, Thumbnail);
         }
 
-        static T LoadSettingsFromFile<T>(string path)
+        static async Task<T> LoadSettingsAsync<T>(SettingsType type)
             where T : new()
         {
-            if (!File.Exists(path))
-                return new T();
+            var dbSettings = await Database.GetSettingsAsync((int) type);
 
-            var jsonContent = File.ReadAllText(path);
-            return JsonConvert.DeserializeObject<T>(jsonContent);
+            if (dbSettings is null)
+            {
+                var settings = new T();
+                await Database.SetSettingsAsync((int) type, JsonConvert.SerializeObject(settings, Formatting.Indented));
+
+                return settings;
+            }
+
+            try
+            {
+                return JsonConvert.DeserializeObject<T>(dbSettings.Data);
+            }
+            catch (Exception ex)
+            {
+                RiftBot.Log.Fatal($"Failed to deserialize {type.ToString()} settings!");
+                RiftBot.Log.Fatal(ex);
+                return default;
+            }
         }
 
-        public static async Task Save(SettingsType type)
+        static async Task SaveAsync(SettingsType type, object data)
         {
-            switch (type)
+            if (data is null)
             {
-                case SettingsType.App:
-                    await File.WriteAllTextAsync(appSettingsFilePath, JsonConvert.SerializeObject(App, Formatting.Indented));
-                    break;
+                RiftBot.Log.Warn($"Trying to write null {type.ToString()} settings, skipping.");
+                return;
+            }
 
-                case SettingsType.ChannelId:
-                    await File.WriteAllTextAsync(channelIdSettingsFilePath, JsonConvert.SerializeObject(ChannelId, Formatting.Indented));
-                    break;
-
-                case SettingsType.Chat:
-                    await File.WriteAllTextAsync(chatSettingsFilePath, JsonConvert.SerializeObject(Chat, Formatting.Indented));
-                    break;
-
-                case SettingsType.Economy:
-                    await File.WriteAllTextAsync(economySettingsFilePath, JsonConvert.SerializeObject(Economy, Formatting.Indented));
-                    break;
-
-
-                case SettingsType.RoleId:
-                    await File.WriteAllTextAsync(roleIdSettingsFilePath, JsonConvert.SerializeObject(RoleId, Formatting.Indented));
-                    break;
-
-                case SettingsType.Thumbnail:
-                    await File.WriteAllTextAsync(thumbnailSettingsFilePath, JsonConvert.SerializeObject(Thumbnail, Formatting.Indented));
-                    break;
+            try
+            {
+                var json = JsonConvert.SerializeObject(data);
+                await Database.SetSettingsAsync((int) type, json);
+            }
+            catch (Exception ex)
+            {
+                RiftBot.Log.Fatal($"Failed to write {type.ToString()} settings to database!");
+                RiftBot.Log.Fatal(ex);
             }
         }
     }
 
     public enum SettingsType
     {
-        App,
-        ChannelId,
-        Chat,
-        Economy,
+        App = 0,
+        ChannelId = 1,
+        Chat = 2,
+        Economy = 3,
         RoleId = 4,
-        RoleId,
-        Thumbnail,
+        Thumbnail = 5,
     }
 }

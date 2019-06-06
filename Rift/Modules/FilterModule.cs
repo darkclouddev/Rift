@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 using Rift.Configuration;
 using Rift.Preconditions;
 
-using IonicLib;
-
 using Discord.Commands;
+using IonicLib;
 
 namespace Rift.Modules
 {
@@ -45,7 +44,7 @@ namespace Rift.Modules
                 return;
 
             Settings.Chat.CapsFilterEnabled = !Settings.Chat.CapsFilterEnabled;
-            await Settings.Save(SettingsType.Chat);
+            await Settings.SaveChatAsync();
 
             await channel.SendMessageAsync($"Фильтр чата {(Settings.Chat.CapsFilterEnabled ? "включён" : "выключен")}.");
         }
@@ -59,7 +58,7 @@ namespace Rift.Modules
                 return;
 
             Settings.Chat.AttachmentFilterEnabled = !Settings.Chat.AttachmentFilterEnabled;
-            await Settings.Save(SettingsType.Chat);
+            await Settings.SaveChatAsync();
 
             await channel.SendMessageAsync($"Фильтр вложений {(Settings.Chat.AttachmentFilterEnabled ? "включён" : "выключен")}.");
         }
@@ -73,7 +72,7 @@ namespace Rift.Modules
                 return;
 
             Settings.Chat.UrlFilterEnabled = !Settings.Chat.UrlFilterEnabled;
-            await Settings.Save(SettingsType.Chat);
+            await Settings.SaveChatAsync();
 
             await channel.SendMessageAsync($"Фильтр ссылок {(Settings.Chat.UrlFilterEnabled ? "включён" : "выключен")}.");
         }

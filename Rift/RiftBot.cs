@@ -95,6 +95,7 @@ namespace Rift
         
         public static async Task Main(string[] args)
         {
+            await Settings.ReloadAllAsync();
             AppPath = GetContentRoot();
             Culture = new CultureInfo("ru-RU")
             {

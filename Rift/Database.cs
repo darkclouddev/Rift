@@ -1470,6 +1470,42 @@ namespace Rift
         }
 
         #endregion Moderation Logs
+
+        #region Settings
+
+        public static async Task<RiftSettings> GetSettingsAsync(int id)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Settings
+                    .FirstOrDefaultAsync(x => x.Id == id);
+            }
+        }
+
+        public static async Task SetSettingsAsync(int id, string data)
+        {
+            using (var context = new RiftContext())
+            {
+                var settings = new RiftSettings
+                {
+                    Id = id,
+                    Data = data
+                };
+
+                if (await context.Settings.AnyAsync(x => x.Id == id))
+                {
+                    context.Entry(settings).Property(x => x.Data).IsModified = true;
+                }
+                else
+                {
+                    await context.Settings.AddAsync(settings);
+                }
+
+                await context.SaveChangesAsync();
+            }
+        }
+
+        #endregion Settings
     }
 
     public class DatabaseException : Exception
