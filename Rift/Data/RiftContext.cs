@@ -20,6 +20,7 @@ namespace Rift.Data
         public DbSet<RiftToxicity> Toxicity { get; set; }
         public DbSet<RiftModerationLog> ModerationLog { get; set; }
         public DbSet<RiftSettings> Settings { get; set; }
+        public DbSet<RiftInventoryRole> RoleInventories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
             optionsBuilder.UseMySql(@"Server=localhost;Database=rift;Uid=rift;Pwd=;");
@@ -52,7 +53,6 @@ namespace Rift.Data
                 .WithOne(pending => pending.User)
                 .HasForeignKey<RiftPendingUser>(user => user.UserId);
 
-            builder.Entity<RiftTempRole>().ToTable("TempRoles");
             builder.Entity<RiftTempRole>()
                 .HasKey(x => new
                 {
@@ -98,6 +98,13 @@ namespace Rift.Data
 
             builder.Entity<RiftSettings>().HasKey(prop => prop.Id);
             builder.Entity<RiftSettings>().Property(prop => prop.Id).ValueGeneratedNever();
+
+            builder.Entity<RiftInventoryRole>()
+                .HasKey(x => new
+                {
+                    x.UserId,
+                    x.RoleId
+                });
         }
     }
 }
