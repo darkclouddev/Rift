@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Discord;
@@ -77,13 +78,16 @@ namespace Rift.Services.Message
 
         public RiftEmbed AddField(string header, string content, bool isInline = false)
         {
+            List<RiftField> list;
+
             if (Fields is null)
-                Fields = new RiftField[1];
+                list = new List<RiftField>();
+            else
+                list = Fields.ToList();
 
-            var list = Fields.ToList();
             list.Add(new RiftField(header, content, isInline));
-
             Fields = list.ToArray();
+
             return this;
         }
 
