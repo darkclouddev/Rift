@@ -1380,8 +1380,96 @@ namespace Rift
                 await context.SaveChangesAsync();
             }
         }
-        
+
         #endregion Stored Messages
+
+        #region Toxicity
+
+        public static async Task AddOrUpdateToxicityAsync(ulong userId, uint percent)
+        {
+            await EnsureUserExistsAsync(userId);
+
+            var dbToxicity = await GetToxicityAsync(userId);
+
+            var toxicity = new RiftToxicity
+            {
+                UserId = userId,
+                Percent = percent,
+                LastUpdated = DateTime.UtcNow
+            };
+
+            using (var context = new RiftContext())
+            {
+                if (dbToxicity is null)
+                {
+                    await context.Toxicity.AddAsync(toxicity);
+                }
+                else
+                {
+                    var entry = context.Entry(toxicity);
+                    entry.Property(x => x.Percent).IsModified = true;
+                    entry.Property(x => x.LastUpdated).IsModified = true;
+                }
+
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public static async Task<RiftToxicity> GetToxicityAsync(ulong userId)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Toxicity.FirstOrDefaultAsync(x => x.UserId == userId);
+            }
+        }
+
+        #endregion Toxicity
+
+        #region Moderation Logs
+
+        public static async Task AddModerationLogAsync(ulong targetId, ulong moderatorId, string action, string reason, DateTime createdAt, TimeSpan duration)
+        {
+            var log = new RiftModerationLog
+            {
+                TargetId = targetId,
+                ModeratorId = moderatorId,
+                Action = action,
+                Reason = reason,
+                CreatedAt = createdAt,
+                Duration = duration
+            };
+
+            using (var context = new RiftContext())
+            {
+                await context.AddAsync(log);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public static async Task<List<RiftModerationLog>> GetModerationLogsForUserAsync(ulong userId)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.ModerationLog
+                    .Where(x => x.TargetId == userId)
+                    .OrderByDescending(x => x.CreatedAt)
+                    .Take(10)
+                    .ToListAsync();
+            }
+        }
+
+        public static async Task<List<RiftModerationLog>> GetLastModerationLogsAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.ModerationLog
+                    .OrderByDescending(x => x.CreatedAt)
+                    .Take(10)
+                    .ToListAsync();
+            }
+        }
+
+        #endregion Moderation Logs
     }
 
     public class DatabaseException : Exception

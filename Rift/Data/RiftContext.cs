@@ -1,4 +1,4 @@
-﻿using Rift.Data.Models;
+using Rift.Data.Models;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +17,8 @@ namespace Rift.Data
         public DbSet<RiftStreamer> Streamers { get; set; }
         public DbSet<RiftMessage> StoredMessages { get; set; }
         public DbSet<RiftMapping> MessageMappings { get; set; }
+        public DbSet<RiftToxicity> Toxicity { get; set; }
+        public DbSet<RiftModerationLog> ModerationLog { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
             optionsBuilder.UseMySql(@"Server=localhost;Database=rift;Uid=rift;Pwd=;");
@@ -83,6 +85,15 @@ namespace Rift.Data
             
             builder.Entity<RiftMessage>().HasKey(key => key.Id);
             builder.Entity<RiftMessage>().Property(key => key.Id).ValueGeneratedOnAdd();
+
+            builder.Entity<RiftToxicity>().HasKey(key => key.UserId);
+            builder.Entity<RiftToxicity>().Ignore(key => key.Level);
+            builder.Entity<RiftUser>().HasOne(user => user.Toxicity)
+                .WithOne(toxicity => toxicity.User)
+                .HasForeignKey<RiftToxicity>(user => user.UserId);
+
+            builder.Entity<RiftModerationLog>().HasKey(prop => prop.Id);
+            builder.Entity<RiftModerationLog>().Property(prop => prop.Id).ValueGeneratedOnAdd();
         }
     }
 }

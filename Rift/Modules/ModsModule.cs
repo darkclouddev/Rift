@@ -1,13 +1,12 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Preconditions;
 
-using IonicLib;
-using IonicLib.Util;
-
 using Discord;
 using Discord.Commands;
+using IonicLib;
+using IonicLib.Util;
 
 namespace Rift.Modules
 {

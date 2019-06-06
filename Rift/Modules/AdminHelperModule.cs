@@ -21,12 +21,21 @@ namespace Rift.Modules
     public class AdminHelperModule : RiftModuleBase
     {
         readonly RiotService riotService;
-        readonly EconomyService economyService;
+        readonly ModerationService moderationService;
 
-        public AdminHelperModule(RiotService riotService, EconomyService economyService)
+        public AdminHelperModule(RiotService riotService, ModerationService moderationService)
         {
             this.riotService = riotService;
-            this.economyService = economyService;
+            this.moderationService = moderationService;
+        }
+
+        [Command("la")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task ListActions(IUser user)
+        {
+            var msg = await moderationService.GetUserActionLogsAsync(user);
+            await Context.Channel.SendIonicMessageAsync(msg);
         }
 
         [Command("code")]

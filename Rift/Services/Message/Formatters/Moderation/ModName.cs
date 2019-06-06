@@ -21,7 +21,7 @@ namespace Rift.Services.Message.Formatters.Moderation
                 return Task.FromResult(message);
             }
 
-            return ReplaceData(message, sgUser.ToString());
+            return ReplaceData(message, sgUser.Username);
         }
     }
 }

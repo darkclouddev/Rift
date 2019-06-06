@@ -1,5 +1,6 @@
 ﻿using System;
 
+using Rift.Data.Models;
 using Rift.Data.Models.Users;
 using Rift.Services.Reward;
 
@@ -74,5 +75,16 @@ namespace Rift.Services.Message
         public ulong TargetId { get; set; }
         public string Reason { get; set; }
         public TimeSpan? Duration { get; set; } = null;
+
+        public static implicit operator ModerationData(RiftModerationLog log)
+        {
+            return new ModerationData
+            {
+                ModeratorId = log.ModeratorId,
+                TargetId = log.TargetId,
+                Reason = log.Reason,
+                Duration = log.Duration != TimeSpan.Zero ? log.Duration : TimeSpan.Zero
+            };
+        }
     }
 }

@@ -15,5 +15,6 @@ namespace Rift.Data.Models
         public ICollection<RiftTempRole> TempRoles { get; set; }
         public RiftStatistics Statistics { get; set; }
         public RiftStreamer Streamers { get; set; }
+        public RiftToxicity Toxicity { get; set; }
     }
 }
