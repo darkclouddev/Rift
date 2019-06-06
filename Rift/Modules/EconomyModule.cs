@@ -489,11 +489,11 @@ namespace Rift.Modules
 
             [Command("сундук")]
             [RequireContext(ContextType.Guild)]
-            public async Task Chest()
+            public async Task Chest(uint amount = 1u)
             {
                 using (Context.Channel.EnterTypingState())
                 {
-                    var message = await economyService.OpenChestAsync(Context.User.Id);
+                    var message = await economyService.OpenChestAsync(Context.User.Id, amount);
 
                     if (message is null)
                         return;
