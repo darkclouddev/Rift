@@ -138,9 +138,62 @@ namespace Rift.Modules
             var errors = new List<string>();
             var fixedRoles = 0u;
 
-            var eb = new EmbedBuilder();
+            var eb = new RiftEmbed().WithTitle("Self-test");
 
-            eb.WithTitle("Self-test");
+            if (!IonicClient.GetGuild(Settings.App.MainGuildId, out var guild))
+            {
+                errors.Add($"Guild is null: {nameof(Settings.App.MainGuildId)}");
+                skipChecks = true;
+            }
+
+            var channelNames = Settings.ChannelId.GetNames();
+
+            foreach (var field in Settings.ChannelId.GetType().GetProperties())
+            {
+                if (skipChecks)
+                    break;
+
+                if (field.GetValue(Settings.ChannelId, null) is ulong value)
+                {
+                    if (value == 0ul)
+                    {
+                        if (channelNames.ContainsKey(field.Name))
+                        {
+                            var (categoryName, channelName) = channelNames[field.Name];
+
+                            var guildCategory = guild.CategoryChannels.FirstOrDefault(x =>
+                                x.Name.Equals(categoryName, StringComparison.InvariantCultureIgnoreCase));
+
+                            if (guildCategory is null)
+                            {
+                                errors.Add($"No such category: {categoryName}");
+                                continue;
+                            }
+
+                            var guildChannel = guildCategory.Channels.FirstOrDefault(x =>
+                                x.Name.Equals(channelName, StringComparison.InvariantCultureIgnoreCase));
+
+                            if (guildChannel is null)
+                            {
+                                errors.Add($"Channel ID remains undefined: {field.Name} ({categoryName}|{channelName})");
+                                continue;
+                            }
+
+                            Settings.RoleId.SetValue(field.Name, guildChannel.Id);
+                            fixedRoles++;
+                        }
+                        else
+                        {
+                            errors.Add($"Role ID undefined: {field.Name}");
+                            continue;
+                        }
+                    }
+                    else if (!IonicClient.GetRole(Settings.App.MainGuildId, value, out var channel))
+                    {
+                        errors.Add($"No role on server: {field.Name}");
+                    }
+                }
+            }
 
             foreach (var field in Settings.ChannelId.GetType().GetProperties())
             {
@@ -217,12 +270,6 @@ namespace Rift.Modules
                 }
             }
 
-            if (!IonicClient.GetGuild(Settings.App.MainGuildId, out var guild))
-            {
-                errors.Add($"Guild is null: {nameof(Settings.App.MainGuildId)}");
-                skipChecks = true;
-            }
-
             var roleNames = Settings.RoleId.GetNames();
 
             foreach (var field in Settings.RoleId.GetType().GetProperties())
@@ -282,16 +329,16 @@ namespace Rift.Modules
                 }
             }
 
-            await Context.Channel.SendEmbedAsync(eb);
+            await Context.Channel.SendIonicMessageAsync(new IonicMessage(eb));
 
             if (fixedRoles > 0u)
             {
-                var embedMsg = new EmbedBuilder()
+                var embedMsg = new RiftEmbed()
                                .WithColor(255, 255, 0)
                                .WithAuthor("Self-test")
                                .WithDescription($"Automatically resolved {fixedRoles.ToString()} roles.");
 
-                await Context.Channel.SendEmbedAsync(embedMsg);
+                await Context.Channel.SendIonicMessageAsync(new IonicMessage(embedMsg));
             }
         }
 
@@ -353,7 +400,7 @@ namespace Rift.Modules
         }
 
         [Command("whois")]
-        [RequireDeveloper]
+        [RequireAdmin]
         [RequireContext(ContextType.DM)]
         public async Task WhoIs(ulong userId)
         {
@@ -390,7 +437,7 @@ namespace Rift.Modules
             IonicClient.TokenSource.Cancel();
         }
 
-        [Command("emotes")]
+        [Command("listemotes")]
         [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
         public async Task Emotes()
