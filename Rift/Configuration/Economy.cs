@@ -15,5 +15,8 @@ namespace Rift.Configuration
         public TimeSpan PendingUserLifeTime { get; set; } = TimeSpan.FromHours(4);
         public TimeSpan LolAccountUpdateCooldown { get; set; } = TimeSpan.FromHours(6);
         public uint GiftPrice { get; set; } = 0u;
+        public TimeSpan ToxicityCheckInterval { get; set; } = TimeSpan.FromDays(7);
+        public TimeSpan ToxicityWaitTime { get; set; } = TimeSpan.FromDays(30);
+        public uint ToxicityWeeklyDropRate { get; set; } = 1u;
     }
 }

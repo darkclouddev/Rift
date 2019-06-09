@@ -1385,32 +1385,24 @@ namespace Rift
 
         #region Toxicity
 
-        public static async Task AddOrUpdateToxicityAsync(ulong userId, uint percent)
+        static async Task EnsureToxicityExistsAsync(ulong userId)
         {
             await EnsureUserExistsAsync(userId);
 
             var dbToxicity = await GetToxicityAsync(userId);
 
-            var toxicity = new RiftToxicity
-            {
-                UserId = userId,
-                Percent = percent,
-                LastUpdated = DateTime.UtcNow
-            };
+            if (dbToxicity != null)
+                return;
 
             using (var context = new RiftContext())
             {
-                if (dbToxicity is null)
+                var toxicity = new RiftToxicity
                 {
-                    await context.Toxicity.AddAsync(toxicity);
-                }
-                else
-                {
-                    var entry = context.Entry(toxicity);
-                    entry.Property(x => x.Percent).IsModified = true;
-                    entry.Property(x => x.LastUpdated).IsModified = true;
-                }
+                    UserId = userId,
+                    LastIncreased = DateTime.MinValue,
+                };
 
+                await context.Toxicity.AddAsync(toxicity);
                 await context.SaveChangesAsync();
             }
         }
@@ -1420,6 +1412,57 @@ namespace Rift
             using (var context = new RiftContext())
             {
                 return await context.Toxicity.FirstOrDefaultAsync(x => x.UserId == userId);
+            }
+        }
+
+        public static async Task<bool> HasBlockingToxicityLevelAsync(ulong userId)
+        {
+            var toxicity = await GetToxicityAsync(userId);
+
+            if (toxicity is null)
+                return false;
+
+            return toxicity.Level == 2u;
+        }
+
+        public static async Task<RiftToxicity[]> GetToxicityNonZeroAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Toxicity
+                    .Where(x => x.Level > 0u)
+                    .ToArrayAsync();
+            }
+        }
+
+        public static async Task UpdateToxicityPercentAsync(ulong userId, uint percent)
+        {
+            await EnsureToxicityExistsAsync(userId);
+
+            var oldToxicity = await GetToxicityAsync(userId);
+
+            using (var context = new RiftContext())
+            {
+                var toxicity = new RiftToxicity
+                {
+                    UserId = userId,
+                    Percent = percent
+                };
+
+                context.Entry(toxicity).Property(x => x.Percent).IsModified = true;
+
+                if (percent > oldToxicity.Percent)
+                {
+                    toxicity.LastIncreased = DateTime.UtcNow;
+                    context.Entry(toxicity).Property(x => x.LastIncreased).IsModified = true;
+                }
+                else if (percent < oldToxicity.Percent)
+                {
+                    toxicity.LastDecreased = DateTime.UtcNow;
+                    context.Entry(toxicity).Property(x => x.LastDecreased).IsModified = true;
+                }
+
+                await context.SaveChangesAsync();
             }
         }
 
@@ -1506,6 +1549,37 @@ namespace Rift
         }
 
         #endregion Settings
+
+        #region System Timers
+
+        public static async Task<RiftSystemTimer> GetSystemTimerAsync(string name)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.SystemCooldowns.FirstOrDefaultAsync(x =>
+                    x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+            }
+        }
+
+        public static async Task UpdateSystemTimerAsync(string name, DateTime lastUpdated)
+        {
+            var timer = await GetSystemTimerAsync(name);
+
+            if (timer is null)
+            {
+                RiftBot.Log.Error($"Timer \"{name}\" does not exist!");
+                return;
+            }
+
+            using (var context = new RiftContext())
+            {
+                timer.LastInvoked = lastUpdated;
+                context.Entry(timer).Property(x => x.LastInvoked).IsModified = true;
+                await context.SaveChangesAsync();
+            }
+        }
+
+        #endregion System Timers
     }
 
     public class DatabaseException : Exception

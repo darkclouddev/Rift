@@ -81,10 +81,16 @@ namespace Rift
             if (message.Author.IsBot)
                 return;
 
-            if (Settings.App.MaintenanceMode
-                && !RiftBot.IsAdmin(message.Author)
-                && !RiftBot.IsModerator(message.Author))
+            if (Settings.App.MaintenanceMode && !RiftBot.IsDeveloper(message.Author))
+                //&& !RiftBot.IsAdmin(message.Author)
+                //&& !RiftBot.IsModerator(message.Author))
                 return;
+
+            if (await Database.HasBlockingToxicityLevelAsync(message.Author.Id))
+            {
+                await RiftBot.SendChatMessageAsync("toxicity-blocked", new FormatData(message.Author.Id));
+                return;
+            }
 
             var context = new CommandContext(client, message);
 

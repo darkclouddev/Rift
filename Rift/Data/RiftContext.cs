@@ -21,6 +21,7 @@ namespace Rift.Data
         public DbSet<RiftModerationLog> ModerationLog { get; set; }
         public DbSet<RiftSettings> Settings { get; set; }
         public DbSet<RiftInventoryRole> RoleInventories { get; set; }
+        public DbSet<RiftSystemTimer> SystemCooldowns { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
             optionsBuilder.UseMySql(@"Server=localhost;Database=rift;Uid=rift;Pwd=;");
@@ -105,6 +106,9 @@ namespace Rift.Data
                     x.UserId,
                     x.RoleId
                 });
+
+            builder.Entity<RiftSystemTimer>().HasKey(prop => prop.Id);
+            builder.Entity<RiftSystemTimer>().Property(prop => prop.Id).ValueGeneratedOnAdd();
         }
     }
 }

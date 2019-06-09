@@ -25,6 +25,9 @@ namespace Rift.Services
             await sgTarget.KickAsync();
             await Database.AddModerationLogAsync(sgTarget.Id, moderator.Id, "Kick", reason, DateTime.UtcNow, TimeSpan.Zero);
 
+            (var oldToxicity, var newToxicity) = await GetNewToxicityAsync(sgTarget.Id, ToxicitySource.Kick);
+            await Database.UpdateToxicityPercentAsync(sgTarget.Id, newToxicity.Percent);
+
             var data = new FormatData(target.Id)
             {
                 Moderation = new ModerationData
@@ -57,6 +60,9 @@ namespace Rift.Services
 
             await guild.AddBanAsync(sgTarget, 1, $"Banned by {moderator}: {reason}");
             await Database.AddModerationLogAsync(sgTarget.Id, moderator.Id, "Ban", reason, DateTime.UtcNow, TimeSpan.Zero);
+
+            (var oldToxicity, var newToxicity) = await GetNewToxicityAsync(sgTarget.Id, ToxicitySource.Ban);
+            await Database.UpdateToxicityPercentAsync(sgTarget.Id, newToxicity.Percent);
 
             var data = new FormatData(target.Id)
             {
@@ -119,8 +125,13 @@ namespace Rift.Services
             
             await RiftBot.GetService<RoleService>().AddTempRoleAsync(sgTarget.Id, Settings.RoleId.Muted, ts,
                     $"Muted by {moderator}|{moderator.Id.ToString()} with reason: {reason}");
-
             await Database.AddModerationLogAsync(sgTarget.Id, moderator.Id, "Mute", reason, DateTime.UtcNow, ts);
+
+            (var oldToxicity, var newToxicity) = await GetNewToxicityAsync(sgTarget.Id, ToxicitySource.Mute);
+            await Database.UpdateToxicityPercentAsync(sgTarget.Id, newToxicity.Percent);
+
+            if (newToxicity.Level > oldToxicity.Level)
+                await RiftBot.SendChatMessageAsync("mod-toxicity-increased", new FormatData(sgTarget.Id));
 
             var data = new FormatData(sgTarget.Id)
             {
@@ -157,8 +168,7 @@ namespace Rift.Services
             await Database.AddModerationLogAsync(sgTarget.Id, moderator.Id, "Warn", reason, DateTime.UtcNow, TimeSpan.Zero);
 
             (var oldToxicity, var newToxicity) = await GetNewToxicityAsync(sgTarget.Id, ToxicitySource.Warn);
-
-            await Database.AddOrUpdateToxicityAsync(sgTarget.Id, newToxicity.Percent);
+            await Database.UpdateToxicityPercentAsync(sgTarget.Id, newToxicity.Percent);
 
             if (newToxicity.Level > oldToxicity.Level)
                 await RiftBot.SendChatMessageAsync("mod-toxicity-increased", new FormatData(sgTarget.Id));

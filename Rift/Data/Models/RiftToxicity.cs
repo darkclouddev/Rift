@@ -6,7 +6,8 @@ namespace Rift.Data.Models
     {
         public ulong UserId { get; set; }
         public uint Percent { get; set; }
-        public DateTime LastUpdated { get; set; }
+        public DateTime LastIncreased { get; set; }
+        public DateTime LastDecreased { get; set; }
 
         public uint Level
         {
