@@ -184,31 +184,14 @@ namespace Rift.Modules
                         }
                         else
                         {
-                            errors.Add($"Role ID undefined: {field.Name}");
+                            errors.Add($"Channel ID remains undefined: {field.Name}");
                             continue;
                         }
                     }
-                    else if (!IonicClient.GetRole(Settings.App.MainGuildId, value, out var channel))
+                    else if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, value, out var textChannel) ||
+                             !IonicClient.GetVoiceChannel(Settings.App.MainGuildId, value, out var voiceChannel))
                     {
-                        errors.Add($"No role on server: {field.Name}");
-                    }
-                }
-            }
-
-            foreach (var field in Settings.ChannelId.GetType().GetProperties())
-            {
-                if (skipChecks)
-                    break;
-
-                if (field.GetValue(Settings.ChannelId) is ulong value)
-                {
-                    if (value == 0ul)
-                    {
-                        errors.Add($"Channel ID is undefined: {field.Name}");
-                    }
-                    else if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, value, out var channel))
-                    {
-                        errors.Add($"No text channel on server: {field.Name}");
+                        errors.Add($"No channel on server: {field.Name}");
                     }
                 }
             }

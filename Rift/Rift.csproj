@@ -14,7 +14,7 @@
     <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
     <PackageReference Include="Discord.Net.WebSocket" Version="2.1.1" />
     <PackageReference Include="Humanizer.Core.ru" Version="2.6.2" />
-    <PackageReference Include="IonicLib.Core" Version="1.2.37" />
+    <PackageReference Include="IonicLib.Core" Version="1.2.39" />
     <PackageReference Include="IonicLib.Extensions" Version="1.6.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
