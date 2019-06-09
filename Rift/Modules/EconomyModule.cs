@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 
-using Rift.Configuration;
 using Rift.Preconditions;
 using Rift.Services;
 using Rift.Services.Economy;
@@ -17,13 +16,11 @@ namespace Rift.Modules
     {
         readonly EconomyService economyService;
         readonly RiotService riotService;
-        readonly MessageService messageService;
 
-        public EconomyModule(EconomyService economyService, RiotService riotService, MessageService messageService)
+        public EconomyModule(EconomyService economyService, RiotService riotService)
         {
             this.economyService = economyService;
             this.riotService = riotService;
-            this.messageService = messageService;
         }
 
         [Command("update")]
@@ -138,35 +135,23 @@ namespace Rift.Modules
             }
         }
 
-        [Group("активировать")]
+        [Command("двойной опыт")]
         [RequireContext(ContextType.Guild)]
-        public class ActivateModule : ModuleBase
+        public async Task DoubleExp()
         {
-            readonly EconomyService economyService;
-
-            public ActivateModule(EconomyService economyService)
+            using (Context.Channel.EnterTypingState())
             {
-                this.economyService = economyService;
+                await economyService.ActivateDoubleExp(Context.User.Id);
             }
+        }
 
-            [Command("двойной опыт")]
-            [RequireContext(ContextType.Guild)]
-            public async Task DoubleExp()
+        [Command("уважение ботов")]
+        [RequireContext(ContextType.Guild)]
+        public async Task BotRespect()
+        {
+            using (Context.Channel.EnterTypingState())
             {
-                using (Context.Channel.EnterTypingState())
-                {
-                    await economyService.ActivateDoubleExp(Context.User.Id);
-                }
-            }
-
-            [Command("уважение ботов")]
-            [RequireContext(ContextType.Guild)]
-            public async Task BotRespect()
-            {
-                using (Context.Channel.EnterTypingState())
-                {
-                    await economyService.ActivateBotRespect(Context.User.Id);
-                }
+                await economyService.ActivateBotRespect(Context.User.Id);
             }
         }
 
@@ -300,7 +285,7 @@ namespace Rift.Modules
                         .WithDescription($"{giveText} $emotesphere {amount.ToString()}"));
             }
 
-            [Command("lvl2")]
+            [Command("2exp")]
             [RequireAdmin]
             [RequireContext(ContextType.Guild)]
             public async Task Levels(uint amount, IUser user)
