@@ -20,6 +20,7 @@ namespace Rift.Modules
         [Command("kick")]
         [RequireModerator]
         [RequireContext(ContextType.Guild)]
+        [RequireBotPermission(GuildPermission.KickMembers)]
         public async Task KickAsync(IUser user, [Remainder] string reason)
         {
             await moderationService.KickAsync(user, reason, Context.User).ConfigureAwait(false);
@@ -28,6 +29,7 @@ namespace Rift.Modules
         [Command("ban")]
         [RequireModerator]
         [RequireContext(ContextType.Guild)]
+        [RequireBotPermission(GuildPermission.BanMembers)]
         public async Task BanAsync(IUser user, [Remainder] string reason)
         {
             await moderationService.BanAsync(user, reason, Context.User).ConfigureAwait(false);
