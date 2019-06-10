@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using ICSharpCode.SharpZipLib.Zip;
+
 using Rift.Data;
 using Rift.Data.Models;
 using Rift.Data.Models.Cooldowns;

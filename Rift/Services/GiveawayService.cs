@@ -19,6 +19,7 @@ namespace Rift.Services
             if (string.IsNullOrWhiteSpace(name))
             {
                 RiftBot.Log.Warn("Wrong giveaway name, skipping execution.");
+
                 return new IonicMessage($"Розыгрыш с названием \"{name}\" отсутствует в моей базе данных.");
             }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+
 using Humanizer;
 
 namespace Rift.Data.Models
