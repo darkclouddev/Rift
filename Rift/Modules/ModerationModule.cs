@@ -8,11 +8,11 @@ using Discord.Commands;
 
 namespace Rift.Modules
 {
-    public class BanhammerModule : RiftModuleBase
+    public class ModerationModule : RiftModuleBase
     {
         readonly ModerationService moderationService;
 
-        public BanhammerModule(ModerationService moderationService)
+        public ModerationModule(ModerationService moderationService)
         {
             this.moderationService = moderationService;
         }
