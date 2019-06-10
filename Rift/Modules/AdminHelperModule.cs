@@ -21,12 +21,90 @@ namespace Rift.Modules
     public class AdminHelperModule : RiftModuleBase
     {
         readonly RiotService riotService;
-        readonly ModerationService moderationService;
+        readonly EconomyService economyService;
 
-        public AdminHelperModule(RiotService riotService, ModerationService moderationService)
+        public AdminHelperModule(RiotService riotService, EconomyService economyService)
         {
             this.riotService = riotService;
-            this.moderationService = moderationService;
+            this.economyService = economyService;
+        }
+
+        [Command("exp")]
+        [RequireAdmin]
+        [RequireContext(ContextType.DM)]
+        public async Task Exp(uint level)
+        {
+            await ReplyAsync($"Level {level.ToString()}: {EconomyService.GetExpForLevel(level).ToString()} XP");
+        }
+
+        [Command("getprofile")]
+        [RequireAdmin]
+        [RequireContext(ContextType.DM)]
+        public async Task GetProfile(ulong userId)
+        {
+            var message = await economyService.GetUserProfileAsync(userId);
+
+            if (message is null)
+                return;
+
+            await Context.Channel.SendIonicMessageAsync(message);
+        }
+
+        [Command("getinventory")]
+        [RequireAdmin]
+        [RequireContext(ContextType.DM)]
+        public async Task GetInventory(ulong userId)
+        {
+            var message = await economyService.GetUserInventoryAsync(userId);
+
+            if (message is null)
+                return;
+
+            await Context.Channel.SendIonicMessageAsync(message);
+        }
+
+        [Command("getgamestat")]
+        [RequireAdmin]
+        [RequireContext(ContextType.DM)]
+        public async Task GetGameStat(ulong userId)
+        {
+            var message = await economyService.GetUserGameStatAsync(userId);
+
+            if (message is null)
+                return;
+
+            await Context.Channel.SendIonicMessageAsync(message);
+        }
+
+        [Command("getstat")]
+        [RequireAdmin]
+        [RequireContext(ContextType.DM)]
+        public async Task GetStat(ulong userId)
+        {
+            var message = await economyService.GetUserStatAsync(userId);
+
+            if (message is null)
+                return;
+
+            await Context.Channel.SendIonicMessageAsync(message);
+        }
+
+        [Command("update")]
+        [RequireDeveloper]
+        [RateLimit(1, 10, Measure.Minutes)]
+        [RequireContext(ContextType.Guild)]
+        public async Task Update(ulong userId)
+        {
+            await riotService.UpdateRankAsync(userId);
+        }
+
+        [Command("gastart")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task StartGiveaway(string name)
+        {
+            var msg = await RiftBot.GetService<GiveawayService>().StartGiveawayAsync(name);
+            await Context.Channel.SendIonicMessageAsync(msg);
         }
 
         [Command("la")]
@@ -34,7 +112,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task ListActions(IUser user)
         {
-            var msg = await moderationService.GetUserActionLogsAsync(user);
+            var msg = await RiftBot.GetService<ModerationService>().GetUserActionLogsAsync(user);
             await Context.Channel.SendIonicMessageAsync(msg);
         }
 
@@ -441,6 +519,270 @@ namespace Rift.Modules
         public async Task AppStatus()
         {
             await RiftBot.SendChatMessageAsync("bot-about", new FormatData(212997107525746690ul));
+        }
+
+        const string addRemoveHeaderText = "Оповещение";
+
+        [Group("give")]
+        public class GiveModule : ModuleBase
+        {
+            const string giveText = "Основатель сервера выдал вам";
+
+            [Command("coins")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Coins(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Coins = amount });
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emotecoins {amount.ToString()}"));
+            }
+
+            [Command("tokens")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Tokens(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Tokens = amount });
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emotetokens {amount.ToString()}"));
+            }
+
+            [Command("chests")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Chests(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Chests = amount });
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emotechest {amount.ToString()}"));
+            }
+
+            [Command("capsules")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Capsules(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Capsules = amount });
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emotecapsule {amount.ToString()}"));
+            }
+
+            [Command("spheres")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Spheres(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Spheres = amount });
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emotesphere {amount.ToString()}"));
+            }
+
+            [Command("2exp")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Levels(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { DoubleExps = amount });
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emote2exp {amount.ToString()}"));
+            }
+
+            [Command("respects")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task BotRespects(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { BotRespects = amount });
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emoterespect {amount.ToString()}"));
+            }
+
+            [Command("tickets")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task CustomTickets(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Tickets = amount });
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emoteticket {amount.ToString()}"));
+            }
+        }
+
+        [Group("take")]
+        public class TakeModule : ModuleBase
+        {
+            const string takeText = "Основатель сервера забрал у вас";
+
+            [Command("coins")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Coins(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { Coins = amount });
+
+                await sgUser.SendEmbedAsync(new EmbedBuilder()
+                                            .WithAuthor(addRemoveHeaderText)
+                                            .WithDescription($"{takeText} $emotecoins {amount.ToString()}"));
+            }
+
+            [Command("tokens")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Tokens(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { Tokens = amount });
+
+                await sgUser.SendEmbedAsync(new EmbedBuilder()
+                                            .WithAuthor(addRemoveHeaderText)
+                                            .WithDescription($"{takeText} $emotetoken {amount.ToString()}"));
+            }
+
+            [Command("2exp")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Level(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { DoubleExps = amount });
+
+                await sgUser.SendEmbedAsync(new EmbedBuilder()
+                                            .WithAuthor(addRemoveHeaderText)
+                                            .WithDescription($"{takeText} $emote2exp {amount.ToString()}"));
+            }
+
+            [Command("chests")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Chests(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { Chests = amount });
+
+                await sgUser.SendEmbedAsync(new EmbedBuilder()
+                                            .WithAuthor(addRemoveHeaderText)
+                                            .WithDescription($"{takeText} $emotechest {amount.ToString()}"));
+            }
+
+            [Command("capsules")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Capsules(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { Capsules = amount });
+
+                await sgUser.SendEmbedAsync(new EmbedBuilder()
+                                            .WithAuthor(addRemoveHeaderText)
+                                            .WithDescription($"{takeText} $emotecapsule {amount.ToString()}"));
+            }
+
+            [Command("spheres")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Spheres(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { Spheres = amount });
+
+                await sgUser.SendEmbedAsync(new EmbedBuilder()
+                                            .WithAuthor(addRemoveHeaderText)
+                                            .WithDescription($"{takeText} $emotesphere {amount.ToString()}"));
+            }
+
+            [Command("respects")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task BotRespects(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { BotRespects = amount });
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{takeText} $emoterespect {amount.ToString()}"));
+            }
+
+            [Command("tickets")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task CustomTickets(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await Database.RemoveInventoryAsync(sgUser.Id, new InventoryData { Tickets = amount });
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{takeText} $emoteticket {amount.ToString()}"));
+            }
         }
     }
 }
