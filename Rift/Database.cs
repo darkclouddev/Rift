@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-
+using ICSharpCode.SharpZipLib.Zip;
 using Rift.Data;
 using Rift.Data.Models;
 using Rift.Data.Models.Cooldowns;
@@ -1580,6 +1580,103 @@ namespace Rift
         }
 
         #endregion System Timers
+
+        #region Rewards
+
+        public static async Task AddRewardAsync(RiftReward reward)
+        {
+            using (var context = new RiftContext())
+            {
+                await context.Rewards.AddAsync(reward);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public static async Task<RiftReward> GetRewardAsync(int id)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Rewards
+                    .FirstOrDefaultAsync(x => x.Id == id);
+            }
+        }
+
+        public static async Task<bool> TryUpdateRewardAsync(RiftReward reward)
+        {
+            using (var context = new RiftContext())
+            {
+                var data = await GetRewardAsync(reward.Id);
+
+                if (data is null)
+                    return false; // nothing to update
+
+                var entry = context.Entry(data);
+
+                if (!reward.Description.Equals(data.Description))
+                    entry.Property(x => x.Description).IsModified = true;
+
+                if (!reward.ItemsData.Equals(data.ItemsData))
+                    entry.Property(x => x.ItemsData).IsModified = true;
+
+                if (!reward.RoleData.Equals(data.RoleData))
+                    entry.Property(x => x.RoleData).IsModified = true;
+
+                await context.SaveChangesAsync();
+                return true;
+            }
+        }
+
+        #endregion Rewards
+
+        #region Giveaways
+
+        public static async Task<RiftGiveaway> GetGiveawayAsync(string name)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Giveaways
+                    .FirstOrDefaultAsync(x => x.Name.Equals(name));
+            }
+        }
+
+        public static async Task AddOrUpdateGiveawayAsync(RiftGiveaway giveaway)
+        {
+            using (var context = new RiftContext())
+            {
+                var dbGiveaway = await GetGiveawayAsync(giveaway.Name);
+
+                if (dbGiveaway is null)
+                {
+                    await context.Giveaways.AddAsync(giveaway);
+                }
+                else
+                {
+                    var entry = context.Entry(giveaway);
+
+                    if (!dbGiveaway.Description.Equals(giveaway.Description))
+                        entry.Property(x => x.Description).IsModified = true;
+
+                    if (!dbGiveaway.WinnersAmount.Equals(giveaway.WinnersAmount))
+                        entry.Property(x => x.WinnersAmount).IsModified = true;
+
+                    if (!dbGiveaway.RewardId.Equals(giveaway.RewardId))
+                        entry.Property(x => x.RewardId).IsModified = true;
+
+                    if (!dbGiveaway.Duration.Equals(giveaway.Duration))
+                        entry.Property(x => x.Duration).IsModified = true;
+
+                    if (!dbGiveaway.CreatedAt.Equals(giveaway.CreatedAt))
+                        entry.Property(x => x.CreatedAt).IsModified = true;
+
+                    if (!dbGiveaway.CreatedBy.Equals(giveaway.CreatedBy))
+                        entry.Property(x => x.CreatedBy).IsModified = true;
+                }
+
+                await context.SaveChangesAsync();
+            }
+        }
+
+        #endregion Giveaways
     }
 
     public class DatabaseException : Exception

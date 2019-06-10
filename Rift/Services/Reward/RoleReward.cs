@@ -2,6 +2,9 @@
 using System.Threading.Tasks;
 
 using Discord;
+using Humanizer;
+using IonicLib;
+using Rift.Configuration;
 
 namespace Rift.Services.Reward
 {
@@ -45,6 +48,24 @@ namespace Rift.Services.Reward
             {
                 await roleService.AddTempRoleAsync(userId, RoleId, Duration.Value, nameof(RoleReward));
             }
+        }
+
+        public override string ToString()
+        {
+            var text = "Роль";
+
+            if (!IonicClient.GetRole(Settings.App.MainGuildId, RoleId, out var role))
+            {
+                text += " Роль не найдена";
+                return text;
+            }
+
+            text += $" {role.Name}";
+
+            if (Duration != null)
+                text += $" на {Duration.Value.Humanize()}";
+
+            return text;
         }
     }
 }

@@ -1,31 +1,29 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
 
-using Rift.Configuration;
-
 using IonicLib.Extensions;
 
 namespace Rift.Services.Reward
 {
     public class ItemReward : RewardBase
     {
-        public uint Coins { get; private set; } = 0u;
+        public uint Coins { get; set; } = 0u;
 
-        public uint Tokens { get; private set; } = 0u;
+        public uint Tokens { get; set; } = 0u;
 
-        public uint Chests { get; private set; } = 0u;
+        public uint Chests { get; set; } = 0u;
 
-        public uint Spheres { get; private set; } = 0u;
+        public uint Spheres { get; set; } = 0u;
 
-        public uint Capsules { get; private set; } = 0u;
+        public uint Capsules { get; set; } = 0u;
 
-        public uint Tickets { get; private set; } = 0u;
+        public uint Tickets { get; set; } = 0u;
 
-        public uint DoubleExps { get; private set; } = 0u;
+        public uint DoubleExps { get; set; } = 0u;
 
-        public uint BotRespects { get; private set; } = 0u;
+        public uint BotRespects { get; set; } = 0u;
 
-        public uint Rewinds { get; private set; } = 0u;
+        public uint Rewinds { get; set; } = 0u;
 
         public ItemReward()
         {

@@ -22,6 +22,9 @@ namespace Rift.Data
         public DbSet<RiftSettings> Settings { get; set; }
         public DbSet<RiftInventoryRole> RoleInventories { get; set; }
         public DbSet<RiftSystemTimer> SystemCooldowns { get; set; }
+        public DbSet<RiftReward> Rewards { get; set; }
+        public DbSet<RiftGiveaway> Giveaways { get; set; }
+        public DbSet<RiftGiveawayLog> GiveawayLogs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
             optionsBuilder.UseMySql(@"Server=localhost;Database=rift;Uid=rift;Pwd=;");
@@ -109,6 +112,21 @@ namespace Rift.Data
 
             builder.Entity<RiftSystemTimer>().HasKey(prop => prop.Id);
             builder.Entity<RiftSystemTimer>().Property(prop => prop.Id).ValueGeneratedOnAdd();
+
+            builder.Entity<RiftReward>().HasKey(prop => prop.Id);
+            builder.Entity<RiftReward>().Property(prop => prop.Id).ValueGeneratedOnAdd();
+            builder.Entity<RiftReward>().Ignore(prop => prop.ItemReward);
+            builder.Entity<RiftReward>().Ignore(prop => prop.RoleReward);
+
+            builder.Entity<RiftGiveaway>().HasKey(prop => prop.Name);
+            builder.Entity<RiftReward>().HasOne(reward => reward.Giveaway)
+                .WithOne(giveaway => giveaway.Reward)
+                .HasForeignKey<RiftGiveaway>(reward => reward.RewardId);
+
+            builder.Entity<RiftGiveawayLog>().HasKey(prop => prop.Id);
+            builder.Entity<RiftGiveawayLog>().Property(prop => prop.Id).ValueGeneratedOnAdd();
+            builder.Entity<RiftGiveawayLog>().Ignore(prop => prop.Winners);
+            builder.Entity<RiftGiveawayLog>().Ignore(prop => prop.Participants);
         }
     }
 }

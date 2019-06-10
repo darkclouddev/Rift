@@ -175,6 +175,7 @@ namespace Rift
                 .AddSingleton(new EmoteService())
                 .AddSingleton(new MessageService())
                 .AddSingleton(new ToxicityService())
+                .AddSingleton(new GiveawayService())
                 //.AddSingleton(new AnnounceService())
                 //.AddSingleton(new EventService())
                 //.AddSingleton(new MinionService())
