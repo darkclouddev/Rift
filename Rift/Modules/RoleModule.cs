@@ -44,7 +44,7 @@ namespace Rift.Modules
 
             if (streamer is null)
             {
-                await Context.User.SendMessageAsync($"Вы не являетесь зарегистрированным стримером.");
+                await Context.User.SendMessageAsync("Вы не являетесь зарегистрированным стримером.");
                 return;
             }
 
@@ -89,13 +89,13 @@ namespace Rift.Modules
 
                 if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.Active, out var role))
                 {
-                    await Context.User.SendMessageAsync($"Не найдена роль \"Активные\"");
+                    await Context.User.SendMessageAsync("Не найдена роль \"Активные\"");
                     return;
                 }
 
                 if (sgUser.Roles.Contains(role))
                 {
-                    await Context.User.SendMessageAsync($"У этого пользователя уже есть такая роль.");
+                    await Context.User.SendMessageAsync("У этого пользователя уже есть такая роль.");
                     return;
                 }
 

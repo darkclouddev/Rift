@@ -29,12 +29,33 @@ namespace Rift.Modules
             this.economyService = economyService;
         }
 
+        [Command("reactions")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task Reactions(ulong messageId)
+        {
+            var msg = (IUserMessage)await Context.Channel.GetMessageAsync(messageId);
+            var text = "";
+
+            if (msg.Reactions is null)
+                text = "0";
+            else
+            {
+                foreach ((var emote, var reactionMetadata) in msg.Reactions)
+                {
+                    text += $"**{emote}**: {reactionMetadata.ReactionCount.ToString()}\n";
+                }
+            }
+
+            await Context.Channel.SendMessageAsync(text).ConfigureAwait(false);
+        }
+
         [Command("exp")]
         [RequireAdmin]
         [RequireContext(ContextType.DM)]
         public async Task Exp(uint level)
         {
-            await ReplyAsync($"Level {level.ToString()}: {EconomyService.GetExpForLevel(level).ToString()} XP");
+            await ReplyAsync($"Level {level.ToString()}: {EconomyService.GetExpForLevel(level).ToString()} XP").ConfigureAwait(false);
         }
 
         [Command("getprofile")]
@@ -47,7 +68,7 @@ namespace Rift.Modules
             if (message is null)
                 return;
 
-            await Context.Channel.SendIonicMessageAsync(message);
+            await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
         }
 
         [Command("getinventory")]
@@ -60,7 +81,7 @@ namespace Rift.Modules
             if (message is null)
                 return;
 
-            await Context.Channel.SendIonicMessageAsync(message);
+            await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
         }
 
         [Command("getgamestat")]
@@ -73,7 +94,7 @@ namespace Rift.Modules
             if (message is null)
                 return;
 
-            await Context.Channel.SendIonicMessageAsync(message);
+            await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
         }
 
         [Command("getstat")]
@@ -86,7 +107,7 @@ namespace Rift.Modules
             if (message is null)
                 return;
 
-            await Context.Channel.SendIonicMessageAsync(message);
+            await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
         }
 
         [Command("update")]
@@ -95,7 +116,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Update(ulong userId)
         {
-            await riotService.UpdateRankAsync(userId);
+            await riotService.UpdateRankAsync(userId).ConfigureAwait(false);
         }
 
         [Command("gastart")]
@@ -103,8 +124,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task StartGiveaway(string name)
         {
-            var msg = await RiftBot.GetService<GiveawayService>().StartGiveawayAsync(name);
-            await Context.Channel.SendIonicMessageAsync(msg);
+            await RiftBot.GetService<GiveawayService>().StartGiveawayAsync(name).ConfigureAwait(false);
         }
 
         [Command("la")]
@@ -113,7 +133,7 @@ namespace Rift.Modules
         public async Task ListActions(IUser user)
         {
             var msg = await RiftBot.GetService<ModerationService>().GetUserActionLogsAsync(user);
-            await Context.Channel.SendIonicMessageAsync(msg);
+            await Context.Channel.SendIonicMessageAsync(msg).ConfigureAwait(false);
         }
 
         [Command("code")]

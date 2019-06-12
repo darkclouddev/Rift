@@ -1,12 +1,15 @@
+using System;
+using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
-
+using Discord;
 using Rift.Services;
 using Rift.Preconditions;
 
 using Discord.Commands;
 using Discord.WebSocket;
 using Humanizer;
+using Humanizer.Localisation;
 
 namespace Rift.Modules
 {
@@ -29,12 +32,15 @@ namespace Rift.Modules
         }
 
         [Command("since")]
+        [RequireAdmin]
         [RateLimit(1, 10, Measure.Minutes, RateLimitFlags.NoLimitForAdmins)]
         [RequireContext(ContextType.Guild)]
-        public async Task Since()
+        public async Task Since(IUser user)
         {
-            await ReplyAsync($"{Context.User.Mention} на сервере с"
-                             + $" {((SocketGuildUser) Context.User).JoinedAt.Value.LocalDateTime.Humanize()}"); // TODO: do proper check
+            if (!(user is SocketGuildUser sgUser))
+                return;
+
+            await ReplyAsync($"{user.Mention} на сервере {(DateTime.UtcNow - sgUser.JoinedAt.Value.UtcDateTime).Humanize(precision: 3, minUnit: TimeUnit.Day, maxUnit: TimeUnit.Year)}"); // TODO: do proper check
         }
 
         [Command("baron")]
