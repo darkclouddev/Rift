@@ -158,7 +158,7 @@ namespace Rift.Services
 
                     RiftBot.Log.Info($"Data update completed. New version is {Settings.App.LolVersion}");
 
-                    await RiftBot.SendMessageToDevelopers($"Data update completed. New version is {Settings.App.LolVersion}.");
+                    await RiftBot.SendMessageToDevelopers(new IonicMessage($"Data update completed. New version is {Settings.App.LolVersion}."));
                 });
             });
         }

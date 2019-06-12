@@ -13,21 +13,14 @@ namespace Rift.Services.Message
     public class FormatData
     {
         public ulong UserId { get; set; }
-
         public EconomyData Economy { get; set; }
-
         public BotRespectData BotRespect { get; set; }
-
         public BragData Brag { get; set; }
-
         public GiftData Gift { get; set; }
-
+        public GiveawayData Giveaway { get; set; }
         public LolStatData LolStat { get; set; }
-
         public ModerationData Moderation { get; set; }
-
         public FormatData() {}
-
         public FormatData(ulong userId)
         {
             UserId = userId;
@@ -60,6 +53,12 @@ namespace Rift.Services.Message
         public ItemReward Reward { get; set; }
         public TimeSpan Cooldown { get; set; }
         public uint NecessaryCoins { get; set; }
+    }
+
+    public class GiveawayData
+    {
+        public RiftGiveawayActive ActiveGiveaway { get; set; }
+        public RiftGiveaway StoredGiveaway { get; set; }
     }
 
     public class LolStatData

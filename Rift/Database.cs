@@ -1676,6 +1676,87 @@ namespace Rift
         }
 
         #endregion Giveaways
+
+        #region Giveaway Logs
+
+        public static async Task AddGiveawayLogAsync(RiftGiveawayLog log)
+        {
+            using (var context = new RiftContext())
+            {
+                await context.GiveawayLogs.AddAsync(log);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public static async Task<RiftGiveawayLog> GetGiveawayLogAsync(int id)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.GiveawayLogs.FirstOrDefaultAsync(x => x.Id == id);
+            }
+        }
+
+        public static async Task<List<RiftGiveawayLog>> GetStartedGiveawayLogAsync(Expression<Func<RiftGiveawayLog, bool>> predicate)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.GiveawayLogs
+                    .Where(predicate)
+                    .ToListAsync();
+            }
+        }
+
+        #endregion Giveaway Logs
+
+        #region Active Giveaways
+
+        public static async Task AddActiveGiveawayAsync(RiftGiveawayActive giveaway)
+        {
+            using (var context = new RiftContext())
+            {
+                await context.ActiveGiveaways.AddAsync(giveaway);
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public static async Task<List<RiftGiveawayActive>> GetExpiredActiveGiveawaysAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.ActiveGiveaways
+                    .Where(x => x.DueTime < DateTime.UtcNow)
+                    .ToListAsync();
+            }
+        }
+
+        public static async Task<List<RiftGiveawayActive>> GetLinkedActiveGiveawaysAsync(string giveawayName)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.ActiveGiveaways
+                    .Where(x => x.GiveawayName.Equals(giveawayName))
+                    .ToListAsync();
+            }
+        }
+
+        public static async Task<RiftGiveawayActive> GetActiveGiveawayAsync(int id)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.ActiveGiveaways
+                    .FirstOrDefaultAsync(x => x.Id == id);
+            }
+        }
+
+        public static async Task<List<RiftGiveawayActive>> GetActiveGiveawaysAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.ActiveGiveaways.ToListAsync();
+            }
+        }
+
+        #endregion Active Giveaways
     }
 
     public class DatabaseException : Exception

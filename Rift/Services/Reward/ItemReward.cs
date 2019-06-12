@@ -170,5 +170,21 @@ namespace Rift.Services.Reward
 
             return sb.ToString().TrimEnd();
         }
+
+        public string ToPlainString()
+        {
+            var sb = new StringBuilder();
+            if (Coins > 0u) sb.Append($"{nameof(Coins)} {Coins.ToString()} ");
+            if (Tokens > 0u) sb.Append($"{nameof(Tokens)} {Tokens.ToString()} ");
+            if (Chests > 0u) sb.Append($"{nameof(Chests)} {Chests.ToString()} ");
+            if (Spheres > 0u) sb.Append($"{nameof(Spheres)} {Spheres.ToString()} ");
+            if (Capsules > 0u) sb.Append($"{nameof(Capsules)} {Capsules.ToString()} ");
+            if (Tickets > 0u) sb.Append($"{nameof(Tickets)} {Tickets.ToString()} ");
+            if (DoubleExps > 0u) sb.Append($"{nameof(DoubleExps)} {DoubleExps.ToString()} ");
+            if (BotRespects > 0u) sb.Append($"{nameof(BotRespects)} {BotRespects.ToString()} ");
+            if (Rewinds > 0u) sb.Append($"{nameof(Rewinds)} {Rewinds.ToString()} ");
+
+            return sb.ToString().TrimEnd();
+        }
     }
 }

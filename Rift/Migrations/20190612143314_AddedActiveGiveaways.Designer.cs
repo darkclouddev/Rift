@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rift.Data;
 
 namespace Rift.Migrations
 {
     [DbContext(typeof(RiftContext))]
-    partial class RiftContextModelSnapshot : ModelSnapshot
+    [Migration("20190612143314_AddedActiveGiveaways")]
+    partial class AddedActiveGiveaways
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,9 +55,9 @@ namespace Rift.Migrations
 
                     b.Property<TimeSpan>("Duration");
 
-                    b.Property<int>("RewardId");
+                    b.Property<int>("MessageId");
 
-                    b.Property<int>("StoredMessageId");
+                    b.Property<int>("RewardId");
 
                     b.Property<uint>("WinnersAmount");
 
@@ -69,17 +71,15 @@ namespace Rift.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<ulong>("ChannelMessageId");
-
                     b.Property<DateTime>("DueTime");
 
-                    b.Property<string>("GiveawayName");
+                    b.Property<int>("GiveawayId");
+
+                    b.Property<ulong>("MessageId");
 
                     b.Property<DateTime>("StartedAt");
 
                     b.Property<ulong>("StartedBy");
-
-                    b.Property<int>("StoredMessageId");
 
                     b.HasKey("Id");
 
@@ -257,11 +257,15 @@ namespace Rift.Migrations
 
                     b.Property<string>("Description");
 
+                    b.Property<string>("GiveawayName");
+
                     b.Property<string>("ItemsData");
 
                     b.Property<string>("RoleData");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GiveawayName");
 
                     b.ToTable("Rewards");
                 });
@@ -451,6 +455,13 @@ namespace Rift.Migrations
                         .WithOne("PendingUser")
                         .HasForeignKey("Rift.Data.Models.RiftPendingUser", "UserId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Rift.Data.Models.RiftReward", b =>
+                {
+                    b.HasOne("Rift.Data.Models.RiftGiveaway", "Giveaway")
+                        .WithMany()
+                        .HasForeignKey("GiveawayName");
                 });
 
             modelBuilder.Entity("Rift.Data.Models.RiftStatistics", b =>

@@ -13,8 +13,6 @@ namespace Rift.Data.Models
         public string ItemsData { get; set; }
         public string RoleData { get; set; }
 
-        public RiftGiveaway Giveaway { get; set; }
-
         public ItemReward ItemReward
         {
             get
@@ -100,6 +98,19 @@ namespace Rift.Data.Models
 
             if (ItemsData != null)
                 text += ItemReward.ToString();
+
+            if (RoleData != null)
+                text += RoleReward.ToString();
+
+            return text;
+        }
+
+        public string ToPlainString()
+        {
+            var text = "";
+
+            if (ItemsData != null)
+                text += ItemReward.ToPlainString();
 
             if (RoleData != null)
                 text += RoleReward.ToString();

@@ -62,7 +62,7 @@ namespace Rift
 
 		public static T GetService<T>() => handler.provider.GetService<T>();
 
-        public static async Task SendMessageToDevelopers(string msg)
+        public static async Task SendMessageToDevelopers(IonicMessage msg)
         {
             foreach (var userId in developersIds)
             {
@@ -71,7 +71,7 @@ namespace Rift
                 if (sgUser is null)
                     return;
 
-                await sgUser.SendMessageAsync(msg);
+                await sgUser.SendIonicMessageAsync(msg);
             }
         }
 
@@ -91,6 +91,14 @@ namespace Rift
                 return;
 
             await channel.SendIonicMessageAsync(msg);
+        }
+
+        public static async Task SendChatMessageAsync(IonicMessage message)
+        {
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
+                return;
+
+            await channel.SendIonicMessageAsync(message);
         }
         
         public static async Task Main(string[] args)
