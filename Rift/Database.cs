@@ -50,7 +50,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserCooldowns> GetUserCooldownsAsync(ulong userId)
+        public static async Task<RiftCooldowns> GetUserCooldownsAsync(ulong userId)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
                 throw new DatabaseException(nameof(GetUserDoubleExpTimeAsync));
@@ -59,7 +59,6 @@ namespace Rift
             {
                 return await context.Cooldowns
                     .Where(x => x.UserId == userId)
-                    .Select(x => new UserCooldowns(x))
                     .FirstAsync();
             }
         }
