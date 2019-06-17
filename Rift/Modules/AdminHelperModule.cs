@@ -29,6 +29,17 @@ namespace Rift.Modules
             this.economyService = economyService;
         }
 
+        [Command("formatters")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task Formatters()
+        {
+            var formatters = RiftBot.GetService<MessageService>().GetActiveFormatters();
+
+            await ReplyAsync(
+                $"**Supported formatters**\n\n{string.Join(',', formatters.Select(x => x.Template))}");
+        }
+
         [Command("reactions")]
         [RequireDeveloper]
         [RequireContext(ContextType.Guild)]

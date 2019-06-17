@@ -1,10 +1,11 @@
-﻿namespace Rift.Data.Models
+namespace Rift.Data.Models
 {
     public class RiftStatistics
     {
         public ulong UserId { get; set; }
         public uint CoinsEarnedTotal { get; set; }
         public uint TokensEarnedTotal { get; set; }
+        public uint EssenceEarnedTotal { get; set; }
         public uint ChestsEarnedTotal { get; set; }
         public uint SphereEarnedTotal { get; set; }
         public uint CapsuleEarnedTotal { get; set; }

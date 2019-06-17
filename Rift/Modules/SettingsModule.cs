@@ -2,6 +2,7 @@
 
 using Rift.Configuration;
 using Rift.Preconditions;
+using Rift.Services;
 
 using Discord.Commands;
 
@@ -52,6 +53,13 @@ namespace Rift.Modules
                 await Settings.ReloadEconomyAsync();
 
                 await ReplyAsync("Economy settings reloaded successfully.");
+            }
+
+            [Command("emotes")]
+            public async Task Emotes()
+            {
+                await RiftBot.GetService<EmoteService>().ReloadEmotesAsync();
+                await ReplyAsync("Reloaded emotes.");
             }
 
             [Command("roles")]

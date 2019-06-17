@@ -1,8 +1,9 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
 using Rift.Data.Models;
 
+using Discord.WebSocket;
 using IonicLib;
 
 namespace Rift.Services
@@ -16,26 +17,32 @@ namespace Rift.Services
             emotes = new ConcurrentDictionary<string, Emote>();
         }
 
-        public Task ReloadEmotes()
+        public Task AddEmotesFromGuild(SocketGuild guild)
+        {
+            foreach (var emote in guild.Emotes)
+            {
+                if (!emotes.TryAdd($"$emote{emote.Name}", new Emote(emote.Id, emote.Name, emote.Url)))
+                {
+                    RiftBot.Log.Error(emotes.ContainsKey(emote.Name)
+                        ? $"[{nameof(EmoteService)}] Duplicate emote \"{emote.Name}\" from {guild.Name}, skipping."
+                        : $"[{nameof(EmoteService)}] Failed to add emote \"{emote.Name}\" from {guild.Name}.");
+                }
+            }
+
+            //RiftBot.Log.Info($"{nameof(EmoteService)} Loaded {guild.Emotes.Count.ToString()} emote(s) from {guild.Name}");
+            return Task.CompletedTask;
+        }
+
+        public Task ReloadEmotesAsync()
         {
             emotes.Clear();
 
             foreach (var guild in IonicClient.Client.Guilds)
             {
-                foreach (var emote in guild.Emotes)
-                {
-                    if (!emotes.TryAdd($"$emote{emote.Name}", new Emote(emote.Id, emote.Name, emote.Url)))
-                    {
-                        if (emotes.ContainsKey(emote.Name))
-                            RiftBot.Log.Error($"[{nameof(EmoteService)}] Duplicate emote \"{emote.Name}\" from {guild.Name}, skipping.");
-                        else
-                            RiftBot.Log.Error($"[{nameof(EmoteService)}] Failed to add emote \"{emote.Name}\" from {guild.Name}.");
-                    }
-                }
+                AddEmotesFromGuild(guild);
             }
 
             RiftBot.Log.Info($"{nameof(EmoteService)} Loaded {emotes.Count.ToString()} emote(s) from {IonicClient.Client.Guilds.Count.ToString()} guild(s)");
-
             return Task.CompletedTask;
         }
 

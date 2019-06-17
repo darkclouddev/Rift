@@ -62,9 +62,9 @@ namespace Rift
             client.Ready += ReadyAsync;
         }
 
-        public static async Task ReadyAsync()
+        static async Task ReadyAsync()
         {
-            await emoteService.ReloadEmotes();
+            await emoteService.ReloadEmotesAsync();
             await client.SetGameAsync(RiftBot.BotStatusMessage);
 
             //if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
