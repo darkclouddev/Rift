@@ -12,7 +12,6 @@ using Rift.Services.Reward;
 using Rift.Util;
 
 using Discord;
-using Humanizer;
 using IonicLib;
 using IonicLib.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -21,84 +20,10 @@ namespace Rift.Services
 {
     public class EconomyService
     {
-        public static readonly Dictionary<ulong, string> TempRoles = new Dictionary<ulong, string>
-        {
-            {
-                Settings.RoleId.Arcade, "Аркадные"
-            },
-            {
-                Settings.RoleId.Arclight, "Светоносные"
-            },
-            {
-                Settings.RoleId.BloodMoon, "Кровавая луна"
-            },
-            {
-                Settings.RoleId.BravePoro, "Храбрые поро"
-            },
-            {
-                Settings.RoleId.Chosen, "Избранные"
-            },
-            {
-                Settings.RoleId.DarkStar, "Темная звезда"
-            },
-            {
-                Settings.RoleId.Debonairs, "Галантные"
-            },
-            {
-                Settings.RoleId.Epic, "Эпические"
-            },
-            {
-                Settings.RoleId.HappyPoro, "Довольные поро"
-            },
-            {
-                Settings.RoleId.Hextech, "Хекстековые"
-            },
-            {
-                Settings.RoleId.Justicars, "Юстициары"
-            },
-            {
-                Settings.RoleId.Mythic, "Мифические"
-            },
-            {
-                Settings.RoleId.Party, "Тусовые"
-            },
-            {
-                Settings.RoleId.Pentakill, "Pentakill"
-            },
-            {
-                Settings.RoleId.StarGuardians, "Звездные защитники"
-            },
-            {
-                Settings.RoleId.ThunderLords, "Повелители грома"
-            },
-            {
-                Settings.RoleId.Vandals, "Вандалы"
-            },
-            {
-                Settings.RoleId.Victorious, "Победоносные"
-            },
-            {
-                Settings.RoleId.Ward, "Вардилочка"
-            },
-            {
-                Settings.RoleId.Reworked, "Реворкнутый"
-            },
-            {
-                Settings.RoleId.Meta, "Метовый"
-            },
-            {
-                Settings.RoleId.Hasagi, "Хасаги"
-            },
-            {
-                Settings.RoleId.YasuoPlayer, "Ясуоплееры"
-            },
-        };
-
         static Timer ratingUpdateTimer;
         static Timer ActiveUsersTimer;
         static Timer RichUsersTimer;
         static readonly TimeSpan ratingTimerCooldown = TimeSpan.FromHours(1);
-        static List<ulong> ratingSorted = null;
 
         static SemaphoreSlim chestMutex = new SemaphoreSlim(1);
         static SemaphoreSlim capsuleMutex = new SemaphoreSlim(1);
@@ -113,6 +38,8 @@ namespace Rift.Services
             InitActiveUsersTimer();
             InitRichUsersTimer();
         }
+
+        public static List<ulong> SortedRating { get; private set; } = null;
 
         static void InitActiveUsersTimer()
         {
@@ -256,10 +183,7 @@ namespace Rift.Services
                 await reward.DeliverToAsync(userId);
                 await Database.SetLastDailyChestTimeAsync(userId, DateTime.UtcNow);
 
-                var msg = await RiftBot.GetMessageAsync("daily-reward", new FormatData(userId));
-
-                RiftBot.GetService<MessageService>().TryAddSend(
-                    new MixedMessage(DestinationType.GuildChannel, Settings.ChannelId.Comms, TimeSpan.Zero, msg));
+                await RiftBot.SendChatMessageAsync("daily-reward", new FormatData(userId));
             }
             finally
             {
@@ -269,33 +193,35 @@ namespace Rift.Services
 
         static async Task GiveRewardsForLevelAsync(ulong userId, uint fromLevel, uint toLevel)
         {
-            for (uint level = fromLevel + 1; level <= toLevel; level++)
-            {
-                await GiveRewardsForLevelAsync(userId, level);
-            }
-        }
-
-        static async Task GiveRewardsForLevelAsync(ulong userId, uint level)
-        {
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
             if (sgUser is null)
                 return;
 
-            ItemReward reward;
+            var reward = new ItemReward();
 
-            if (level == 100u || level == 50u)
-                reward = new ItemReward().AddCapsules(1u);
-            else if (level % 25u == 0u)
-                reward = new ItemReward().AddSpheres(1u);
-            else if (level % 10u == 0u)
-                reward = new ItemReward().AddTokens(2u);
-            else if (level % 5u == 0u)
-                reward = new ItemReward().AddCoins(2_000u).AddTickets(1u);
-            else 
-                reward = new ItemReward().AddCoins(2_000u).AddChests(1u);
+            for (uint level = fromLevel + 1; level <= toLevel; level++)
+            {
+                if (level == 100u || level == 50u)
+                    reward = new ItemReward().AddCapsules(1u);
+                else if (level % 25u == 0u)
+                    reward = new ItemReward().AddSpheres(1u);
+                else if (level % 10u == 0u)
+                    reward = new ItemReward().AddTokens(2u);
+                else if (level % 5u == 0u)
+                    reward = new ItemReward().AddCoins(2_000u).AddTickets(1u);
+                else
+                    reward = new ItemReward().AddCoins(2_000u).AddChests(1u);
+            }
 
             await reward.DeliverToAsync(userId);
+            await RiftBot.SendChatMessageAsync("levelup", new FormatData(userId)
+            {
+                Reward = new RewardData
+                {
+                    Reward = reward
+                }
+            });
         }
 
         public async Task<IonicMessage> GetUserCooldownsAsync(ulong userId)
@@ -363,7 +289,7 @@ namespace Rift.Services
                     .Select(x => x.UserId)
                     .ToListAsync();
 
-                ratingSorted = sortedIds;
+                SortedRating = sortedIds;
             }
         }
 
@@ -411,7 +337,6 @@ namespace Rift.Services
         static async Task<IonicMessage> OpenChestInternalAsync(ulong userId, uint amount)
         {
             var dbInventory = await Database.GetUserInventoryAsync(userId);
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
             if (dbInventory.Chests < amount || amount == 0)
                 return await RiftBot.GetMessageAsync("chests-nochests", new FormatData(userId));
@@ -650,8 +575,6 @@ namespace Rift.Services
             return (diff > Settings.Economy.StoreCooldown, remaining);
         }
 
-        
-
         public async Task ActivateDoubleExp(ulong userId)
         {
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
@@ -718,27 +641,6 @@ namespace Rift.Services
         {
             return (uint) (Math.Pow(level, 1.5) * 40 - 40);
         }
-
-        public static string GetUserNameById(ulong userId)
-        {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (!(sgUser is null))
-            {
-                return string.IsNullOrWhiteSpace(sgUser.Nickname)
-                    ? sgUser.Username
-                    : sgUser.Nickname;
-            }
-
-            return "-";
-        }
-    }
-
-    public enum GiftSource
-    {
-        Streamer,
-        Voice,
-        Moderator,
     }
 
     public enum Currency
