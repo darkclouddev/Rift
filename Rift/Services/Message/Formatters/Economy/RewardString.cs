@@ -4,13 +4,13 @@ using Rift.Data.Models;
 
 namespace Rift.Services.Message.Formatters.Economy
 {
-    public class BragReward : FormatterBase
+    public class RewardString : FormatterBase
     {
-        public BragReward() : base("$bragReward") {}
+        public RewardString() : base("$rewardString") {}
 
         public override Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
-            return ReplaceData(message, data.Brag.Reward);
+            return ReplaceData(message, data.Reward.Reward.ToString());
         }
     }
 }

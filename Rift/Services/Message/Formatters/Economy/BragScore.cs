@@ -14,11 +14,8 @@ namespace Rift.Services.Message.Formatters.Economy
             var kills = stats.Kills.ToString();
             var deaths = stats.Deaths.ToString();
             var assists = stats.Assists.ToString();
-            var laneMinions = stats.TotalMinionsKilled;
-            var neutralMinions = stats.NeutralMinionsKilled;
-            var cs = (laneMinions + neutralMinions).ToString();
 
-            return ReplaceData(message, $"{kills} / {deaths} / {assists}, {cs} cs");
+            return ReplaceData(message, $"{kills} / {deaths} / {assists}");
         }
     }
 }
