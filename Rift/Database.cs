@@ -1196,30 +1196,43 @@ namespace Rift
 
         #region Toxicity
 
-        static async Task EnsureToxicityExistsAsync(ulong userId)
+        static async Task<bool> EnsureToxicityExistsAsync(ulong userId)
         {
-            await EnsureUserExistsAsync(userId);
-
-            var dbToxicity = await GetToxicityAsync(userId);
-
-            if (dbToxicity != null)
-                return;
+            if (!await EnsureUserExistsAsync(userId))
+                throw new DatabaseException(nameof(EnsureToxicityExistsAsync));
 
             using (var context = new RiftContext())
             {
-                var toxicity = new RiftToxicity
-                {
-                    UserId = userId,
-                    LastIncreased = DateTime.MinValue,
-                };
+                if (await context.Toxicity.AnyAsync(x => x.UserId == userId))
+                    return true;
 
-                await context.Toxicity.AddAsync(toxicity);
-                await context.SaveChangesAsync();
+                try
+                {
+                    var entry = new RiftToxicity
+                    {
+                        UserId = userId,
+                        LastIncreased = DateTime.MinValue,
+                    };
+
+                    await context.Toxicity.AddAsync(entry);
+                    await context.SaveChangesAsync();
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    RiftBot.Log.Error($"Failed to check {nameof(EnsureToxicityExistsAsync)} for user {userId.ToString()}.");
+                    RiftBot.Log.Error(ex);
+                    return false;
+                }
             }
         }
 
         public static async Task<RiftToxicity> GetToxicityAsync(ulong userId)
         {
+            if (!await EnsureToxicityExistsAsync(userId))
+                throw new DatabaseException(nameof(GetToxicityAsync));
+
             using (var context = new RiftContext())
             {
                 return await context.Toxicity.FirstOrDefaultAsync(x => x.UserId == userId);
