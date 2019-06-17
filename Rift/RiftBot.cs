@@ -77,7 +77,7 @@ namespace Rift
 
         public static async Task<IonicMessage> GetMessageAsync(string identifier, FormatData data)
         {
-            return await GetService<MessageService>().GetMessageAsync(identifier, data);
+            return await GetService<MessageService>().GetMessageAsync(identifier, data).ConfigureAwait(false);
         }
 
         public static async Task SendChatMessageAsync(string identifier, FormatData data)
@@ -90,7 +90,7 @@ namespace Rift
             if (msg is null)
                 return;
 
-            await channel.SendIonicMessageAsync(msg);
+            await channel.SendIonicMessageAsync(msg).ConfigureAwait(false);
         }
 
         public static async Task SendChatMessageAsync(IonicMessage message)

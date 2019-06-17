@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -89,8 +89,8 @@ namespace Rift.Services
         {
             var dtNow = DateTime.UtcNow;
 
-            await CheckSendAsync(dtNow);
-            await CheckDeleteAsync(dtNow);
+            await CheckSendAsync(dtNow).ConfigureAwait(false);
+            await CheckDeleteAsync(dtNow).ConfigureAwait(false);
         }
 
         async Task CheckSendAsync(DateTime dt)
@@ -112,7 +112,7 @@ namespace Rift.Services
                 if (!success)
                     continue;
 
-                await DeliverAsync(message);
+                await DeliverAsync(message).ConfigureAwait(false);
             }
         }
 
@@ -134,7 +134,7 @@ namespace Rift.Services
                 if (!success)
                     continue;
 
-                await DeleteAsync(message);
+                await DeleteAsync(message).ConfigureAwait(false);
             }
         }
 
@@ -155,17 +155,17 @@ namespace Rift.Services
                     {
                         case MessageType.PlainText:
 
-                            await userChannel.SendMessageAsync(message.Text);
+                            await userChannel.SendMessageAsync(message.Text).ConfigureAwait(false);
                             break;
 
                         case MessageType.Embed:
 
-                            await userChannel.SendEmbedAsync(message.Embed);
+                            await userChannel.SendEmbedAsync(message.Embed).ConfigureAwait(false);
                             break;
 
                         case MessageType.Mixed:
 
-                            await userChannel.SendMessageAsync(message.Text, embed: message.Embed);
+                            await userChannel.SendMessageAsync(message.Text, embed: message.Embed).ConfigureAwait(false);
                             break;
                     }
 
@@ -180,17 +180,17 @@ namespace Rift.Services
                     {
                         case MessageType.PlainText:
 
-                            await channel.SendMessageAsync(message.Text);
+                            await channel.SendMessageAsync(message.Text).ConfigureAwait(false);
                             break;
 
                         case MessageType.Embed:
 
-                            await channel.SendEmbedAsync(message.Embed);
+                            await channel.SendEmbedAsync(message.Embed).ConfigureAwait(false);
                             break;
 
                         case MessageType.Mixed:
 
-                            await channel.SendMessageAsync(message.Text, embed: message.Embed);
+                            await channel.SendMessageAsync(message.Text, embed: message.Embed).ConfigureAwait(false);
                             break;
                     }
 
@@ -210,7 +210,7 @@ namespace Rift.Services
                 if (msg is null)
                     return;
 
-                await msg.DeleteAsync();
+                await msg.DeleteAsync().ConfigureAwait(false);
             }
             catch(Exception ex) // fails when message is already deleted, no delete perms or discord outage
             {
@@ -325,7 +325,7 @@ namespace Rift.Services
 
                     try
                     {
-                        await f.Format(message, data);
+                        await f.Format(message, data).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
@@ -358,7 +358,7 @@ namespace Rift.Services
                 Embed = json,
             };
 
-            await Database.AddStoredMessage(message);
+            await Database.AddStoredMessage(message).ConfigureAwait(false);
         }
 
         #endregion Message formatting
