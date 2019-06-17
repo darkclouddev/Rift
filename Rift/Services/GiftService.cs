@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -90,6 +90,9 @@ namespace Rift.Services
                 Gift = new GiftData
                 {
                     TargetId = toSgUser.Id,
+                },
+                Reward = new RewardData
+                {
                     Reward = giftItem
                 }
             });

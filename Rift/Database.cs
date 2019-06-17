@@ -1569,6 +1569,29 @@ namespace Rift
         }
 
         #endregion Active Giveaways
+
+        #region Role Inventory
+
+        public static async Task<List<RiftRoleInventory>> GetRoleInventoryAsync(ulong userId)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.RoleInventories
+                    .Where(x => x.UserId == userId)
+                    .ToListAsync();
+            }
+        }
+
+        public static async Task<int> GetRoleInventoryCountAsync(ulong userId)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.RoleInventories
+                    .CountAsync(x => x.UserId == userId);
+            }
+        }
+
+        #endregion Role Inventory
     }
 
     public class DatabaseException : Exception
