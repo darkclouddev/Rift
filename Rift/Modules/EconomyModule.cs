@@ -5,9 +5,7 @@ using Rift.Services;
 using Rift.Services.Economy;
 using Rift.Util;
 
-using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using IonicLib.Util;
 
 namespace Rift.Modules
@@ -16,11 +14,13 @@ namespace Rift.Modules
     {
         readonly EconomyService economyService;
         readonly RiotService riotService;
+        readonly BragService bragService;
 
-        public EconomyModule(EconomyService economyService, RiotService riotService)
+        public EconomyModule(EconomyService economyService, RiotService riotService, BragService bragService)
         {
             this.economyService = economyService;
             this.riotService = riotService;
+            this.bragService = bragService;
         }
 
         [Command("обновить")]
@@ -58,7 +58,7 @@ namespace Rift.Modules
                 if (message is null)
                     return;
 
-                await Context.Channel.SendIonicMessageAsync(message);
+                await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
             }
         }
 
@@ -136,7 +136,7 @@ namespace Rift.Modules
         {
             using (Context.Channel.EnterTypingState())
             {
-                var message = await economyService.GetUserBragAsync(Context.User.Id);
+                var message = await bragService.GetUserBragAsync(Context.User.Id);
 
                 if (message is null)
                     return;
