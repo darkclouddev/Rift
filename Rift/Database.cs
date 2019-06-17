@@ -6,9 +6,6 @@ using System.Threading.Tasks;
 
 using Rift.Data;
 using Rift.Data.Models;
-using Rift.Data.Models.Cooldowns;
-using Rift.Data.Models.LolData;
-using Rift.Data.Models.Statistics;
 using Rift.Data.Models.Users;
 
 using Microsoft.EntityFrameworkCore;
@@ -53,7 +50,7 @@ namespace Rift
         public static async Task<RiftCooldowns> GetUserCooldownsAsync(ulong userId)
         {
             if (!await EnsureCooldownsExistsAsync(userId))
-                throw new DatabaseException(nameof(GetUserDoubleExpTimeAsync));
+                throw new DatabaseException(nameof(GetUserCooldownsAsync));
 
             using (var context = new RiftContext())
             {
@@ -63,126 +60,15 @@ namespace Rift
             }
         }
         
-        public static async Task<UserDoubleExpTime> GetUserDoubleExpTimeAsync(ulong userId)
-        {
-            if (!await EnsureCooldownsExistsAsync(userId))
-                throw new DatabaseException(nameof(GetUserDoubleExpTimeAsync));
-
-            using (var context = new RiftContext())
-            {
-                return await context.Cooldowns
-                    .Where(x => x.UserId == userId)
-                    .Select(x => new UserDoubleExpTime
-                    {
-                        UserId = x.UserId,
-                        DoubleExpTime = x.DoubleExpTime,
-                    })
-                    .FirstAsync();
-            }
-        }
-
-        public static async Task<UserLastStoreTime> GetUserLastStoreTimeAsync(ulong userId)
-        {
-            if (!await EnsureCooldownsExistsAsync(userId))
-                throw new DatabaseException(nameof(GetUserLastStoreTimeAsync));
-
-            using (var context = new RiftContext())
-            {
-                return await context.Cooldowns
-                    .Where(x => x.UserId == userId)
-                    .Select(x => new UserLastStoreTime
-                    {
-                        UserId = x.UserId,
-                        LastStoreTime = x.LastStoreTime,
-                    })
-                    .FirstAsync();
-            }
-        }
-
-        public static async Task<UserLastDailyChestTime> GetUserLastDailyChestTimeAsync(ulong userId)
-        {
-            if (!await EnsureCooldownsExistsAsync(userId))
-                throw new DatabaseException(nameof(GetUserLastDailyChestTimeAsync));
-
-            using (var context = new RiftContext())
-            {
-                return await context.Cooldowns
-                    .Where(x => x.UserId == userId)
-                    .Select(x => new UserLastDailyChestTime
-                    {
-                        UserId = x.UserId,
-                        LastDailyChestTime = x.LastDailyChestTime,
-                    })
-                    .FirstOrDefaultAsync();
-            }
-        }
-
-        public static async Task<UserLastBragTime> GetUserLastBragTimeAsync(ulong userId)
-        {
-            if (!await EnsureCooldownsExistsAsync(userId))
-                throw new DatabaseException(nameof(GetUserLastBragTimeAsync));
-
-            using (var context = new RiftContext())
-            {
-                return await context.Cooldowns
-                    .Where(x => x.UserId == userId)
-                    .Select(x => new UserLastBragTime
-                    {
-                        UserId = x.UserId,
-                        LastBragTime = x.LastBragTime,
-                    })
-                    .FirstAsync();
-            }
-        }
-
-        public static async Task<UserLastGiftTime> GetUserLastGiftTimeAsync(ulong userId)
-        {
-            if (!await EnsureCooldownsExistsAsync(userId))
-                throw new InvalidOperationException();
-
-            using (var context = new RiftContext())
-            {
-                return await context.Cooldowns
-                    .Where(x => x.UserId == userId)
-                    .Select(x => new UserLastGiftTime
-                    {
-                        UserId = x.UserId,
-                        LastGiftTime = x.LastGiftTime,
-                    })
-                    .FirstAsync();
-            }
-        }
-
-        public static async Task<UserBotRespectTime[]> GetBotRespectedUsersAsync()
+        public static async Task<List<(ulong, DateTime)>> GetBotRespectedUsersAsync()
         {
             using (var context = new RiftContext())
             {
-                return await context.Cooldowns
-                    .Select(x => new UserBotRespectTime
-                    {
-                        UserId = x.UserId,
-                        BotRespectTime = x.BotRespectTime
-                    })
+                var users = await context.Cooldowns
                     .Where(x => x.BotRespectTime > DateTime.UtcNow)
-                    .ToArrayAsync();
-            }
-        }
+                    .ToListAsync();
 
-        public static async Task<UserLastLolAccountUpdateTime[]> GetTenUsersForUpdateAsync()
-        {
-            using (var context = new RiftContext())
-            {
-                var list = await context.Cooldowns
-                    .Select(x => new UserLastLolAccountUpdateTime
-                    {
-                        UserId = x.UserId,
-                        LastUpdateTime = x.LastLolAccountUpdateTime,
-                    })
-                    .OrderBy(x => x.LastUpdateTime)
-                    .Where(x => !string.IsNullOrWhiteSpace(x.PlayerUuid))
-                    .ToArrayAsync();
-
-                return list.Take(10).ToArray();
+                return users.Select(x => (x.UserId, x.BotRespectTime)).ToList();
             }
         }
 
@@ -294,24 +180,6 @@ namespace Rift
             }
         }
 
-        public static async Task SetLastLolAccountUpdateTimeAsync(ulong userId, DateTime time)
-        {
-            if (!await EnsureCooldownsExistsAsync(userId))
-                throw new DatabaseException(nameof(SetLastLolAccountUpdateTimeAsync));
-
-            var cd = new RiftCooldowns
-            {
-                UserId = userId,
-                LastLolAccountUpdateTime = time,
-            };
-
-            using (var context = new RiftContext())
-            {
-                context.Attach(cd).Property(x => x.LastLolAccountUpdateTime).IsModified = true;
-                await context.SaveChangesAsync();
-            }
-        }
-
         #endregion Cooldowns
 
         #region Inventory
@@ -347,7 +215,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserInventory> GetUserInventoryAsync(ulong userId)
+        public static async Task<RiftInventory> GetUserInventoryAsync(ulong userId)
         {
             if (!await EnsureInventoryExistsAsync(userId)
                 || !await EnsureStatisticsExistsAsync(userId))
@@ -356,21 +224,7 @@ namespace Rift
             using (var context = new RiftContext())
             {
                 return await context.Inventory
-                    .Where(x => x.UserId == userId)
-                    .Select(x => new UserInventory
-                    {
-                        UserId = x.UserId,
-                        Coins = x.Coins,
-                        Tokens = x.Tokens,
-                        Chests = x.Chests,
-                        Capsules = x.Capsules,
-                        Spheres = x.Spheres,
-                        BonusDoubleExp = x.BonusDoubleExp,
-                        BonusBotRespect = x.BonusBotRespect,
-                        BonusRewind = x.BonusRewind,
-                        Tickets = x.Tickets,
-                    })
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(x => x.UserId == userId);
             }
         }
 
@@ -758,21 +612,11 @@ namespace Rift
             }
         }
 
-        public static async Task<List<PendingUser>> GetAllPendingUsersAsync()
+        public static async Task<List<RiftPendingUser>> GetAllPendingUsersAsync()
         {
             using (var context = new RiftContext())
             {
                 return await context.PendingUsers
-                    .Select(x => new PendingUser
-                    {
-                        UserId = x.UserId,
-                        Region = x.Region,
-                        PlayerUUID = x.PlayerUUID,
-                        AccountId = x.AccountId,
-                        SummonedId = x.SummonedId,
-                        ConfirmationCode = x.ConfirmationCode,
-                        ExpirationTime = x.ExpirationTime,
-                    })
                     .ToListAsync();
             }
         }
@@ -797,7 +641,7 @@ namespace Rift
             }
         }
 
-        public static async Task RemovePendingUserAsync(PendingUser pendingUser)
+        public static async Task RemovePendingUserAsync(RiftPendingUser pendingUser)
         {
             await RemovePendingUserAsync(pendingUser.UserId);
         }
@@ -869,7 +713,7 @@ namespace Rift
             }
         }
 
-        public static async Task<UserStatistics> GetUserStatisticsAsync(ulong userId)
+        public static async Task<RiftStatistics> GetUserStatisticsAsync(ulong userId)
         {
             if (!await EnsureStatisticsExistsAsync(userId))
                 throw new DatabaseException(nameof(GetUserStatisticsAsync));
@@ -877,36 +721,14 @@ namespace Rift
             using (var context = new RiftContext())
             {
                 return await context.Statistics
-                    .Where(x => x.UserId == userId)
-                    .Select(x => new UserStatistics
-                    {
-                        UserId = x.UserId,
-                        CoinsEarnedTotal = x.CoinsEarnedTotal,
-                        TokensEarnedTotal = x.TokensEarnedTotal,
-                        ChestsEarnedTotal = x.ChestsEarnedTotal,
-                        SphereEarnedTotal = x.SphereEarnedTotal,
-                        CapsuleEarnedTotal = x.CapsuleEarnedTotal,
-                        ChestsOpenedTotal = x.ChestsOpenedTotal,
-                        SphereOpenedTotal = x.SphereEarnedTotal,
-                        CapsuleOpenedTotal = x.CapsuleEarnedTotal,
-                        AttacksDone = x.AttacksDone,
-                        AttacksReceived = x.AttacksReceived,
-                        CoinsSpentTotal = x.CoinsSpentTotal,
-                        TokensSpentTotal = x.TokensSpentTotal,
-                        GiftsSent = x.GiftsSent,
-                        GiftsReceived = x.GiftsReceived,
-                        MessagesSentTotal = x.MessagesSentTotal,
-                        BragTotal = x.BragTotal,
-                        PurchasedItemsTotal = x.PurchasedItemsTotal,
-                    })
-                    .FirstAsync();
+                    .FirstAsync(x => x.UserId == userId);
             }
         }
 
         public static async Task AddStatisticsAsync(ulong userId, uint giftsSent = 0u, uint giftsReceived = 0u,
             uint bragTotal = 0u, uint chestsOpenedTotal = 0u, uint sphereOpenedTotal = 0u,
             uint capsuleOpenedTotal = 0u, uint attacksDone = 0u, uint attacksReceived = 0u, 
-            uint messagesSentTotal = 0u, uint purchasedItemsTotal = 0u)
+            uint messagesSentTotal = 0u, uint purchasedItemsTotal = 0u, TimeSpan? voiceUptime = null) // TODO: fix this shiet
         {
             if (!await EnsureStatisticsExistsAsync(userId))
                 throw new DatabaseException(nameof(AddStatisticsAsync));
@@ -1085,45 +907,22 @@ namespace Rift
             }
         }
 
-        public static async Task<UserProfile> GetUserProfileAsync(ulong userId)
+        public static async Task<RiftUser> GetUserAsync(ulong userId)
         {
-            if (!await EnsureUserExistsAsync(userId)
-                || !await EnsureCooldownsExistsAsync(userId))
-                throw new DatabaseException(nameof(GetUserProfileAsync));
+            if (!await EnsureUserExistsAsync(userId))
+                throw new DatabaseException(nameof(GetUserAsync));
 
             using (var context = new RiftContext())
             {
                 return await context.Users
-                    .Join(context.Cooldowns, user => user.UserId, time => time.UserId,
-                          (riftUser, riftCooldown) => new
-                          {
-                              User = riftUser,
-                              Cooldowns = riftCooldown
-                          })
-                    .Where(x => x.User.UserId == userId && x.Cooldowns.UserId == userId)
-                    .Select(x => new UserProfile
-                    {
-                        UserId = x.User.UserId,
-                        Experience = x.User.Experience,
-                        Level = x.User.Level,
-                        DoubleExpTime = x.Cooldowns.DoubleExpTime,
-                        BotRespectTime = x.Cooldowns.BotRespectTime,
-                    })
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(x => x.UserId == userId);
             }
         }
 
-        public static async Task<RiftUser> GetUserLevelAsync(ulong userId)
+        public static async Task<uint> GetUserLevelAsync(ulong userId)
         {
-            if (!await EnsureUserExistsAsync(userId))
-                throw new DatabaseException(nameof(GetUserLevelAsync));
-
-            using (var context = new RiftContext())
-            {
-                return await context.Users
-                    .Where(x => x.UserId == userId)
-                    .FirstAsync();
-            }
+            var user = await GetUserAsync(userId);
+            return user.Level;
         }
 
         public static async Task<UserTopCoins[]> GetTopTenByCoinsAsync(Func<UserTopCoins, bool> predicate)
@@ -1204,13 +1003,14 @@ namespace Rift
 
             var dbUser = new RiftUser { UserId = userId };
 
-            var profile = await GetUserProfileAsync(userId);
+            var profile = await GetUserAsync(userId);
+            var cooldowns = await GetUserCooldownsAsync(userId);
 
             using (var context = new RiftContext())
             {
                 var entry = context.Attach(dbUser);
 
-                if (DateTime.UtcNow < profile.DoubleExpTime)
+                if (DateTime.UtcNow < cooldowns.DoubleExpTime)
                     exp *= 2;
 
                 var expBefore = profile.Experience;

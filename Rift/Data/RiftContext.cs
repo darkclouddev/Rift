@@ -20,7 +20,7 @@ namespace Rift.Data
         public DbSet<RiftToxicity> Toxicity { get; set; }
         public DbSet<RiftModerationLog> ModerationLog { get; set; }
         public DbSet<RiftSettings> Settings { get; set; }
-        public DbSet<RiftInventoryRole> RoleInventories { get; set; }
+        public DbSet<RiftRoleInventory> RoleInventories { get; set; }
         public DbSet<RiftSystemTimer> SystemCooldowns { get; set; }
         public DbSet<RiftReward> Rewards { get; set; }
         public DbSet<RiftGiveaway> Giveaways { get; set; }
@@ -104,7 +104,7 @@ namespace Rift.Data
             builder.Entity<RiftSettings>().HasKey(prop => prop.Id);
             builder.Entity<RiftSettings>().Property(prop => prop.Id).ValueGeneratedNever();
 
-            builder.Entity<RiftInventoryRole>()
+            builder.Entity<RiftRoleInventory>()
                 .HasKey(x => new
                 {
                     x.UserId,

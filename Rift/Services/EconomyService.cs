@@ -180,53 +180,43 @@ namespace Rift.Services
 
         public async Task ProcessMessageAsync(IUserMessage message)
         {
-            await AddExpAsync(message.Author.Id, 1u);
+            await AddExpAsync(message.Author.Id, 1u).ConfigureAwait(false);
+            await CheckDailyMessageAsync(message.Author.Id).ConfigureAwait(false);
         }
 
         static async Task AddExpAsync(ulong userId, uint exp)
         {
-            await Database.AddExperienceAsync(userId, exp).ContinueWith(async _ =>
-            {
-                await CheckLevelUpAsync(userId);
-            });
+            await Database.AddExperienceAsync(userId, exp)
+                .ContinueWith(async _ => await CheckLevelUpAsync(userId));
         }
 
         static async Task CheckLevelUpAsync(ulong userId)
         {
-            var dbUserLevel = await Database.GetUserLevelAsync(userId);
+            var dbUser = await Database.GetUserAsync(userId);
 
-            if (dbUserLevel.Experience != uint.MaxValue)
+            if (dbUser.Experience != uint.MaxValue)
             {
-                var newLevel = dbUserLevel.Level + 1u;
+                var newLevel = dbUser.Level + 1u;
 
-                while (dbUserLevel.Experience >= GetExpForLevel(newLevel))
+                while (dbUser.Experience >= GetExpForLevel(newLevel))
                 {
                     newLevel++;
                 }
 
                 newLevel--;
 
-                if (newLevel > dbUserLevel.Level)
+                if (newLevel > dbUser.Level)
                 {
-                    await Database.SetLevelAsync(userId, newLevel);
+                    await Database.SetLevelAsync(dbUser.UserId, newLevel);
 
-                    RiftBot.Log.Info($"{userId.ToString()} just leveled up to {newLevel.ToString()}");
+                    RiftBot.Log.Info($"{dbUser.UserId.ToString()} just leveled up: {dbUser.Level.ToString()} => {newLevel.ToString()}");
 
                     if (newLevel == 1u)
                         return; //no rewards on level 1
 
-                    if (IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var commsChannel))
-                    {
-                        var msg = await RiftBot.GetMessageAsync("levelup", new FormatData(userId));
-
-                        await commsChannel.SendIonicMessageAsync(msg);
-                    }
-                    
-                    await GiveRewardsForLevelAsync(userId, dbUserLevel.Level, newLevel);
+                    await GiveRewardsForLevelAsync(dbUser.UserId, dbUser.Level, newLevel);
                 }
             }
-
-            await CheckDailyMessageAsync(userId);
         }
 
         static async Task CheckDailyMessageAsync(ulong userId)
@@ -235,7 +225,7 @@ namespace Rift.Services
 
             try
             {
-                var dbDaily = await Database.GetUserLastDailyChestTimeAsync(userId);
+                var dbDaily = await Database.GetUserCooldownsAsync(userId);
     
                 var diff = DateTime.UtcNow - dbDaily.LastDailyChestTime;
     
@@ -315,55 +305,7 @@ namespace Rift.Services
         
         public async Task<IonicMessage> GetUserProfileAsync(ulong userId)
         {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (sgUser is null)
-                return MessageService.Error;
-
-            var profile = await Database.GetUserProfileAsync(userId);
-
-            var position = ratingSorted is null
-                ? "-"
-                : $"{(ratingSorted.IndexOf(userId) + 1).ToString()} / {ratingSorted.Count.ToString()}";
-
-            var tempRoles = await RiftBot.GetService<RoleService>().GetUserTempRolesAsync(userId);
-            var tempRolesList = new List<string>();
-
-            foreach (var role in tempRoles)
-            {
-                if (!TempRoles.ContainsKey(role.RoleId) && role.RoleId != Settings.RoleId.Keepers)
-                    continue;
-
-                var timeLeft = role.ExpirationTime - DateTime.UtcNow;
-                
-                tempRolesList.Add($"- {TempRoles[role.RoleId]} ({timeLeft.Humanize()})");
-            }
-
-            var tempRolesString = tempRolesList.Any()
-                ? string.Join('\n', tempRolesList)
-                : "У вас нет временных ролей.";
-
-            var currentLevelExp = GetExpForLevel(profile.Level);
-            var fullLevelExp = GetExpForLevel(profile.Level+1u) - currentLevelExp;
-            var remainingExp = fullLevelExp - (profile.Experience - currentLevelExp);
-            var levelPerc = 100 - (int)Math.Floor(((float)remainingExp / fullLevelExp * 100));
-
-            var embed = new RiftEmbed()
-                .WithTitle("Ваш профиль")
-                .WithThumbnailUrl(sgUser.GetAvatarUrl())
-                .WithDescription($"Статистика и информация о вашем аккаунте в системе:")
-                .AddField("Уровень", $"{profile.Level.ToString()}", true)
-                .AddField("Место", $"{position}", true)
-                .AddField("Статистика текущего уровня",
-                    $" Получено {levelPerc.ToString()}% опыта до {(profile.Level+1).ToString()} уровня.")
-                .AddField("Временные роли", tempRolesString);
-            
-            return new IonicMessage(embed.ToEmbed());
-        }
-
-        public async Task<IonicMessage> GetUserInventoryAsync(ulong userId)
-        {
-            return await RiftBot.GetMessageAsync("user-inventory", new FormatData(userId));
+            return await RiftBot.GetMessageAsync("user-profile", new FormatData(userId));
         }
 
         public async Task<IonicMessage> GetUserGameStatAsync(ulong userId)
@@ -403,110 +345,12 @@ namespace Rift.Services
 
         public async Task<IonicMessage> GetUserStatAsync(ulong userId)
         {
-            return await RiftBot.GetMessageAsync("user-stat", new FormatData(userId));
-        }
+            var statistics = await Database.GetUserStatisticsAsync(userId);
 
-        public async Task<IonicMessage> GetUserBragAsync(ulong userId)
-        {
-            await bragMutex.WaitAsync().ConfigureAwait(false);
-
-            IonicMessage result;
-
-            try
+            return await RiftBot.GetMessageAsync("user-stat", new FormatData(userId)
             {
-                result = await GetUserBragInternalAsync(userId).ConfigureAwait(false);
-            }
-            finally
-            {
-                bragMutex.Release();
-            }
-
-            return result;
-        }
-
-        static async Task<IonicMessage> GetUserBragInternalAsync(ulong userId)
-        {
-            (var canBrag, var remaining) = await CanBrag(userId);
-
-            if (!canBrag)
-                return await RiftBot.GetMessageAsync("brag-cooldown", new FormatData(userId));
-
-            var dbSummoner = await Database.GetUserLolDataAsync(userId);
-
-            if (dbSummoner is null || string.IsNullOrWhiteSpace(dbSummoner.AccountId))
-                return await RiftBot.GetMessageAsync("loldata-nodata", new FormatData(userId));
-
-            (var matchlistResult, var matchlist) = await RiftBot.GetService<RiotService>()
-                .GetLast20MatchesByAccountIdAsync(dbSummoner.SummonerRegion, dbSummoner.AccountId);
-
-            if (matchlistResult != RequestResult.Success)
-                return await RiftBot.GetMessageAsync("brag-nomatches", new FormatData(userId));
-
-            (var matchDataResult, var matchData) = await RiftBot.GetService<RiotService>()
-                .GetMatchById(dbSummoner.SummonerRegion, matchlist.Random().GameId);
-
-            if (matchDataResult != RequestResult.Success)
-            {
-                RiftBot.Log.Error("Failed to get match data");
-                return MessageService.Error;
-            }
-
-            long participantId = matchData.ParticipantIdentities
-                .First(x => x.Player.CurrentAccountId == dbSummoner.AccountId || x.Player.AccountId == dbSummoner.AccountId)
-                .ParticipantId;
-
-            var player = matchData.Participants.First(x => x.ParticipantId == participantId);
-
-            if (player is null)
-            {
-                RiftBot.Log.Error("Failed to get player object");
-                return MessageService.Error;
-            }
-
-            var champData = RiftBot.GetService<RiotService>().GetChampionById(player.ChampionId.ToString());
-
-            if (champData is null)
-            {
-                RiftBot.Log.Error("Failed to obtain champ data");
-                return MessageService.Error;
-            }
-
-            var champThumb = RiotService.GetChampionSquareByName(champData.Image);
-
-            await Database.SetLastBragTimeAsync(userId, DateTime.UtcNow);
-
-            var brag = new Brag(player.Stats.Win);
-            await Database.AddInventoryAsync(userId, new InventoryData { Coins = brag.Coins });
-
-            var queue = RiftBot.GetService<RiotService>().GetQueueNameById(matchData.QueueId);
-            
-            await Database.AddStatisticsAsync(userId, bragTotal: 1u);
-
-            return await RiftBot.GetMessageAsync("brag-success", new FormatData(userId)
-            {
-                Brag = new BragData
-                {
-                    ChampionName = champData.Name,
-                    ChampionPortraitUrl = champThumb,
-                    Stats = player.Stats,
-                    QueueName = queue,
-                    Reward = brag.Coins.ToString(),
-                }
+                Statistics = statistics
             });
-        }
-
-        static async Task<(bool, TimeSpan)> CanBrag(ulong userId)
-        {
-            var data = await Database.GetUserLastBragTimeAsync(userId);
-
-            if (data.LastBragTime == DateTime.MinValue)
-                return (true, TimeSpan.Zero);
-
-            var diff = DateTime.UtcNow - data.LastBragTime;
-
-            var result = diff > Settings.Economy.BragCooldown;
-
-            return (result, result ? TimeSpan.Zero : Settings.Economy.BragCooldown - diff);
         }
 
         static async Task UpdateRatingAsync()
@@ -795,7 +639,7 @@ namespace Rift.Services
 
         static async Task<(bool, TimeSpan)> CanBuyStoreAsync(ulong userId)
         {
-            var dbStore = await Database.GetUserLastStoreTimeAsync(userId);
+            var dbStore = await Database.GetUserCooldownsAsync(userId);
 
             if (dbStore.LastStoreTime == DateTime.MinValue)
                 return (true, TimeSpan.Zero);
@@ -822,7 +666,7 @@ namespace Rift.Services
                 return;
             }
 
-            var dbDoubleExp = await Database.GetUserDoubleExpTimeAsync(userId);
+            var dbDoubleExp = await Database.GetUserCooldownsAsync(userId);
             if (dbDoubleExp.DoubleExpTime > DateTime.UtcNow)
             {
                 var msg = await RiftBot.GetMessageAsync("activate-active", new FormatData(userId));
@@ -853,8 +697,8 @@ namespace Rift.Services
                 return;
             }
 
-            var dbUser = await Database.GetUserProfileAsync(userId);
-            if (dbUser.BotRespectTime > DateTime.UtcNow)
+            var dbCooldowns = await Database.GetUserCooldownsAsync(userId);
+            if (dbCooldowns.BotRespectTime > DateTime.UtcNow)
             {
                 var msgActive = await RiftBot.GetMessageAsync("activate-active", new FormatData(userId));
                 await channel.SendIonicMessageAsync(msgActive);

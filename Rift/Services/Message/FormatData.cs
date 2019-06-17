@@ -14,22 +14,18 @@ namespace Rift.Services.Message
     {
         public ulong UserId { get; set; }
         public EconomyData Economy { get; set; }
-        public BotRespectData BotRespect { get; set; }
         public BragData Brag { get; set; }
         public GiftData Gift { get; set; }
         public GiveawayData Giveaway { get; set; }
         public LolStatData LolStat { get; set; }
         public ModerationData Moderation { get; set; }
+        public RewardData Reward { get; set; }
+        public RiftStatistics Statistics { get; set; }
         public FormatData() {}
         public FormatData(ulong userId)
         {
             UserId = userId;
         }
-    }
-
-    public class BotRespectData
-    {
-        public ItemReward Reward { get; set; }
     }
 
     public class BragData
@@ -38,7 +34,6 @@ namespace Rift.Services.Message
         public string QueueName { get; set; }
         public string ChampionName { get; set; }
         public string ChampionPortraitUrl { get; set; }
-        public string Reward { get; set; }
     }
 
     public class EconomyData
@@ -50,7 +45,6 @@ namespace Rift.Services.Message
     public class GiftData
     {
         public ulong TargetId { get; set; }
-        public ItemReward Reward { get; set; }
         public TimeSpan Cooldown { get; set; }
         public uint NecessaryCoins { get; set; }
     }
@@ -85,5 +79,10 @@ namespace Rift.Services.Message
                 Duration = log.Duration != TimeSpan.Zero ? log.Duration : TimeSpan.Zero
             };
         }
+    }
+
+    public class RewardData
+    {
+        public RewardBase Reward { get; set; }
     }
 }

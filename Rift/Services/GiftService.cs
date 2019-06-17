@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -97,7 +97,7 @@ namespace Rift.Services
 
         static async Task<(bool, TimeSpan)> CanGift(ulong userId)
         {
-            var data = await Database.GetUserLastGiftTimeAsync(userId);
+            var data = await Database.GetUserCooldownsAsync(userId);
 
             if (data.LastGiftTime == DateTime.MinValue)
                 return (true, TimeSpan.Zero);

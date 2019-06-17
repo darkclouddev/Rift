@@ -71,19 +71,6 @@ namespace Rift.Modules
             await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
         }
 
-        [Command("getinventory")]
-        [RequireAdmin]
-        [RequireContext(ContextType.DM)]
-        public async Task GetInventory(ulong userId)
-        {
-            var message = await economyService.GetUserInventoryAsync(userId);
-
-            if (message is null)
-                return;
-
-            await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
-        }
-
         [Command("getgamestat")]
         [RequireAdmin]
         [RequireContext(ContextType.DM)]

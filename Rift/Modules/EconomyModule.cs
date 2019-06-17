@@ -62,8 +62,8 @@ namespace Rift.Modules
             }
         }
 
-        [Command("кд")]
-        [Alias("таймеры")]
+        [Command("таймеры")]
+        [Alias("кд")]
         [RateLimit(1, 10.0, Measure.Seconds, RateLimitFlags.NoLimitForAdmins, ErrorMessage = "Проверять таймеры можно не чаще 1 раза в 10 секунд!")]
         [RequireContext(ContextType.Guild)]
         public async Task Cooldowns()
@@ -96,21 +96,6 @@ namespace Rift.Modules
             using (Context.Channel.EnterTypingState())
             {
                 await economyService.ActivateBotRespect(Context.User.Id);
-            }
-        }
-
-        [Command("инвентарь")]
-        [RequireContext(ContextType.Guild)]
-        public async Task Inventory()
-        {
-            using (Context.Channel.EnterTypingState())
-            {
-                var message = await economyService.GetUserInventoryAsync(Context.User.Id);
-
-                if (message is null)
-                    return;
-
-                await Context.Channel.SendIonicMessageAsync(message);
             }
         }
 

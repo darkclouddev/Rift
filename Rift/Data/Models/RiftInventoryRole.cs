@@ -2,7 +2,7 @@
 
 namespace Rift.Data.Models
 {
-    public class RiftInventoryRole
+    public class RiftRoleInventory
     {
         public ulong UserId { get; set; }
         public ulong RoleId { get; set; }
@@ -18,14 +18,14 @@ namespace Rift.Data.Models
 
         public override bool Equals(object obj)
         {
-            return obj is RiftInventoryRole role
+            return obj is RiftRoleInventory role
                    && UserId == role.UserId
                    && RoleId == role.RoleId;
         }
 
         public override string ToString()
         {
-            return $"{nameof(RiftInventoryRole)}: {nameof(UserId)}: {UserId.ToString()}, {nameof(RoleId)}: {RoleId.ToString()}";
+            return $"{nameof(RiftRoleInventory)}: {nameof(UserId)}: {UserId.ToString()}, {nameof(RoleId)}: {RoleId.ToString()}";
         }
     }
 }

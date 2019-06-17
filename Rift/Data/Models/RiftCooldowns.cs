@@ -13,9 +13,33 @@ namespace Rift.Data.Models
             get
             {
                 var dt = DateTime.UtcNow;
-                var nextStoreTime = LastStoreTime + Settings.Economy.StoreCooldown;
-                return nextStoreTime > dt
-                    ? nextStoreTime - dt
+                var nextTime = LastStoreTime + Settings.Economy.StoreCooldown;
+                return nextTime > dt
+                    ? nextTime - dt
+                    : TimeSpan.Zero;
+            }
+        }
+        public DateTime LastRoleStoreTime { get; set; }
+        public TimeSpan RoleStoreTimeSpan
+        {
+            get
+            {
+                var dt = DateTime.UtcNow;
+                var nextTime = LastRoleStoreTime + Settings.Economy.RoleStoreCooldown;
+                return nextTime > dt
+                    ? nextTime - dt
+                    : TimeSpan.Zero;
+            }
+        }
+        public DateTime LastBackgroundStoreTime { get; set; }
+        public TimeSpan BackgroundStoreTimeSpan
+        {
+            get
+            {
+                var dt = DateTime.UtcNow;
+                var nextTime = LastBackgroundStoreTime + Settings.Economy.BackgroundStoreCooldown;
+                return nextTime > dt
+                    ? nextTime - dt
                     : TimeSpan.Zero;
             }
         }
@@ -25,9 +49,9 @@ namespace Rift.Data.Models
             get
             {
                 var dt = DateTime.UtcNow;
-                var nextDailyTime = LastDailyChestTime + TimeSpan.FromHours(22);
-                return nextDailyTime > dt
-                    ? nextDailyTime - dt
+                var nextTime = LastDailyChestTime + TimeSpan.FromHours(22);
+                return nextTime > dt
+                    ? nextTime - dt
                     : TimeSpan.Zero;
             }
         }
@@ -37,9 +61,9 @@ namespace Rift.Data.Models
             get
             {
                 var dt = DateTime.UtcNow;
-                var nextBragTime = LastBragTime + Settings.Economy.BragCooldown;
-                return nextBragTime > dt
-                    ? nextBragTime - dt
+                var nextTime = LastBragTime + Settings.Economy.BragCooldown;
+                return nextTime > dt
+                    ? nextTime - dt
                     : TimeSpan.Zero;
             }
         }
@@ -49,9 +73,9 @@ namespace Rift.Data.Models
             get
             {
                 var dt = DateTime.UtcNow;
-                var nextGiftTime = LastGiftTime + Settings.Economy.GiftCooldown;
-                return nextGiftTime > dt
-                    ? nextGiftTime - dt
+                var nextTime = LastGiftTime + Settings.Economy.GiftCooldown;
+                return nextTime > dt
+                    ? nextTime - dt
                     : TimeSpan.Zero;
             }
         }

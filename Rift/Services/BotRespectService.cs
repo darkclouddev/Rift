@@ -70,16 +70,16 @@ namespace Rift.Services
             RiftBot.Log.Debug("Gifts are on the way..");
 
             var users = await Database.GetBotRespectedUsersAsync();
-            if (users.Length > 0)
+            if (users.Count > 0)
             {
-                foreach (var user in users)
+                foreach ((var userId, var dt) in users)
                 {
-                    var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, user.UserId);
+                    var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
                     if (sgUser is null)
                         continue;
 
                     (var chance, var reward) = AvailableRewards.Random();
-                    await reward.DeliverToAsync(user.UserId);
+                    await reward.DeliverToAsync(userId);
                 }
 
                 if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var commsChannel))

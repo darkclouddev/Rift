@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Data.Models;
-using Rift.Data.Models.Cooldowns;
-using Rift.Data.Models.LolData;
 using Rift.Services.Message;
 using Rift.Services.Riot;
 using Rift.Util;
@@ -47,7 +45,6 @@ namespace Rift.Services
         public event RankChanged OnRankChanged;
 
         static uint index = 0;
-        static UserLastLolAccountUpdateTime[] users = null;
         static Timer updateTimer;
 
         static Timer approveTimer;
@@ -429,7 +426,7 @@ namespace Rift.Services
             RiftBot.Log.Info($"{usersValidated} users validated.");
         }
 
-        async Task PostValidateAsync(PendingUser pendingUser)
+        async Task PostValidateAsync(RiftPendingUser pendingUser)
         {
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, pendingUser.UserId);
 
@@ -449,36 +446,6 @@ namespace Rift.Services
         #endregion Validation
 
         #region Rank
-
-        async Task UpdateUsersAsync()
-        {
-            if (users == null || index == users.Length)
-            {
-                users = await Database.GetTenUsersForUpdateAsync();
-                index = 0;
-                return;
-            }
-
-            var user = users[index];
-            if (user.LastUpdateTime + Settings.Economy.LolAccountUpdateCooldown > DateTime.UtcNow)
-                return;
-
-            try
-            {
-                var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, user.UserId);
-
-                if (sgUser is null)
-                    await Database.RemoveLolDataAsync(user.UserId);
-                else
-                    await UpdateRankAsync(user.UserId, true);
-            }
-            catch (Discord.Net.HttpException)
-            {
-            }
-
-            await Database.SetLastLolAccountUpdateTimeAsync(user.UserId, DateTime.UtcNow);
-            index++;
-        }
 
         public async Task UpdateRankAsync(ulong userId, bool silentMode = false)
         {
@@ -727,7 +694,7 @@ namespace Rift.Services
             }
         }
 
-        async Task AssignRoleFromRankAsync(SocketGuildUser guildUser, PendingUser approvedUser)
+        async Task AssignRoleFromRankAsync(SocketGuildUser guildUser, RiftPendingUser approvedUser)
         {
             (var rankResult, var rankData) = await GetLeaguePositionsByEncryptedSummonerIdAsync(approvedUser.Region, approvedUser.SummonedId);
 
