@@ -1,3 +1,5 @@
+﻿using System;
+
 namespace Rift.Data.Models
 {
     public class RiftStatistics
@@ -21,6 +23,7 @@ namespace Rift.Data.Models
         public uint MessagesSentTotal { get; set; }
         public uint BragTotal { get; set; }
         public uint PurchasedItemsTotal { get; set; }
+        public TimeSpan VoiceUptime { get; set; }
 
         public RiftUser User { get; set; }
     }

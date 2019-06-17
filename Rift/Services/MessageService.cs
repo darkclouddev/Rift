@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -252,6 +252,11 @@ namespace Rift.Services
             }
             
             return assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(FormatterBase))).ToList();
+        }
+
+        public List<FormatterBase> GetActiveFormatters()
+        {
+            return formatters.Values.ToList();
         }
 
         public async Task<IonicMessage> GetMessageAsync(string identifier, FormatData data)

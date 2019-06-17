@@ -864,6 +864,18 @@ namespace Rift
                     entry.Property(x => x.PurchasedItemsTotal).IsModified = true;
                 }
 
+                if (voiceUptime.HasValue && voiceUptime.Value > TimeSpan.Zero)
+                {
+                    var before = statistics.VoiceUptime;
+
+                    if (TimeSpan.MaxValue - before < voiceUptime)
+                        statUser.VoiceUptime = TimeSpan.MaxValue;
+                    else
+                        statUser.VoiceUptime = before + voiceUptime.Value;
+
+                    entry.Property(x => x.VoiceUptime).IsModified = true;
+                }
+
                 await context.SaveChangesAsync();
             }
         }

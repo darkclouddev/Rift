@@ -191,7 +191,7 @@ namespace Rift
                 .AddSingleton(new QuizService())
                 .AddSingleton(new ModerationService())
                 //.AddSingleton(new ReliabilityService(IonicClient.Client))
-                //.AddSingleton(new ChannelService(IonicClient.Client))
+                .AddSingleton(new ChannelService(IonicClient.Client))
                 .AddSingleton(new CommandService(new CommandServiceConfig
                 {
                     CaseSensitiveCommands = false,
