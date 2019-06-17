@@ -86,9 +86,9 @@ namespace Rift
                 //&& !RiftBot.IsModerator(message.Author))
                 return;
 
-            if (await Database.HasBlockingToxicityLevelAsync(message.Author.Id))
+            if (await Database.HasBlockingToxicityLevelAsync(message.Author.Id).ConfigureAwait(false))
             {
-                await RiftBot.SendChatMessageAsync("toxicity-blocked", new FormatData(message.Author.Id));
+                await RiftBot.SendChatMessageAsync("toxicity-blocked", new FormatData(message.Author.Id)).ConfigureAwait(false);
                 return;
             }
 
@@ -181,6 +181,25 @@ namespace Rift
 
                 await context.User.SendEmbedAsync(eb);
                 return;
+            }
+
+            if (Settings.Chat.ProcessUserNames)
+            {
+                if (context.User is SocketGuildUser sgUser)
+                {
+                    var name = string.IsNullOrWhiteSpace(sgUser.Nickname) ? sgUser.Username : sgUser.Nickname;
+
+                    if (IsIncorrectName(name, out var editedName))
+                    {
+                        if (string.IsNullOrWhiteSpace(editedName))
+                            editedName = $"tempname{DateTime.UtcNow.Millisecond.ToString()}";
+
+                        await sgUser.ModifyAsync(x =>
+                        {
+                            x.Nickname = editedName;
+                        });
+                    }
+                }
             }
             
             await Database.AddStatisticsAsync(context.User.Id, messagesSentTotal: 1u);
@@ -279,6 +298,14 @@ namespace Rift
 
             return true;
         }
+
+        static Regex nameRegex = new Regex(@"^\p{L}[\p{L}\p{N}]*$");
+        static bool IsIncorrectName(string name, out string editedName)
+        {
+            editedName = new string(name.Where(x => (char.IsLetterOrDigit(x) || char.IsWhiteSpace(x) || x == ' ')).ToArray());
+
+            return !name.Equals(editedName);
+        } 
         
         static readonly Dictionary<ulong, DateTime> LastPostTimestamps = new Dictionary<ulong, DateTime>();
 
