@@ -17,6 +17,20 @@ namespace Rift.Migrations
                 .HasAnnotation("ProductVersion", "2.2.4-servicing-10062")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+            modelBuilder.Entity("Rift.Data.Models.RiftBackgroundInventory", b =>
+                {
+                    b.Property<ulong>("UserId");
+
+                    b.Property<int>("BackgroundId");
+
+                    b.HasKey("UserId", "BackgroundId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("BackgroundInventories");
+                });
+
             modelBuilder.Entity("Rift.Data.Models.RiftCooldowns", b =>
                 {
                     b.Property<ulong>("UserId");
@@ -33,11 +47,11 @@ namespace Rift.Migrations
 
                     b.Property<DateTime>("LastGiftTime");
 
+                    b.Property<DateTime>("LastItemStoreTime");
+
                     b.Property<DateTime>("LastLolAccountUpdateTime");
 
                     b.Property<DateTime>("LastRoleStoreTime");
-
-                    b.Property<DateTime>("LastStoreTime");
 
                     b.HasKey("UserId");
 
@@ -239,6 +253,139 @@ namespace Rift.Migrations
                     b.ToTable("PendingUsers");
                 });
 
+            modelBuilder.Entity("Rift.Data.Models.RiftProfileBackground", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Url");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProfileBackgrounds");
+                });
+
+            modelBuilder.Entity("Rift.Data.Models.RiftQuest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<uint?>("ActivatedBotRespects");
+
+                    b.Property<bool?>("ApprovedLolAccount");
+
+                    b.Property<uint?>("BoughtChests");
+
+                    b.Property<uint?>("BragsDone");
+
+                    b.Property<uint?>("CoinsReceived");
+
+                    b.Property<uint?>("CoinsSpent");
+
+                    b.Property<uint?>("EpicMonstersKilled");
+
+                    b.Property<bool?>("GiftedBotKeeper");
+
+                    b.Property<bool?>("GiftedModerator");
+
+                    b.Property<bool?>("GiftedStreamer");
+
+                    b.Property<uint?>("GiftsReceived");
+
+                    b.Property<uint?>("GiftsReceivedFromUltraGay");
+
+                    b.Property<uint?>("GiftsSent");
+
+                    b.Property<uint?>("GiveawaysParticipated");
+
+                    b.Property<uint?>("LevelReached");
+
+                    b.Property<uint?>("MessagesSent");
+
+                    b.Property<string>("Name");
+
+                    b.Property<uint?>("OpenedChests");
+
+                    b.Property<bool?>("OpenedSphere");
+
+                    b.Property<int>("Order");
+
+                    b.Property<uint?>("RareMonstersKilled");
+
+                    b.Property<int?>("RewardId");
+
+                    b.Property<uint?>("RolesPurchased");
+
+                    b.Property<int>("StageId");
+
+                    b.Property<uint?>("UsualMonstersKilled");
+
+                    b.Property<TimeSpan?>("VoiceUptimeEarned");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Quests");
+                });
+
+            modelBuilder.Entity("Rift.Data.Models.RiftQuestProgress", b =>
+                {
+                    b.Property<ulong>("UserId");
+
+                    b.Property<int>("QuestId");
+
+                    b.Property<uint?>("ActivatedBotRespects");
+
+                    b.Property<bool?>("ApprovedLolAccount");
+
+                    b.Property<uint?>("BoughtChests");
+
+                    b.Property<uint?>("BragsDone");
+
+                    b.Property<uint?>("CoinsReceived");
+
+                    b.Property<uint?>("CoinsSpent");
+
+                    b.Property<uint?>("EpicMonstersKilled");
+
+                    b.Property<bool?>("GiftedBotKeeper");
+
+                    b.Property<bool?>("GiftedModerator");
+
+                    b.Property<bool?>("GiftedStreamer");
+
+                    b.Property<uint?>("GiftsReceived");
+
+                    b.Property<uint?>("GiftsReceivedFromUltraGay");
+
+                    b.Property<uint?>("GiftsSent");
+
+                    b.Property<uint?>("GiveawaysParticipated");
+
+                    b.Property<bool>("IsCompleted");
+
+                    b.Property<uint?>("LevelReached");
+
+                    b.Property<uint?>("MessagesSent");
+
+                    b.Property<uint?>("OpenedChests");
+
+                    b.Property<bool?>("OpenedSphere");
+
+                    b.Property<uint?>("RareMonstersKilled");
+
+                    b.Property<uint?>("RolesPurchased");
+
+                    b.Property<uint?>("UsualMonstersKilled");
+
+                    b.Property<TimeSpan?>("VoiceUptimeEarned");
+
+                    b.HasKey("UserId", "QuestId");
+
+                    b.ToTable("QuestProgress");
+                });
+
             modelBuilder.Entity("Rift.Data.Models.RiftReward", b =>
                 {
                     b.Property<int>("Id")
@@ -281,45 +428,77 @@ namespace Rift.Migrations
                     b.ToTable("Settings");
                 });
 
+            modelBuilder.Entity("Rift.Data.Models.RiftStage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int?>("CompletionRewardId");
+
+                    b.Property<DateTime>("EndDate");
+
+                    b.Property<string>("Name");
+
+                    b.Property<DateTime>("StartDate");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("QuestStages");
+                });
+
             modelBuilder.Entity("Rift.Data.Models.RiftStatistics", b =>
                 {
                     b.Property<ulong>("UserId");
 
-                    b.Property<uint>("AttacksDone");
+                    b.Property<uint>("BotRespectsActivated");
 
-                    b.Property<uint>("AttacksReceived");
+                    b.Property<uint>("BotRespectsEarned");
 
-                    b.Property<uint>("BragTotal");
+                    b.Property<uint>("BragsDone");
 
-                    b.Property<uint>("CapsuleEarnedTotal");
+                    b.Property<uint>("CapsulesEarned");
 
-                    b.Property<uint>("CapsuleOpenedTotal");
+                    b.Property<uint>("CapsulesOpened");
 
-                    b.Property<uint>("ChestsEarnedTotal");
+                    b.Property<uint>("ChestsEarned");
 
-                    b.Property<uint>("ChestsOpenedTotal");
+                    b.Property<uint>("ChestsOpened");
 
-                    b.Property<uint>("CoinsEarnedTotal");
+                    b.Property<uint>("CoinsEarned");
 
-                    b.Property<uint>("CoinsSpentTotal");
+                    b.Property<uint>("CoinsSpent");
 
-                    b.Property<uint>("EssenceEarnedTotal");
+                    b.Property<uint>("DoubleExpsActivated");
+
+                    b.Property<uint>("DoubleExpsEarned");
+
+                    b.Property<uint>("EssenceEarned");
+
+                    b.Property<uint>("EssenceSpent");
 
                     b.Property<uint>("GiftsReceived");
 
                     b.Property<uint>("GiftsSent");
 
-                    b.Property<uint>("MessagesSentTotal");
+                    b.Property<uint>("MessagesSent");
 
-                    b.Property<uint>("PurchasedItemsTotal");
+                    b.Property<uint>("PurchasedItems");
 
-                    b.Property<uint>("SphereEarnedTotal");
+                    b.Property<uint>("RewindsActivated");
 
-                    b.Property<uint>("SphereOpenedTotal");
+                    b.Property<uint>("RewindsEarned");
 
-                    b.Property<uint>("TokensEarnedTotal");
+                    b.Property<uint>("SpheresEarned");
 
-                    b.Property<uint>("TokensSpentTotal");
+                    b.Property<uint>("SpheresOpened");
+
+                    b.Property<uint>("TicketsEarned");
+
+                    b.Property<uint>("TicketsSpent");
+
+                    b.Property<uint>("TokensEarned");
+
+                    b.Property<uint>("TokensSpent");
 
                     b.Property<TimeSpan>("VoiceUptime");
 
@@ -398,6 +577,10 @@ namespace Rift.Migrations
 
                     b.Property<uint>("Level");
 
+                    b.Property<int>("ProfileBackground");
+
+                    b.Property<ulong?>("SelectedRole");
+
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
@@ -405,20 +588,24 @@ namespace Rift.Migrations
 
             modelBuilder.Entity("Rift.Data.Models.ScheduledEvent", b =>
                 {
-                    b.Property<uint>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("DayId");
+                    b.Property<DateTime>("Date");
 
                     b.Property<int>("EventId");
-
-                    b.Property<int>("Hour");
-
-                    b.Property<int>("Minute");
 
                     b.HasKey("Id");
 
                     b.ToTable("ScheduledEvents");
+                });
+
+            modelBuilder.Entity("Rift.Data.Models.RiftBackgroundInventory", b =>
+                {
+                    b.HasOne("Rift.Data.Models.RiftUser", "User")
+                        .WithOne("BackgroundInventory")
+                        .HasForeignKey("Rift.Data.Models.RiftBackgroundInventory", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Rift.Data.Models.RiftCooldowns", b =>

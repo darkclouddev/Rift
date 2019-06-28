@@ -10,7 +10,7 @@ namespace Rift.Services.Message.Formatters.LolData
 
         public override async Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
-            var lolData = await Database.GetUserLolDataAsync(data.UserId);
+            var lolData = await DB.LolData.GetAsync(data.UserId);
             
             return await ReplaceData(message, lolData.SummonerName);
         }

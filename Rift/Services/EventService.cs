@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Data.Models;
+using Rift.Services.Events;
 using Rift.Services.Message;
 using Rift.Services.Reward;
 using Rift.Util;
@@ -13,6 +14,7 @@ using Rift.Util;
 using Discord;
 using Discord.WebSocket;
 using IonicLib;
+using IonicLib.Extensions;
 
 namespace Rift.Services
 {
@@ -31,32 +33,135 @@ namespace Rift.Services
 
         public EventService()
         {
-            RiftBot.Log.Info($"Starting EventService..");
+            RiftBot.Log.Info("Starting EventService..");
 
-            startupTimer = new Timer(
+            /*startupTimer = new Timer(
                 async delegate
                 {
                     await SetupNextEvent();
                 },
                 null,
                 TimeSpan.FromSeconds(15),
-                TimeSpan.Zero);
+                TimeSpan.Zero);*/
 
-            RiftBot.Log.Info($"EventService loaded successfully.");
+            ScheduleEventsForMonth(DateTime.UtcNow.Month);
+
+            RiftBot.Log.Info("EventService loaded successfully.");
         }
 
-        static async Task<ScheduledEvent> GetNextEvent(DateTime dt)
+        static List<GeneratedEvent> ScheduleEventsForMonth(int month)
         {
-            return (await Database.GetEventsAsync(x =>
-                    x.DayId == (int) dt.DayOfWeek && dt < dt.Date + new TimeSpan(x.Hour, x.Minute, 0)))
-                .FirstOrDefault();
+            // settings
+
+            const int rareEventsAmount = 2;
+            var rareEventsBaseHour = TimeSpan.FromHours(16);
+            var rareEventsOffset = TimeSpan.FromHours(4);
+
+            var epicEventsBaseHour = TimeSpan.FromHours(16);
+            var epicEventsOffset = TimeSpan.FromHours(4);
+
+            // settings
+
+            var events = new List<GeneratedEvent>();
+
+            var dtNow = DateTime.UtcNow;
+
+            var monthStart = new DateTime(dtNow.Year, month, 1);
+
+            var daysInMonth = monthStart.AddMonths(1).AddDays(-1).Day;
+
+            var rareEventDays = new int[rareEventsAmount];
+
+            for (var i = 0; i < rareEventDays.Length; i++)
+            {
+                var ratio = (int)Math.Floor((double) daysInMonth / rareEventsAmount);
+                var min = i * ratio;
+                var max = (i+1) * ratio;
+
+                rareEventDays[i] = Helper.NextInt(min, max + 1);
+            }
+
+            for (var dayNumber = 1; dayNumber <= daysInMonth; dayNumber++)
+            {
+                var dt = new DateTime(monthStart.Year, monthStart.Month, dayNumber);
+
+                if (rareEventDays.Contains(dayNumber))
+                {
+                    dt += GetEventTime(rareEventsBaseHour, rareEventsOffset);
+
+                    events.Add(new GeneratedEvent
+                    {
+                        DayNumber = dayNumber,
+                        Name = "**Rare shit**",
+                        Time = dt
+                    });
+
+                    continue;
+                }
+
+                if (dt.DayOfWeek == DayOfWeek.Sunday) // epic day
+                {
+                    dt += GetEventTime(epicEventsBaseHour, epicEventsOffset);
+
+                    events.Add(new GeneratedEvent
+                    {
+                        DayNumber = dayNumber,
+                        Name = "**Epic shit**",
+                        Time = dt
+                    });
+
+                    continue;
+                }
+                else // normal day
+                {
+                    var deviation = TimeSpan.FromHours(2);
+
+                    var dt10 = dt + GetEventTime(TimeSpan.FromHours(7), deviation);
+                    var dt16 = dt + GetEventTime(TimeSpan.FromHours(13), deviation);
+                    var dt22 = dt + GetEventTime(TimeSpan.FromHours(19), deviation);
+
+                    events.Add(new GeneratedEvent
+                    {
+                        DayNumber = dayNumber,
+                        Name = "Normal shit",
+                        Time = dt10
+                    });
+
+                    events.Add(new GeneratedEvent
+                    {
+                        DayNumber = dayNumber,
+                        Name = "Normal shit",
+                        Time = dt16
+                    });
+
+                    events.Add(new GeneratedEvent
+                    {
+                        DayNumber = dayNumber,
+                        Name = "Normal shit",
+                        Time = dt22
+                    });
+                }
+            }
+
+            return events;
+        }
+
+        static TimeSpan GetEventTime(TimeSpan start, TimeSpan maxDeviation)
+        {
+            var minimum = start - maxDeviation;
+            var diff = (int)(maxDeviation * 2).TotalMinutes;
+
+            var offset = Helper.NextUInt(0, diff+1);
+            var result = minimum + TimeSpan.FromMinutes(offset);
+
+            return result;
         }
 
         async Task SetupNextEvent()
         {
-            if (!(await Database.GetAllEventsAsync()).Any())
+            if (!(await DB.ScheduledEvents.GetAllEventsAsync()).Any())
             {
-                RiftBot.Log.Warn($"No events in db, skipping event setup.");
+                RiftBot.Log.Warn("No events in db, skipping event setup.");
                 return;
             }
 
@@ -66,7 +171,7 @@ namespace Rift.Services
 
             do
             {
-                eventData = await GetNextEvent(dt);
+                eventData = await DB.ScheduledEvents.GetClosestEventAsync(dt);
 
                 if (eventData is null)
                     dt = dt.Date.AddDays(1);
@@ -107,19 +212,12 @@ namespace Rift.Services
                     break;
             }
 
-            var eventTs = GetEventTimeSpan(dt, eventData.Hour, eventData.Minute);
+            var eventTs = eventData.Date - dt;
 
             RiftBot.Log.Debug($"Event Type: {eventType.ToString()}");
-            RiftBot.Log.Debug($"Event Time: {(DateTime.Now + eventTs).ToString(RiftBot.Culture)}");
+            RiftBot.Log.Debug($"Event Time: {(DateTime.UtcNow + eventTs).ToString(RiftBot.Culture)}");
 
             eventTimer = new Timer(async delegate { await StartEvent(eventType); }, null, eventTs, TimeSpan.Zero);
-        }
-
-        static TimeSpan GetEventTimeSpan(DateTime date, int hour, int minute)
-        {
-            var eventTime = date.Date + new TimeSpan(hour, minute, 0);
-
-            return eventTime - DateTime.Now;
         }
 
         static List<ulong> reactionIds = new List<ulong>();

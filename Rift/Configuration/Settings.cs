@@ -24,6 +24,16 @@ namespace Rift.Configuration
             await ReloadThumbnailsAsync();
         }
 
+        public static async Task SaveAllAsync()
+        {
+            await SaveAppAsync();
+            await SaveChannelsAsync();
+            await SaveChatAsync();
+            await SaveEconomyAsync();
+            await SaveRolesAsync();
+            await SaveThumbnailsAsync();
+        }
+
         public static async Task ReloadAppAsync()
         {
             App = await LoadSettingsAsync<App>(SettingsType.App);
@@ -81,12 +91,12 @@ namespace Rift.Configuration
         static async Task<T> LoadSettingsAsync<T>(SettingsType type)
             where T : new()
         {
-            var dbSettings = await Database.GetSettingsAsync((int) type);
+            var dbSettings = await DB.Settings.GetAsync((int) type);
 
             if (dbSettings is null)
             {
                 var settings = new T();
-                await Database.SetSettingsAsync((int) type, JsonConvert.SerializeObject(settings, Formatting.Indented));
+                await DB.Settings.SetAsync((int) type, JsonConvert.SerializeObject(settings, Formatting.Indented));
 
                 return settings;
             }
@@ -114,7 +124,7 @@ namespace Rift.Configuration
             try
             {
                 var json = JsonConvert.SerializeObject(data);
-                await Database.SetSettingsAsync((int) type, json);
+                await DB.Settings.SetAsync((int) type, json);
             }
             catch (Exception ex)
             {

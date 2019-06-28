@@ -15,7 +15,7 @@ namespace Rift.Services.Message.Formatters.Cooldown
 
         public override async Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
-            var cd = await Database.GetUserCooldownsAsync(data.UserId);
+            var cd = await DB.Cooldowns.GetAsync(data.UserId);
 
             return await ReplaceData(message, cd.BackgroundStoreTimeSpan == TimeSpan.Zero
                 ? Available

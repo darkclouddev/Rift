@@ -10,7 +10,7 @@ namespace Rift.Services.Message.Formatters.Users
         
         public override async Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
-            var toxicity = await Database.GetToxicityAsync(data.UserId);
+            var toxicity = await DB.Toxicity.GetAsync(data.UserId);
             return await ReplaceData(message, toxicity.Level.ToString());
         }
     }

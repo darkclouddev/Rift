@@ -40,7 +40,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task StreamStart([Remainder] string description)
         {
-            var streamer = await Database.GetStreamer(Context.User.Id);
+            var streamer = await DB.Streamers.GetAsync(Context.User.Id);
 
             if (streamer is null)
             {

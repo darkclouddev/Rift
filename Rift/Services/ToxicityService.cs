@@ -16,7 +16,7 @@ namespace Rift.Services
         {
             Task.Run(async () =>
             {
-                var toxicityTimer = await Database.GetSystemTimerAsync(timerName);
+                var toxicityTimer = await DB.SystemTimers.GetAsync(timerName);
 
                 if (toxicityTimer is null)
                 {
@@ -40,13 +40,13 @@ namespace Rift.Services
 
         async Task StartAsync()
         {
-            await Database.UpdateSystemTimerAsync(timerName, DateTime.UtcNow).ConfigureAwait(false);
+            await DB.SystemTimers.UpdateAsync(timerName, DateTime.UtcNow).ConfigureAwait(false);
             await CheckToxicityAsync();
         }
 
         public async Task CheckToxicityAsync()
         {
-            var toxicity = await Database.GetToxicityNonZeroAsync();
+            var toxicity = await DB.Toxicity.GetNonZeroAsync();
 
             if (toxicity is null || toxicity.Length == 0)
             {
@@ -82,7 +82,7 @@ namespace Rift.Services
 
             RiftBot.Log.Warn($"Reduced {toxicity.UserId}'s toxicity to {perc}% (level {toxicity.Level}).");
 
-            await Database.UpdateToxicityPercentAsync(toxicity.UserId, perc);
+            await DB.Toxicity.UpdatePercentAsync(toxicity.UserId, perc);
         }
     }
 }

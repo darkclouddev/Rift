@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Rift.Configuration;
-
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
 using IonicLib;
+using Rift.Database;
+using Settings = Rift.Configuration.Settings;
 
 namespace Rift.Services
 {
@@ -112,8 +111,8 @@ namespace Rift.Services
 
             foreach (var userId in users)
             {
-                await Database.AddInventoryAsync(userId, reward);
-                await Database.AddStatisticsAsync(userId, voiceUptime: VoiceRewardsInterval);
+                await DB.Inventory.AddAsync(userId, reward);
+                await DB.Statistics.AddAsync(userId, new StatisticData { VoiceUptime = VoiceRewardsInterval });
             }
 
             RiftBot.Log.Info($"Gived out voice online rewards for {users.Count.ToString()} user(s).");

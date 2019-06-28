@@ -10,7 +10,7 @@ namespace Rift.Services.Message.Formatters.Inventory
 
         public override async Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
-            var inventory = await Database.GetUserInventoryAsync(data.UserId);
+            var inventory = await DB.Inventory.GetAsync(data.UserId);
 
             return await ReplaceData(message, inventory.Coins.ToString());
         }

@@ -33,7 +33,7 @@ namespace Rift.Services
 
         async Task TimerProcAsync()
         {
-            var expiredRoles = await Database.GetExpiredTempRolesAsync();
+            var expiredRoles = await DB.TempRoles.GetExpiredTempRolesAsync();
 
             if (expiredRoles is null || expiredRoles.Count == 0)
                 return;
@@ -78,12 +78,12 @@ namespace Rift.Services
                 return;
 
             await sgUser.AddRoleAsync(serverRole);
-            await Database.AddTempRoleAsync(role);
+            await DB.TempRoles.AddAsync(role);
         }
 
         public async Task<(bool, Embed)> RemoveTempRoleAsync(ulong userId, ulong roleId)
         {
-            await Database.RemoveUserTempRoleAsync(userId, roleId);
+            await DB.TempRoles.RemoveAsync(userId, roleId);
 
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
@@ -99,14 +99,14 @@ namespace Rift.Services
 
         public async Task<List<RiftTempRole>> GetUserTempRolesAsync(ulong userId)
         {
-            return await Database.GetUserTempRolesAsync(userId);
+            return await DB.TempRoles.GetAsync(userId);
         }
 
         public async Task RestoreTempRolesAsync(SocketGuildUser sgUser)
         {
             RiftBot.Log.Info($"User {sgUser} ({sgUser.Id.ToString()}) joined, checking temp roles");
 
-            var tempRoles = await Database.GetUserTempRolesAsync(sgUser.Id);
+            var tempRoles = await DB.TempRoles.GetAsync(sgUser.Id);
 
             if (tempRoles is null || tempRoles.Count == 0)
             {

@@ -39,6 +39,18 @@ namespace Rift.Configuration
             }
         }
 
+        [ResolveRole("Импульсные")]
+        public ulong Impulse { get; set; }
+
+        [ResolveRole("Инфернальные")]
+        public ulong Infernal { get; set; }
+
+        [ResolveRole("Хрустальные")]
+        public ulong Crystal { get; set; }
+
+        [ResolveRole("Мародёры")]
+        public ulong Marauders { get; set; }
+
         [ResolveRole("Чемпионы")]
         public ulong Champions { get; set; }
 
@@ -245,5 +257,8 @@ namespace Rift.Configuration
 
         [ResolveRole("K/DA")]
         public ulong KDA { get; set; }
+
+        [ResolveRole("Хранители ботов")]
+        public ulong BotKeepers { get; set; }
     }
 }

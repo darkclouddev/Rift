@@ -11,7 +11,7 @@ namespace Rift.Services.Message.Formatters.Gifts
 
         public override async Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
-            var inventory = await Database.GetUserInventoryAsync(data.UserId);
+            var inventory = await DB.Inventory.GetAsync(data.UserId);
             var coins = Settings.Economy.GiftPrice - inventory.Coins;
 
             return await ReplaceData(message, coins.ToString());

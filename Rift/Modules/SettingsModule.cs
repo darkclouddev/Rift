@@ -75,46 +75,53 @@ namespace Rift.Modules
         [RequireAdmin]
         public class SaveModule : ModuleBase
         {
+            [Command]
+            public async Task Default()
+            {
+                await Settings.SaveAllAsync();
+                await ReplyAsync("Settings saved.");
+            }
+
             [Command("app")]
             public async Task App()
             {
                 await Settings.SaveAppAsync();
-                await ReplyAsync("App settings saved successfully.");
+                await ReplyAsync("App settings saved.");
             }
 
             [Command("channels")]
             public async Task Channels()
             {
                 await Settings.SaveChannelsAsync();
-                await ReplyAsync("Channels saved successfully.");
+                await ReplyAsync("Channels saved.");
             }
 
             [Command("chat")]
             public async Task Chat()
             {
                 await Settings.SaveChatAsync();
-                await ReplyAsync("Chat settings saved successfully.");
+                await ReplyAsync("Chat settings saved.");
             }
 
             [Command("economy")]
             public async Task Economy()
             {
                 await Settings.SaveEconomyAsync();
-                await ReplyAsync("Economy settings saved successfully.");
+                await ReplyAsync("Economy settings saved.");
             }
 
             [Command("roles")]
             public async Task Roles()
             {
                 await Settings.SaveRolesAsync();
-                await ReplyAsync("Roles saved successfully.");
+                await ReplyAsync("Roles saved.");
             }
 
             [Command("thumbnails")]
             public async Task Thumbnails()
             {
                 await Settings.SaveThumbnailsAsync();
-                await ReplyAsync("Thumbnails saved successfully.");
+                await ReplyAsync("Thumbnails saved.");
             }
         }
     }

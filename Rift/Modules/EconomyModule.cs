@@ -2,11 +2,9 @@ using System.Threading.Tasks;
 
 using Rift.Preconditions;
 using Rift.Services;
-using Rift.Services.Economy;
 using Rift.Util;
 
 using Discord.Commands;
-using IonicLib.Util;
 
 namespace Rift.Modules
 {
@@ -15,12 +13,14 @@ namespace Rift.Modules
         readonly EconomyService economyService;
         readonly RiotService riotService;
         readonly BragService bragService;
+        
 
-        public EconomyModule(EconomyService economyService, RiotService riotService, BragService bragService)
+        public EconomyModule(EconomyService economyService, RiotService riotService, BragService bragService, StoreService storeService)
         {
             this.economyService = economyService;
             this.riotService = riotService;
             this.bragService = bragService;
+            
         }
 
         [Command("обновить")]
@@ -202,31 +202,6 @@ namespace Rift.Modules
 
                 await Context.Channel.SendIonicMessageAsync(embed);
             }
-        }
-
-        [Command("купить")]
-        [RequireContext(ContextType.Guild)]
-        public async Task Buy(uint id)
-        {
-            using (Context.Channel.EnterTypingState())
-            {
-                var storeItem = Store.GetShopItemById(id);
-
-                if (storeItem is null)
-                {
-                    await Context.Channel.SendMessageAsync("Данный номер отсутствует в магазине.");
-                    return;
-                }
-
-                var result = await economyService.StorePurchaseAsync(Context.User.Id, storeItem);
-                await Context.Channel.SendIonicMessageAsync(result);
-            }
-        }
-
-        [Command("магазин")]
-        public async Task Shop()
-        {
-            await Context.User.SendEmbedAsync(Store.Embed);
         }
     }
 }

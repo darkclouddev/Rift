@@ -7,13 +7,13 @@ namespace Rift.Data.Models
     public class RiftCooldowns
     {
         public ulong UserId { get; set; }
-        public DateTime LastStoreTime { get; set; }
-        public TimeSpan StoreTimeSpan
+        public DateTime LastItemStoreTime { get; set; }
+        public TimeSpan ItemStoreTimeSpan
         {
             get
             {
                 var dt = DateTime.UtcNow;
-                var nextTime = LastStoreTime + Settings.Economy.StoreCooldown;
+                var nextTime = LastItemStoreTime + Settings.Economy.StoreCooldown;
                 return nextTime > dt
                     ? nextTime - dt
                     : TimeSpan.Zero;

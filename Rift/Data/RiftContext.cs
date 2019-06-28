@@ -26,6 +26,11 @@ namespace Rift.Data
         public DbSet<RiftGiveaway> Giveaways { get; set; }
         public DbSet<RiftGiveawayLog> GiveawayLogs { get; set; }
         public DbSet<RiftGiveawayActive> ActiveGiveaways { get; set; }
+        public DbSet<RiftStage> QuestStages { get; set; }
+        public DbSet<RiftQuest> Quests { get; set; }
+        public DbSet<RiftQuestProgress> QuestProgress { get; set; }
+        public DbSet<RiftProfileBackground> ProfileBackgrounds { get; set; }
+        public DbSet<RiftBackgroundInventory> BackgroundInventories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
             optionsBuilder.UseMySql(@"Server=localhost;Database=rift;Uid=rift;Pwd=;");
@@ -128,6 +133,34 @@ namespace Rift.Data
 
             builder.Entity<RiftGiveawayActive>().HasKey(prop => prop.Id);
             builder.Entity<RiftGiveawayActive>().Property(prop => prop.Id).ValueGeneratedOnAdd();
+
+            builder.Entity<RiftStage>().HasKey(prop => prop.Id);
+
+            builder.Entity<RiftQuest>().HasKey(prop => prop.Id);
+
+            builder.Entity<RiftQuestProgress>()
+                .HasKey(prop => new
+                {
+                    prop.UserId,
+                    prop.QuestId
+                });
+            builder.Entity<RiftQuestProgress>().Property(prop => prop.UserId).ValueGeneratedNever();
+            builder.Entity<RiftQuestProgress>().Property(prop => prop.QuestId).ValueGeneratedNever();
+            builder.Entity<RiftQuestProgress>().Ignore(x => x.TotalMonstersKilled);
+
+            builder.Entity<RiftProfileBackground>().HasKey(x => x.Id);
+            builder.Entity<RiftProfileBackground>().Property(x => x.Id).ValueGeneratedOnAdd();
+
+            builder.Entity<RiftBackgroundInventory>()
+                .HasKey(prop => new
+                {
+                    prop.UserId,
+                    prop.BackgroundId
+                });
+            builder.Entity<RiftUser>()
+                .HasOne(user => user.BackgroundInventory)
+                .WithOne(inv => inv.User)
+                .HasForeignKey<RiftBackgroundInventory>(inv => inv.UserId);
         }
     }
 }

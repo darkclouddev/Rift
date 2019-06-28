@@ -186,13 +186,15 @@ namespace Rift
                 .AddSingleton(new GiveawayService())
                 .AddSingleton(new BragService())
                 //.AddSingleton(new AnnounceService())
-                //.AddSingleton(new EventService())
+                .AddSingleton(new EventService())
                 //.AddSingleton(new MinionService())
                 //.AddSingleton(new BotRespectService())
                 .AddSingleton(new QuizService())
                 .AddSingleton(new ModerationService())
                 //.AddSingleton(new ReliabilityService(IonicClient.Client))
                 //.AddSingleton(new ChannelService(IonicClient.Client))
+                .AddSingleton(new QuestService())
+                .AddSingleton(new StoreService())
                 .AddSingleton(new CommandService(new CommandServiceConfig
                 {
                     CaseSensitiveCommands = false,

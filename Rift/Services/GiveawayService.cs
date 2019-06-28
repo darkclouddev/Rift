@@ -19,7 +19,7 @@ namespace Rift.Services
                 return;
             }
 
-            var giveaway = await Database.GetGiveawayAsync(name);
+            var giveaway = await DB.Giveaways.GetAsync(name);
 
             if (giveaway is null)
             {
@@ -28,7 +28,7 @@ namespace Rift.Services
                 return;
             }
 
-            var msg = await Database.GetMessageByIdAsync(giveaway.StoredMessageId);
+            var msg = await DB.StoredMessages.GetMessageByIdAsync(giveaway.StoredMessageId);
 
             if (msg is null)
             {
@@ -47,7 +47,7 @@ namespace Rift.Services
                 DueTime = DateTime.UtcNow + giveaway.Duration
             };
 
-            await Database.AddActiveGiveawayAsync(activeGiveaway).ConfigureAwait(false);
+            await DB.ActiveGiveaways.AddAsync(activeGiveaway).ConfigureAwait(false);
 
             var formattedMsg = await RiftBot.GetService<MessageService>().FormatMessageAsync(msg, new FormatData(callerId)
             {
@@ -75,7 +75,7 @@ namespace Rift.Services
                 FinishedAt = DateTime.UtcNow,
             };
 
-            await Database.AddGiveawayLogAsync(log);
+            await DB.GiveawayLogs.AddAsync(log);
         }
     }
 }

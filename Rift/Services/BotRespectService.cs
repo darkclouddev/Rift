@@ -69,7 +69,7 @@ namespace Rift.Services
         {
             RiftBot.Log.Debug("Gifts are on the way..");
 
-            var users = await Database.GetBotRespectedUsersAsync();
+            var users = await DB.Cooldowns.GetBotRespectedUsersAsync();
             if (users.Count > 0)
             {
                 foreach ((var userId, var dt) in users)

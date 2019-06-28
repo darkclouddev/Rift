@@ -28,7 +28,8 @@ namespace Rift.Services
             new IonicMessage(new RiftEmbed()
                 .WithAuthor("Ошибка")
                 .WithColor(226, 87, 76)
-                .WithDescription("Обратитесь к хранителю ботов и опишите ваши действия, которые привели к возникновению данной ошибки."));
+                .WithDescription("Обратитесь к хранителю ботов и опишите ваши действия, которые привели к возникновению данной ошибки.")
+                .WithThumbnailUrl("https://ionpri.me/rift/error.png"));
         
         public static readonly IonicMessage UserNotFound =
             new IonicMessage(new RiftEmbed()
@@ -261,7 +262,7 @@ namespace Rift.Services
 
         public async Task<IonicMessage> GetMessageAsync(string identifier, FormatData data)
         {
-            var mapping = await Database.GetMessageMappingByNameAsync(identifier);
+            var mapping = await DB.StoredMessages.GetMessageMappingByNameAsync(identifier);
 
             if (mapping is null)
             {
@@ -269,7 +270,7 @@ namespace Rift.Services
                 return Error;
             }
 
-            var dbMessage = await Database.GetMessageByIdAsync(mapping.MessageId);
+            var dbMessage = await DB.StoredMessages.GetMessageByIdAsync(mapping.MessageId);
             
             if (dbMessage is null)
             {
@@ -358,7 +359,7 @@ namespace Rift.Services
                 Embed = json,
             };
 
-            await Database.AddStoredMessage(message).ConfigureAwait(false);
+            await DB.StoredMessages.AddAsync(message).ConfigureAwait(false);
         }
 
         #endregion Message formatting

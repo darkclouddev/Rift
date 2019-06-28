@@ -7,6 +7,8 @@ namespace Rift.Data.Models
         public ulong UserId { get; set; }
         public uint Experience { get; set; } = 0u;
         public uint Level { get; set; } = 0u;
+        public int ProfileBackground { get; set; } = 0;
+        public ulong? SelectedRole { get; set; } = null;
 
         public RiftCooldowns Cooldowns { get; set; }
         public RiftInventory Inventory { get; set; }
@@ -16,5 +18,6 @@ namespace Rift.Data.Models
         public RiftStatistics Statistics { get; set; }
         public RiftStreamer Streamers { get; set; }
         public RiftToxicity Toxicity { get; set; }
+        public RiftBackgroundInventory BackgroundInventory { get; set; }
     }
 }

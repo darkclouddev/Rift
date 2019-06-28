@@ -10,7 +10,7 @@ namespace Rift.Services.Message.Formatters.Users
 
         public override async Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
-            var rolesCount = await Database.GetRoleInventoryCountAsync(data.UserId);
+            var rolesCount = await DB.RoleInventory.GetCountAsync(data.UserId);
             return await ReplaceData(message, rolesCount.ToString());
         }
     }

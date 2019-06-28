@@ -5,9 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Rift.Configuration;
 using Rift.Data.Models;
+using Rift.Events;
 using Rift.Services.Message;
 using Rift.Services.Riot;
 using Rift.Util;
@@ -25,11 +24,16 @@ using MingweiSamuel.Camille.LeagueV4;
 using MingweiSamuel.Camille.MatchV4;
 using MingweiSamuel.Camille.SummonerV4;
 using Newtonsoft.Json;
+using Rift.Database;
+using Settings = Rift.Configuration.Settings;
+
 
 namespace Rift.Services
 {
     public class RiotService
     {
+        public static EventHandler<LolDataCreatedEventArgs> OnLolDataCreated;
+
         static Champion championData;
         static Dictionary<string, ChampionData> champions = new Dictionary<string, ChampionData>();
 
@@ -313,10 +317,10 @@ namespace Rift.Services
 
         async Task<IonicMessage> RegisterInternalAsync(ulong userId, string region, string summonerName)
         {
-            if (await Database.HasLolDataAsync(userId))
+            if (await DB.LolData.HasAsync(userId))
                 return await RiftBot.GetMessageAsync("register-hasAcc", new FormatData(userId));
 
-            if (await Database.IsPendingAsync(userId))
+            if (await DB.PendingUsers.IsPendingAsync(userId))
                 return await RiftBot.GetMessageAsync("register-pending", new FormatData(userId));
 
             (var summonerResult, var summoner) = await GetSummonerByNameAsync(region.ToLowerInvariant(), summonerName);
@@ -324,7 +328,7 @@ namespace Rift.Services
             if (summonerResult != RequestResult.Success)
                 return await RiftBot.GetMessageAsync("register-namenotfound", new FormatData(userId));
 
-            if (await Database.IsTakenAsync(region, summoner.Id))
+            if (await DB.LolData.IsTakenAsync(region, summoner.Id))
                 return await RiftBot.GetMessageAsync("register-taken", new FormatData(userId));
 
             var code = Helper.GenerateConfirmationCode(16);
@@ -348,16 +352,16 @@ namespace Rift.Services
 
         static async Task<bool> AddForApprovalAsync(RiftPendingUser pendingUser)
         {
-            if (await Database.IsPendingAsync(pendingUser.UserId))
+            if (await DB.PendingUsers.IsPendingAsync(pendingUser.UserId))
                 return false;
 
-            await Database.AddPendingUserAsync(pendingUser);
+            await DB.PendingUsers.AddAsync(pendingUser);
             return true;
         }
 
         async Task CheckApproveAsync()
         {
-            var pendingUsers = await Database.GetAllPendingUsersAsync();
+            var pendingUsers = await DB.PendingUsers.GetAllAsync();
 
             if (pendingUsers is null || !pendingUsers.Any())
                 return;
@@ -370,7 +374,7 @@ namespace Rift.Services
 
                 if (expired)
                 {
-                    await Database.RemovePendingUserAsync(user);
+                    await DB.PendingUsers.RemoveAsync(user);
                     await RiftBot.SendChatMessageAsync("register-pending-expired", new FormatData(user.UserId));
                 }
             }
@@ -402,9 +406,11 @@ namespace Rift.Services
 
                 if (requestResult != RequestResult.Success)
                 {
-                    await Database.RemovePendingUserAsync(user);
+                    await DB.PendingUsers.RemoveAsync(user);
                     continue;
                 }
+
+                OnLolDataCreated?.Invoke(null, new LolDataCreatedEventArgs(user.UserId));
 
                 var lolData = new RiftLolData
                 {
@@ -416,7 +422,7 @@ namespace Rift.Services
                     SummonerName = summoner.Name
                 };
 
-                await Database.AddLolDataAsync(lolData);
+                await DB.LolData.AddAsync(lolData);
 
                 usersValidated++;
 
@@ -433,11 +439,11 @@ namespace Rift.Services
             if (sgUser is null)
                 return;
 
-            await Database.RemovePendingUserAsync(pendingUser.UserId);
+            await DB.PendingUsers.RemoveAsync(pendingUser.UserId);
 
             await AssignRoleFromRankAsync(sgUser, pendingUser);
 
-            await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Chests = 2u });
+            await DB.Inventory.AddAsync(sgUser.Id, new InventoryData { Chests = 2u });
 
             await RiftBot.SendChatMessageAsync("register-success", new FormatData(pendingUser.UserId));
             await RiftBot.SendChatMessageAsync("register-reward", new FormatData(pendingUser.UserId));
@@ -454,9 +460,9 @@ namespace Rift.Services
 
             RiftBot.Log.Debug($"[User|{userId.ToString()}] Getting summoner for rank update");
 
-            var lolData = await Database.GetUserLolDataAsync(userId);
+            var lolData = await DB.LolData.GetAsync(userId);
 
-            await Database.UpdateLolDataAsync(userId, lolData.SummonerRegion, lolData.PlayerUUID, lolData.AccountId,
+            await DB.LolData.UpdateAsync(userId, lolData.SummonerRegion, lolData.PlayerUUID, lolData.AccountId,
                 lolData.SummonerId, lolData.SummonerName);
 
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
@@ -563,7 +569,7 @@ namespace Rift.Services
                 if (newRank < LeagueRank.Bronze)
                     return;
 
-                await Database.AddInventoryAsync(sgUser.Id, new InventoryData { Chests = 4u });
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData { Chests = 4u });
             }
             else
             {

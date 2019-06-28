@@ -10,7 +10,7 @@ namespace Rift.Services.Message.Formatters.Users
 
         public override async Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
-            var level = await Database.GetUserLevelAsync(data.UserId);
+            var level = await DB.Users.GetLevelAsync(data.UserId);
             return await ReplaceData(message, level.ToString());
         }
     }

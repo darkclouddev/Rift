@@ -3,7 +3,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Rift.Configuration;
+using Settings = Rift.Configuration.Settings;
+using Rift.Database;
+using Rift.Events;
 using Rift.Services.Economy;
 using Rift.Services.Message;
 using Rift.Services.Reward;
@@ -14,11 +16,13 @@ namespace Rift.Services
 {
     public class BragService
     {
-        static readonly SemaphoreSlim bragMutex = new SemaphoreSlim(1);
+        public static EventHandler<BragEventArgs> OnUserBrag;
+
+        static readonly SemaphoreSlim mutex = new SemaphoreSlim(1);
 
         public async Task<IonicMessage> GetUserBragAsync(ulong userId)
         {
-            await bragMutex.WaitAsync().ConfigureAwait(false);
+            await mutex.WaitAsync().ConfigureAwait(false);
 
             IonicMessage result;
 
@@ -28,7 +32,7 @@ namespace Rift.Services
             }
             finally
             {
-                bragMutex.Release();
+                mutex.Release();
             }
 
             return result;
@@ -41,7 +45,7 @@ namespace Rift.Services
             if (!canBrag)
                 return await RiftBot.GetMessageAsync("brag-cooldown", new FormatData(userId));
 
-            var dbSummoner = await Database.GetUserLolDataAsync(userId);
+            var dbSummoner = await DB.LolData.GetAsync(userId);
 
             if (dbSummoner is null || string.IsNullOrWhiteSpace(dbSummoner.AccountId))
                 return await RiftBot.GetMessageAsync("loldata-nodata", new FormatData(userId));
@@ -83,14 +87,14 @@ namespace Rift.Services
 
             var champThumb = RiotService.GetChampionSquareByName(champData.Image);
 
-            await Database.SetLastBragTimeAsync(userId, DateTime.UtcNow);
-
+            await DB.Cooldowns.SetLastBragTimeAsync(userId, DateTime.UtcNow);
+            await DB.Statistics.AddAsync(userId, new StatisticData { BragsDone = 1u });
+            
             var brag = new Brag(player.Stats.Win);
-            await Database.AddInventoryAsync(userId, new InventoryData { Coins = brag.Coins });
+            await DB.Inventory.AddAsync(userId, new InventoryData { Coins = brag.Coins });
+            OnUserBrag?.Invoke(null, new BragEventArgs(userId));
 
             var queue = RiftBot.GetService<RiotService>().GetQueueNameById(matchData.QueueId);
-
-            await Database.AddStatisticsAsync(userId, bragTotal: 1u);
 
             return await RiftBot.GetMessageAsync("brag-success", new FormatData(userId)
             {
@@ -101,16 +105,14 @@ namespace Rift.Services
                     Stats = player.Stats,
                     QueueName = queue,
                 },
-                Reward = new RewardData
-                {
-                    Reward = new ItemReward().AddCoins(brag.Coins)
-                }
+                Reward = new ItemReward().AddCoins(brag.Coins)
+                
             });
         }
 
         static async Task<(bool, TimeSpan)> CanBrag(ulong userId)
         {
-            var data = await Database.GetUserCooldownsAsync(userId);
+            var data = await DB.Cooldowns.GetAsync(userId);
 
             if (data.BragTimeSpan == TimeSpan.Zero)
                 return (true, TimeSpan.Zero);

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using IonicLib.Extensions;
+using Rift.Database;
 
 namespace Rift.Services.Reward
 {
@@ -140,7 +141,7 @@ namespace Rift.Services.Reward
 
         public override async Task DeliverToAsync(ulong userId)
         {
-            await Database.AddInventoryAsync(userId, new InventoryData
+            await DB.Inventory.AddAsync(userId, new InventoryData
             {
                 Coins = Coins,
                 Tokens = Tokens,

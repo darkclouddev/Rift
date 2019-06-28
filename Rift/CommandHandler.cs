@@ -5,7 +5,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Reflection;
 
-using Rift.Configuration;
+using Settings = Rift.Configuration.Settings;
+using Rift.Database;
 using Rift.Services;
 using Rift.Services.Message;
 using Rift.Util;
@@ -33,6 +34,7 @@ namespace Rift
         static MessageService messageService;
         static QuizService quizService;
         static EmoteService emoteService;
+        static QuestService questService;
 
         public CommandHandler(IServiceProvider serviceProvider)
         {
@@ -47,6 +49,7 @@ namespace Rift
             riotService = provider.GetService<RiotService>();
             quizService = provider.GetService<QuizService>();
             emoteService = provider.GetService<EmoteService>();
+            questService = provider.GetService<QuestService>();
         }
 
         public async Task ConfigureAsync()
@@ -86,7 +89,7 @@ namespace Rift
                 //&& !RiftBot.IsModerator(message.Author))
                 return;
 
-            if (await Database.HasBlockingToxicityLevelAsync(message.Author.Id).ConfigureAwait(false))
+            if (await DB.Toxicity.HasBlockingAsync(message.Author.Id).ConfigureAwait(false))
             {
                 await RiftBot.SendChatMessageAsync("toxicity-blocked", new FormatData(message.Author.Id)).ConfigureAwait(false);
                 return;
@@ -202,10 +205,11 @@ namespace Rift
                 }
             }
             
-            await Database.AddStatisticsAsync(context.User.Id, messagesSentTotal: 1u);
+            await DB.Statistics.AddAsync(context.User.Id, new StatisticData { MessagesSent = 1u });
+            await questService.AddNextQuestAsync(context.User.Id);
 
             if (IsEligibleForEconomy(context.User.Id))
-                await economyService.ProcessMessageAsync(context.Message);
+                await economyService.ProcessMessageAsync(context.Message).ConfigureAwait(false);
         }
 
         async Task UserJoined(SocketGuildUser user)

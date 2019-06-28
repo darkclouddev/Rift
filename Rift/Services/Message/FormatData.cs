@@ -19,7 +19,8 @@ namespace Rift.Services.Message
         public GiveawayData Giveaway { get; set; }
         public LolStatData LolStat { get; set; }
         public ModerationData Moderation { get; set; }
-        public RewardData Reward { get; set; }
+        public RiftQuest Quest { get; set; }
+        public RewardBase Reward { get; set; }
         public RiftStatistics Statistics { get; set; }
         public FormatData() {}
         public FormatData(ulong userId)
@@ -79,10 +80,5 @@ namespace Rift.Services.Message
                 Duration = log.Duration != TimeSpan.Zero ? log.Duration : TimeSpan.Zero
             };
         }
-    }
-
-    public class RewardData
-    {
-        public RewardBase Reward { get; set; }
     }
 }

@@ -39,7 +39,7 @@ namespace Rift.Modules
                 return;
             }
 
-            await Database.RemoveLolDataAsync(user.Id);
+            await DB.LolData.RemoveAsync(user.Id);
             var msg = await RiftBot.GetMessageAsync("loldata-removed", new FormatData(user.Id));
             await Context.Channel.SendIonicMessageAsync(msg);
         }

@@ -23,10 +23,10 @@ namespace Rift.Services
                 return;
 
             await sgTarget.KickAsync();
-            await Database.AddModerationLogAsync(sgTarget.Id, moderator.Id, "Kick", reason, DateTime.UtcNow, TimeSpan.Zero);
+            await DB.ModerationLogs.AddAsync(sgTarget.Id, moderator.Id, "Kick", reason, DateTime.UtcNow, TimeSpan.Zero);
 
             (var oldToxicity, var newToxicity) = await GetNewToxicityAsync(sgTarget.Id, ToxicitySource.Kick);
-            await Database.UpdateToxicityPercentAsync(sgTarget.Id, newToxicity.Percent);
+            await DB.Toxicity.UpdatePercentAsync(sgTarget.Id, newToxicity.Percent);
 
             var data = new FormatData(target.Id)
             {
@@ -59,10 +59,10 @@ namespace Rift.Services
                 return;
 
             await guild.AddBanAsync(sgTarget, 1, $"Banned by {moderator}: {reason}");
-            await Database.AddModerationLogAsync(sgTarget.Id, moderator.Id, "Ban", reason, DateTime.UtcNow, TimeSpan.Zero);
+            await DB.ModerationLogs.AddAsync(sgTarget.Id, moderator.Id, "Ban", reason, DateTime.UtcNow, TimeSpan.Zero);
 
             (var oldToxicity, var newToxicity) = await GetNewToxicityAsync(sgTarget.Id, ToxicitySource.Ban);
-            await Database.UpdateToxicityPercentAsync(sgTarget.Id, newToxicity.Percent);
+            await DB.Toxicity.UpdatePercentAsync(sgTarget.Id, newToxicity.Percent);
 
             var data = new FormatData(target.Id)
             {
@@ -125,10 +125,10 @@ namespace Rift.Services
             
             await RiftBot.GetService<RoleService>().AddTempRoleAsync(sgTarget.Id, Settings.RoleId.Muted, ts,
                     $"Muted by {moderator}|{moderator.Id.ToString()} with reason: {reason}");
-            await Database.AddModerationLogAsync(sgTarget.Id, moderator.Id, "Mute", reason, DateTime.UtcNow, ts);
+            await DB.ModerationLogs.AddAsync(sgTarget.Id, moderator.Id, "Mute", reason, DateTime.UtcNow, ts);
 
             (var oldToxicity, var newToxicity) = await GetNewToxicityAsync(sgTarget.Id, ToxicitySource.Mute);
-            await Database.UpdateToxicityPercentAsync(sgTarget.Id, newToxicity.Percent);
+            await DB.Toxicity.UpdatePercentAsync(sgTarget.Id, newToxicity.Percent);
 
             if (newToxicity.Level > oldToxicity.Level)
                 await RiftBot.SendChatMessageAsync("mod-toxicity-increased", new FormatData(sgTarget.Id));
@@ -155,7 +155,7 @@ namespace Rift.Services
                 return;
 
             await RiftBot.GetService<RoleService>().RemoveTempRoleAsync(sgTarget.Id, Settings.RoleId.Muted);
-            await Database.AddModerationLogAsync(sgTarget.Id, moderator.Id, "Unmute", reason, DateTime.UtcNow, TimeSpan.Zero);
+            await DB.ModerationLogs.AddAsync(sgTarget.Id, moderator.Id, "Unmute", reason, DateTime.UtcNow, TimeSpan.Zero);
         }
 
         public async Task WarnAsync(IUser target, string reason, IUser moderator)
@@ -165,10 +165,10 @@ namespace Rift.Services
             if (!passed)
                 return;
 
-            await Database.AddModerationLogAsync(sgTarget.Id, moderator.Id, "Warn", reason, DateTime.UtcNow, TimeSpan.Zero);
+            await DB.ModerationLogs.AddAsync(sgTarget.Id, moderator.Id, "Warn", reason, DateTime.UtcNow, TimeSpan.Zero);
 
             (var oldToxicity, var newToxicity) = await GetNewToxicityAsync(sgTarget.Id, ToxicitySource.Warn);
-            await Database.UpdateToxicityPercentAsync(sgTarget.Id, newToxicity.Percent);
+            await DB.Toxicity.UpdatePercentAsync(sgTarget.Id, newToxicity.Percent);
 
             if (newToxicity.Level > oldToxicity.Level)
                 await RiftBot.SendChatMessageAsync("mod-toxicity-increased", new FormatData(sgTarget.Id));
@@ -205,7 +205,7 @@ namespace Rift.Services
 
         static async Task<(RiftToxicity, RiftToxicity)> GetNewToxicityAsync(ulong userId, ToxicitySource source)
         {
-            var currentToxicity = await Database.GetToxicityAsync(userId) ?? new RiftToxicity
+            var currentToxicity = await DB.Toxicity.GetAsync(userId) ?? new RiftToxicity
             {
                 UserId = userId,
                 Percent = 0u,
@@ -251,8 +251,8 @@ namespace Rift.Services
             if (user is null)
                 return MessageService.UserNotFound;
 
-            var list = await Database.GetModerationLogsForUserAsync(user.Id);
-            var toxicity = await Database.GetToxicityAsync(user.Id);
+            var list = await DB.ModerationLogs.GetAsync(user.Id);
+            var toxicity = await DB.Toxicity.GetAsync(user.Id);
 
             var actions = string.Join('\n', list.Select(x =>
             {
@@ -286,7 +286,7 @@ namespace Rift.Services
 
         public async Task<IonicMessage> GetLastActionsAsync()
         {
-            var list = await Database.GetLastModerationLogsAsync();
+            var list = await DB.ModerationLogs.GetLastTenAsync();
 
             var mods = string.Join('\n', list.Select(x =>
                 IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.ModeratorId).Username));

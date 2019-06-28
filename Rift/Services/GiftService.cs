@@ -2,17 +2,27 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Rift.Configuration;
+using Settings = Rift.Configuration.Settings;
+using Rift.Database;
+using Rift.Events;
 using Rift.Services.Message;
 using Rift.Services.Reward;
 using Rift.Util;
 
 using Discord.WebSocket;
+using IonicLib;
 
 namespace Rift.Services
 {
     public class GiftService
     {
+        public static event EventHandler<GiftSentEventArgs> GiftSent;
+        public static event EventHandler<GiftReceivedEventArgs> GiftReceived;
+        public static event EventHandler<GiftsReceivedFromFounderEventArgs> GiftsReceivedFromFounder;
+        public static event EventHandler<GiftedBotKeeperEventArgs> GiftedBotKeeper;
+        public static event EventHandler<GiftedModeratorEventArgs> GiftedModerator;
+        public static event EventHandler<GiftedStreamerEventArgs> GiftedStreamer;
+
         static SemaphoreSlim giftMutex = new SemaphoreSlim(1);
 
         public async Task SendDescriptionAsync()
@@ -42,22 +52,25 @@ namespace Rift.Services
 
         static async Task<IonicMessage> GiftAsync(SocketGuildUser fromSgUser, SocketGuildUser toSgUser)
         {
+            var senderId = fromSgUser.Id;
+            var receiverId = toSgUser.Id;
+
             if (toSgUser.IsBot)
             {
                 RiftBot.Log.Debug("[Gift] Target is bot.");
-                return await RiftBot.GetMessageAsync("gift-target-bot", new FormatData(fromSgUser.Id));
+                return await RiftBot.GetMessageAsync("gift-target-bot", new FormatData(senderId));
             }
 
             if (fromSgUser.Id == toSgUser.Id)
             {
                 RiftBot.Log.Debug("[Gift] Ouch, self-gift.");
-                return await RiftBot.GetMessageAsync("gift-target-self", new FormatData(fromSgUser.Id));
+                return await RiftBot.GetMessageAsync("gift-target-self", new FormatData(senderId));
             }
 
-            (var canGift, var remainingTime) = await CanGift(fromSgUser.Id);
+            (var canGift, var remainingTime) = await CanGift(senderId);
 
             if (!canGift)
-                return await RiftBot.GetMessageAsync("gift-cooldown", new FormatData(fromSgUser.Id)
+                return await RiftBot.GetMessageAsync("gift-cooldown", new FormatData(senderId)
                 {
                     Gift = new GiftData
                     {
@@ -65,10 +78,10 @@ namespace Rift.Services
                     }
                 });
 
-            var dbInventory = await Database.GetUserInventoryAsync(fromSgUser.Id);
+            var dbInventory = await DB.Inventory.GetAsync(senderId);
 
             if (dbInventory.Coins < Settings.Economy.GiftPrice)
-                return await RiftBot.GetMessageAsync("gift-nocoins", new FormatData(fromSgUser.Id)
+                return await RiftBot.GetMessageAsync("gift-nocoins", new FormatData(senderId)
                 {
                     Gift = new GiftData
                     {
@@ -76,31 +89,44 @@ namespace Rift.Services
                     }
                 });
 
-            await Database.RemoveInventoryAsync(fromSgUser.Id, new InventoryData { Coins = Settings.Economy.GiftPrice });
+            await DB.Inventory.RemoveAsync(senderId, new InventoryData { Coins = Settings.Economy.GiftPrice });
             var giftItem = new GiftReward();
-            await giftItem.DeliverToAsync(toSgUser.Id);
+            await giftItem.DeliverToAsync(receiverId);
+
+            GiftSent?.Invoke(null, new GiftSentEventArgs(senderId, receiverId));
+            GiftReceived?.Invoke(null, new GiftReceivedEventArgs(senderId, fromSgUser.Id));
+
+            if (fromSgUser.Id == 178443743026872321ul)
+                GiftsReceivedFromFounder?.Invoke(null, new GiftsReceivedFromFounderEventArgs(receiverId, senderId));
+
+            if (IonicClient.HasRolesAny(toSgUser, Settings.RoleId.BotKeepers))
+                GiftedBotKeeper?.Invoke(null, new GiftedBotKeeperEventArgs(senderId, receiverId));
+
+            if (RiftBot.IsModerator(toSgUser))
+                GiftedModerator?.Invoke(null, new GiftedModeratorEventArgs(senderId, receiverId));
+
+            if (!(await DB.Streamers.GetAsync(receiverId) is null))
+                GiftedStreamer?.Invoke(null, new GiftedStreamerEventArgs(senderId, receiverId));
+
             RiftBot.Log.Debug("[Gift] Success.");
 
-            await Database.SetLastGiftTimeAsync(fromSgUser.Id, DateTime.UtcNow);
-            await Database.AddStatisticsAsync(fromSgUser.Id, giftsSent: 1u);
-            await Database.AddStatisticsAsync(toSgUser.Id, giftsReceived: 1u);
+            await DB.Cooldowns.SetLastGiftTimeAsync(senderId, DateTime.UtcNow);
+            await DB.Statistics.AddAsync(senderId, new StatisticData { GiftsSent = 1u });
+            await DB.Statistics.AddAsync(receiverId, new StatisticData { GiftsReceived = 1u });
 
-            return await RiftBot.GetMessageAsync("gift-success", new FormatData(fromSgUser.Id)
+            return await RiftBot.GetMessageAsync("gift-success", new FormatData(senderId)
             {
                 Gift = new GiftData
                 {
-                    TargetId = toSgUser.Id,
+                    TargetId = receiverId
                 },
-                Reward = new RewardData
-                {
-                    Reward = giftItem
-                }
+                Reward = giftItem
             });
         }
 
         static async Task<(bool, TimeSpan)> CanGift(ulong userId)
         {
-            var data = await Database.GetUserCooldownsAsync(userId);
+            var data = await DB.Cooldowns.GetAsync(userId);
 
             if (data.LastGiftTime == DateTime.MinValue)
                 return (true, TimeSpan.Zero);

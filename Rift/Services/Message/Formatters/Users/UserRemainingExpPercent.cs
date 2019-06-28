@@ -11,7 +11,7 @@ namespace Rift.Services.Message.Formatters.Users
 
         public override async Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
-            var user = await Database.GetUserAsync(data.UserId);
+            var user = await DB.Users.GetAsync(data.UserId);
             var currentLevelExp = EconomyService.GetExpForLevel(user.Level);
             var fullLevelExp = EconomyService.GetExpForLevel(user.Level + 1u) - currentLevelExp;
             var remainingExp = fullLevelExp - (user.Experience - currentLevelExp);

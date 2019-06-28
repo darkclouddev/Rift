@@ -10,7 +10,7 @@ namespace Rift.Services.Message.Formatters.Economy
 
         public override Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
-            return ReplaceData(message, data.Reward.Reward.ToString());
+            return ReplaceData(message, data.Reward.ToString());
         }
     }
 }

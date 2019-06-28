@@ -1,5 +1,7 @@
 using System;
+using System.Linq.Expressions;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using Rift.Services.Message;
@@ -12,7 +14,7 @@ namespace Rift.Util
     public static class Extensions
     {
         const string ImageFileName = "image.png";
-        
+
         public static async Task<IUserMessage> SendIonicMessageAsync(this ITextChannel channel, IonicMessage message)
         {
             if (message is null)

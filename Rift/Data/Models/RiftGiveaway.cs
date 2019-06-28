@@ -18,7 +18,7 @@ namespace Rift.Data.Models
 
         public override string ToString()
         {
-            var rewardData = Task.Run(async () => await Database.GetRewardAsync(RewardId)).Result;
+            var rewardData = Task.Run(async () => await DB.Rewards.GetAsync(RewardId)).Result;
 
             return $"{nameof(Name)}: {Name}\n" +
                    $"{nameof(Description)}: {Description}\n" +

@@ -12,7 +12,7 @@ namespace Rift.Services.Message.Formatters.Economy
 
         public override async Task<RiftMessage> Format(RiftMessage message, FormatData data)
         {
-            var cd = await Database.GetUserCooldownsAsync(data.UserId);
+            var cd = await DB.Cooldowns.GetAsync(data.UserId);
             return await ReplaceData(message, cd.BotRespectTimeSpan.Humanize());
         }
     }
