@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Discord;
-using Humanizer;
-using IonicLib;
 using Rift.Configuration;
+
+using Discord;
+using IonicLib;
+using Humanizer;
 
 namespace Rift.Services.Reward
 {
     public class RoleReward : RewardBase
     {
-        public ulong RoleId { get; private set; }
-        public TimeSpan? Duration { get; private set; } = null;
+        public ulong RoleId { get; set; }
+        public TimeSpan? Duration { get; set; }
 
         public RoleReward()
         {
@@ -52,11 +53,11 @@ namespace Rift.Services.Reward
 
         public override string ToString()
         {
-            var text = "Роль";
+            var text = "роль";
 
             if (!IonicClient.GetRole(Settings.App.MainGuildId, RoleId, out var role))
             {
-                text += " Роль не найдена";
+                text += " не найдена";
                 return text;
             }
 
