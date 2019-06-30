@@ -7,6 +7,7 @@ namespace Rift
     public static class DB
     {
         public static ActiveGiveaways ActiveGiveaways;
+        public static BackgroundInventory BackgroundInventory;
         public static Cooldowns Cooldowns;
         public static GiveawayLogs GiveawayLogs;
         public static Giveaways Giveaways;
@@ -30,6 +31,7 @@ namespace Rift
         static DB()
         {
             ActiveGiveaways = new ActiveGiveaways();
+            BackgroundInventory = new BackgroundInventory();
             Cooldowns = new Cooldowns();
             GiveawayLogs = new GiveawayLogs();
             Giveaways = new Giveaways();
