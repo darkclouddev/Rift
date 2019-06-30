@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 
 using Rift.Data.Models;
@@ -8,9 +8,9 @@ using Humanizer.Localisation;
 
 namespace Rift.Services.Message.Formatters.Cooldown
 {
-    public class CooldownItemStoreFormatted : FormatterBase
+    public class CooldownBackgroundStoreFormatted : FormatterBase
     {
-        public CooldownItemStoreFormatted() : base("$cooldownItemStoreFormatted") { }
+        public CooldownBackgroundStoreFormatted() : base("$cooldownBackgroundStoreFormatted") {}
 
         const string Available = "доступно";
 
@@ -18,9 +18,9 @@ namespace Rift.Services.Message.Formatters.Cooldown
         {
             var cd = await DB.Cooldowns.GetAsync(data.UserId);
 
-            return await ReplaceData(message, cd.ItemStoreTimeSpan == TimeSpan.Zero
+            return await ReplaceData(message, cd.BackgroundStoreTimeSpan == TimeSpan.Zero
                 ? Available
-                : $"осталось {cd.ItemStoreTimeSpan.Humanize(minUnit: TimeUnit.Second)}");
+                : $"осталось {cd.BackgroundStoreTimeSpan.Humanize(minUnit: TimeUnit.Second)}");
         }
     }
 }
