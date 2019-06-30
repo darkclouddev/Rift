@@ -42,7 +42,10 @@ namespace Rift.Data.Models
 
                 try
                 {
-                    ItemsData = JsonConvert.SerializeObject(value);
+                    ItemsData = JsonConvert.SerializeObject(value, Formatting.Indented, new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -81,7 +84,10 @@ namespace Rift.Data.Models
 
                 try
                 {
-                    RoleData = JsonConvert.SerializeObject(value);
+                    RoleData = JsonConvert.SerializeObject(value, Formatting.Indented, new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore
+                    });
                 }
                 catch (Exception ex)
                 {
