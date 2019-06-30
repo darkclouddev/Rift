@@ -15,6 +15,7 @@ namespace Rift
         public static LolData LolData;
         public static ModerationLogs ModerationLogs;
         public static PendingUsers PendingUsers;
+        public static ProfileBackgrounds ProfileBackgrounds;
         public static Quests Quests;
         public static Rewards Rewards;
         public static RoleInventory RoleInventory;
@@ -39,6 +40,7 @@ namespace Rift
             LolData = new LolData();
             ModerationLogs = new ModerationLogs();
             PendingUsers = new PendingUsers();
+            ProfileBackgrounds = new ProfileBackgrounds();
             Quests = new Quests();
             Rewards = new Rewards();
             RoleInventory = new RoleInventory();

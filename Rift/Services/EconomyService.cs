@@ -114,7 +114,7 @@ namespace Rift.Services
         static async Task AddExpAsync(ulong userId, uint exp)
         {
             await DB.Users.AddExperienceAsync(userId, exp)
-                .ContinueWith(async _ => await CheckLevelUpAsync(userId));
+                .ContinueWith(async _ => await CheckLevelUpAsync(userId).ConfigureAwait(false));
         }
 
         static async Task CheckLevelUpAsync(ulong userId)
@@ -183,7 +183,13 @@ namespace Rift.Services
         
         public async Task<IonicMessage> GetUserProfileAsync(ulong userId)
         {
-            return await RiftBot.GetMessageAsync("user-profile", new FormatData(userId));
+            var dbUser = await DB.Users.GetAsync(userId);
+
+            var messageName = dbUser.ProfileBackground > 0
+                ? "user-profile-background"
+                : "user-profile";
+            
+            return await RiftBot.GetMessageAsync(messageName, new FormatData(userId));
         }
 
         public async Task<IonicMessage> GetUserGameStatAsync(ulong userId)

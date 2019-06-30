@@ -75,6 +75,43 @@ namespace Rift.Services
         
         List<StoreItem> backgroundShopList;
 
+        List<StoreItem> BackgroundShopList
+        {
+            get
+            {
+                if (backgroundShopList is null)
+                {
+                    const string url = "https://cdn.ionpri.me/rift/profile/backgrounds/{0}.jpg";
+
+                    backgroundShopList = new List<StoreItem>
+                    {
+                        new StoreItem(1u, $"[Preview]({string.Format(url, 1.ToString())})",
+                            StoreItemType.ProfileBackground, 1u, 70_000u, Currency.Coins),
+                        new StoreItem(2u, $"[Preview]({string.Format(url, 2.ToString())})",
+                            StoreItemType.ProfileBackground, 1u, 120_000u, Currency.Coins),
+                        new StoreItem(3u, $"[Preview]({string.Format(url, 3.ToString())})",
+                            StoreItemType.ProfileBackground, 1u, 120_000u, Currency.Coins),
+                        new StoreItem(4u, $"[Preview]({string.Format(url, 4.ToString())})",
+                            StoreItemType.ProfileBackground, 1u, 120_000u, Currency.Coins),
+                        new StoreItem(5u, $"[Preview]({string.Format(url, 5.ToString())})",
+                            StoreItemType.ProfileBackground, 1u, 120_000u, Currency.Coins),
+                        new StoreItem(6u, $"[Preview]({string.Format(url, 6.ToString())})",
+                            StoreItemType.ProfileBackground, 1u, 120_000u, Currency.Coins),
+                        new StoreItem(7u, $"[Preview]({string.Format(url, 7.ToString())})",
+                            StoreItemType.ProfileBackground, 1u, 200_000u, Currency.Coins),
+                        new StoreItem(8u, $"[Preview]({string.Format(url, 8.ToString())})",
+                            StoreItemType.ProfileBackground, 1u, 200_000u, Currency.Coins),
+                        new StoreItem(9u, $"[Preview]({string.Format(url, 9.ToString())})",
+                            StoreItemType.ProfileBackground, 1u, 200_000u, Currency.Coins),
+                        new StoreItem(10u, $"[Preview]({string.Format(url, 10.ToString())})",
+                            StoreItemType.ProfileBackground, 1u, 400_000u, Currency.Coins),
+                    };
+                }
+
+                return backgroundShopList;
+            }
+        }
+
         IonicMessage itemShopMessage;
         public IonicMessage ItemShopMessage
         {

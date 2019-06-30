@@ -83,6 +83,6 @@
         BotRespect,
         Sphere,
         PermanentRole,
-        Background,
+        ProfileBackground,
     }
 }
