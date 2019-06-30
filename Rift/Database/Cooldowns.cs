@@ -86,6 +86,42 @@ namespace Rift.Database
             }
         }
 
+        public async Task SetLastRoleStoreTimeAsync(ulong userId, DateTime time)
+        {
+            if (!await EnsureExistsAsync(userId))
+                throw new DatabaseException(nameof(SetLastRoleStoreTimeAsync));
+
+            var cd = new RiftCooldowns
+            {
+                UserId = userId,
+                LastRoleStoreTime = time,
+            };
+
+            using (var context = new RiftContext())
+            {
+                context.Attach(cd).Property(x => x.LastRoleStoreTime).IsModified = true;
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task SetLastBackgroundStoreTimeAsync(ulong userId, DateTime time)
+        {
+            if (!await EnsureExistsAsync(userId))
+                throw new DatabaseException(nameof(SetLastBackgroundStoreTimeAsync));
+
+            var cd = new RiftCooldowns
+            {
+                UserId = userId,
+                LastBackgroundStoreTime = time,
+            };
+
+            using (var context = new RiftContext())
+            {
+                context.Attach(cd).Property(x => x.LastBackgroundStoreTime).IsModified = true;
+                await context.SaveChangesAsync();
+            }
+        }
+
         public async Task SetDoubleExpTimeAsync(ulong userId, DateTime time)
         {
             if (!await EnsureExistsAsync(userId))
