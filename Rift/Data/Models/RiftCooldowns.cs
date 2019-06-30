@@ -13,7 +13,7 @@ namespace Rift.Data.Models
             get
             {
                 var dt = DateTime.UtcNow;
-                var nextTime = LastItemStoreTime + Settings.Economy.StoreCooldown;
+                var nextTime = LastItemStoreTime + Settings.Economy.ItemStoreCooldown;
                 return nextTime > dt
                     ? nextTime - dt
                     : TimeSpan.Zero;

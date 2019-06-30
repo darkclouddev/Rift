@@ -6,7 +6,7 @@ namespace Rift.Configuration
     {
         public TimeSpan MessageCooldown { get; set; } = TimeSpan.FromSeconds(15);
         public TimeSpan GiftCooldown { get; set; } = TimeSpan.FromHours(1);
-        public TimeSpan StoreCooldown { get; set; } = TimeSpan.FromMinutes(60);
+        public TimeSpan ItemStoreCooldown { get; set; } = TimeSpan.FromMinutes(60);
         public TimeSpan RoleStoreCooldown { get; set; } = TimeSpan.FromHours(24);
         public TimeSpan BackgroundStoreCooldown { get; set; } = TimeSpan.FromMinutes(60);
         public TimeSpan BragCooldown { get; set; } = TimeSpan.FromHours(6);
