@@ -140,7 +140,7 @@ namespace Rift
                     if (result.Error != null && result.Error.Value != CommandError.UnknownCommand)
                         RiftBot.Log.Error(result.ErrorReason);
 
-                    await context.User.SendMessageAsync(result.ErrorReason);
+                    await context.Channel.SendMessageAsync(result.ErrorReason);
                 }
 
                 messageService.TryAddDelete(new DeleteMessage(context.Message, TimeSpan.FromSeconds(5)));
