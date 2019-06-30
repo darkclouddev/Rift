@@ -4,15 +4,15 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Settings = Rift.Configuration.Settings;
 using Rift.Data.Models;
 using Rift.Database;
-using Settings = Rift.Configuration.Settings;
 using Rift.Services.Message;
 using Rift.Services.Reward;
 using Rift.Services.Store;
 
-using Newtonsoft.Json;
 using IonicLib;
+using Newtonsoft.Json;
 
 namespace Rift.Services
 {
@@ -22,15 +22,14 @@ namespace Rift.Services
         static readonly SemaphoreSlim MutexRoleStore = new SemaphoreSlim(1);
         static readonly SemaphoreSlim MutexBackStore = new SemaphoreSlim(1);
 
-        List<StoreItem> _itemShopList;
-
-        List<StoreItem> itemShopList
+        List<StoreItem> itemShopList;
+        List<StoreItem> ItemShopList
         {
             get
             {
-                if (_itemShopList is null)
+                if (itemShopList is null)
                 {
-                    _itemShopList = new List<StoreItem>
+                    itemShopList = new List<StoreItem>
                     {
                         new StoreItem(1u, "Сундуки (1 шт.)", StoreItemType.Chest, 1u, 2_000u, Currency.Coins),
                         new StoreItem(2u, "Сундуки (6 шт.)", StoreItemType.Chest, 6u, 11_000u, Currency.Coins),
@@ -39,95 +38,139 @@ namespace Rift.Services
                     };
                 }
 
-                return _itemShopList;
+                return itemShopList;
             }
         }
 
         List<StoreItem> roleShopList;
+        List<StoreItem> RoleShopList
+        {
+            get
+            {
+                if (roleShopList is null)
+                {
+                    roleShopList = new List<StoreItem>
+                    {
+                        new StoreItem(1u, "Мародеры", StoreItemType.PermanentRole, Settings.RoleId.Marauders, 50_000u, Currency.Coins),
+                        new StoreItem(2u, "Аркадные", StoreItemType.PermanentRole, Settings.RoleId.Arcade, 200_000u, Currency.Coins),
+                        new StoreItem(3u, "Галантные", StoreItemType.PermanentRole, Settings.RoleId.Debonairs, 200_000u, Currency.Coins),
+                        new StoreItem(4u, "Хрустальные", StoreItemType.PermanentRole, Settings.RoleId.Crystal, 300_000u, Currency.Coins),
+                        new StoreItem(5u, "Тусовые", StoreItemType.PermanentRole, Settings.RoleId.Party, 400_000u, Currency.Coins),
+                        new StoreItem(6u, "Вардилочки", StoreItemType.PermanentRole, Settings.RoleId.Wardhole, 600_000u, Currency.Coins),
+                        new StoreItem(7u, "Темная звезда", StoreItemType.PermanentRole, Settings.RoleId.DarkStar, 700_000u, Currency.Coins),
+                        new StoreItem(8u, "Инфернальные", StoreItemType.PermanentRole, Settings.RoleId.Infernal, 750_000u, Currency.Coins),
+                        new StoreItem(9u, "Звездные защитники", StoreItemType.PermanentRole, Settings.RoleId.StarGuardians, 800_000u, Currency.Coins),
+                        new StoreItem(10u, "Вознесение", StoreItemType.PermanentRole, Settings.RoleId.Ascention, 250u, Currency.Tokens),
+                        new StoreItem(11u, "Импульсные", StoreItemType.PermanentRole, Settings.RoleId.Impulse, 250u, Currency.Tokens),
+                        new StoreItem(12u, "Кровавая луна", StoreItemType.PermanentRole, Settings.RoleId.BloodMoon, 300u, Currency.Tokens),
+                        new StoreItem(13u, "Юстициары", StoreItemType.PermanentRole, Settings.RoleId.Justicars, 350u, Currency.Tokens),
+                        new StoreItem(14u, "Токсичные", StoreItemType.PermanentRole, Settings.RoleId.Toxic, 400u, Currency.Tokens),
+                        new StoreItem(15u, "K/DA", StoreItemType.PermanentRole, Settings.RoleId.KDA, 500u, Currency.Tokens),
+                    };
+                }
+
+                return roleShopList;
+            }
+        }
+        
         List<StoreItem> backgroundShopList;
 
-        IonicMessage _itemShopMessage;
+        IonicMessage itemShopMessage;
         public IonicMessage ItemShopMessage
         {
             get
             {
-                if (_itemShopMessage is null)
+                if (itemShopMessage is null)
                 {
-                    _itemShopMessage = Task.Run(async () =>
+                    itemShopMessage = Task.Run(async () =>
                         await RiftBot.GetService<MessageService>()
                             .FormatMessageAsync(
                                 new RiftMessage
                                 {
-                                    Text = "**Магазин**\nВ магазине находятся сундуки, капсулы, бонусы и билеты.\n" +
-                                           "Для покупки напишите `!купить` и номер желаемого товара.",
                                     Embed = JsonConvert.SerializeObject(new RiftEmbed()
-                                        .AddField("Товар", string.Join('\n', itemShopList.Select(x => $"{x.Id}. {x.FormattedName}")), true)
-                                        .AddField("Стоимость", string.Join('\n', itemShopList.Select(x => x.FormattedPrice)), true)
+                                        .WithTitle("Магазин")
+                                        .WithDescription("В магазине находятся сундуки, капсулы, бонусы и билеты.\n" +
+                                                         "Для покупки напишите `!купить` и номер желаемого товара.")
+                                        .AddField("Товар", string.Join('\n', ItemShopList.Select(x => $"{x.Id.ToString()}. {x.FormattedName}")), true)
+                                        .AddField("Стоимость", string.Join('\n', ItemShopList.Select(x => x.FormattedPrice)), true)
                                         .WithFooter("Максимум одна покупка в час."))
                                 })).Result;
                 }
 
-                return _itemShopMessage;
+                return itemShopMessage;
             }
         }
-        public IonicMessage RoleShopMessage { get; }
-        public IonicMessage BackgroundShopMessage { get; }
 
-        public StoreService()
+        IonicMessage roleShopMessage;
+        public IonicMessage RoleShopMessage
         {
-            //roleShopList = new List<StoreItem>
-            //{
-            //    new StoreItem(1u, "Мародеры", StoreItemType.PermanentRole, Settings.RoleId.Marauders, 50_000u, Currency.Coins),
-            //    new StoreItem(2u, "Аркадные", StoreItemType.PermanentRole, Settings.RoleId.Arcade, 200_000u, Currency.Coins),
-            //    new StoreItem(3u, "Галантные", StoreItemType.PermanentRole, Settings.RoleId.Debonairs, 200_000u, Currency.Coins),
-            //    new StoreItem(4u, "Хрустальные", StoreItemType.PermanentRole, Settings.RoleId.Crystal, 300_000u, Currency.Coins),
-            //    new StoreItem(5u, "Тусовые", StoreItemType.PermanentRole, Settings.RoleId.Party, 400_000u, Currency.Coins),
-            //    new StoreItem(6u, "Вардилочки", StoreItemType.PermanentRole, Settings.RoleId.Wardhole, 600_000u, Currency.Coins),
-            //    new StoreItem(7u, "Темная звезда", StoreItemType.PermanentRole, Settings.RoleId.DarkStar, 700_000u, Currency.Coins),
-            //    new StoreItem(8u, "Инфернальные", StoreItemType.PermanentRole, Settings.RoleId.Infernal, 750_000u, Currency.Coins),
-            //    new StoreItem(9u, "Звездные защитники", StoreItemType.PermanentRole, Settings.RoleId.StarGuardians, 50_000u, Currency.Coins),
-            //    new StoreItem(10u, "Вознесение", StoreItemType.PermanentRole, Settings.RoleId.Ascention, 250u, Currency.Tokens),
-            //    new StoreItem(11u, "Импульсные", StoreItemType.PermanentRole, Settings.RoleId.Impulse, 250u, Currency.Tokens),
-            //    new StoreItem(12u, "Кровавая луна", StoreItemType.PermanentRole, Settings.RoleId.BloodMoon, 300u, Currency.Tokens),
-            //    new StoreItem(13u, "Юстициары", StoreItemType.PermanentRole, Settings.RoleId.Justicars, 350u, Currency.Tokens),
-            //    new StoreItem(14u, "Токсичные", StoreItemType.PermanentRole, Settings.RoleId.Toxic, 400u, Currency.Tokens),
-            //    new StoreItem(15u, "K/DA", StoreItemType.PermanentRole, Settings.RoleId.KDA, 500u, Currency.Tokens),
-            //};
+            get
+            {
+                if (roleShopMessage is null)
+                {
+                    roleShopMessage = Task.Run(async () =>
+                        await RiftBot.GetService<MessageService>()
+                            .FormatMessageAsync(
+                                new RiftMessage
+                                {
+                                    Embed = JsonConvert.SerializeObject(new RiftEmbed()
+                                        .WithTitle("Магазин ролей")
+                                        .WithDescription("В магазине находятся обычные и уникальные роли.\n" +
+                                                         "Для покупки напишите `!купить роль` и номер желаемого товара.")
+                                        .AddField("Товар", string.Join('\n', RoleShopList.Select(x => $"{x.Id.ToString()}. {x.FormattedName}")), true)
+                                        .AddField("Стоимость", string.Join('\n', RoleShopList.Select(x => x.FormattedPrice)), true)
+                                        .WithFooter("Максимум одна покупка в 24 часа."))
+                                })).Result;
+                }
 
-            //var rolesList = string.Join('\n', roleShopList.Select(x => x.ToString()));
-
-            //RoleShopMessage = new IonicMessage(
-            //    new RiftEmbed()
-            //        .WithTitle("Магазин ролей")
-            //        .WithDescription("В магазине находятся обычные и уникальные роли.\n" +
-            //                         "Для покупки напишите `!купить роль` и номер желаемого товара.\n\n" +
-            //                         rolesList)
-            //    );
-
-            //backgroundShopList = new List<StoreItem>
-            //{
-
-            //};
-
-            //var backgroundsList = string.Join('\n', backgroundShopList.Select(x => x.ToString()));
+                return roleShopMessage;
+            }
         }
+        
+        public IonicMessage BackgroundShopMessage { get; }
 
         StoreItem GetItemById(uint id)
         {
-            return itemShopList.FirstOrDefault(x => x.Id == id);
+            return ItemShopList.FirstOrDefault(x => x.Id == id);
         }
 
         StoreItem GetRoleById(uint id)
         {
-            return roleShopList.FirstOrDefault(x => x.Id == id);
+            return RoleShopList.FirstOrDefault(x => x.Id == id);
         }
 
         StoreItem GetBackgroundById(uint id)
         {
             return backgroundShopList.FirstOrDefault(x => x.Id == id);
         }
+        
+        static async Task<bool> TryWithdrawAsync(ulong userId, StoreItem item)
+        {
+            var dbInventory = await DB.Inventory.GetAsync(userId);
 
-        static readonly IonicMessage wrongNumberMessage = new IonicMessage("Неверный номер предмета!");
+            switch (item.Currency)
+            {
+                case Currency.Coins:
+                {
+                    if (dbInventory.Coins < item.Price)
+                        return false;
+
+                    await DB.Inventory.RemoveAsync(userId, new InventoryData { Coins = item.Price });
+                    break;
+                }
+
+                case Currency.Tokens:
+                {
+                    if (dbInventory.Tokens < item.Price)
+                        return false;
+
+                    await DB.Inventory.RemoveAsync(userId, new InventoryData { Tokens = item.Price });
+                    break;
+                }
+            }
+
+            return true;
+        }
 
         public async Task<IonicMessage> PurchaseItemAsync(ulong userId, uint itemId)
         {
@@ -147,31 +190,20 @@ namespace Rift.Services
             return result;
         }
 
-        async Task<IonicMessage> PurchaseItemInternalAsync(ulong userId, uint id)
+        async Task<IonicMessage> PurchaseItemInternalAsync(ulong userId, uint itemId)
         {
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
             if (sgUser is null)
                 return MessageService.Error;
 
-            var item = GetItemById(id);
+            var item = GetItemById(itemId);
 
             if (item is null)
-                return wrongNumberMessage;
+                return await RiftBot.GetMessageAsync("store-wrongnumber", new FormatData(userId));
 
-            if (!await CanBuyItemAsync(userId)) // TODO: remove admin check after tests
+            if (!await CanBuyItemAsync(userId))
                 return await RiftBot.GetMessageAsync("itemstore-cooldown", new FormatData(userId));
-
-            (var result, var currencyType) = await TryWithdrawAsync(userId, item);
-
-            if (!result)
-            {
-                switch (currencyType)
-                {
-                    case Currency.Coins: return await RiftBot.GetMessageAsync("store-nocoins", new FormatData(userId));
-                    case Currency.Tokens: return await RiftBot.GetMessageAsync("store-notokens", new FormatData(userId));
-                }
-            }
 
             ItemReward reward;
 
@@ -193,6 +225,15 @@ namespace Rift.Services
                     RiftBot.Log.Error($"Wrong type in item store: {item.Type.ToString()}!");
                     return MessageService.Error;
             }
+            
+            if (!await TryWithdrawAsync(userId, item))
+            {
+                switch (item.Currency)
+                {
+                    case Currency.Coins: return await RiftBot.GetMessageAsync("store-nocoins", new FormatData(userId));
+                    case Currency.Tokens: return await RiftBot.GetMessageAsync("store-notokens", new FormatData(userId));
+                }
+            }
 
             await reward.DeliverToAsync(userId);
 
@@ -207,35 +248,6 @@ namespace Rift.Services
             });
         }
 
-        async Task StorePurchaseInternalAsync(ulong userId, StoreItem item)
-        {
-            // if buying temp role over existing one
-            if (item.Type == StoreItemType.PermanentRole)
-            {
-                // TODO: check role inventory
-
-                var userTempRoles = await RiftBot.GetService<RoleService>().GetUserTempRolesAsync(userId);
-
-                if (userTempRoles != null && userTempRoles.Count > 0)
-                {
-                    if (userTempRoles.Any(x => x.UserId == userId && x.RoleId == item.RoleId))
-                    {
-                        await RiftBot.GetMessageAsync("store-hasrole", new FormatData(userId));
-                    }
-                }
-            }
-
-            switch (item.Type)
-            {
-                case StoreItemType.PermanentRole:
-                    var msgPermRole = await RiftBot.GetMessageAsync("store-purchased-permrole", new FormatData(userId));
-                    //await channel.SendIonicMessageAsync(msgPermRole);
-                    // TODO: add to role inventory
-                    await RiftBot.GetService<RoleService>().AddPermanentRoleAsync(userId, item.RoleId);
-                    break;
-            }
-        }
-
         static async Task<bool> CanBuyItemAsync(ulong userId)
         {
             var dbStore = await DB.Cooldowns.GetAsync(userId);
@@ -245,35 +257,83 @@ namespace Rift.Services
 
             var diff = DateTime.UtcNow - dbStore.LastItemStoreTime;
 
-            return diff > Settings.Economy.StoreCooldown;
+            return diff > Settings.Economy.ItemStoreCooldown;
         }
-
-        async Task<(bool, Currency)> TryWithdrawAsync(ulong userId, StoreItem item)
+        
+        public async Task<IonicMessage> PurchaseRoleAsync(ulong userId, uint itemId)
         {
-            var dbInventory = await DB.Inventory.GetAsync(userId);
+            await MutexRoleStore.WaitAsync().ConfigureAwait(false);
 
-            switch (item.Currency)
+            IonicMessage result;
+
+            try
             {
-                case Currency.Coins:
-                {
-                    if (dbInventory.Coins < item.Price)
-                        return (false, item.Currency);
-
-                    await DB.Inventory.RemoveAsync(userId, new InventoryData { Coins = item.Price });
-                    break;
-                }
-
-                case Currency.Tokens:
-                {
-                    if (dbInventory.Tokens < item.Price)
-                        return (false, item.Currency);
-
-                    await DB.Inventory.RemoveAsync(userId, new InventoryData { Tokens = item.Price });
-                    break;
-                }
+                result = await PurchaseRoleInternalAsync(userId, itemId).ConfigureAwait(false);
+            }
+            finally
+            {
+                MutexRoleStore.Release();
             }
 
-            return (true, item.Currency);
+            return result;
+        }
+
+        async Task<IonicMessage> PurchaseRoleInternalAsync(ulong userId, uint itemId)
+        {
+            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
+
+            if (sgUser is null)
+                return MessageService.Error;
+
+            var item = GetRoleById(itemId);
+
+            if (item is null)
+                return await RiftBot.GetMessageAsync("store-wrongnumber", new FormatData(userId));
+
+            if (!await CanBuyRoleAsync(userId))
+                return await RiftBot.GetMessageAsync("rolestore-cooldown", new FormatData(userId));
+
+            var roleInventory = await DB.RoleInventory.GetAsync(userId);
+
+            if (!(roleInventory is null) && roleInventory.Count > 0)
+            {
+                if (roleInventory.Any(x => x.RoleId == item.RoleId))
+                    return await RiftBot.GetMessageAsync("rolestore-hasrole", new FormatData(userId));
+            }
+            
+            if (!await TryWithdrawAsync(userId, item))
+            {
+                switch (item.Currency)
+                {
+                    case Currency.Coins: return await RiftBot.GetMessageAsync("store-nocoins", new FormatData(userId));
+                    case Currency.Tokens: return await RiftBot.GetMessageAsync("store-notokens", new FormatData(userId));
+                }
+            }
+            
+            await DB.RoleInventory.AddAsync(userId, item.RoleId, "Store");
+
+            var reward = new RoleReward().SetRole(item.RoleId);
+
+            await DB.Cooldowns.SetLastRoleStoreTimeAsync(userId, DateTime.UtcNow);
+
+            RiftBot.Log.Info($"Role purchased: #{item.RoleId.ToString()} by {userId.ToString()}.");
+
+            return await RiftBot.GetMessageAsync("store-success", new FormatData(userId)
+            {
+                Reward = reward
+            });
+        }
+        
+        static async Task<bool> CanBuyRoleAsync(ulong userId)
+        {
+            var dbStore = await DB.Cooldowns.GetAsync(userId);
+
+            if (dbStore.LastRoleStoreTime == DateTime.MinValue)
+                return true;
+
+            var diff = DateTime.UtcNow - dbStore.LastRoleStoreTime;
+
+            return diff > Settings.Economy.RoleStoreCooldown;
         }
     }
 }

@@ -48,7 +48,7 @@ namespace Rift.Configuration
         [ResolveRole("Хрустальные")]
         public ulong Crystal { get; set; }
 
-        [ResolveRole("Мародёры")]
+        [ResolveRole("Мародеры")]
         public ulong Marauders { get; set; }
 
         [ResolveRole("Чемпионы")]
