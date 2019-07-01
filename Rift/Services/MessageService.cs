@@ -29,7 +29,7 @@ namespace Rift.Services
                 .WithAuthor("Ошибка")
                 .WithColor(226, 87, 76)
                 .WithDescription("Обратитесь к хранителю ботов и опишите ваши действия, которые привели к возникновению данной ошибки.")
-                .WithThumbnailUrl("https://ionpri.me/rift/error.png"));
+                .WithThumbnailUrl("https://cdn.ionpri.me/rift/error.jpg"));
         
         public static readonly IonicMessage UserNotFound =
             new IonicMessage(new RiftEmbed()
