@@ -81,9 +81,6 @@ namespace Rift.Configuration
         [ResolveRole("Модераторы")]
         public ulong Moderator { get; set; }
 
-        [ResolveRole("Гл. Модераторы")]
-        public ulong BossModerator { get; set; }
-
         [ResolveRole("Абсолютные")]
         public ulong Absolute { get; set; }
 

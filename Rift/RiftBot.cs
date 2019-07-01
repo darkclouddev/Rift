@@ -55,7 +55,8 @@ namespace Rift
 
 		public static bool IsModerator(IUser user)
 		{
-            return (user is SocketGuildUser socketUser && socketUser.Roles.Any(x => x.Id == Settings.RoleId.Moderator || x.Id == Settings.RoleId.BossModerator));
+            return (user is SocketGuildUser socketUser
+                    && socketUser.Roles.Any(x => x.Id == Settings.RoleId.Moderator));
 		}
 
 		public static bool IsDeveloper(IUser user) => developersIds.Contains(user.Id);
