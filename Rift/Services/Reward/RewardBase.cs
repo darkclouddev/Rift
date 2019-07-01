@@ -13,5 +13,6 @@ namespace Rift.Services.Reward
         Undefined = 0,
         Item = 1,
         Role = 2,
+        Background = 3,
     }
 }

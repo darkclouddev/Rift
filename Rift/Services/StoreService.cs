@@ -81,30 +81,30 @@ namespace Rift.Services
             {
                 if (backgroundShopList is null)
                 {
-                    const string url = "https://cdn.ionpri.me/rift/profile/backgrounds/{0}.jpg";
+                    var backgrounds = Task.Run(async () => await DB.ProfileBackgrounds.GetAllAsync()).Result;
 
                     backgroundShopList = new List<StoreItem>
                     {
-                        new StoreItem(1u, $"[Preview]({string.Format(url, 1.ToString())})",
-                            StoreItemType.ProfileBackground, 1u, 70_000u, Currency.Coins),
-                        new StoreItem(2u, $"[Preview]({string.Format(url, 2.ToString())})",
-                            StoreItemType.ProfileBackground, 1u, 120_000u, Currency.Coins),
-                        new StoreItem(3u, $"[Preview]({string.Format(url, 3.ToString())})",
-                            StoreItemType.ProfileBackground, 1u, 120_000u, Currency.Coins),
-                        new StoreItem(4u, $"[Preview]({string.Format(url, 4.ToString())})",
-                            StoreItemType.ProfileBackground, 1u, 120_000u, Currency.Coins),
-                        new StoreItem(5u, $"[Preview]({string.Format(url, 5.ToString())})",
-                            StoreItemType.ProfileBackground, 1u, 120_000u, Currency.Coins),
-                        new StoreItem(6u, $"[Preview]({string.Format(url, 6.ToString())})",
-                            StoreItemType.ProfileBackground, 1u, 120_000u, Currency.Coins),
-                        new StoreItem(7u, $"[Preview]({string.Format(url, 7.ToString())})",
-                            StoreItemType.ProfileBackground, 1u, 200_000u, Currency.Coins),
-                        new StoreItem(8u, $"[Preview]({string.Format(url, 8.ToString())})",
-                            StoreItemType.ProfileBackground, 1u, 200_000u, Currency.Coins),
-                        new StoreItem(9u, $"[Preview]({string.Format(url, 9.ToString())})",
-                            StoreItemType.ProfileBackground, 1u, 200_000u, Currency.Coins),
-                        new StoreItem(10u, $"[Preview]({string.Format(url, 10.ToString())})",
-                            StoreItemType.ProfileBackground, 1u, 400_000u, Currency.Coins),
+                        new StoreItem(1u, $"[Preview]({backgrounds[0].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[0].Id, 70_000u, Currency.Coins),
+                        new StoreItem(2u, $"[Preview]({backgrounds[1].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[1].Id, 120_000u, Currency.Coins),
+                        new StoreItem(3u, $"[Preview]({backgrounds[2].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[2].Id, 120_000u, Currency.Coins),
+                        new StoreItem(4u, $"[Preview]({backgrounds[3].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[3].Id, 120_000u, Currency.Coins),
+                        new StoreItem(5u, $"[Preview]({backgrounds[4].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[4].Id, 120_000u, Currency.Coins),
+                        new StoreItem(6u, $"[Preview]({backgrounds[5].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[5].Id, 120_000u, Currency.Coins),
+                        new StoreItem(7u, $"[Preview]({backgrounds[6].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[6].Id, 200_000u, Currency.Coins),
+                        new StoreItem(8u, $"[Preview]({backgrounds[7].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[7].Id, 200_000u, Currency.Coins),
+                        new StoreItem(9u, $"[Preview]({backgrounds[8].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[8].Id, 200_000u, Currency.Coins),
+                        new StoreItem(10u, $"[Preview]({backgrounds[9].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[9].Id, 400_000u, Currency.Coins),
                     };
                 }
 
@@ -163,8 +163,35 @@ namespace Rift.Services
                 return roleShopMessage;
             }
         }
-        
-        public IonicMessage BackgroundShopMessage { get; }
+
+        IonicMessage backgroundShopMessage;
+        public IonicMessage BackgroundShopMessage
+        {
+            get
+            {
+                if (backgroundShopMessage is null)
+                {
+                    var things = BackgroundShopList.Select(x => $"{x.Id.ToString()}. {x.FormattedName}");
+                    var prices = BackgroundShopList.Select(x => x.FormattedPrice);
+                    var embed = new RiftEmbed()
+                        .WithTitle("Магазин фонов")
+                        .WithDescription("В магазине находятся фоны для вашего профиля.\n" +
+                                         "Для покупки напишите `!купить фон` и номер желаемого товара.")
+                        .AddField("Товар", string.Join('\n', things), true)
+                        .AddField("Стоимость", string.Join('\n', prices), true)
+                        .WithFooter("Максимум одна покупка в час.");
+                    var json = JsonConvert.SerializeObject(embed);
+                    var msg = new RiftMessage { Embed = json };
+                    
+                    backgroundShopMessage = Task.Run(async () =>
+                        await RiftBot.GetService<MessageService>()
+                            .FormatMessageAsync(msg))
+                        .Result;
+                }
+
+                return backgroundShopMessage;
+            }
+        }
 
         StoreItem GetItemById(uint id)
         {
@@ -371,6 +398,82 @@ namespace Rift.Services
             var diff = DateTime.UtcNow - dbStore.LastRoleStoreTime;
 
             return diff > Settings.Economy.RoleStoreCooldown;
+        }
+
+        public async Task<IonicMessage> PurchaseBackgroundAsync(ulong userId, uint itemId)
+        {
+            await MutexBackStore.WaitAsync().ConfigureAwait(false);
+
+            IonicMessage result;
+
+            try
+            {
+                result = await PurchaseBackgroundInternalAsync(userId, itemId).ConfigureAwait(false);
+            }
+            finally
+            {
+                MutexBackStore.Release();
+            }
+
+            return result;
+        }
+
+        async Task<IonicMessage> PurchaseBackgroundInternalAsync(ulong userId, uint itemId)
+        {
+            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
+
+            if (sgUser is null)
+                return MessageService.Error;
+
+            var item = GetBackgroundById(itemId);
+
+            if (item is null)
+                return await RiftBot.GetMessageAsync("store-wrongnumber", new FormatData(userId));
+
+            if (!await CanBuyBackAsync(userId))
+                return await RiftBot.GetMessageAsync("backstore-cooldown", new FormatData(userId));
+
+            var backInventory = await DB.BackgroundInventory.GetAsync(userId);
+
+            if (!(backInventory is null) && backInventory.Count > 0)
+            {
+                if (backInventory.Any(x => x.BackgroundId == item.Id))
+                    return await RiftBot.GetMessageAsync("backstore-hasback", new FormatData(userId));
+            }
+            
+            if (!await TryWithdrawAsync(userId, item))
+            {
+                switch (item.Currency)
+                {
+                    case Currency.Coins: return await RiftBot.GetMessageAsync("store-nocoins", new FormatData(userId));
+                    case Currency.Tokens: return await RiftBot.GetMessageAsync("store-notokens", new FormatData(userId));
+                }
+            }
+            
+            var reward = new BackgroundReward().SetBackgroundId((int)item.Id);
+
+            await reward.DeliverToAsync(userId);
+
+            await DB.Cooldowns.SetLastBackgroundStoreTimeAsync(userId, DateTime.UtcNow);
+
+            RiftBot.Log.Info($"Background purchased: #{item.Id.ToString()} by {userId.ToString()}.");
+
+            return await RiftBot.GetMessageAsync("store-success", new FormatData(userId)
+            {
+                Reward = reward
+            });
+        }
+        
+        static async Task<bool> CanBuyBackAsync(ulong userId)
+        {
+            var dbStore = await DB.Cooldowns.GetAsync(userId);
+
+            if (dbStore.LastBackgroundStoreTime == DateTime.MinValue)
+                return true;
+
+            var diff = DateTime.UtcNow - dbStore.LastBackgroundStoreTime;
+
+            return diff > Settings.Economy.BackgroundStoreCooldown;
         }
     }
 }

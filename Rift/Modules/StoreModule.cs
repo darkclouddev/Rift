@@ -49,5 +49,22 @@ namespace Rift.Modules
                 await Context.Channel.SendIonicMessageAsync(result);
             }
         }
+
+        [Command("магазин фонов")]
+        public async Task BackgroundShop()
+        {
+            await Context.Channel.SendIonicMessageAsync(storeService.BackgroundShopMessage);
+        }
+
+        [Command("купить фон")]
+        [RequireContext(ContextType.Guild)]
+        public async Task BuyBack(uint id = 0u)
+        {
+            using (Context.Channel.EnterTypingState())
+            {
+                var result = await storeService.PurchaseBackgroundAsync(Context.User.Id, id);
+                await Context.Channel.SendIonicMessageAsync(result);
+            }
+        }
     }
 }

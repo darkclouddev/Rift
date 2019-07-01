@@ -4,6 +4,7 @@
     {
         public readonly uint Id;
         public readonly ulong RoleId;
+        public readonly int BackgroundId;
         public readonly string Name;
         public readonly StoreItemType Type;
         public readonly uint Price;
@@ -56,6 +57,27 @@
             Name = name;
             Type = type;
             RoleId = roleId;
+            Price = price;
+            Currency = currency;
+
+            switch (Currency)
+            {
+                case Currency.Coins:
+                    CurrencyEmote = "$emotecoins";
+                    break;
+
+                case Currency.Tokens:
+                    CurrencyEmote = "$emotetokens";
+                    break;
+            }
+        }
+
+        public StoreItem(uint id, string name, StoreItemType type, int backgroundId, uint price, Currency currency)
+        {
+            Id = id;
+            Name = name;
+            Type = type;
+            BackgroundId = backgroundId;
             Price = price;
             Currency = currency;
 

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 
 using Rift.Data;
@@ -24,6 +25,16 @@ namespace Rift.Database
             {
                 return await context.ProfileBackgrounds
                     .FirstOrDefaultAsync(x => x.Id == id);
+            }
+        }
+        
+        public async Task<RiftProfileBackground[]> GetAllAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.ProfileBackgrounds
+                    .OrderBy(x => x.Id)
+                    .ToArrayAsync();
             }
         }
     }
