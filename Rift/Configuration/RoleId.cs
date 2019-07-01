@@ -51,32 +51,11 @@ namespace Rift.Configuration
         [ResolveRole("Мародеры")]
         public ulong Marauders { get; set; }
 
-        [ResolveRole("Чемпионы")]
-        public ulong Champions { get; set; }
-
-        [ResolveRole("Мифические")]
-        public ulong Mythic { get; set; }
-
         [ResolveRole("Тусовые")]
         public ulong Party { get; set; }
 
-        [ResolveRole("Отряд \"Омега\"")]
-        public ulong OmegaSquad { get; set; }
-
         [ResolveRole("Звездные защитники")]
         public ulong StarGuardians { get; set; }
-
-        [ResolveRole("Хекстековые")]
-        public ulong Hextech { get; set; }
-
-        [ResolveRole("Разрушители миров")]
-        public ulong Worldbreakers { get; set; }
-
-        [ResolveRole("Победоносные")]
-        public ulong Victorious { get; set; }
-
-        [ResolveRole("Вандалы")]
-        public ulong Vandals { get; set; }
 
         [ResolveRole("Галантные")]
         public ulong Debonairs { get; set; }
@@ -84,32 +63,17 @@ namespace Rift.Configuration
         [ResolveRole("Аркадные")]
         public ulong Arcade { get; set; }
 
-        [ResolveRole("Повелители грома")]
-        public ulong ThunderLords { get; set; }
-
         [ResolveRole("Юстициары")]
         public ulong Justicars { get; set; }
 
         [ResolveRole("Кровавая луна")]
         public ulong BloodMoon { get; set; }
 
-        [ResolveRole("Эпические")]
-        public ulong Epic { get; set; }
-
-        [ResolveRole("Исследователи ущелья")]
-        public ulong RiftExplorers { get; set; }
-
         [ResolveRole("Охотники")]
         public ulong Hunters { get; set; }
 
-        [ResolveRole("Ковбои")]
-        public ulong Cowboys { get; set; }
-
         [ResolveRole("Восхождение")]
         public ulong Ascention { get; set; }
-
-        [ResolveRole("Повелители бронзы")]
-        public ulong BronzeOverlords { get; set; }
 
         [ResolveRole("Стримеры")]
         public ulong Streamer { get; set; }
@@ -123,44 +87,11 @@ namespace Rift.Configuration
         [ResolveRole("Абсолютные")]
         public ulong Absolute { get; set; }
 
-        [ResolveRole("Архивные")]
-        public ulong Archive { get; set; }
-
         [ResolveRole("Блокировка чата")]
         public ulong Muted { get; set; }
 
-        [ResolveRole("Косплееры")]
-        public ulong Cosplayer { get; set; }
-
-        [ResolveRole("Офицеры клубов")]
-        public ulong ClubOfficer { get; set; }
-
-        [ResolveRole("Хранители жетонов")]
-        public ulong Keepers { get; set; }
-
-        [ResolveRole("Призыватель атакован")]
-        public ulong Attacked { get; set; }
-
-        [ResolveRole("ХАСАГИ")]
-        public ulong Hasagi { get; set; }
-
-        [ResolveRole("Довольные поро")]
-        public ulong HappyPoro { get; set; }
-
-        [ResolveRole("Храбрые поро")]
-        public ulong BravePoro { get; set; }
-
-        [ResolveRole("Избранные")]
-        public ulong Chosen { get; set; }
-
         [ResolveRole("Легендарные")]
         public ulong Legendary { get; set; }
-
-        [ResolveRole("ЧОТЫРЕ")]
-        public ulong Four { get; set; }
-
-        [ResolveRole("PENTAKILL")]
-        public ulong Pentakill { get; set; }
 
         [ResolveRole("Ранг: Железо")]
         public ulong RankIron { get; set; }
@@ -189,44 +120,11 @@ namespace Rift.Configuration
         [ResolveRole("Ранг: Претендент")]
         public ulong RankChallenger { get; set; }
 
-        [ResolveRole("Клуб LOLRU")]
-        public ulong ClubLolru { get; set; }
-
-        [ResolveRole("Клуб Off™")]
-        public ulong ClubOffTm { get; set; }
-
-        [ResolveRole("Клуб (Octo)")]
-        public ulong ClubOcto { get; set; }
-
-        [ResolveRole("Убийца Барона")]
-        public ulong BaronKiller { get; set; }
-
-        [ResolveRole("Убийца Дракона")]
-        public ulong DrakeKiller { get; set; }
-
-        [ResolveRole("Алмазные")]
-        public ulong DonateDiamond { get; set; }
-
-        [ResolveRole("Светоносные")]
-        public ulong Arclight { get; set; }
-
         [ResolveRole("Темная звезда")]
         public ulong DarkStar { get; set; }
 
         [ResolveRole("Активные")]
         public ulong Active { get; set; }
-
-        [ResolveRole("Вардилочка")]
-        public ulong Ward { get; set; }
-
-        [ResolveRole("Реворкнутый")]
-        public ulong Reworked { get; set; }
-
-        [ResolveRole("Метовый")]
-        public ulong Meta { get; set; }
-
-        [ResolveRole("Ясуоплееры")]
-        public ulong YasuoPlayer { get; set; }
 
         [ResolveRole("Зануда")]
         public ulong PrivateBore { get; set; }
@@ -251,9 +149,6 @@ namespace Rift.Configuration
 
         [ResolveRole("Вардилочки")]
         public ulong Wardhole { get; set; }
-
-        [ResolveRole("Престижные")]
-        public ulong Prestige { get; set; }
 
         [ResolveRole("K/DA")]
         public ulong KDA { get; set; }
