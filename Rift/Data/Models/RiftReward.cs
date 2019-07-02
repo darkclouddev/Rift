@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 using Rift.Services.Reward;
 
@@ -13,6 +14,9 @@ namespace Rift.Data.Models
         public string ItemsData { get; set; }
         public string RoleData { get; set; }
 
+        /// <summary>
+        /// This method does not cache result data
+        /// </summary>
         public ItemReward ItemReward
         {
             get
@@ -56,6 +60,9 @@ namespace Rift.Data.Models
             }
         }
 
+        /// <summary>
+        /// This method does not cache result data
+        /// </summary>
         public RoleReward RoleReward
         {
             get
@@ -96,6 +103,19 @@ namespace Rift.Data.Models
                     return;
                 }
             }
+        }
+        
+        public async Task DeliverToAsync(ulong userId)
+        {
+            var itemReward = ItemReward;
+
+            if (!(itemReward is null))
+                await itemReward.DeliverToAsync(userId);
+
+            var roleReward = RoleReward;
+
+            if (!(roleReward is null))
+                await roleReward.DeliverToAsync(userId);
         }
 
         public override string ToString()
