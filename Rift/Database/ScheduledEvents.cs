@@ -22,6 +22,16 @@ namespace Rift.Database
                     .ToListAsync();
             }
         }
+        
+        public async Task<List<RiftGiveawayActive>> GetActiveEventsAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.ActiveGiveaways
+                    .OrderBy(x => x.DueTime)
+                    .ToListAsync();
+            }
+        }
 
         public async Task<List<RiftScheduledEvent>> GetEventsAsync(Expression<Func<RiftScheduledEvent, bool>> predicate)
         {

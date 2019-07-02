@@ -57,5 +57,19 @@ namespace Rift.Database
                 return await context.ActiveGiveaways.ToListAsync();
             }
         }
+
+        public async Task RemoveAsync(int id)
+        {
+            var giveaway = new RiftGiveawayActive
+            {
+                Id = id
+            };
+            
+            using (var context = new RiftContext())
+            {
+                context.ActiveGiveaways.Remove(giveaway);
+                await context.SaveChangesAsync();
+            }
+        }
     }
 }
