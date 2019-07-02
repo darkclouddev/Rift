@@ -167,7 +167,7 @@ namespace Rift.Services
 
             var dt = DateTime.Now;
 
-            ScheduledEvent eventData;
+            RiftScheduledEvent eventData;
 
             do
             {

@@ -12,7 +12,7 @@ namespace Rift.Data
         public DbSet<RiftLolData> LolData { get; set; }
         public DbSet<RiftStatistics> Statistics { get; set; }
         public DbSet<RiftPendingUser> PendingUsers { get; set; }
-        public DbSet<ScheduledEvent> ScheduledEvents { get; set; }
+        public DbSet<RiftScheduledEvent> ScheduledEvents { get; set; }
         public DbSet<RiftTempRole> TempRoles { get; set; }
         public DbSet<RiftStreamer> Streamers { get; set; }
         public DbSet<RiftMessage> StoredMessages { get; set; }
@@ -82,8 +82,8 @@ namespace Rift.Data
                 .WithOne(stat => stat.User)
                 .HasForeignKey<RiftStatistics>(user => user.UserId);
 
-            builder.Entity<ScheduledEvent>().HasKey(key => key.Id);
-            builder.Entity<ScheduledEvent>().Property(prop => prop.Id).ValueGeneratedOnAdd();
+            builder.Entity<RiftScheduledEvent>().HasKey(key => key.Id);
+            builder.Entity<RiftScheduledEvent>().Property(prop => prop.Id).ValueGeneratedOnAdd();
 
             builder.Entity<RiftStreamer>().ToTable("Streamers");
             builder.Entity<RiftStreamer>().HasKey(x => x.UserId);

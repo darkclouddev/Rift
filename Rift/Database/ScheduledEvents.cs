@@ -13,7 +13,7 @@ namespace Rift.Database
 {
     public class ScheduledEvents
     {
-        public async Task<List<ScheduledEvent>> GetAllEventsAsync()
+        public async Task<List<RiftScheduledEvent>> GetAllEventsAsync()
         {
             using (var context = new RiftContext())
             {
@@ -23,7 +23,7 @@ namespace Rift.Database
             }
         }
 
-        public async Task<List<ScheduledEvent>> GetEventsAsync(Expression<Func<ScheduledEvent, bool>> predicate)
+        public async Task<List<RiftScheduledEvent>> GetEventsAsync(Expression<Func<RiftScheduledEvent, bool>> predicate)
         {
             using (var context = new RiftContext())
             {
@@ -34,7 +34,7 @@ namespace Rift.Database
             }
         }
 
-        public async Task<ScheduledEvent> GetClosestEventAsync(DateTime dt)
+        public async Task<RiftScheduledEvent> GetClosestEventAsync(DateTime dt)
         {
             using (var context = new RiftContext())
             {
