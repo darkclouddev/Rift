@@ -52,8 +52,9 @@ namespace Rift.Services.Message
 
     public class GiveawayData
     {
-        public RiftGiveawayActive ActiveGiveaway { get; set; }
-        public RiftGiveaway StoredGiveaway { get; set; }
+        public RiftGiveawayActive Active { get; set; }
+        public RiftGiveaway Stored { get; set; }
+        public RiftGiveawayLog Log { get; set; }
     }
 
     public class LolStatData

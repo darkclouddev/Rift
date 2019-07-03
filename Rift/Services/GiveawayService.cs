@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Rift.Configuration;
 using Rift.Data.Models;
 using Rift.Services.Message;
 
 using Discord;
 using IonicLib;
 using IonicLib.Extensions;
-using Rift.Configuration;
 
 namespace Rift.Services
 {
@@ -146,14 +145,28 @@ namespace Rift.Services
             {
                 await reward.DeliverToAsync(winner);
             }
+            
+            var log = new RiftGiveawayLog
+            {
+                Name = dbGiveaway.Name,
+                Winners = winners,
+                Participants = participants,
+                Reward = reward.ToPlainString(),
+                StartedBy = expiredGiveaway.StartedBy,
+                StartedAt = expiredGiveaway.StartedAt,
+                Duration = dbGiveaway.Duration,
+                FinishedAt = DateTime.UtcNow,
+            };
 
             await RiftBot.SendChatMessageAsync("giveaway-finished", new FormatData(expiredGiveaway.StartedBy)
             {
-                // TODO: create giveaway field in FormatData
+                Giveaway = new GiveawayData
+                {
+                    Log = log
+                }
             });
 
-            await LogGiveawayAsync(dbGiveaway, winners, participants, reward.ToPlainString(), expiredGiveaway.StartedBy,
-                expiredGiveaway.StartedAt).ConfigureAwait(false);
+            await LogGiveawayAsync(log).ConfigureAwait(false);
         }
         
         public async Task StartGiveawayAsync(string name, ulong callerId = 0u)
@@ -199,14 +212,19 @@ namespace Rift.Services
             {
                 Giveaway = new GiveawayData
                 {
-                    ActiveGiveaway = activeGiveaway,
-                    StoredGiveaway = giveaway
+                    Active = activeGiveaway,
+                    Stored = giveaway
                 }
             });
 
             await RiftBot.SendChatMessageAsync(formattedMsg).ConfigureAwait(false);
         }
 
+        static async Task LogGiveawayAsync(RiftGiveawayLog log)
+        {
+            await DB.GiveawayLogs.AddAsync(log);
+        }
+        
         static async Task LogGiveawayAsync(RiftGiveaway giveaway, ulong[] winners, ulong[] participants, string rewardPlain, ulong startedBy, DateTime startedAt)
         {
             var log = new RiftGiveawayLog
@@ -221,7 +239,7 @@ namespace Rift.Services
                 FinishedAt = DateTime.UtcNow,
             };
 
-            await DB.GiveawayLogs.AddAsync(log);
+            await LogGiveawayAsync(log);
         }
     }
 }
