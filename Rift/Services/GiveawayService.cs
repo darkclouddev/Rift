@@ -10,6 +10,7 @@ using Rift.Services.Message;
 using Discord;
 using IonicLib;
 using IonicLib.Extensions;
+using Rift.Services.Reward;
 
 namespace Rift.Services
 {
@@ -56,7 +57,7 @@ namespace Rift.Services
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
             {
                 RiftBot.Log.Error($"Could not finish giveaway \"{giveawayData})\": " +
-                                  $"Giveaway channel is null!");
+                                  "Giveaway channel is null!");
                 return;
             }
 
@@ -65,14 +66,14 @@ namespace Rift.Services
             if (message is null)
             {
                 RiftBot.Log.Error($"Could not finish giveaway \"{giveawayData})\": " +
-                                  $"Giveaway message is null! Deleted?");
+                                  "Giveaway message is null! Deleted?");
                 return;
             }
 
             if (!IonicClient.GetEmote(Settings.App.MainGuildId, "smite", out var emote))
             {
                 RiftBot.Log.Error($"Could not finish giveaway \"{giveawayData})\": " +
-                                  $"Emote is null! Deleted?");
+                                  "Emote is null! Deleted?");
                 return;
             }
 
@@ -83,7 +84,7 @@ namespace Rift.Services
             if (reactions is null)
             {
                 RiftBot.Log.Error($"Could not finish giveaway \"{giveawayData})\": " +
-                                  $"Unable to get reactions.");
+                                  "Unable to get reactions.");
                 return;
             }
 
@@ -191,9 +192,19 @@ namespace Rift.Services
 
             if (msg is null)
             {
-                RiftBot.Log.Warn("Wrong giveaway name, skipping execution.");
+                RiftBot.Log.Warn("Wrong giveaway message ID, skipping execution.");
                 await RiftBot.SendMessageToDevelopers(new IonicMessage(
                     $"В настройках розыгрыша указан неверный ID сообщения: ({giveaway.StoredMessageId.ToString()})."));
+                return;
+            }
+
+            var dbReward = await DB.Rewards.GetAsync(giveaway.RewardId);
+
+            if (dbReward is null)
+            {
+                RiftBot.Log.Warn("Wrong giveaway reward ID, skipping execution.");
+                await RiftBot.SendMessageToDevelopers(new IonicMessage(
+                    $"В настройках розыгрыша указан неверный ID награды: ({giveaway.RewardId.ToString()})."));
                 return;
             }
 
@@ -214,7 +225,8 @@ namespace Rift.Services
                 {
                     Active = activeGiveaway,
                     Stored = giveaway
-                }
+                },
+                Reward = dbReward.ItemReward
             });
 
             await RiftBot.SendChatMessageAsync(formattedMsg).ConfigureAwait(false);

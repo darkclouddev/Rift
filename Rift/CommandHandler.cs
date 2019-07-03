@@ -22,7 +22,7 @@ namespace Rift
 {
     public class CommandHandler
     {
-        const char commandPrefix = '!';
+        const char CommandPrefix = '!';
 
         public readonly IServiceProvider provider;
         static DiscordSocketClient client;
@@ -126,7 +126,7 @@ namespace Rift
                 return true;
             }
             
-            if (context.Message.HasCharPrefix(commandPrefix, ref argPos))
+            if (context.Message.HasCharPrefix(CommandPrefix, ref argPos))
             {
                 var result = await commandService.ExecuteAsync(context, argPos, provider);
 

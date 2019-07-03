@@ -23,23 +23,36 @@ namespace Rift.Modules
         readonly RiotService riotService;
         readonly EconomyService economyService;
         readonly EventService eventService;
+        readonly GiveawayService giveawayService;
 
-        public AdminHelperModule(RiotService riotService, EconomyService economyService, EventService eventService)
+        public AdminHelperModule(RiotService riotService,
+            EconomyService economyService,
+            EventService eventService,
+            GiveawayService giveawayService)
         {
             this.riotService = riotService;
             this.economyService = economyService;
             this.eventService = eventService;
+            this.giveawayService = giveawayService;
         }
 
-        [Command("formatters")]
+        [Command("gastart")]
         [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
-        public async Task Formatters()
+        public async Task GiveawayStart(string name)
         {
-            var formatters = RiftBot.GetService<MessageService>().GetActiveTemplates();
+            await giveawayService.StartGiveawayAsync(name, Context.User.Id);
+        }
 
-            await ReplyAsync(
-                $"**Supported formatters**\n\n{string.Join(',', formatters.Select(x => x.Template))}");
+        [Command("templates")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task GetTemplates()
+        {
+            var templates = RiftBot.GetService<MessageService>().GetActiveTemplates();
+
+            await ReplyAsync("**Supported templates**\n\n" +
+                             $"{string.Join(',', templates.Select(x => x.Template))}");
         }
 
         [Command("reactions")]

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 using Rift.Data;
 using Rift.Data.Models;
@@ -51,7 +52,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Giveaways
-                    .FirstOrDefaultAsync(x => x.Name.Equals(name));
+                    .FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
             }
         }
     }
