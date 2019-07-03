@@ -12,13 +12,12 @@ using System.Threading.Tasks;
 using Rift.Configuration;
 using Rift.Data.Models;
 using Rift.Services.Message;
-using Rift.Services.Message.Formatters;
 using MessageType = Rift.Services.Message.MessageType;
+using Rift.Services.Message.Templates;
 
 using Humanizer;
 using IonicLib;
 using IonicLib.Util;
-using Newtonsoft.Json;
 
 namespace Rift.Services
 {
@@ -50,16 +49,16 @@ namespace Rift.Services
             var sw = new Stopwatch();
             sw.Restart();
 
-            formatters = new ConcurrentDictionary<string, FormatterBase>();
+            templates = new ConcurrentDictionary<string, TemplateBase>();
 
-            foreach (var type in GetFormatters())
+            foreach (var type in GetTemplates())
             {
-                var formatter = (FormatterBase)Activator.CreateInstance(type);
-                formatters.TryAdd(formatter.Template, formatter);
+                var formatter = (TemplateBase)Activator.CreateInstance(type);
+                templates.TryAdd(formatter.Template, formatter);
             }
 
             sw.Stop();
-            RiftBot.Log.Info($"Loaded {formatters.Count.ToString()} message formatters in" +
+            RiftBot.Log.Info($"Loaded {templates.Count.ToString()} message formatters in" +
                 $" {sw.Elapsed.Humanize(1, new CultureInfo("en-US")).ToLowerInvariant()}.");
 
             RiftBot.Log.Info("Starting up message scheduler.");
@@ -240,24 +239,24 @@ namespace Rift.Services
         
         #region Message formatting
 
-        static ConcurrentDictionary<string, FormatterBase> formatters;
+        static ConcurrentDictionary<string, TemplateBase> templates;
 
-        static List<Type> GetFormatters()
+        static List<Type> GetTemplates()
         {
             var assembly = Assembly.GetEntryAssembly();
 
             if (assembly is null)
             {
-                RiftBot.Log.Error("Unable to obtain entry assembly, disabling formatting service.");
+                RiftBot.Log.Error("Unable to obtain entry assembly, disabling template service.");
                 return null;
             }
             
-            return assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(FormatterBase))).ToList();
+            return assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(TemplateBase))).ToList();
         }
 
-        public List<FormatterBase> GetActiveFormatters()
+        public List<TemplateBase> GetActiveTemplates()
         {
-            return formatters.Values.ToList();
+            return templates.Values.ToList();
         }
 
         public async Task<IonicMessage> GetMessageAsync(string identifier, FormatData data)
@@ -286,7 +285,7 @@ namespace Rift.Services
 
         public async Task<IonicMessage> FormatMessageAsync(RiftMessage message, FormatData data = null)
         {
-            if (formatters.Count == 0)
+            if (templates.Count == 0)
                 return new IonicMessage(message);
 
             if (message is null)
@@ -315,7 +314,7 @@ namespace Rift.Services
 
                 foreach (var match in matches)
                 {
-                    if (!formatters.TryGetValue(match.Value, out var f))
+                    if (!templates.TryGetValue(match.Value, out var template))
                     {
                         if (!match.Value.StartsWith(EmotePrefix))
                             continue;
@@ -326,7 +325,7 @@ namespace Rift.Services
 
                     try
                     {
-                        await f.Format(message, data).ConfigureAwait(false);
+                        await template.Apply(message, data).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
@@ -336,30 +335,6 @@ namespace Rift.Services
             }
             
             return new IonicMessage(message);
-        }
-
-        public async Task PutEmbedToDatabase(string name, RiftEmbed embed)
-        {
-            string json = null;
-
-            try
-            {
-                json = JsonConvert.SerializeObject(embed, Formatting.Indented,
-                    new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore});
-            }
-            catch (Exception ex)
-            {
-                RiftBot.Log.Error(ex);
-            }
-
-            var message = new RiftMessage
-            {
-                ApplyFormat = true,
-                Name = name,
-                Embed = json,
-            };
-
-            await DB.StoredMessages.AddAsync(message).ConfigureAwait(false);
         }
 
         #endregion Message formatting

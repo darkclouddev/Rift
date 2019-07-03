@@ -36,7 +36,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Formatters()
         {
-            var formatters = RiftBot.GetService<MessageService>().GetActiveFormatters();
+            var formatters = RiftBot.GetService<MessageService>().GetActiveTemplates();
 
             await ReplyAsync(
                 $"**Supported formatters**\n\n{string.Join(',', formatters.Select(x => x.Template))}");
