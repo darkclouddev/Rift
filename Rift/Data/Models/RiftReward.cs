@@ -143,5 +143,28 @@ namespace Rift.Data.Models
 
             return text;
         }
+
+        public RewardBase ToRewardBase()
+        {
+            RewardBase reward = null;
+
+            var itemReward = ItemReward;
+
+            if (itemReward is null)
+            {
+                var roleReward = RoleReward;
+
+                if (!(roleReward is null))
+                {
+                    reward = roleReward;
+                }
+            }
+            else
+            {
+                reward = itemReward;
+            }
+
+            return reward;
+        }
     }
 }
