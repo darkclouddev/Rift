@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+
+using Settings = Rift.Configuration.Settings;
+using Rift.Database;
 using Rift.Preconditions;
 using Rift.Services;
 using Rift.Services.Message;
@@ -13,8 +16,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using IonicLib;
 using IonicLib.Util;
-using Rift.Database;
-using Settings = Rift.Configuration.Settings;
 
 namespace Rift.Modules
 {
@@ -137,7 +138,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task StartGiveaway(string name)
         {
-            await RiftBot.GetService<GiveawayService>().StartGiveawayAsync(name).ConfigureAwait(false);
+            await RiftBot.GetService<GiveawayService>().StartGiveawayAsync(name, Context.User.Id).ConfigureAwait(false);
         }
 
         [Command("la")]
