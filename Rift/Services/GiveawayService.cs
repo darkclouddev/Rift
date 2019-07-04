@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,24 +9,47 @@ using Rift.Data.Models;
 using Rift.Services.Message;
 
 using Discord;
+using Humanizer;
 using IonicLib;
 using IonicLib.Extensions;
-using Rift.Services.Reward;
 
 namespace Rift.Services
 {
     public class GiveawayService
     {
         Timer eventTimer;
+        readonly CultureInfo schedulerCulture;
         
         public GiveawayService()
         {
-            ScheduleTimer(TimeSpan.FromSeconds(10));
+            schedulerCulture = new CultureInfo("en-US");
+            DelayTimer(TimeSpan.FromSeconds(10));
         }
 
-        void ScheduleTimer(TimeSpan delay)
+        void DelayTimer(TimeSpan delay)
         {
             eventTimer = new Timer(async delegate { await CheckExpiredAsync(); }, null, delay, TimeSpan.Zero);
+        }
+        
+        async Task ScheduleTimerToClosest()
+        {
+            var closest = await DB.ActiveGiveaways.GetClosestAsync();
+
+            if (closest is null || DateTime.UtcNow > closest.DueTime)
+                return;
+            
+            var ts = closest.DueTime - DateTime.UtcNow;
+
+            RiftBot.Log.Info($"Giveaway tracker scheduled to {closest.DueTime.Humanize(culture: schedulerCulture)}.");
+            
+            eventTimer = new Timer(
+                async delegate
+                {
+                    await CheckExpiredAsync();
+                },
+                null,
+                ts,
+                TimeSpan.Zero);
         }
 
         async Task CheckExpiredAsync()
@@ -39,6 +63,13 @@ namespace Rift.Services
             {
                 await FinishGiveawayAsync(giveaway);
             }
+
+            var all = await DB.ActiveGiveaways.GetAllAsync();
+
+            if (all is null)
+                return;
+
+            await ScheduleTimerToClosest().ConfigureAwait(false);
         }
 
         async Task FinishGiveawayAsync(RiftGiveawayActive expiredGiveaway)
@@ -88,14 +119,16 @@ namespace Rift.Services
                 return;
             }
 
-            var reward = await DB.Rewards.GetAsync(dbGiveaway.RewardId);
+            var dbReward = await DB.Rewards.GetAsync(dbGiveaway.RewardId);
             
-            if (reward is null)
+            if (dbReward is null)
             {
                 RiftBot.Log.Error($"Could not finish giveaway \"{giveawayData})\": " +
                                   $"Unable to get reward ID {dbGiveaway.RewardId.ToString()}.");
                 return;
             }
+            
+            var reward = dbReward.ToRewardBase();
             
             var participants = reactions
                 .Where(x => !x.IsBot && x.Id != IonicClient.Client.CurrentUser.Id)
@@ -105,7 +138,7 @@ namespace Rift.Services
             if (participants.Length == 0)
             {
                 await LogGiveawayAsync(dbGiveaway, default, default,
-                    reward.ToPlainString(), expiredGiveaway.StartedBy, expiredGiveaway.StartedAt);
+                    dbReward.ToPlainString(), expiredGiveaway.StartedBy, expiredGiveaway.StartedAt);
                 await DB.ActiveGiveaways.RemoveAsync(expiredGiveaway.Id);
 
                 RiftBot.Log.Error($"Could not finish giveaway \"{giveawayData})\": " +
@@ -144,15 +177,17 @@ namespace Rift.Services
 
             foreach (var winner in winners)
             {
-                await reward.DeliverToAsync(winner);
+                //await reward.DeliverToAsync(winner);
             }
+            
+            await DB.ActiveGiveaways.RemoveAsync(expiredGiveaway.Id);
             
             var log = new RiftGiveawayLog
             {
                 Name = dbGiveaway.Name,
                 Winners = winners,
                 Participants = participants,
-                Reward = reward.ToPlainString(),
+                Reward = dbReward.ToPlainString(),
                 StartedBy = expiredGiveaway.StartedBy,
                 StartedAt = expiredGiveaway.StartedAt,
                 Duration = dbGiveaway.Duration,
@@ -163,14 +198,16 @@ namespace Rift.Services
             {
                 Giveaway = new GiveawayData
                 {
-                    Log = log
-                }
+                    Log = log,
+                    Stored = dbGiveaway,
+                },
+                Reward = reward
             });
 
             await LogGiveawayAsync(log).ConfigureAwait(false);
         }
         
-        public async Task StartGiveawayAsync(string name, ulong callerId = 0u)
+        public async Task StartGiveawayAsync(string name, ulong startedById)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -208,28 +245,42 @@ namespace Rift.Services
                 return;
             }
 
+            var reward = dbReward.ToRewardBase();
+
+            if (!IonicClient.GetEmote(Settings.App.MainGuildId, "smite", out var smite))
+            {
+                RiftBot.Log.Warn("No giveaway emote, skipping execution.");
+                await RiftBot.SendMessageToDevelopers(new IonicMessage("Невозможно найти эмоцию: smite"));
+                return;
+            }
+
             var activeGiveaway = new RiftGiveawayActive
             {
                 GiveawayName = giveaway.Name,
                 StoredMessageId = giveaway.StoredMessageId,
-                StartedBy = callerId == 0u ? IonicClient.Client.CurrentUser.Id : callerId,
+                StartedBy = startedById == 0u ? IonicClient.Client.CurrentUser.Id : startedById,
                 StartedAt = DateTime.UtcNow,
-                DueTime = DateTime.UtcNow + giveaway.Duration
+                DueTime = DateTime.UtcNow + giveaway.Duration,
             };
 
-            await DB.ActiveGiveaways.AddAsync(activeGiveaway).ConfigureAwait(false);
-
-            var formattedMsg = await RiftBot.GetService<MessageService>().FormatMessageAsync(msg, new FormatData(callerId)
+            var formattedMsg = await RiftBot.GetService<MessageService>().FormatMessageAsync(msg, new FormatData(startedById)
             {
                 Giveaway = new GiveawayData
                 {
-                    Active = activeGiveaway,
                     Stored = giveaway
                 },
-                Reward = dbReward.ItemReward
+                Reward = reward
             });
+            
+            var giveawayMessage = await RiftBot.SendChatMessageAsync(formattedMsg).ConfigureAwait(false);
 
-            await RiftBot.SendChatMessageAsync(formattedMsg).ConfigureAwait(false);
+            activeGiveaway.ChannelMessageId = giveawayMessage.Id;
+            
+            await DB.ActiveGiveaways.AddAsync(activeGiveaway).ConfigureAwait(false);
+            
+            await giveawayMessage.AddReactionAsync(smite);
+            
+            await ScheduleTimerToClosest().ConfigureAwait(false);
         }
 
         static async Task LogGiveawayAsync(RiftGiveawayLog log)

@@ -94,12 +94,12 @@ namespace Rift
             await channel.SendIonicMessageAsync(msg).ConfigureAwait(false);
         }
 
-        public static async Task SendChatMessageAsync(IonicMessage message)
+        public static async Task<IUserMessage> SendChatMessageAsync(IonicMessage message)
         {
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
-                return;
+                return null;
 
-            await channel.SendIonicMessageAsync(message);
+            return await channel.SendIonicMessageAsync(message);
         }
         
         public static async Task Main(string[] args)

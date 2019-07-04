@@ -21,6 +21,16 @@ namespace Rift.Database
             }
         }
 
+        public async Task<RiftGiveawayActive> GetClosestAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.ActiveGiveaways
+                    .OrderBy(x => x.DueTime)
+                    .FirstOrDefaultAsync();
+            }
+        }
+
         public async Task<List<RiftGiveawayActive>> GetExpiredAsync()
         {
             using (var context = new RiftContext())
