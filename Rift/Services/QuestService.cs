@@ -33,6 +33,10 @@ namespace Rift.Services
             EconomyService.OpenedSphere += OnOpenedSphere;
             StoreService.BoughtChests += OnBoughtChests;
             StoreService.RolesPurchased += OnRolesPurchased;
+            GiveawayService.GiveawaysParticipated += OnGiveawaysParticipated;
+            //EventService.UsualMonstersKilled += OnUsualMonstersKilled;
+            //EventService.RareMonstersKilled += OnRareMonstersKilled;
+            //EventService.EpicMonstersKilled += OnEpicMonstersKilled;
         }
 
         public async Task AddNextQuestAsync(ulong userId)
@@ -660,6 +664,37 @@ namespace Rift.Services
                 };
 
                 if (rqp.RolesPurchased.Value >= dbQuest.RolesPurchased.Value)
+                {
+                    await FinishQuestAsync(dbQuest, rqp);
+                    continue;
+                }
+
+                await DB.Quests.SetQuestsProgressAsync(rqp);
+            }
+        }
+
+        static async void OnGiveawaysParticipated(object sender, GiveawaysParticipatedEventArgs e)
+        {
+            var quests = await DB.Quests.GetActiveQuestsProgressAsync(e.UserId);
+
+            if (quests is null || quests.Count == 0)
+                return;
+
+            foreach (var questProgress in quests)
+            {
+                var dbQuest = await DB.Quests.GetQuestAsync(questProgress.QuestId);
+
+                if (dbQuest?.GiveawaysParticipated is null)
+                    continue;
+
+                var rqp = new RiftQuestProgress
+                {
+                    UserId = e.UserId,
+                    QuestId = dbQuest.Id,
+                    GiveawaysParticipated = (dbQuest.GiveawaysParticipated ?? 0u) + 1u
+                };
+
+                if (rqp.GiveawaysParticipated.Value >= dbQuest.GiveawaysParticipated.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;

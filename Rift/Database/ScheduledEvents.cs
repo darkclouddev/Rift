@@ -13,7 +13,15 @@ namespace Rift.Database
 {
     public class ScheduledEvents
     {
-        public async Task<List<RiftScheduledEvent>> GetAllEventsAsync()
+        public async Task<bool> AnyAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.ScheduledEvents
+                    .AnyAsync();
+            }
+        }
+        public async Task<List<RiftScheduledEvent>> GetEventsAllAsync()
         {
             using (var context = new RiftContext())
             {

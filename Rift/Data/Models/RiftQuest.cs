@@ -14,16 +14,16 @@ namespace Rift.Data.Models
         public uint? MessagesSent { get; set; }
         public uint? BoughtChests { get; set; }
         public uint? OpenedChests { get; set; }
-        public uint? UsualMonstersKilled { get; set; } // TODO: after monsters
-        public uint? RareMonstersKilled { get; set; } // TODO: after monsters
-        public uint? EpicMonstersKilled { get; set; } // TODO: after monsters
+        public uint? UsualMonstersKilled { get; set; }
+        public uint? RareMonstersKilled { get; set; }
+        public uint? EpicMonstersKilled { get; set; }
         public uint TotalMonstersKilled =>
             (UsualMonstersKilled ?? 0u) + (RareMonstersKilled ?? 0u) + (EpicMonstersKilled ?? 0u);
         public uint? GiftsSent { get; set; }
         public uint? GiftsReceived { get; set; }
         public uint? GiftsReceivedFromUltraGay { get; set; }
         public uint? LevelReached { get; set; }
-        public uint? GiveawaysParticipated { get; set; } // TODO: after giveaways
+        public uint? GiveawaysParticipated { get; set; }
         public uint? CoinsReceived { get; set; }
         public uint? CoinsSpent { get; set; }
         public TimeSpan? VoiceUptimeEarned { get; set; }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Settings = Rift.Configuration.Settings;
 using Rift.Data.Models;
 using Rift.Database;
+using Rift.Events;
 using Rift.Services.Message;
 
 using Discord;
@@ -18,6 +19,8 @@ namespace Rift.Services
 {
     public class GiveawayService
     {
+        public static event EventHandler<GiveawaysParticipatedEventArgs> GiveawaysParticipated;
+        
         Timer eventTimer;
         readonly CultureInfo schedulerCulture;
         
@@ -175,6 +178,11 @@ namespace Rift.Services
             }
             
             await DB.ActiveGiveaways.RemoveAsync(expiredGiveaway.Id);
+
+            foreach (var participant in participants)
+            {
+                GiveawaysParticipated?.Invoke(null, new GiveawaysParticipatedEventArgs(participant));
+            }
             
             var log = new RiftGiveawayLog
             {

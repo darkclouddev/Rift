@@ -44,7 +44,7 @@ namespace Rift.Services
                 TimeSpan.FromSeconds(15),
                 TimeSpan.Zero);*/
 
-            ScheduleEventsForMonth(DateTime.UtcNow.Month);
+            //ScheduleEventsForMonth(DateTime.UtcNow.Month);
 
             RiftBot.Log.Info("EventService loaded successfully.");
         }
@@ -159,7 +159,7 @@ namespace Rift.Services
 
         async Task SetupNextEvent()
         {
-            if (!(await DB.ScheduledEvents.GetAllEventsAsync()).Any())
+            if (!await DB.ScheduledEvents.AnyAsync())
             {
                 RiftBot.Log.Warn("No events in db, skipping event setup.");
                 return;
