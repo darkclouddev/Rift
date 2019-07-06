@@ -55,6 +55,7 @@ namespace Rift.Services.Message
         public RiftGiveawayActive Active { get; set; }
         public RiftGiveaway Stored { get; set; }
         public RiftGiveawayLog Log { get; set; }
+        public TicketGiveaway TicketGiveaway { get; set; }
     }
 
     public class LolStatData
@@ -81,5 +82,11 @@ namespace Rift.Services.Message
                 Duration = log.Duration != TimeSpan.Zero ? log.Duration : TimeSpan.Zero
             };
         }
+    }
+
+    public class TicketGiveaway
+    {
+        public int ParticipantsCount { get; set; }
+        public ulong WinnerId { get; set; }
     }
 }

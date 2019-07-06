@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using Rift.Data;
@@ -264,6 +267,33 @@ namespace Rift.Database
             {
                 return await context.Inventory
                     .FirstOrDefaultAsync(x => x.UserId == userId);
+            }
+        }
+
+        public async Task<List<RiftInventory>> GetAllAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Inventory
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<List<RiftInventory>> GetAsync(Expression<Func<RiftInventory, bool>> predicate)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Inventory
+                    .Where(predicate)
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<int> GiveTicketsToUsersAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Database.ExecuteSqlCommandAsync("CALL giveticketstolowlevels();"); // MariaDB-specific call.
             }
         }
 

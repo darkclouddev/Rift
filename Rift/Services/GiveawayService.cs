@@ -283,22 +283,94 @@ namespace Rift.Services
             await ScheduleTimerToClosest().ConfigureAwait(false);
         }
 
+        public async Task StartTicketGiveawayAsync(int rewardId, ulong startedBy)
+        {
+            var dbReward = await DB.Rewards.GetAsync(rewardId);
+
+            if (dbReward is null)
+            {
+                RiftBot.Log.Warn("Wrong reward ID, skipping execution.");
+                await RiftBot.SendMessageToDevelopers(new IonicMessage(
+                    $"Неверный ID награды в роызгрыша по билетам: ({rewardId.ToString()})."));
+                return;
+            }
+
+            var reward = dbReward.ToRewardBase();
+            
+            var usersWithTickets = await DB.Inventory.GetAsync(x => x.Tickets > 0);
+
+            if (usersWithTickets is null || usersWithTickets.Count == 0)
+            {
+                RiftBot.Log.Warn("No users with tickets, skipping execution.");
+                return;
+            }
+            
+            RiftBot.Log.Info($"Ticket giveaway started for {usersWithTickets.Count.ToString()}, reward ID {rewardId.ToString()}.");
+
+            var removeInv = new InventoryData { Tickets = 1u };
+            
+            foreach (var userInventory in usersWithTickets)
+            {
+                //await DB.Inventory.RemoveAsync(userInventory.UserId, removeInv); // too slow on tunnel db connection
+            }
+
+            var winnerId = usersWithTickets.Random().UserId;
+
+            await reward.DeliverToAsync(winnerId);
+
+            await RiftBot.SendChatMessageAsync("giveaway-ticket-success", new FormatData(startedBy)
+            {
+                Giveaway = new GiveawayData
+                {
+                    TicketGiveaway = new TicketGiveaway
+                    {
+                        ParticipantsCount = usersWithTickets.Count,
+                        WinnerId = winnerId
+                    }
+                },
+                Reward = reward
+            });
+
+            var log = new RiftGiveawayLog
+            {
+                Name = "Ticket Giveaway",
+                Winners = new [] { winnerId },
+                Participants = usersWithTickets.Select(x => x.UserId).ToArray(),
+                Reward = dbReward.ToPlainString(),
+                StartedBy = startedBy,
+                StartedAt = DateTime.Now,
+                Duration = TimeSpan.Zero,
+                FinishedAt = DateTime.UtcNow,
+            };
+            
+            await DB.GiveawayLogs.AddAsync(log);
+        }
+
+        public async Task GiveTicketsToLowLevelUsersAsync(ulong startedBy)
+        {
+            var affectedRows = await DB.Inventory.GiveTicketsToUsersAsync();
+            
+            RiftBot.Log.Info($"Gived tickets to {affectedRows.ToString()} users");
+
+            await RiftBot.SendChatMessageAsync("ticket-charity-success", new FormatData(startedBy));
+        }
+        
         static async Task LogGiveawayAsync(RiftGiveawayLog log)
         {
             await DB.GiveawayLogs.AddAsync(log);
         }
         
-        static async Task LogGiveawayAsync(RiftGiveaway giveaway, ulong[] winners, ulong[] participants, string rewardPlain, ulong startedBy, DateTime startedAt)
+        static async Task LogGiveawayAsync(string name, ulong[] winners, ulong[] participants, string rewardPlain, ulong startedBy, DateTime startedAt, TimeSpan duration)
         {
             var log = new RiftGiveawayLog
             {
-                Name = giveaway.Name,
+                Name = name,
                 Winners = winners,
                 Participants = participants,
                 Reward = rewardPlain,
                 StartedBy = startedBy,
                 StartedAt = startedAt,
-                Duration = giveaway.Duration,
+                Duration = duration,
                 FinishedAt = DateTime.UtcNow,
             };
 

@@ -13,14 +13,22 @@ namespace Rift.Modules
         readonly EconomyService economyService;
         readonly RiotService riotService;
         readonly BragService bragService;
-        
+        readonly GiveawayService giveawayService;
 
-        public EconomyModule(EconomyService economyService, RiotService riotService, BragService bragService, StoreService storeService)
+        public EconomyModule(EconomyService economyService, RiotService riotService, BragService bragService, GiveawayService giveawayService)
         {
             this.economyService = economyService;
             this.riotService = riotService;
             this.bragService = bragService;
-            
+            this.giveawayService = giveawayService;
+        }
+
+        [Command("выдать билеты")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task GiveTickets()
+        {
+            await giveawayService.GiveTicketsToLowLevelUsersAsync(Context.User.Id);
         }
 
         [Command("обновить")]

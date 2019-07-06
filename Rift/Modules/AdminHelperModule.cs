@@ -37,6 +37,14 @@ namespace Rift.Modules
             this.giveawayService = giveawayService;
         }
 
+        [Command("gtstart")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task GiveawayStart(int rewardId)
+        {
+            await giveawayService.StartTicketGiveawayAsync(rewardId, Context.User.Id);
+        }
+
         [Command("gastart")]
         [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
