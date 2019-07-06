@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Rift.Data;
+
+using Settings = Rift.Configuration.Settings;
+using Rift.Database;
 using Rift.Events;
 using Rift.Services.Message;
 using Rift.Services.Reward;
-using Rift.Services.Store;
 using Rift.Util;
 
 using Discord;
 using IonicLib;
-using Microsoft.EntityFrameworkCore;
-using Rift.Database;
-using Settings = Rift.Configuration.Settings;
 
 namespace Rift.Services
 {

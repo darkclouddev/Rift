@@ -53,12 +53,12 @@ namespace Rift.Services
 
             foreach (var type in GetTemplates())
             {
-                var formatter = (TemplateBase)Activator.CreateInstance(type);
-                templates.TryAdd(formatter.Template, formatter);
+                var templateObj = (TemplateBase)Activator.CreateInstance(type);
+                templates.TryAdd(templateObj.Template, templateObj);
             }
 
             sw.Stop();
-            RiftBot.Log.Info($"Loaded {templates.Count.ToString()} message formatters in" +
+            RiftBot.Log.Info($"Loaded {templates.Count.ToString()} message templates in" +
                 $" {sw.Elapsed.Humanize(1, new CultureInfo("en-US")).ToLowerInvariant()}.");
 
             RiftBot.Log.Info("Starting up message scheduler.");

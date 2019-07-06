@@ -6,28 +6,28 @@ namespace Rift
 {
     public static class DB
     {
-        public static ActiveGiveaways ActiveGiveaways;
-        public static BackgroundInventory BackgroundInventory;
-        public static Cooldowns Cooldowns;
-        public static GiveawayLogs GiveawayLogs;
-        public static Giveaways Giveaways;
-        public static Inventory Inventory;
-        public static LolData LolData;
-        public static ModerationLogs ModerationLogs;
-        public static PendingUsers PendingUsers;
-        public static ProfileBackgrounds ProfileBackgrounds;
-        public static Quests Quests;
-        public static Rewards Rewards;
-        public static RoleInventory RoleInventory;
-        public static ScheduledEvents ScheduledEvents;
-        public static Settings Settings;
-        public static Statistics Statistics;
-        public static StoredMessages StoredMessages;
-        public static Streamers Streamers;
-        public static SystemTimers SystemTimers;
-        public static TempRoles TempRoles;
-        public static Toxicity Toxicity;
-        public static Users Users;
+        public static readonly ActiveGiveaways ActiveGiveaways;
+        public static readonly BackgroundInventory BackgroundInventory;
+        public static readonly Cooldowns Cooldowns;
+        public static readonly GiveawayLogs GiveawayLogs;
+        public static readonly Giveaways Giveaways;
+        public static readonly Inventory Inventory;
+        public static readonly LolData LolData;
+        public static readonly ModerationLogs ModerationLogs;
+        public static readonly PendingUsers PendingUsers;
+        public static readonly ProfileBackgrounds ProfileBackgrounds;
+        public static readonly Quests Quests;
+        public static readonly Rewards Rewards;
+        public static readonly RoleInventory RoleInventory;
+        public static readonly ScheduledEvents ScheduledEvents;
+        public static readonly Settings Settings;
+        public static readonly Statistics Statistics;
+        public static readonly StoredMessages StoredMessages;
+        public static readonly Streamers Streamers;
+        public static readonly SystemTimers SystemTimers;
+        public static readonly TempRoles TempRoles;
+        public static readonly Toxicity Toxicity;
+        public static readonly Users Users;
 
         static DB()
         {
@@ -58,11 +58,8 @@ namespace Rift
 
     public class DatabaseException : Exception
     {
-        public new readonly string Message;
-
         public DatabaseException(string message) : base(message)
         {
-            Message = message;
         }
     }
 }
