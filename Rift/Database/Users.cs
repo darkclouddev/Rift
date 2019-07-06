@@ -53,6 +53,18 @@ namespace Rift.Database
             }
         }
 
+        public async Task<List<ulong>> GetAllSortedAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Users
+                    .OrderByDescending(x => x.Level)
+                    .ThenByDescending(x => x.Experience)
+                    .Select(x => x.UserId)
+                    .ToListAsync();
+            }
+        }
+
         public async Task<RiftUser> GetAsync(ulong userId)
         {
             if (!await EnsureExistsAsync(userId))

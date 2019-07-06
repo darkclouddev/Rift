@@ -27,7 +27,7 @@ namespace Rift.Services
         static Timer ratingUpdateTimer;
         static Timer ActiveUsersTimer;
         static Timer RichUsersTimer;
-        static readonly TimeSpan ratingTimerCooldown = TimeSpan.FromHours(1);
+        static readonly TimeSpan ratingTimerCooldown = TimeSpan.FromMinutes(10);
 
         static SemaphoreSlim chestMutex = new SemaphoreSlim(1);
         static SemaphoreSlim capsuleMutex = new SemaphoreSlim(1);
@@ -40,7 +40,7 @@ namespace Rift.Services
             InitRichUsersTimer();
         }
 
-        public static List<ulong> SortedRating { get; private set; } = null;
+        public static List<ulong> SortedRating { get; private set; }
 
         static void InitActiveUsersTimer()
         {
@@ -235,16 +235,7 @@ namespace Rift.Services
 
         static async Task UpdateRatingAsync()
         {
-            using (var context = new RiftContext())
-            {
-                var sortedIds = await context.Users
-                    .OrderByDescending(x => x.Level)
-                    .ThenByDescending(x => x.Experience)
-                    .Select(x => x.UserId)
-                    .ToListAsync();
-
-                SortedRating = sortedIds;
-            }
+            SortedRating = await DB.Users.GetAllSortedAsync();
         }
 
         public async Task<IonicMessage> OpenChestAsync(ulong userId, uint amount)
