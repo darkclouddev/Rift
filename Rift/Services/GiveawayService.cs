@@ -4,8 +4,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Rift.Configuration;
+using Settings = Rift.Configuration.Settings;
 using Rift.Data.Models;
+using Rift.Database;
 using Rift.Services.Message;
 
 using Discord;
@@ -23,10 +24,10 @@ namespace Rift.Services
         public GiveawayService()
         {
             schedulerCulture = new CultureInfo("en-US");
-            DelayTimer(TimeSpan.FromSeconds(10));
+            InitializeTimer(TimeSpan.FromSeconds(5));
         }
 
-        void DelayTimer(TimeSpan delay)
+        void InitializeTimer(TimeSpan delay)
         {
             eventTimer = new Timer(async delegate { await CheckExpiredAsync(); }, null, delay, TimeSpan.Zero);
         }
@@ -35,21 +36,17 @@ namespace Rift.Services
         {
             var closest = await DB.ActiveGiveaways.GetClosestAsync();
 
-            if (closest is null || DateTime.UtcNow > closest.DueTime)
+            if (closest is null)
+                return;
+
+            if (DateTime.UtcNow > closest.DueTime)
                 return;
             
             var ts = closest.DueTime - DateTime.UtcNow;
 
             RiftBot.Log.Info($"Giveaway tracker scheduled to {closest.DueTime.Humanize(culture: schedulerCulture)}.");
             
-            eventTimer = new Timer(
-                async delegate
-                {
-                    await CheckExpiredAsync();
-                },
-                null,
-                ts,
-                TimeSpan.Zero);
+            eventTimer.Change(ts, TimeSpan.Zero);
         }
 
         async Task CheckExpiredAsync()
@@ -57,7 +54,10 @@ namespace Rift.Services
             var expiredEvents = await DB.ActiveGiveaways.GetExpiredAsync();
 
             if (expiredEvents is null || expiredEvents.Count == 0)
+            {
+                await ScheduleTimerToClosest().ConfigureAwait(false);
                 return;
+            }
 
             foreach (var giveaway in expiredEvents)
             {
@@ -76,19 +76,17 @@ namespace Rift.Services
         {
             var dbGiveaway = await DB.Giveaways.GetAsync(expiredGiveaway.GiveawayName);
 
-            var giveawayData = $"{expiredGiveaway.Id.ToString()}({expiredGiveaway.GiveawayName})";
+            var giveawayData = $"ID {expiredGiveaway.Id.ToString()} \"{expiredGiveaway.GiveawayName}\"";
             
             if (dbGiveaway is null)
             {
-                RiftBot.Log.Error($"Could not finish giveaway \"{giveawayData}\": " +
-                                  $"{nameof(RiftGiveaway)} is null!");
+                RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: {nameof(RiftGiveaway)} is null!");
                 return;
             }
 
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
             {
-                RiftBot.Log.Error($"Could not finish giveaway \"{giveawayData})\": " +
-                                  "Giveaway channel is null!");
+                RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: Giveaway channel is null!");
                 return;
             }
 
@@ -96,15 +94,13 @@ namespace Rift.Services
 
             if (message is null)
             {
-                RiftBot.Log.Error($"Could not finish giveaway \"{giveawayData})\": " +
-                                  "Giveaway message is null! Deleted?");
+                RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: Giveaway message is null! Deleted?");
                 return;
             }
 
             if (!IonicClient.GetEmote(Settings.App.MainGuildId, "smite", out var emote))
             {
-                RiftBot.Log.Error($"Could not finish giveaway \"{giveawayData})\": " +
-                                  "Emote is null! Deleted?");
+                RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: Emote is null! Deleted?");
                 return;
             }
 
@@ -114,8 +110,7 @@ namespace Rift.Services
             
             if (reactions is null)
             {
-                RiftBot.Log.Error($"Could not finish giveaway \"{giveawayData})\": " +
-                                  "Unable to get reactions.");
+                RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: Unable to get reactions.");
                 return;
             }
 
@@ -123,7 +118,7 @@ namespace Rift.Services
             
             if (dbReward is null)
             {
-                RiftBot.Log.Error($"Could not finish giveaway \"{giveawayData})\": " +
+                RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: " +
                                   $"Unable to get reward ID {dbGiveaway.RewardId.ToString()}.");
                 return;
             }
@@ -137,12 +132,11 @@ namespace Rift.Services
             
             if (participants.Length == 0)
             {
-                await LogGiveawayAsync(dbGiveaway, default, default,
-                    dbReward.ToPlainString(), expiredGiveaway.StartedBy, expiredGiveaway.StartedAt);
+                await LogGiveawayAsync(dbGiveaway.Name, null, null,
+                    dbReward.ToPlainString(), expiredGiveaway.StartedBy, expiredGiveaway.StartedAt, dbGiveaway.Duration);
                 await DB.ActiveGiveaways.RemoveAsync(expiredGiveaway.Id);
 
-                RiftBot.Log.Error($"Could not finish giveaway \"{giveawayData})\": " +
-                                  "No participants.");
+                RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: No participants.");
                 return;
             }
             
@@ -150,7 +144,7 @@ namespace Rift.Services
 
             if (participants.Length < dbGiveaway.WinnersAmount)
             {
-                RiftBot.Log.Error($"Could not finish giveaway \"{giveawayData})\": " +
+                RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: " +
                                   $"Not enough participants: only {participants.Length.ToString()} of minimum {dbGiveaway.WinnersAmount.ToString()}");
                 return;
             }
@@ -177,7 +171,7 @@ namespace Rift.Services
 
             foreach (var winner in winners)
             {
-                //await reward.DeliverToAsync(winner);
+                await reward.DeliverToAsync(winner);
             }
             
             await DB.ActiveGiveaways.RemoveAsync(expiredGiveaway.Id);
