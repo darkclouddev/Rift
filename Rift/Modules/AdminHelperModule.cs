@@ -504,7 +504,7 @@ namespace Rift.Modules
 
         [Command("whois")]
         [RequireAdmin]
-        [RequireContext(ContextType.DM)]
+        [RequireContext(ContextType.Guild)]
         public async Task WhoIs(ulong userId)
         {
             var user = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
