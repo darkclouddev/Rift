@@ -5,20 +5,21 @@ using Rift.Data.Models;
 
 namespace Rift.Services.Message.Templates.Economy
 {
-    public class EconomyTopRichCoins : TemplateBase
+    public class EconomyTopActiveLevelExp : TemplateBase
     {
-        public EconomyTopRichCoins() : base(nameof(EconomyTopRichCoins))
+        public EconomyTopActiveLevelExp() : base(nameof(EconomyTopActiveLevelExp))
         {
         }
 
         public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
         {
             var emoteService = RiftBot.GetService<EmoteService>();
-            var coinsEmote = emoteService.GetEmoteString("$emotecoins");
+            var lvlEmote = emoteService.GetEmoteString("$emotelvl");
+            var expEmote = emoteService.GetEmoteString("$emoteexp");
             
-            var top = data.Economy.Top10Coins;
+            var top = data.Economy.Top10Exp;
             
-            var coins = top.Select(x => $"{coinsEmote} {x.Coins.ToString()}");
+            var coins = top.Select(x => $"{lvlEmote} {x.Level.ToString()} {expEmote} {x.Experience.ToString()}");
 
             var formattedString = string.Join('\n', coins);
 

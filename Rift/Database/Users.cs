@@ -93,7 +93,7 @@ namespace Rift.Database
             return user.Level;
         }
 
-        public async Task<UserTopCoins[]> GetTopTenByCoinsAsync(Func<UserTopCoins, bool> predicate)
+        public async Task<List<UserTopCoins>> GetTopTenByCoinsAsync(Func<UserTopCoins, bool> predicate)
         {
             using (var context = new RiftContext())
             {
@@ -106,11 +106,11 @@ namespace Rift.Database
                     })
                     .ToListAsync();
 
-                return list.Where(predicate).Take(10).ToArray();
+                return list.Where(predicate).Take(10).ToList();
             }
         }
 
-        public async Task<UserTopExp[]> GetTopTenByExpAsync(Func<UserTopExp, bool> predicate)
+        public async Task<List<UserTopExp>> GetTopTenByExpAsync(Func<UserTopExp, bool> predicate)
         {
             using (var context = new RiftContext())
             {
@@ -124,7 +124,7 @@ namespace Rift.Database
                     })
                     .ToListAsync();
 
-                return list.Where(predicate).Take(10).ToArray();
+                return list.Where(predicate).Take(10).ToList();
             }
         }
 

@@ -66,23 +66,19 @@ namespace Rift.Services
 
         public static async Task ShowActiveUsersAsync()
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var commsChannel))
-                return;
-
             var topTen = await DB.Users.GetTopTenByExpAsync(x => 
                 !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
 
-            if (topTen.Length == 0)
+            if (topTen.Count == 0)
                 return;
 
-            var msg = await RiftBot.GetMessageAsync("economy-activeusers", new FormatData
+            await RiftBot.SendChatMessageAsync("economy-activeusers", new FormatData
             {
                 Economy = new EconomyData
                 {
                     Top10Exp = topTen
                 }
             });
-            await commsChannel.SendIonicMessageAsync(msg);
         }
 
         public static async Task ShowRichUsersAsync()
@@ -90,7 +86,7 @@ namespace Rift.Services
             var topTen = await DB.Users.GetTopTenByCoinsAsync(x => 
                 !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
 
-            if (topTen.Length == 0)
+            if (topTen.Count == 0)
                 return;
 
             await RiftBot.SendChatMessageAsync("economy-richusers", new FormatData

@@ -5,9 +5,9 @@ using Rift.Data.Models;
 
 namespace Rift.Services.Message.Templates.Economy
 {
-    public class EconomyTopRichUserList : TemplateBase
+    public class EconomyTopActiveUserList : TemplateBase
     {
-        public EconomyTopRichUserList() : base(nameof(EconomyTopRichUserList))
+        public EconomyTopActiveUserList() : base(nameof(EconomyTopActiveUserList))
         {
         }
 
@@ -16,7 +16,7 @@ namespace Rift.Services.Message.Templates.Economy
             var emoteService = RiftBot.GetService<EmoteService>();
             var transparentEmote = emoteService.GetEmoteString("$emotetran");
             
-            var top = data.Economy.Top10Coins;
+            var top = data.Economy.Top10Exp;
             
             var users = top.Select(x => $"{(top.IndexOf(x)+1).ToString()}. <@{x.UserId.ToString()}>{transparentEmote}");
 

@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Collections.Generic;
 using Rift.Data.Models;
 using Rift.Data.Models.Users;
 using Rift.Services.Reward;
@@ -39,8 +39,8 @@ namespace Rift.Services.Message
 
     public class EconomyData
     {
-        public UserTopExp[] Top10Exp { get; set; }
-        public UserTopCoins[] Top10Coins { get; set; }
+        public List<UserTopExp> Top10Exp { get; set; }
+        public List<UserTopCoins> Top10Coins { get; set; }
     }
 
     public class GiftData
