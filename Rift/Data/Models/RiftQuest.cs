@@ -12,7 +12,7 @@ namespace Rift.Data.Models
         public bool? ApprovedLolAccount { get; set; }
         public uint? BragsDone { get; set; }
         public uint? MessagesSent { get; set; }
-        public uint? BoughtChests { get; set; } // TODO: after shop
+        public uint? BoughtChests { get; set; }
         public uint? OpenedChests { get; set; }
         public uint? UsualMonstersKilled { get; set; } // TODO: after monsters
         public uint? RareMonstersKilled { get; set; } // TODO: after monsters
@@ -32,6 +32,6 @@ namespace Rift.Data.Models
         public bool? GiftedStreamer { get; set; }
         public uint? ActivatedBotRespects { get; set; }
         public bool? OpenedSphere { get; set; }
-        public uint? RolesPurchased { get; set; } // TODO: after shop
+        public uint? RolesPurchased { get; set; }
     }
 }

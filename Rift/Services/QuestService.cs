@@ -31,6 +31,8 @@ namespace Rift.Services
             DB.Statistics.VoiceUptimeEarned += OnVoiceUptimeEarned;
             EconomyService.ActivatedBotRespects += OnActivatedBotRespects;
             EconomyService.OpenedSphere += OnOpenedSphere;
+            StoreService.BoughtChests += OnBoughtChests;
+            StoreService.RolesPurchased += OnRolesPurchased;
         }
 
         public async Task AddNextQuestAsync(ulong userId)
@@ -564,7 +566,7 @@ namespace Rift.Services
                     ActivatedBotRespects = (questProgress.ActivatedBotRespects ?? 0u) + 1u
                 };
 
-                if (dbQuest.ActivatedBotRespects.Value >= rqp.ActivatedBotRespects)
+                if (rqp.ActivatedBotRespects >= dbQuest.ActivatedBotRespects.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;
@@ -595,7 +597,69 @@ namespace Rift.Services
                     OpenedSphere = true
                 };
 
-                if (dbQuest.OpenedSphere.Value)
+                if (rqp.OpenedSphere.Value)
+                {
+                    await FinishQuestAsync(dbQuest, rqp);
+                    continue;
+                }
+
+                await DB.Quests.SetQuestsProgressAsync(rqp);
+            }
+        }
+
+        static async void OnBoughtChests(object sender, BoughtChestsEventArgs e)
+        {
+            var quests = await DB.Quests.GetActiveQuestsProgressAsync(e.UserId);
+
+            if (quests is null || quests.Count == 0)
+                return;
+
+            foreach (var questProgress in quests)
+            {
+                var dbQuest = await DB.Quests.GetQuestAsync(questProgress.QuestId);
+
+                if (dbQuest?.BoughtChests is null)
+                    continue;
+
+                var rqp = new RiftQuestProgress
+                {
+                    UserId = e.UserId,
+                    QuestId = dbQuest.Id,
+                    BoughtChests = (dbQuest.BoughtChests ?? 0u) + e.Amount
+                };
+
+                if (rqp.BoughtChests.Value >= dbQuest.BoughtChests.Value)
+                {
+                    await FinishQuestAsync(dbQuest, rqp);
+                    continue;
+                }
+
+                await DB.Quests.SetQuestsProgressAsync(rqp);
+            }
+        }
+
+        static async void OnRolesPurchased(object sender, RolesPurchasedEventArgs e)
+        {
+            var quests = await DB.Quests.GetActiveQuestsProgressAsync(e.UserId);
+
+            if (quests is null || quests.Count == 0)
+                return;
+
+            foreach (var questProgress in quests)
+            {
+                var dbQuest = await DB.Quests.GetQuestAsync(questProgress.QuestId);
+
+                if (dbQuest?.RolesPurchased is null)
+                    continue;
+
+                var rqp = new RiftQuestProgress
+                {
+                    UserId = e.UserId,
+                    QuestId = dbQuest.Id,
+                    RolesPurchased = (dbQuest.RolesPurchased ?? 0u) + e.Amount
+                };
+
+                if (rqp.RolesPurchased.Value >= dbQuest.RolesPurchased.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;

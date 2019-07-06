@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Settings = Rift.Configuration.Settings;
 using Rift.Data.Models;
 using Rift.Database;
+using Rift.Events;
 using Rift.Services.Message;
 using Rift.Services.Reward;
 using Rift.Services.Store;
@@ -18,6 +19,9 @@ namespace Rift.Services
 {
     public class StoreService
     {
+        public static EventHandler<BoughtChestsEventArgs> BoughtChests;
+        public static EventHandler<RolesPurchasedEventArgs> RolesPurchased;
+    
         static readonly SemaphoreSlim MutexItemStore = new SemaphoreSlim(1);
         static readonly SemaphoreSlim MutexRoleStore = new SemaphoreSlim(1);
         static readonly SemaphoreSlim MutexBackStore = new SemaphoreSlim(1);
@@ -298,6 +302,9 @@ namespace Rift.Services
                     case Currency.Tokens: return await RiftBot.GetMessageAsync("store-notokens", new FormatData(userId));
                 }
             }
+            
+            if (item.Type == StoreItemType.Chest)
+                BoughtChests?.Invoke(null, new BoughtChestsEventArgs(userId, item.Amount));
 
             await reward.DeliverToAsync(userId);
 
@@ -373,6 +380,8 @@ namespace Rift.Services
                     case Currency.Tokens: return await RiftBot.GetMessageAsync("store-notokens", new FormatData(userId));
                 }
             }
+            
+            RolesPurchased?.Invoke(null, new RolesPurchasedEventArgs(userId, 1u));
             
             await DB.RoleInventory.AddAsync(userId, item.RoleId, "Store");
 
