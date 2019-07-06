@@ -12,9 +12,9 @@ namespace Rift.Services.Message.Templates.Bot
     {
         public BotUptime() : base(nameof(BotUptime)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            return ReplaceData(message, GetUptime());
+            return ReplaceDataAsync(message, GetUptime());
         }
         
         static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).Humanize();

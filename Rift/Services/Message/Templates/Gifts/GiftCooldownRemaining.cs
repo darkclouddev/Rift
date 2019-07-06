@@ -10,11 +10,11 @@ namespace Rift.Services.Message.Templates.Gifts
     {
         public GiftCooldownRemaining() : base(nameof(GiftCooldownRemaining)) {}
 
-        public override async Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var cooldowns = await DB.Cooldowns.GetAsync(data.UserId);
 
-            return await ReplaceData(message, cooldowns.GiftTimeSpan.Humanize());
+            return await ReplaceDataAsync(message, cooldowns.GiftTimeSpan.Humanize());
         }
     }
 }

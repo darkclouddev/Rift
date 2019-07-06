@@ -11,7 +11,7 @@ namespace Rift.Services.Message.Templates.Economy
         {
         }
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var emoteService = RiftBot.GetService<EmoteService>();
             var lvlEmote = emoteService.GetEmoteString("$emotelvl");
@@ -23,7 +23,7 @@ namespace Rift.Services.Message.Templates.Economy
 
             var formattedString = string.Join('\n', coins);
 
-            return ReplaceData(message, formattedString);
+            return ReplaceDataAsync(message, formattedString);
         }
     }
 }

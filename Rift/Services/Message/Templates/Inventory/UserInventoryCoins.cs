@@ -8,11 +8,11 @@ namespace Rift.Services.Message.Templates.Inventory
     {
         public UserInventoryCoins() : base(nameof(UserInventoryCoins)) {}
 
-        public override async Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var inventory = await DB.Inventory.GetAsync(data.UserId);
 
-            return await ReplaceData(message, inventory.Coins.ToString());
+            return await ReplaceDataAsync(message, inventory.Coins.ToString());
         }
     }
 }

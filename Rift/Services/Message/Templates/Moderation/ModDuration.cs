@@ -10,9 +10,9 @@ namespace Rift.Services.Message.Templates.Moderation
     {
         public ModDuration() : base(nameof(ModDuration)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            return ReplaceData(message, data.Moderation.Duration.HasValue
+            return ReplaceDataAsync(message, data.Moderation.Duration.HasValue
                 ? data.Moderation.Duration.Value.Humanize()
                 : Template);
         }

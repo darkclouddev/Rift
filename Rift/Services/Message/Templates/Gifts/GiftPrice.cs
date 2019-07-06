@@ -9,9 +9,9 @@ namespace Rift.Services.Message.Templates.Gifts
     {
         public GiftPrice() : base(nameof(GiftPrice)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            return ReplaceData(message, Settings.Economy.GiftPrice.ToString());
+            return ReplaceDataAsync(message, Settings.Economy.GiftPrice.ToString());
         }
     }
 }

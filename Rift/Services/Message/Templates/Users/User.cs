@@ -11,7 +11,7 @@ namespace Rift.Services.Message.Templates.Users
     {
         public User() : base(nameof(User)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, data.UserId);
 
@@ -21,7 +21,7 @@ namespace Rift.Services.Message.Templates.Users
                 return null;
             }
 
-            return ReplaceData(message, sgUser.ToString());
+            return ReplaceDataAsync(message, sgUser.ToString());
         }
     }
 }

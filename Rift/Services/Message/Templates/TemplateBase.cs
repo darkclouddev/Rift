@@ -9,6 +9,7 @@ namespace Rift.Services.Message.Templates
         public string Template { get; }
         string TemplateWithoutPrefix { get; }
         const string Prefix = "$";
+        const string ErrorTemplate = "Template error (\"{0}\"): {1}";
 
         protected TemplateBase(string template)
         {
@@ -16,9 +17,9 @@ namespace Rift.Services.Message.Templates
             Template = $"{Prefix}{TemplateWithoutPrefix}";
         }
 
-        public abstract Task<RiftMessage> Apply(RiftMessage message, FormatData data);
+        public abstract Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data);
 
-        protected Task<RiftMessage> ReplaceData(RiftMessage message, string replacement)
+        protected Task<RiftMessage> ReplaceDataAsync(RiftMessage message, string replacement)
         {
             if (message.Text != null)
                 message.Text = message.Text.Replace(Template, replacement);
@@ -31,7 +32,7 @@ namespace Rift.Services.Message.Templates
 
         protected void TemplateError(string message)
         {
-            RiftBot.Log.Error($"Template error (\"{TemplateWithoutPrefix}\"): {message}");
+            RiftBot.Log.Error(string.Format(ErrorTemplate, TemplateWithoutPrefix, message));
         }
     }
 }

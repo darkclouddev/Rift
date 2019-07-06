@@ -11,7 +11,7 @@ namespace Rift.Services.Message.Templates.Guild
     {
         public GuildName() : base(nameof(GuildName)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             if (!IonicClient.GetGuild(Settings.App.MainGuildId, out var guild))
             {
@@ -19,7 +19,7 @@ namespace Rift.Services.Message.Templates.Guild
                 return Task.FromResult(message);
             }
 
-            return ReplaceData(message, guild.Name);
+            return ReplaceDataAsync(message, guild.Name);
         }
     }
 }

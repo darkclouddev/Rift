@@ -325,7 +325,7 @@ namespace Rift.Services
 
                     try
                     {
-                        await template.Apply(message, data).ConfigureAwait(false);
+                        await template.ApplyAsync(message, data).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {

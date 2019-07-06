@@ -8,9 +8,9 @@ namespace Rift.Services.Message.Templates.Bot
     {
         public BotName() : base(nameof(BotName)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            return ReplaceData(message, nameof(Rift));
+            return ReplaceDataAsync(message, nameof(Rift));
         }
     }
 }

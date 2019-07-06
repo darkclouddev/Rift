@@ -8,10 +8,10 @@ namespace Rift.Services.Message.Templates.Users
     {
         public UserToxicityLevel() : base(nameof(UserToxicityLevel)) {}
         
-        public override async Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var toxicity = await DB.Toxicity.GetAsync(data.UserId);
-            return await ReplaceData(message, toxicity.Level.ToString());
+            return await ReplaceDataAsync(message, toxicity.Level.ToString());
         }
     }
 }

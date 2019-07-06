@@ -8,9 +8,9 @@ namespace Rift.Services.Message.Templates.Giveaway
     {
         public TicketGiveawayParticipantsCount() : base(nameof(TicketGiveawayParticipantsCount)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            return ReplaceData(message, data.Giveaway.TicketGiveaway.ParticipantsCount.ToString());
+            return ReplaceDataAsync(message, data.Giveaway.TicketGiveaway.ParticipantsCount.ToString());
         }
     }
 }

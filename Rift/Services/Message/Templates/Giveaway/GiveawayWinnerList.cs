@@ -9,11 +9,11 @@ namespace Rift.Services.Message.Templates.Giveaway
     {
         public GiveawayWinnerList() : base(nameof(GiveawayWinnerList)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var winners = string.Join('\n', data.Giveaway.Log.Winners.Select(x => $"<@{x.ToString()}>"));
 
-            return ReplaceData(message, winners);
+            return ReplaceDataAsync(message, winners);
         }
     }
 }

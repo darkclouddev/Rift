@@ -11,9 +11,9 @@ namespace Rift.Services.Message.Templates.Statistic
     {
         public StatVoiceUptime() : base(nameof(StatVoiceUptime)) {}
 
-        public override async Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            return await ReplaceData(message, data.Statistics.VoiceUptime
+            return await ReplaceDataAsync(message, data.Statistics.VoiceUptime
                 .Humanize(minUnit: TimeUnit.Minute, maxUnit: TimeUnit.Hour));
         }
     }

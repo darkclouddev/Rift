@@ -14,11 +14,11 @@ namespace Rift.Services.Message.Templates.Cooldown
 
         const string Available = "доступно";
 
-        public override async Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var cd = await DB.Cooldowns.GetAsync(data.UserId);
 
-            return await ReplaceData(message, cd.ItemStoreTimeSpan == TimeSpan.Zero
+            return await ReplaceDataAsync(message, cd.ItemStoreTimeSpan == TimeSpan.Zero
                 ? Available
                 : $"осталось {cd.ItemStoreTimeSpan.Humanize(minUnit: TimeUnit.Second)}");
         }

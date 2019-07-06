@@ -8,11 +8,11 @@ namespace Rift.Services.Message.Templates.LeagueData
     {
         public LeagueDataSummonerName() : base(nameof(LeagueDataSummonerName)) {}
 
-        public override async Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var lolData = await DB.LolData.GetAsync(data.UserId);
             
-            return await ReplaceData(message, lolData.SummonerName);
+            return await ReplaceDataAsync(message, lolData.SummonerName);
         }
     }
 }

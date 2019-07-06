@@ -11,7 +11,7 @@ namespace Rift.Services.Message.Templates.Moderation
     {
         public ModName() : base(nameof(ModName)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, data.Moderation.ModeratorId);
 
@@ -21,7 +21,7 @@ namespace Rift.Services.Message.Templates.Moderation
                 return Task.FromResult(message);
             }
 
-            return ReplaceData(message, sgUser.Username);
+            return ReplaceDataAsync(message, sgUser.Username);
         }
     }
 }

@@ -8,9 +8,9 @@ namespace Rift.Services.Message.Templates.Economy
     {
         public BragChampThumbnailUrl() : base(nameof(BragChampThumbnailUrl)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            return ReplaceData(message, data.Brag.ChampionPortraitUrl);
+            return ReplaceDataAsync(message, data.Brag.ChampionPortraitUrl);
         }
     }
 }

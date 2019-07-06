@@ -8,10 +8,10 @@ namespace Rift.Services.Message.Templates.Inventory
     {
         public UserInventoryRewinds() : base(nameof(UserInventoryRewinds)) {}
 
-        public override async Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var inventory = await DB.Inventory.GetAsync(data.UserId);
-            return await ReplaceData(message, inventory.BonusRewind.ToString());
+            return await ReplaceDataAsync(message, inventory.BonusRewind.ToString());
         }
     }
 }

@@ -8,9 +8,9 @@ namespace Rift.Services.Message.Templates.Giveaway
     {
         public GiveawayName() : base(nameof(GiveawayName)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            return ReplaceData(message, data.Giveaway.Stored.Name);
+            return ReplaceDataAsync(message, data.Giveaway.Stored.Name);
         }
     }
 }

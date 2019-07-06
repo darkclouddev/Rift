@@ -8,10 +8,10 @@ namespace Rift.Services.Message.Templates.Users
     {
         public UserInventoryRolesAmount() : base(nameof(UserInventoryRolesAmount)) {}
 
-        public override async Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var rolesCount = await DB.RoleInventory.GetCountAsync(data.UserId);
-            return await ReplaceData(message, rolesCount.ToString());
+            return await ReplaceDataAsync(message, rolesCount.ToString());
         }
     }
 }

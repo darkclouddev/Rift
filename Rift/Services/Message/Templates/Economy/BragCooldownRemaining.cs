@@ -10,10 +10,10 @@ namespace Rift.Services.Message.Templates.Economy
     {
         public BragCooldownRemaining() : base(nameof(BragCooldownRemaining)) {}
 
-        public override async Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var cd = await DB.Cooldowns.GetAsync(data.UserId);
-            return await ReplaceData(message, cd.BotRespectTimeSpan.Humanize());
+            return await ReplaceDataAsync(message, cd.BotRespectTimeSpan.Humanize());
         }
     }
 }

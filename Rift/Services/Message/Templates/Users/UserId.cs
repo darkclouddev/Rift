@@ -8,9 +8,9 @@ namespace Rift.Services.Message.Templates.Users
     {
         public UserId() : base(nameof(UserId)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            return ReplaceData(message, data.UserId.ToString());
+            return ReplaceDataAsync(message, data.UserId.ToString());
         }
     }
 }

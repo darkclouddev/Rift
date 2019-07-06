@@ -10,9 +10,9 @@ namespace Rift.Services.Message.Templates.Bot
     {
         public BotHeapSize() : base(nameof(BotHeapSize)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            return ReplaceData(message, GetHeapSize());
+            return ReplaceDataAsync(message, GetHeapSize());
         }
 
         static string GetHeapSize()

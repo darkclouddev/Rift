@@ -8,9 +8,9 @@ namespace Rift.Services.Message.Templates.Moderation
     {
         public ModReason() : base(nameof(ModReason)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            return ReplaceData(message, data.Moderation.Reason);
+            return ReplaceDataAsync(message, data.Moderation.Reason);
         }
     }
 }

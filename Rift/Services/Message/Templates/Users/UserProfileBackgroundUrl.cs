@@ -8,7 +8,7 @@ namespace Rift.Services.Message.Templates.Users
     {
         public UserProfileBackgroundUrl() : base(nameof(UserProfileBackgroundUrl)) {}
 
-        public override async Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var dbUser = await DB.Users.GetAsync(data.UserId);
             
@@ -23,7 +23,7 @@ namespace Rift.Services.Message.Templates.Users
                 return message;
             }
 
-            return await ReplaceData(message, background.Url);
+            return await ReplaceDataAsync(message, background.Url);
         }
     }
 }

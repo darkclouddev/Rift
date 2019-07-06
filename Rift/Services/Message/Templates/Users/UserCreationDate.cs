@@ -12,7 +12,7 @@ namespace Rift.Services.Message.Templates.Users
     {
         public UserCreationDate() : base(nameof(UserCreationDate)) {}
 
-        public override async Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var user = IonicClient.GetGuildUserById(Settings.App.MainGuildId, data.UserId);
 
@@ -22,7 +22,7 @@ namespace Rift.Services.Message.Templates.Users
                 return message;
             }
 
-            return await ReplaceData(message, user.CreatedAt.UtcDateTime.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture));
+            return await ReplaceDataAsync(message, user.CreatedAt.UtcDateTime.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture));
         }
     }
 }

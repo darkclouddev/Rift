@@ -9,17 +9,17 @@ namespace Rift.Services.Message.Templates.LeagueData
     {
         public LeagueDataRankFlex() : base(nameof(LeagueDataRankFlex)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             if (data.LolStat.Flex5v5 is null)
-                return ReplaceData(message, "Недостаточно игр");
+                return ReplaceDataAsync(message, "Недостаточно игр");
 
             var league = data.LolStat.Flex5v5;
             var totalGames = league.Wins + league.Losses;
             var winRatePerc = (int)Math.Round(((double)league.Wins / (double)totalGames) * 100);
             var leagueName = $"{RiotService.GetStatStringFromRank(RiotService.GetRankFromPosition(league))} {league.Rank}";
 
-            return ReplaceData(message, $"{leagueName} ({league.LeaguePoints.ToString()}LP / " +
+            return ReplaceDataAsync(message, $"{leagueName} ({league.LeaguePoints.ToString()}LP / " +
                                         $"{league.Wins.ToString()}W {league.Losses.ToString()}L) ({winRatePerc.ToString()}%)");
         }
     }

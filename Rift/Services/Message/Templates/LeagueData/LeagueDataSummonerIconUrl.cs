@@ -8,10 +8,10 @@ namespace Rift.Services.Message.Templates.LeagueData
     {
         public LeagueDataSummonerIconUrl() : base(nameof(LeagueDataSummonerIconUrl)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var iconUrl = RiftBot.GetService<RiotService>().GetSummonerIconUrlById(data.LolStat.Summoner.ProfileIconId);
-            return ReplaceData(message, iconUrl);
+            return ReplaceDataAsync(message, iconUrl);
         }
     }
 }

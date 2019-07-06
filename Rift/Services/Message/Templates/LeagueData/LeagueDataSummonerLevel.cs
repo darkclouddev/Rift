@@ -8,7 +8,7 @@ namespace Rift.Services.Message.Templates.LeagueData
     {
         public LeagueDataSummonerLevel() : base(nameof(LeagueDataSummonerLevel)) {}
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             if (data.LolStat.Summoner is null)
             {
@@ -16,7 +16,7 @@ namespace Rift.Services.Message.Templates.LeagueData
                 return Task.FromResult(message);
             }
 
-            return ReplaceData(message, data.LolStat.Summoner.SummonerLevel.ToString());
+            return ReplaceDataAsync(message, data.LolStat.Summoner.SummonerLevel.ToString());
         }
     }
 }

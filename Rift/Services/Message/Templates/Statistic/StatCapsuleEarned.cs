@@ -8,9 +8,9 @@ namespace Rift.Services.Message.Templates.Statistic
     {
         public StatCapsuleEarned() : base(nameof(StatCapsuleEarned)) {}
 
-        public override async Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            return await ReplaceData(message, data.Statistics.CapsulesEarned.ToString());
+            return await ReplaceDataAsync(message, data.Statistics.CapsulesEarned.ToString());
         }
     }
 }

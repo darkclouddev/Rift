@@ -8,10 +8,10 @@ namespace Rift.Services.Message.Templates.Inventory
     {
         public UserInventoryBotRespects() : base(nameof(UserInventoryBotRespects)) {}
 
-        public override async Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var inventory = await DB.Inventory.GetAsync(data.UserId);
-            return await ReplaceData(message, inventory.BonusBotRespect.ToString());
+            return await ReplaceDataAsync(message, inventory.BonusBotRespect.ToString());
         }
     }
 }

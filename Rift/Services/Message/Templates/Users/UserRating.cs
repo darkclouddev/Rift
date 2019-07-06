@@ -10,7 +10,7 @@ namespace Rift.Services.Message.Templates.Users
 
         const string NoRating = "-";
 
-        public override Task<RiftMessage> Apply(RiftMessage message, FormatData data)
+        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var rating = EconomyService.SortedRating;
 
@@ -18,7 +18,7 @@ namespace Rift.Services.Message.Templates.Users
                 ? NoRating
                 : $"{(rating.IndexOf(data.UserId) + 1).ToString()} / {rating.Count.ToString()}";
 
-            return ReplaceData(message, position);
+            return ReplaceDataAsync(message, position);
         }
     }
 }
