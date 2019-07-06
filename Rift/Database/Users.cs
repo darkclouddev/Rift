@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using Rift.Data;
@@ -63,6 +65,16 @@ namespace Rift.Database
             }
         }
 
+        public async Task<List<RiftUser>> GetAsync(Expression<Func<RiftUser, bool>> predicate)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Users
+                    .Where(predicate)
+                    .ToListAsync();
+            }
+        }
+
         public async Task<uint> GetLevelAsync(ulong userId)
         {
             var user = await GetAsync(userId);
@@ -79,7 +91,6 @@ namespace Rift.Database
                     {
                         UserId = x.UserId,
                         Coins = x.Coins,
-                        Tokens = x.Tokens
                     })
                     .ToListAsync();
 

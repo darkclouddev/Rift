@@ -87,23 +87,19 @@ namespace Rift.Services
 
         public static async Task ShowRichUsersAsync()
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var commsChannel))
-                return;
-
             var topTen = await DB.Users.GetTopTenByCoinsAsync(x => 
                 !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
 
             if (topTen.Length == 0)
                 return;
 
-            var msg = await RiftBot.GetMessageAsync("economy-richusers", new FormatData
+            await RiftBot.SendChatMessageAsync("economy-richusers", new FormatData
             {
                 Economy = new EconomyData
                 {
                     Top10Coins = topTen
                 }
             });
-            await commsChannel.SendIonicMessageAsync(msg);
         }
 
         public async Task ProcessMessageAsync(IUserMessage message)
