@@ -136,7 +136,7 @@ namespace Rift.Services
                     LevelReached = e.Level
                 };
 
-                if (dbQuest.LevelReached.Value >= e.Level)
+                if (rqp.LevelReached >= dbQuest.LevelReached.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;
@@ -198,7 +198,7 @@ namespace Rift.Services
                     BragsDone = (questProgress.BragsDone ?? 0u) + 1u
                 };
 
-                if (dbQuest.BragsDone.Value >= rqp.BragsDone)
+                if (rqp.BragsDone >= dbQuest.BragsDone.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;
@@ -229,7 +229,7 @@ namespace Rift.Services
                     MessagesSent = (questProgress.MessagesSent ?? 0u) + 1u
                 };
 
-                if (dbQuest.MessagesSent.Value >= rqp.MessagesSent)
+                if (rqp.MessagesSent >= dbQuest.MessagesSent.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;
@@ -260,7 +260,7 @@ namespace Rift.Services
                     OpenedChests = (questProgress.OpenedChests ?? 0u) + e.Amount
                 };
 
-                if (dbQuest.OpenedChests.Value >= rqp.OpenedChests)
+                if (rqp.OpenedChests >= dbQuest.OpenedChests.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;
@@ -291,7 +291,7 @@ namespace Rift.Services
                     GiftsSent = (questProgress.GiftsSent ?? 0u) + 1u
                 };
 
-                if (dbQuest.GiftsSent.Value >= rqp.GiftsSent)
+                if (rqp.GiftsSent >= dbQuest.GiftsSent.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;
@@ -322,7 +322,7 @@ namespace Rift.Services
                     GiftsReceived = (questProgress.GiftsReceived ?? 0u) + 1u
                 };
 
-                if (dbQuest.GiftsReceived.Value >= rqp.GiftsReceived)
+                if (rqp.GiftsReceived >= dbQuest.GiftsReceived.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;
@@ -353,7 +353,7 @@ namespace Rift.Services
                     GiftsReceivedFromUltraGay = (questProgress.GiftsReceivedFromUltraGay ?? 0u) + 1u
                 };
 
-                if (dbQuest.GiftsReceivedFromUltraGay.Value >= rqp.GiftsReceived)
+                if (rqp.GiftsReceivedFromUltraGay >= dbQuest.GiftsReceivedFromUltraGay)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;
@@ -384,7 +384,7 @@ namespace Rift.Services
                     GiftedBotKeeper = true
                 };
 
-                if (dbQuest.GiftedBotKeeper.Value)
+                if (rqp.GiftedBotKeeper.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;
@@ -415,7 +415,7 @@ namespace Rift.Services
                     GiftedModerator = true
                 };
 
-                if (dbQuest.GiftedModerator.Value)
+                if (rqp.GiftedModerator.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;
@@ -446,7 +446,7 @@ namespace Rift.Services
                     GiftedStreamer = true
                 };
 
-                if (dbQuest.GiftedStreamer.Value)
+                if (rqp.GiftedStreamer.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;
@@ -477,7 +477,7 @@ namespace Rift.Services
                     CoinsReceived = (questProgress.CoinsReceived ?? 0u) + e.Amount
                 };
 
-                if (dbQuest.CoinsReceived.Value >= rqp.CoinsReceived)
+                if (rqp.CoinsReceived >= dbQuest.CoinsReceived.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;
@@ -508,7 +508,7 @@ namespace Rift.Services
                     CoinsSpent = (questProgress.CoinsSpent ?? 0u) + e.Amount
                 };
 
-                if (dbQuest.CoinsSpent.Value >= rqp.CoinsSpent)
+                if (rqp.CoinsSpent >= dbQuest.CoinsSpent.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;
@@ -539,7 +539,7 @@ namespace Rift.Services
                     VoiceUptimeEarned = (questProgress.VoiceUptimeEarned ?? TimeSpan.Zero) + e.Uptime
                 };
 
-                if (dbQuest.VoiceUptimeEarned.Value >= rqp.VoiceUptimeEarned)
+                if (rqp.VoiceUptimeEarned >= dbQuest.VoiceUptimeEarned.Value)
                 {
                     await FinishQuestAsync(dbQuest, rqp);
                     continue;
@@ -629,7 +629,7 @@ namespace Rift.Services
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
-                    BoughtChests = (dbQuest.BoughtChests ?? 0u) + e.Amount
+                    BoughtChests = (questProgress.BoughtChests ?? 0u) + e.Amount
                 };
 
                 if (rqp.BoughtChests.Value >= dbQuest.BoughtChests.Value)
@@ -660,7 +660,7 @@ namespace Rift.Services
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
-                    RolesPurchased = (dbQuest.RolesPurchased ?? 0u) + e.Amount
+                    RolesPurchased = (questProgress.RolesPurchased ?? 0u) + e.Amount
                 };
 
                 if (rqp.RolesPurchased.Value >= dbQuest.RolesPurchased.Value)
@@ -691,7 +691,7 @@ namespace Rift.Services
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
-                    GiveawaysParticipated = (dbQuest.GiveawaysParticipated ?? 0u) + 1u
+                    GiveawaysParticipated = (questProgress.GiveawaysParticipated ?? 0u) + 1u
                 };
 
                 if (rqp.GiveawaysParticipated.Value >= dbQuest.GiveawaysParticipated.Value)
