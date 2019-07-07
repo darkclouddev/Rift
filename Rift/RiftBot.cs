@@ -15,8 +15,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using IonicLib;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using ILogger = NLog.ILogger;
@@ -112,9 +110,6 @@ namespace Rift
             };
 
             Console.WriteLine($"Using content root: {AppPath}");
-            
-            //await CreateWebHostBuilder(args).Build().StartAsync();
-            //await Task.Delay(-1);
 
             await new IonicClient(Path.Combine(AppPath, ".token"))
                 .RunAsync()
@@ -207,9 +202,5 @@ namespace Rift
 
             return provider;
         }
-
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
     }
 }
