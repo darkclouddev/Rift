@@ -9,6 +9,7 @@ namespace Rift
         public static readonly ActiveGiveaways ActiveGiveaways;
         public static readonly BackgroundInventory BackgroundInventory;
         public static readonly Cooldowns Cooldowns;
+        public static readonly EventSchedule EventSchedule;
         public static readonly GiveawayLogs GiveawayLogs;
         public static readonly Giveaways Giveaways;
         public static readonly Inventory Inventory;
@@ -19,7 +20,6 @@ namespace Rift
         public static readonly Quests Quests;
         public static readonly Rewards Rewards;
         public static readonly RoleInventory RoleInventory;
-        public static readonly ScheduledEvents ScheduledEvents;
         public static readonly Settings Settings;
         public static readonly Statistics Statistics;
         public static readonly StoredMessages StoredMessages;
@@ -34,6 +34,7 @@ namespace Rift
             ActiveGiveaways = new ActiveGiveaways();
             BackgroundInventory = new BackgroundInventory();
             Cooldowns = new Cooldowns();
+            EventSchedule = new EventSchedule();
             GiveawayLogs = new GiveawayLogs();
             Giveaways = new Giveaways();
             Inventory = new Inventory();
@@ -44,7 +45,6 @@ namespace Rift
             Quests = new Quests();
             Rewards = new Rewards();
             RoleInventory = new RoleInventory();
-            ScheduledEvents = new ScheduledEvents();
             Settings = new Settings();
             Statistics = new Statistics();
             StoredMessages = new StoredMessages();

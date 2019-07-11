@@ -12,7 +12,6 @@ namespace Rift.Data
         public DbSet<RiftLeagueData> LolData { get; set; }
         public DbSet<RiftStatistics> Statistics { get; set; }
         public DbSet<RiftPendingUser> PendingUsers { get; set; }
-        public DbSet<RiftScheduledEvent> ScheduledEvents { get; set; }
         public DbSet<RiftTempRole> TempRoles { get; set; }
         public DbSet<RiftStreamer> Streamers { get; set; }
         public DbSet<RiftMessage> StoredMessages { get; set; }
@@ -31,6 +30,10 @@ namespace Rift.Data
         public DbSet<RiftQuestProgress> QuestProgress { get; set; }
         public DbSet<RiftProfileBackground> ProfileBackgrounds { get; set; }
         public DbSet<RiftBackgroundInventory> BackgroundInventories { get; set; }
+        public DbSet<RiftScheduledEvent> EventSchedule { get; set; }
+        public DbSet<RiftEvent> Events { get; set; }
+        public DbSet<RiftActiveEvent> ActiveEvents { get; set; }
+        public DbSet<RiftEventLog> EventLogs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -83,9 +86,6 @@ namespace Rift.Data
                    .HasOne(user => user.Statistics)
                    .WithOne(stat => stat.User)
                    .HasForeignKey<RiftStatistics>(user => user.UserId);
-
-            builder.Entity<RiftScheduledEvent>().HasKey(key => key.Id);
-            builder.Entity<RiftScheduledEvent>().Property(prop => prop.Id).ValueGeneratedOnAdd();
 
             builder.Entity<RiftStreamer>().ToTable("Streamers");
             builder.Entity<RiftStreamer>().HasKey(x => x.UserId);
@@ -163,6 +163,19 @@ namespace Rift.Data
                    .HasOne(user => user.BackgroundInventory)
                    .WithOne(inv => inv.User)
                    .HasForeignKey<RiftBackgroundInventory>(inv => inv.UserId);
+            
+            builder.Entity<RiftScheduledEvent>().HasKey(key => key.Id);
+            builder.Entity<RiftScheduledEvent>().Property(prop => prop.Id).ValueGeneratedOnAdd();
+
+            builder.Entity<RiftEvent>().HasKey(x => x.Name);
+            builder.Entity<RiftEvent>().Ignore(x => x.HasSpecialReward);
+            
+            builder.Entity<RiftActiveEvent>().HasKey(x => x.Id);
+            builder.Entity<RiftActiveEvent>().Property(x => x.Id).ValueGeneratedOnAdd();
+            
+            builder.Entity<RiftEventLog>().HasKey(x => x.Id);
+            builder.Entity<RiftEventLog>().Property(x => x.Id).ValueGeneratedOnAdd();
+            builder.Entity<RiftEventLog>().Ignore(x => x.HadSpecialReward);
         }
     }
 }

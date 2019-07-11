@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -47,19 +46,11 @@ namespace Rift.Modules
                 $"{user.Mention} на сервере {(DateTime.UtcNow - sgUser.JoinedAt.Value.UtcDateTime).Humanize(3, minUnit: TimeUnit.Day, maxUnit: TimeUnit.Year)}"); // TODO: do proper check
         }
 
-        [Command("baron")]
-        [RequireDeveloper]
-        public async Task Baron()
-        {
-            await eventService.StartEvent(EventType.Baron);
-        }
-
         [Command("horse")]
         [RequireDeveloper]
         public async Task Horse()
         {
-            var url =
-                "http://www.merlinsltd.com/WebRoot/StoreLGB/Shops/62030553/54C2/CD1F/F497/BF84/54D1/C0A8/2ABB/1A80/mask_horse_brown.png";
+            var url = "https://cdn.ionpri.me/rift/things/horse_mask.png";
 
             var request = WebRequest.Create(url);
 
