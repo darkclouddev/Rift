@@ -18,23 +18,23 @@ namespace Rift.Database
                 await context.SaveChangesAsync();
             }
         }
-        
+
         public async Task<RiftProfileBackground> GetAsync(int id)
         {
             using (var context = new RiftContext())
             {
                 return await context.ProfileBackgrounds
-                    .FirstOrDefaultAsync(x => x.Id == id);
+                                    .FirstOrDefaultAsync(x => x.Id == id);
             }
         }
-        
+
         public async Task<RiftProfileBackground[]> GetAllAsync()
         {
             using (var context = new RiftContext())
             {
                 return await context.ProfileBackgrounds
-                    .OrderBy(x => x.Id)
-                    .ToArrayAsync();
+                                    .OrderBy(x => x.Id)
+                                    .ToArrayAsync();
             }
         }
     }

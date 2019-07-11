@@ -12,7 +12,8 @@ namespace Rift.Database
 {
     public class ModerationLogs
     {
-        public async Task AddAsync(ulong targetId, ulong moderatorId, string action, string reason, DateTime createdAt, TimeSpan duration)
+        public async Task AddAsync(ulong targetId, ulong moderatorId, string action, string reason, DateTime createdAt,
+                                   TimeSpan duration)
         {
             var log = new RiftModerationLog
             {
@@ -36,10 +37,10 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.ModerationLog
-                    .Where(x => x.TargetId == userId)
-                    .OrderByDescending(x => x.CreatedAt)
-                    .Take(10)
-                    .ToListAsync();
+                                    .Where(x => x.TargetId == userId)
+                                    .OrderByDescending(x => x.CreatedAt)
+                                    .Take(10)
+                                    .ToListAsync();
             }
         }
 
@@ -48,9 +49,9 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.ModerationLog
-                    .OrderByDescending(x => x.CreatedAt)
-                    .Take(10)
-                    .ToListAsync();
+                                    .OrderByDescending(x => x.CreatedAt)
+                                    .Take(10)
+                                    .ToListAsync();
             }
         }
     }

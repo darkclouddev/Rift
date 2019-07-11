@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Settings = Rift.Configuration.Settings;
+
 using Rift.Database;
 using Rift.Events;
 using Rift.Services.Message;
@@ -10,6 +11,7 @@ using Rift.Services.Reward;
 using Rift.Util;
 
 using Discord.WebSocket;
+
 using IonicLib;
 
 namespace Rift.Services
@@ -89,7 +91,7 @@ namespace Rift.Services
                     }
                 });
 
-            await DB.Inventory.RemoveAsync(senderId, new InventoryData { Coins = Settings.Economy.GiftPrice });
+            await DB.Inventory.RemoveAsync(senderId, new InventoryData {Coins = Settings.Economy.GiftPrice});
             var giftItem = new GiftReward();
             await giftItem.DeliverToAsync(receiverId);
 
@@ -111,8 +113,8 @@ namespace Rift.Services
             RiftBot.Log.Debug("[Gift] Success.");
 
             await DB.Cooldowns.SetLastGiftTimeAsync(senderId, DateTime.UtcNow);
-            await DB.Statistics.AddAsync(senderId, new StatisticData { GiftsSent = 1u });
-            await DB.Statistics.AddAsync(receiverId, new StatisticData { GiftsReceived = 1u });
+            await DB.Statistics.AddAsync(senderId, new StatisticData {GiftsSent = 1u});
+            await DB.Statistics.AddAsync(receiverId, new StatisticData {GiftsReceived = 1u});
 
             return await RiftBot.GetMessageAsync("gift-success", new FormatData(senderId)
             {

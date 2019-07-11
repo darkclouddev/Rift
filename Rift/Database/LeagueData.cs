@@ -8,43 +8,44 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Rift.Database
 {
-    public class LolData
+    public class LeagueData
     {
-        public async Task AddAsync(RiftLolData lolData)
+        public async Task AddAsync(RiftLeagueData data)
         {
-            await DB.Users.EnsureExistsAsync(lolData.UserId);
+            await DB.Users.EnsureExistsAsync(data.UserId);
 
             using (var context = new RiftContext())
             {
-                await context.LolData.AddAsync(lolData);
+                await context.LolData.AddAsync(data);
                 await context.SaveChangesAsync();
             }
         }
 
-        public async Task<RiftLolData> GetAsync(ulong userId)
+        public async Task<RiftLeagueData> GetAsync(ulong userId)
         {
             using (var context = new RiftContext())
             {
                 return await context.LolData
-                    .Where(x => x.UserId == userId)
-                    .Select(x => new RiftLolData
-                    {
-                        UserId = x.UserId,
-                        SummonerRegion = x.SummonerRegion,
-                        PlayerUUID = x.PlayerUUID,
-                        AccountId = x.AccountId,
-                        SummonerId = x.SummonerId,
-                        SummonerName = x.SummonerName,
-                    })
-                    .FirstOrDefaultAsync();
+                                    .Where(x => x.UserId == userId)
+                                    .Select(x => new RiftLeagueData
+                                    {
+                                        UserId = x.UserId,
+                                        SummonerRegion = x.SummonerRegion,
+                                        PlayerUUID = x.PlayerUUID,
+                                        AccountId = x.AccountId,
+                                        SummonerId = x.SummonerId,
+                                        SummonerName = x.SummonerName,
+                                    })
+                                    .FirstOrDefaultAsync();
             }
         }
 
-        public async Task UpdateAsync(ulong userId, string region, string playerUuid, string accountId, string summonerId, string summonerName)
+        public async Task UpdateAsync(ulong userId, string region, string playerUuid, string accountId,
+                                      string summonerId, string summonerName)
         {
             var dbSummoner = await GetAsync(userId);
 
-            var lolData = new RiftLolData
+            var lolData = new RiftLeagueData
             {
                 UserId = userId,
                 SummonerRegion = region,
@@ -75,7 +76,7 @@ namespace Rift.Database
 
         public async Task RemoveAsync(ulong userId)
         {
-            var lolData = new RiftLolData
+            var lolData = new RiftLeagueData
             {
                 UserId = userId,
             };

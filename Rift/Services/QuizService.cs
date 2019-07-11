@@ -17,7 +17,7 @@ namespace Rift.Services
 
         readonly TimeSpan intervalBetween = TimeSpan.FromSeconds(10);
         readonly TimeSpan duration = TimeSpan.FromSeconds(20);
-        
+
         readonly List<QuizEntry> entries = new List<QuizEntry>
         {
             new QuizEntry("Глава Демасии", "Джарван"),
@@ -26,6 +26,7 @@ namespace Rift.Services
             new QuizEntry("Какому персонажу принадлежит скилл \"Тёмный ветер\"?", "Фиддлстикс"),
             new QuizEntry("Какой персонаж носит нечто неразрушимое за спиной?", "Райз"),
         };
+
         Stack<QuizEntry> questions;
 
         Timer durationTimer;
@@ -46,10 +47,7 @@ namespace Rift.Services
 
         QuizEntry GetNextEntry()
         {
-            if (questions is null || questions.Count == 0)
-            {
-                questions = new Stack<QuizEntry>(entries.Shuffle());
-            }
+            if (questions is null || questions.Count == 0) questions = new Stack<QuizEntry>(entries.Shuffle());
 
             return questions.Pop();
         }
@@ -67,7 +65,8 @@ namespace Rift.Services
             IsActive = true;
 
             durationTimer = new Timer(async delegate { await TimeIsUpAsync(); }, null, duration, TimeSpan.Zero);
-            checkTimer = new Timer(async delegate { await CheckAnswersAsync(); }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+            checkTimer = new Timer(async delegate { await CheckAnswersAsync(); }, null, TimeSpan.FromSeconds(1),
+                                   TimeSpan.FromSeconds(1));
         }
 
         void StopTimers()
@@ -85,7 +84,7 @@ namespace Rift.Services
                 return;
 
             await channel.SendMessageAsync($"Время вышло! Правильный ответ: `{currentEntry.Answer}`");
-            
+
             await NextQuiz();
         }
 
@@ -118,11 +117,11 @@ namespace Rift.Services
                 return;
 
             await channel.SendMessageAsync("Следующий вопрос через 10 секунд!");
-            
+
             new Timer(async delegate { await StartAsync(); }, null, intervalBetween, TimeSpan.Zero);
         }
     }
-    
+
     public class QuizGuess
     {
         public ulong UserId { get; }
@@ -147,6 +146,8 @@ namespace Rift.Services
         }
 
         public bool IsRightAnswer(string guess)
-            => guess.Equals(Answer, StringComparison.InvariantCultureIgnoreCase);
+        {
+            return guess.Equals(Answer, StringComparison.InvariantCultureIgnoreCase);
+        }
     }
 }

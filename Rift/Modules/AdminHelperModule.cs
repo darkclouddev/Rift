@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 using Settings = Rift.Configuration.Settings;
+
 using Rift.Database;
 using Rift.Preconditions;
 using Rift.Services;
@@ -14,6 +15,7 @@ using Rift.Util;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+
 using IonicLib;
 using IonicLib.Util;
 
@@ -27,9 +29,9 @@ namespace Rift.Modules
         readonly GiveawayService giveawayService;
 
         public AdminHelperModule(RiotService riotService,
-            EconomyService economyService,
-            EventService eventService,
-            GiveawayService giveawayService)
+                                 EconomyService economyService,
+                                 EventService eventService,
+                                 GiveawayService giveawayService)
         {
             this.riotService = riotService;
             this.economyService = economyService;
@@ -69,18 +71,14 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Reactions(ulong messageId)
         {
-            var msg = (IUserMessage)await Context.Channel.GetMessageAsync(messageId);
+            var msg = (IUserMessage) await Context.Channel.GetMessageAsync(messageId);
             var text = "";
 
             if (msg.Reactions is null)
                 text = "0";
             else
-            {
                 foreach ((var emote, var reactionMetadata) in msg.Reactions)
-                {
                     text += $"**{emote}**: {reactionMetadata.ReactionCount.ToString()}\n";
-                }
-            }
 
             await Context.Channel.SendMessageAsync(text).ConfigureAwait(false);
         }
@@ -90,7 +88,8 @@ namespace Rift.Modules
         [RequireContext(ContextType.DM)]
         public async Task Exp(uint level)
         {
-            await ReplyAsync($"Level {level.ToString()}: {EconomyService.GetExpForLevel(level).ToString()} XP").ConfigureAwait(false);
+            await ReplyAsync($"Level {level.ToString()}: {EconomyService.GetExpForLevel(level).ToString()} XP")
+                .ConfigureAwait(false);
         }
 
         [Command("getprofile")]
@@ -170,7 +169,9 @@ namespace Rift.Modules
                 return;
             }
 
-            (var result, var code) = await riotService.GetThirdPartyCodeByEncryptedSummonerIdAsync(pendingData.Region, pendingData.SummonedId);
+            (var result, var code) =
+                await riotService.GetThirdPartyCodeByEncryptedSummonerIdAsync(
+                    pendingData.Region, pendingData.SummonedId);
 
             if (result != RequestResult.Success)
             {
@@ -194,7 +195,8 @@ namespace Rift.Modules
                 return;
             if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateKayn, out var pvtKayn))
                 return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateMellifluous, out var pvtMellifluous))
+            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateMellifluous,
+                                     out var pvtMellifluous))
                 return;
             if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateOctopusMom, out var pvtOctopus))
                 return;
@@ -221,14 +223,10 @@ namespace Rift.Modules
                 return;
 
             foreach (var user in srAbsolute.Members)
-            {
-                await DB.Inventory.AddAsync(user.Id, new InventoryData { Coins = 10_000u, Spheres = 1u });
-            }
+                await DB.Inventory.AddAsync(user.Id, new InventoryData {Coins = 10_000u, Spheres = 1u});
 
             foreach (var user in srLegendary.Members)
-            {
-                await DB.Inventory.AddAsync(user.Id, new InventoryData { Coins = 50_000u, Tickets = 2u });
-            }
+                await DB.Inventory.AddAsync(user.Id, new InventoryData {Coins = 50_000u, Tickets = 2u});
 
             var privateRoleUsers = new List<SocketGuildUser>();
             privateRoleUsers.AddRange(srBore.Members);
@@ -239,9 +237,7 @@ namespace Rift.Modules
             privateRoleUsers.AddRange(srToxic.Members);
 
             foreach (var user in privateRoleUsers)
-            {
-                await DB.Inventory.AddAsync(user.Id, new InventoryData { Coins = 20_000u, Spheres = 1u });
-            }
+                await DB.Inventory.AddAsync(user.Id, new InventoryData {Coins = 20_000u, Spheres = 1u});
 
             await Context.User.SendMessageAsync($"Выдача подарков завершена!\n\n"
                                                 + $"{srAbsolute.Name}: {srAbsolute.Members.Count().ToString()}\n"
@@ -279,10 +275,12 @@ namespace Rift.Modules
                     {
                         if (channelNames.ContainsKey(field.Name))
                         {
-                            var (categoryName, channelName) = channelNames[field.Name];
+                            (var categoryName, var channelName) = channelNames[field.Name];
 
                             var guildCategory = guild.CategoryChannels.FirstOrDefault(x =>
-                                x.Name.Equals(categoryName, StringComparison.InvariantCultureIgnoreCase));
+                                                                                          x.Name.Equals(categoryName,
+                                                                                                        StringComparison
+                                                                                                            .InvariantCultureIgnoreCase));
 
                             if (guildCategory is null)
                             {
@@ -291,11 +289,14 @@ namespace Rift.Modules
                             }
 
                             var guildChannel = guildCategory.Channels.FirstOrDefault(x =>
-                                x.Name.Equals(channelName, StringComparison.InvariantCultureIgnoreCase));
+                                                                                         x.Name.Equals(channelName,
+                                                                                                       StringComparison
+                                                                                                           .InvariantCultureIgnoreCase));
 
                             if (guildChannel is null)
                             {
-                                errors.Add($"Channel ID remains undefined: {field.Name} ({categoryName}|{channelName})");
+                                errors.Add(
+                                    $"Channel ID remains undefined: {field.Name} ({categoryName}|{channelName})");
                                 continue;
                             }
 
@@ -325,17 +326,11 @@ namespace Rift.Modules
 
                 if (obj is ulong ulongValue)
                 {
-                    if (ulongValue == 0ul)
-                    {
-                        errors.Add($"Chat parameter undefined: {field.Name}");
-                    }
+                    if (ulongValue == 0ul) errors.Add($"Chat parameter undefined: {field.Name}");
                 }
                 else if (obj is uint uintValue)
                 {
-                    if (uintValue == 0u)
-                    {
-                        errors.Add($"Chat parameter undefined: {field.Name}");
-                    }
+                    if (uintValue == 0u) errors.Add($"Chat parameter undefined: {field.Name}");
                 }
             }
 
@@ -350,17 +345,11 @@ namespace Rift.Modules
 
                     if (obj is ulong ulongValue)
                     {
-                        if (ulongValue == 0ul)
-                        {
-                            errors.Add($"Economy parameter undefined: {field.Name}");
-                        }
+                        if (ulongValue == 0ul) errors.Add($"Economy parameter undefined: {field.Name}");
                     }
                     else if (obj is uint uintValue)
                     {
-                        if (uintValue == 0u)
-                        {
-                            errors.Add($"Economy parameter undefined: {field.Name}");
-                        }
+                        if (uintValue == 0u) errors.Add($"Economy parameter undefined: {field.Name}");
                     }
                 }
                 catch (TargetInvocationException ex)
@@ -419,7 +408,7 @@ namespace Rift.Modules
             {
                 eb.WithColor(255, 0, 0);
 
-                var errorList = String.Join('\n', errors);
+                var errorList = string.Join('\n', errors);
 
                 if (errorList.Length >= 1024)
                 {
@@ -467,7 +456,7 @@ namespace Rift.Modules
 
                 var remove = amount >= 20 ? 20 : amount;
 
-                for (int i = 0; i < remove; i++)
+                for (var i = 0; i < remove; i++)
                 {
                     var role = roles.Dequeue();
 
@@ -494,12 +483,10 @@ namespace Rift.Modules
         {
             Settings.App.MaintenanceMode = !Settings.App.MaintenanceMode;
 
-            if (Context.Client is DiscordSocketClient client)
-            {
-                await client.SetGameAsync(RiftBot.BotStatusMessage);
-            }
+            if (Context.Client is DiscordSocketClient client) await client.SetGameAsync(RiftBot.BotStatusMessage);
 
-            var message = await ReplyAsync($"Maintenance mode **{(Settings.App.MaintenanceMode ? "enabled" : "disabled")}**");
+            var message =
+                await ReplyAsync($"Maintenance mode **{(Settings.App.MaintenanceMode ? "enabled" : "disabled")}**");
         }
 
         [Command("whois")]
@@ -548,9 +535,9 @@ namespace Rift.Modules
             var emotes = Context.Guild.Emotes.ToList();
 
             var re = new RiftEmbed()
-                .WithAuthor("Server emotes")
-                .AddField("Emote", string.Join('\n', emotes.Select(x => x.Name)), true)
-                .AddField("ID", string.Join('\n', emotes.Select(x => x.Id)), true);
+                     .WithAuthor("Server emotes")
+                     .AddField("Emote", string.Join('\n', emotes.Select(x => x.Name)), true)
+                     .AddField("ID", string.Join('\n', emotes.Select(x => x.Id)), true);
 
             await Context.Channel.SendIonicMessageAsync(new IonicMessage(re));
         }
@@ -578,7 +565,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData { Coins = amount });
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Coins = amount});
 
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
@@ -594,7 +581,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData { Tokens = amount });
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Tokens = amount});
 
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
@@ -610,7 +597,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData { Chests = amount });
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Chests = amount});
 
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
@@ -626,7 +613,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData { Capsules = amount });
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Capsules = amount});
 
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
@@ -642,7 +629,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData { Spheres = amount });
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Spheres = amount});
 
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
@@ -658,7 +645,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData { DoubleExps = amount });
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {DoubleExps = amount});
 
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
@@ -674,7 +661,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData { BotRespects = amount });
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {BotRespects = amount});
 
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
@@ -690,7 +677,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData { Tickets = amount });
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Tickets = amount});
 
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
@@ -712,7 +699,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData { Coins = amount });
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Coins = amount});
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -727,7 +714,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData { Tokens = amount });
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Tokens = amount});
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -742,7 +729,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData { DoubleExps = amount });
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {DoubleExps = amount});
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -757,7 +744,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData { Chests = amount });
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Chests = amount});
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -772,7 +759,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData { Capsules = amount });
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Capsules = amount});
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -787,7 +774,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData { Spheres = amount });
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Spheres = amount});
 
                 await sgUser.SendEmbedAsync(new EmbedBuilder()
                                             .WithAuthor(addRemoveHeaderText)
@@ -802,7 +789,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData { BotRespects = amount });
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {BotRespects = amount});
 
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()
@@ -818,7 +805,7 @@ namespace Rift.Modules
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData { Tickets = amount });
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Tickets = amount});
 
                 await sgUser.SendEmbedAsync(
                     new EmbedBuilder()

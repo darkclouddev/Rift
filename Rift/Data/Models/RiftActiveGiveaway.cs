@@ -2,7 +2,7 @@
 
 namespace Rift.Data.Models
 {
-    public class RiftGiveawayActive
+    public class RiftActiveGiveaway
     {
         public int Id { get; set; }
         public string GiveawayName { get; set; }

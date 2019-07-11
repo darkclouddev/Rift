@@ -7,7 +7,9 @@ namespace Rift.Services.Message.Templates.Guild.Channels
 {
     public class ChannelRegistration : TemplateBase
     {
-        public ChannelRegistration() : base(nameof(ChannelRegistration)) {}
+        public ChannelRegistration() : base(nameof(ChannelRegistration))
+        {
+        }
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

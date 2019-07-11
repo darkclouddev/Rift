@@ -25,7 +25,8 @@ namespace Rift.Data.Models
 
         public override string ToString()
         {
-            return $"{nameof(RiftRoleInventory)}: {nameof(UserId)}: {UserId.ToString()}, {nameof(RoleId)}: {RoleId.ToString()}";
+            return
+                $"{nameof(RiftRoleInventory)}: {nameof(UserId)}: {UserId.ToString()}, {nameof(RoleId)}: {RoleId.ToString()}";
         }
     }
 }

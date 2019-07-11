@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Rift.Configuration;
 
 using Discord;
+
 using IonicLib;
 using IonicLib.Extensions;
 using IonicLib.Util;

@@ -31,14 +31,14 @@ namespace Rift.Util
             }
 
             return await channel.SendMessageAsync(message.Text ?? "", embed: message.Embed)
-                .ConfigureAwait(false);
+                                .ConfigureAwait(false);
         }
-        
+
         public static async Task<IUserMessage> SendIonicMessageAsync(this IMessageChannel channel, IonicMessage message)
         {
             return await SendIonicMessageAsync((ITextChannel) channel, message);
         }
-        
+
         public static async Task<IUserMessage> SendIonicMessageAsync(this IUser user, IonicMessage message)
         {
             return await SendIonicMessageAsync(await user.GetOrCreateDMChannelAsync(), message);

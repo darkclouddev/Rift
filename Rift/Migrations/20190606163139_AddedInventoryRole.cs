@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Rift.Migrations
@@ -8,8 +9,8 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "RoleInventories",
-                columns: table => new
+                "RoleInventories",
+                table => new
                 {
                     UserId = table.Column<ulong>(nullable: false),
                     RoleId = table.Column<ulong>(nullable: false),
@@ -18,12 +19,12 @@ namespace Rift.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoleInventories", x => new { x.UserId, x.RoleId });
+                    table.PrimaryKey("PK_RoleInventories", x => new {x.UserId, x.RoleId});
                     table.ForeignKey(
-                        name: "FK_RoleInventories_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
+                        "FK_RoleInventories_Users_UserId",
+                        x => x.UserId,
+                        "Users",
+                        "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
         }
@@ -31,7 +32,7 @@ namespace Rift.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "RoleInventories");
+                "RoleInventories");
         }
     }
 }

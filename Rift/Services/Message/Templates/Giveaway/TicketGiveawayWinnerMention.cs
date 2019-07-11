@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.Giveaway
 {
     public class TicketGiveawayWinnerMention : TemplateBase
     {
-        public TicketGiveawayWinnerMention() : base(nameof(TicketGiveawayWinnerMention)) {}
+        public TicketGiveawayWinnerMention() : base(nameof(TicketGiveawayWinnerMention))
+        {
+        }
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

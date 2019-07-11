@@ -15,10 +15,11 @@ namespace Rift.Services.Message.Templates.Economy
         {
             var emoteService = RiftBot.GetService<EmoteService>();
             var transparentEmote = emoteService.GetEmoteString("$emotetran");
-            
+
             var top = data.Economy.Top10Coins;
-            
-            var users = top.Select(x => $"{(top.IndexOf(x)+1).ToString()}. <@{x.UserId.ToString()}>{transparentEmote}");
+
+            var users = top.Select(
+                x => $"{(top.IndexOf(x) + 1).ToString()}. <@{x.UserId.ToString()}>{transparentEmote}");
 
             var formattedString = string.Join('\n', users);
 

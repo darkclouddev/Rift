@@ -17,8 +17,10 @@ namespace Rift.Data.Models
         public uint? UsualMonstersKilled { get; set; }
         public uint? RareMonstersKilled { get; set; }
         public uint? EpicMonstersKilled { get; set; }
+
         public uint TotalMonstersKilled =>
             (UsualMonstersKilled ?? 0u) + (RareMonstersKilled ?? 0u) + (EpicMonstersKilled ?? 0u);
+
         public uint? GiftsSent { get; set; }
         public uint? GiftsReceived { get; set; }
         public uint? GiftsReceivedFromUltraGay { get; set; }

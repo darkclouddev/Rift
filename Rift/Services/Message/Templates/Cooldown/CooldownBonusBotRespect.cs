@@ -9,7 +9,9 @@ namespace Rift.Services.Message.Templates.Cooldown
 {
     public class CooldownBonusBotRespect : TemplateBase
     {
-        public CooldownBonusBotRespect() : base(nameof(CooldownBonusBotRespect)) {}
+        public CooldownBonusBotRespect() : base(nameof(CooldownBonusBotRespect))
+        {
+        }
 
         const string NotActive = "не активирован.";
 
@@ -18,8 +20,8 @@ namespace Rift.Services.Message.Templates.Cooldown
             var cd = await DB.Cooldowns.GetAsync(data.UserId);
 
             return await ReplaceDataAsync(message, cd.BotRespectTimeSpan == TimeSpan.Zero
-                ? NotActive
-                : $"осталось {cd.BotRespectTimeSpan.Humanize()}");
+                                              ? NotActive
+                                              : $"осталось {cd.BotRespectTimeSpan.Humanize()}");
         }
     }
 }

@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.Economy
 {
     public class BragMinions : TemplateBase
     {
-        public BragMinions() : base(nameof(BragMinions)) {}
+        public BragMinions() : base(nameof(BragMinions))
+        {
+        }
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

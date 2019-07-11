@@ -7,7 +7,9 @@ namespace Rift.Services.Message.Templates.Users
 {
     public class UserRemainingExpPercent : TemplateBase
     {
-        public UserRemainingExpPercent() : base(nameof(UserRemainingExpPercent)) {}
+        public UserRemainingExpPercent() : base(nameof(UserRemainingExpPercent))
+        {
+        }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
@@ -15,7 +17,7 @@ namespace Rift.Services.Message.Templates.Users
             var currentLevelExp = EconomyService.GetExpForLevel(user.Level);
             var fullLevelExp = EconomyService.GetExpForLevel(user.Level + 1u) - currentLevelExp;
             var remainingExp = fullLevelExp - (user.Experience - currentLevelExp);
-            var levelPerc = 100 - (int)Math.Floor((float)remainingExp / fullLevelExp * 100);
+            var levelPerc = 100 - (int) Math.Floor((float) remainingExp / fullLevelExp * 100);
 
             return await ReplaceDataAsync(message, levelPerc.ToString());
         }

@@ -8,6 +8,7 @@ namespace Rift.Data.Models
     {
         public ulong UserId { get; set; }
         public DateTime LastItemStoreTime { get; set; }
+
         public TimeSpan ItemStoreTimeSpan
         {
             get
@@ -19,7 +20,9 @@ namespace Rift.Data.Models
                     : TimeSpan.Zero;
             }
         }
+
         public DateTime LastRoleStoreTime { get; set; }
+
         public TimeSpan RoleStoreTimeSpan
         {
             get
@@ -31,7 +34,9 @@ namespace Rift.Data.Models
                     : TimeSpan.Zero;
             }
         }
+
         public DateTime LastBackgroundStoreTime { get; set; }
+
         public TimeSpan BackgroundStoreTimeSpan
         {
             get
@@ -43,7 +48,9 @@ namespace Rift.Data.Models
                     : TimeSpan.Zero;
             }
         }
+
         public DateTime LastDailyChestTime { get; set; }
+
         public TimeSpan DailyChestTimeSpan
         {
             get
@@ -55,7 +62,9 @@ namespace Rift.Data.Models
                     : TimeSpan.Zero;
             }
         }
+
         public DateTime LastBragTime { get; set; }
+
         public TimeSpan BragTimeSpan
         {
             get
@@ -67,7 +76,9 @@ namespace Rift.Data.Models
                     : TimeSpan.Zero;
             }
         }
+
         public DateTime LastGiftTime { get; set; }
+
         public TimeSpan GiftTimeSpan
         {
             get
@@ -79,7 +90,9 @@ namespace Rift.Data.Models
                     : TimeSpan.Zero;
             }
         }
+
         public DateTime DoubleExpTime { get; set; }
+
         public TimeSpan DoubleExpTimeSpan
         {
             get
@@ -90,7 +103,9 @@ namespace Rift.Data.Models
                     : TimeSpan.Zero;
             }
         }
+
         public DateTime BotRespectTime { get; set; }
+
         public TimeSpan BotRespectTimeSpan
         {
             get
@@ -101,7 +116,9 @@ namespace Rift.Data.Models
                     : TimeSpan.Zero;
             }
         }
+
         public DateTime LastLolAccountUpdateTime { get; set; }
+
         public TimeSpan LolAccountUpdateTimeSpan
         {
             get

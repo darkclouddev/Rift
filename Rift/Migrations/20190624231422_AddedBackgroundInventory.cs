@@ -8,70 +8,68 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
-                name: "ProfileBackground",
-                table: "Users",
+                "ProfileBackground",
+                "Users",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<ulong>(
-                name: "SelectedRole",
-                table: "Users",
+                "SelectedRole",
+                "Users",
                 nullable: true);
 
             migrationBuilder.CreateTable(
-                name: "BackgroundInventories",
-                columns: table => new
+                "BackgroundInventories",
+                table => new
                 {
                     UserId = table.Column<ulong>(nullable: false),
                     BackgroundId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BackgroundInventories", x => new { x.UserId, x.BackgroundId });
+                    table.PrimaryKey("PK_BackgroundInventories", x => new {x.UserId, x.BackgroundId});
                     table.ForeignKey(
-                        name: "FK_BackgroundInventories_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
+                        "FK_BackgroundInventories_Users_UserId",
+                        x => x.UserId,
+                        "Users",
+                        "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProfileBackgrounds",
-                columns: table => new
+                "ProfileBackgrounds",
+                table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                              .Annotation("MySql:ValueGenerationStrategy",
+                                          MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: true),
                     Url = table.Column<string>(nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProfileBackgrounds", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_ProfileBackgrounds", x => x.Id); });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BackgroundInventories_UserId",
-                table: "BackgroundInventories",
-                column: "UserId",
+                "IX_BackgroundInventories_UserId",
+                "BackgroundInventories",
+                "UserId",
                 unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "BackgroundInventories");
+                "BackgroundInventories");
 
             migrationBuilder.DropTable(
-                name: "ProfileBackgrounds");
+                "ProfileBackgrounds");
 
             migrationBuilder.DropColumn(
-                name: "ProfileBackground",
-                table: "Users");
+                "ProfileBackground",
+                "Users");
 
             migrationBuilder.DropColumn(
-                name: "SelectedRole",
-                table: "Users");
+                "SelectedRole",
+                "Users");
         }
     }
 }

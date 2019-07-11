@@ -14,7 +14,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Settings
-                    .FirstOrDefaultAsync(x => x.Id == id);
+                                    .FirstOrDefaultAsync(x => x.Id == id);
             }
         }
 
@@ -29,13 +29,9 @@ namespace Rift.Database
                 };
 
                 if (await context.Settings.AnyAsync(x => x.Id == id))
-                {
                     context.Entry(settings).Property(x => x.Data).IsModified = true;
-                }
                 else
-                {
                     await context.Settings.AddAsync(settings);
-                }
 
                 await context.SaveChangesAsync();
             }

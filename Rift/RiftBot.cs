@@ -14,9 +14,13 @@ using Rift.Util;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+
 using IonicLib;
+
 using Microsoft.Extensions.DependencyInjection;
+
 using NLog;
+
 using ILogger = NLog.ILogger;
 
 namespace Rift
@@ -38,30 +42,39 @@ namespace Rift
 
         static CommandHandler handler;
 
-		static readonly List<ulong> adminIds = new List<ulong>
-		{
+        static readonly List<ulong> adminIds = new List<ulong>
+        {
             212997107525746690ul, //me
-			178443743026872321ul, //wise
+            178443743026872321ul, //wise
         };
 
-		static readonly List<ulong> developersIds = new List<ulong>
-		{
-			212997107525746690ul, //me
+        static readonly List<ulong> developersIds = new List<ulong>
+        {
+            212997107525746690ul, //me
         };
 
-		public static bool IsAdmin(IUser user) => adminIds.Contains(user.Id) || developersIds.Contains(user.Id);
+        public static bool IsAdmin(IUser user)
+        {
+            return adminIds.Contains(user.Id) || developersIds.Contains(user.Id);
+        }
 
-		public static bool IsModerator(IUser user)
-		{
-            return (user is SocketGuildUser socketUser
-                    && socketUser.Roles.Any(x => x.Id == Settings.RoleId.Moderator));
-		}
+        public static bool IsModerator(IUser user)
+        {
+            return user is SocketGuildUser socketUser
+                   && socketUser.Roles.Any(x => x.Id == Settings.RoleId.Moderator);
+        }
 
-		public static bool IsDeveloper(IUser user) => developersIds.Contains(user.Id);
+        public static bool IsDeveloper(IUser user)
+        {
+            return developersIds.Contains(user.Id);
+        }
 
-		public static T GetService<T>() => handler.provider.GetService<T>();
+        public static T GetService<T>()
+        {
+            return handler.provider.GetService<T>();
+        }
 
-        public static async Task SendMessageToDevelopers(IonicMessage msg)
+        public static async Task SendMessageToDevelopers(string msg)
         {
             foreach (var userId in developersIds)
             {
@@ -70,7 +83,20 @@ namespace Rift
                 if (sgUser is null)
                     return;
 
-                await sgUser.SendIonicMessageAsync(msg);
+                await sgUser.SendMessageAsync(msg);
+            }
+        }
+
+        public static async Task SendMessageToAdmins(string msg)
+        {
+            foreach (var userId in developersIds)
+            {
+                var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
+
+                if (sgUser is null)
+                    return;
+
+                await sgUser.SendMessageAsync(msg);
             }
         }
 
@@ -99,25 +125,25 @@ namespace Rift
 
             return await channel.SendIonicMessageAsync(message);
         }
-        
+
         public static async Task Main(string[] args)
         {
             await Settings.ReloadAllAsync();
             AppPath = GetContentRoot();
             Culture = new CultureInfo("ru-RU")
             {
-                DateTimeFormat = { Calendar = new GregorianCalendar() }
+                DateTimeFormat = {Calendar = new GregorianCalendar()}
             };
 
             Console.WriteLine($"Using content root: {AppPath}");
 
             await new IonicClient(Path.Combine(AppPath, ".token"))
-                .RunAsync()
-                .ConfigureAwait(false);
+                  .RunAsync()
+                  .ConfigureAwait(false);
 
             await new RiftBot()
-                .RunAsync()
-                .ConfigureAwait(false);
+                  .RunAsync()
+                  .ConfigureAwait(false);
         }
 
         public static string GetContentRoot()
@@ -170,33 +196,33 @@ namespace Rift
         static IServiceProvider SetupServices()
         {
             var services = new ServiceCollection()
-                .AddSingleton(Log)
-                .AddSingleton(IonicClient.Client)
-                .AddSingleton(new EconomyService())
-                .AddSingleton(new GiftService())
-                .AddSingleton(new RoleService())
-                .AddSingleton(new RiotService())
-                .AddSingleton(new EmoteService())
-                .AddSingleton(new MessageService())
-                .AddSingleton(new ToxicityService())
-                .AddSingleton(new GiveawayService())
-                .AddSingleton(new BragService())
-                //.AddSingleton(new AnnounceService())
-                .AddSingleton(new EventService())
-                //.AddSingleton(new MinionService())
-                //.AddSingleton(new BotRespectService())
-                .AddSingleton(new QuizService())
-                .AddSingleton(new ModerationService())
-                //.AddSingleton(new ReliabilityService(IonicClient.Client))
-                //.AddSingleton(new ChannelService(IonicClient.Client))
-                .AddSingleton(new QuestService())
-                .AddSingleton(new StoreService())
-                .AddSingleton(new CommandService(new CommandServiceConfig
-                {
-                    CaseSensitiveCommands = false,
-                    ThrowOnError = true,
-                    DefaultRunMode = RunMode.Async
-                }));
+                           .AddSingleton(Log)
+                           .AddSingleton(IonicClient.Client)
+                           .AddSingleton(new EconomyService())
+                           .AddSingleton(new GiftService())
+                           .AddSingleton(new RoleService())
+                           .AddSingleton(new RiotService())
+                           .AddSingleton(new EmoteService())
+                           .AddSingleton(new MessageService())
+                           .AddSingleton(new ToxicityService())
+                           .AddSingleton(new GiveawayService())
+                           .AddSingleton(new BragService())
+                           //.AddSingleton(new AnnounceService())
+                           .AddSingleton(new EventService())
+                           //.AddSingleton(new MinionService())
+                           //.AddSingleton(new BotRespectService())
+                           .AddSingleton(new QuizService())
+                           .AddSingleton(new ModerationService())
+                           //.AddSingleton(new ReliabilityService(IonicClient.Client))
+                           //.AddSingleton(new ChannelService(IonicClient.Client))
+                           .AddSingleton(new QuestService())
+                           .AddSingleton(new StoreService())
+                           .AddSingleton(new CommandService(new CommandServiceConfig
+                           {
+                               CaseSensitiveCommands = false,
+                               ThrowOnError = true,
+                               DefaultRunMode = RunMode.Async
+                           }));
 
             var provider = services.BuildServiceProvider();
 

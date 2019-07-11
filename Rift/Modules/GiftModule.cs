@@ -37,7 +37,7 @@ namespace Rift.Modules
                     return;
                 }
 
-                var message = await giftService.SendGiftAsync((SocketGuildUser)Context.User, sgUser);
+                var message = await giftService.SendGiftAsync((SocketGuildUser) Context.User, sgUser);
 
                 if (message is null)
                     return;

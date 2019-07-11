@@ -28,8 +28,8 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.TempRoles
-                    .Where(x => x.UserId == userId)
-                    .ToListAsync();
+                                    .Where(x => x.UserId == userId)
+                                    .ToListAsync();
             }
         }
 
@@ -38,9 +38,9 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.TempRoles
-                    .Where(x => x.ExpirationTime >= DateTime.UtcNow)
-                    .OrderBy(x => x.ExpirationTime)
-                    .FirstOrDefaultAsync();
+                                    .Where(x => x.ExpirationTime >= DateTime.UtcNow)
+                                    .OrderBy(x => x.ExpirationTime)
+                                    .FirstOrDefaultAsync();
             }
         }
 
@@ -49,8 +49,8 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.TempRoles
-                    .Where(x => x.ExpirationTime <= DateTime.UtcNow)
-                    .ToListAsync();
+                                    .Where(x => x.ExpirationTime <= DateTime.UtcNow)
+                                    .ToListAsync();
             }
         }
 

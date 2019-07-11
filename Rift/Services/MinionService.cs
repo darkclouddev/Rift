@@ -58,37 +58,25 @@ namespace Rift.Services
             RiftBot.Log.Info("Starting MinionService..");
 
             StartupTimer = new Timer(
-                async delegate
-                {
-                    await SetupNextMinionAsync();
-                },
+                async delegate { await SetupNextMinionAsync(); },
                 null,
                 TimeSpan.FromSeconds(30),
                 TimeSpan.Zero);
-            
+
             MinionKillTimer = new Timer(
-                async delegate
-                {
-                    await KillMinion();
-                },
+                async delegate { await KillMinion(); },
                 null,
                 Timeout.Infinite,
                 0);
-            
+
             MinionSuicideTimer = new Timer(
-                async delegate
-                {
-                    await Suicide();
-                },
+                async delegate { await Suicide(); },
                 null,
                 Timeout.Infinite,
                 0);
-            
+
             MinionTimer = new Timer(
-                async delegate
-                {
-                    await SpawnMinion();
-                },
+                async delegate { await SpawnMinion(); },
                 null,
                 Timeout.Infinite,
                 0);
@@ -122,7 +110,8 @@ namespace Rift.Services
 
             minionTs *= 60;
 
-            RiftBot.Log.Debug(nameof(MinionService), $"Next Minion: {Helper.FromTimestamp(Helper.CurrentUnixTimestamp + minionTs).ToString()}");
+            RiftBot.Log.Debug(nameof(MinionService),
+                              $"Next Minion: {Helper.FromTimestamp(Helper.CurrentUnixTimestamp + minionTs).ToString()}");
 
             MinionTimer.Change(TimeSpan.FromSeconds(minionTs), TimeSpan.Zero);
 
@@ -161,7 +150,6 @@ namespace Rift.Services
 
             var msgMinionKilled = await RiftBot.GetMessageAsync("minion-killed", new FormatData(killerId)
             {
-
             });
             //await channel.SendEmbedAsync(MinionEmbeds.MinionKilled(minionColor, killerId, reward));
             await channel.SendIonicMessageAsync(msgMinionKilled);

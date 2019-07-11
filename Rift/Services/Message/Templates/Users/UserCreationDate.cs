@@ -10,7 +10,9 @@ namespace Rift.Services.Message.Templates.Users
 {
     public class UserCreationDate : TemplateBase
     {
-        public UserCreationDate() : base(nameof(UserCreationDate)) {}
+        public UserCreationDate() : base(nameof(UserCreationDate))
+        {
+        }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
@@ -22,7 +24,8 @@ namespace Rift.Services.Message.Templates.Users
                 return message;
             }
 
-            return await ReplaceDataAsync(message, user.CreatedAt.UtcDateTime.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture));
+            return await ReplaceDataAsync(
+                message, user.CreatedAt.UtcDateTime.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture));
         }
     }
 }

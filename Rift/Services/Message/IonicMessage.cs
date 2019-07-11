@@ -3,6 +3,7 @@ using System;
 using Rift.Data.Models;
 
 using Discord;
+
 using Newtonsoft.Json;
 
 namespace Rift.Services.Message
@@ -58,7 +59,10 @@ namespace Rift.Services.Message
 
             try
             {
-                Embed = JsonConvert.DeserializeObject<RiftEmbed>(msg.Embed, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore}).ToEmbed();
+                Embed = JsonConvert
+                        .DeserializeObject<RiftEmbed>(
+                            msg.Embed, new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
+                        .ToEmbed();
             }
             catch (Exception ex)
             {

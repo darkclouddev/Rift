@@ -4,7 +4,9 @@ using System.Threading.Tasks;
 using Rift.Configuration;
 
 using Discord;
+
 using IonicLib;
+
 using Humanizer;
 
 namespace Rift.Services.Reward
@@ -42,13 +44,9 @@ namespace Rift.Services.Reward
             var roleService = RiftBot.GetService<RoleService>();
 
             if (Duration is null)
-            {
                 await roleService.AddPermanentRoleAsync(userId, RoleId);
-            }
             else
-            {
                 await roleService.AddTempRoleAsync(userId, RoleId, Duration.Value, nameof(RoleReward));
-            }
         }
 
         public override string ToString()

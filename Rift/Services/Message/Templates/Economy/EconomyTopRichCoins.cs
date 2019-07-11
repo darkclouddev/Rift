@@ -15,9 +15,9 @@ namespace Rift.Services.Message.Templates.Economy
         {
             var emoteService = RiftBot.GetService<EmoteService>();
             var coinsEmote = emoteService.GetEmoteString("$emotecoins");
-            
+
             var top = data.Economy.Top10Coins;
-            
+
             var coins = top.Select(x => $"{coinsEmote} {x.Coins.ToString()}");
 
             var formattedString = string.Join('\n', coins);

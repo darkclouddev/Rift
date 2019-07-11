@@ -23,7 +23,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Rewards
-                    .FirstOrDefaultAsync(x => x.Id == id);
+                                    .FirstOrDefaultAsync(x => x.Id == id);
             }
         }
 

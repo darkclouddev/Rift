@@ -7,7 +7,9 @@ namespace Rift.Services.Message.Templates.LeagueData
 {
     public class LeagueDataRankSolo : TemplateBase
     {
-        public LeagueDataRankSolo() : base(nameof(LeagueDataRankSolo)) {}
+        public LeagueDataRankSolo() : base(nameof(LeagueDataRankSolo))
+        {
+        }
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
@@ -16,11 +18,12 @@ namespace Rift.Services.Message.Templates.LeagueData
 
             var league = data.LolStat.SoloQueue;
             var totalGames = league.Wins + league.Losses;
-            var winRatePerc = (int)Math.Round(((double)league.Wins / (double)totalGames) * 100);
-            var leagueName = $"{RiotService.GetStatStringFromRank(RiotService.GetRankFromPosition(league))} {league.Rank}";
+            var winRatePerc = (int) Math.Round((double) league.Wins / (double) totalGames * 100);
+            var leagueName =
+                $"{RiotService.GetStatStringFromRank(RiotService.GetRankFromPosition(league))} {league.Rank}";
 
             return ReplaceDataAsync(message, $"{leagueName} ({league.LeaguePoints.ToString()}LP / " +
-                                        $"{league.Wins.ToString()}W {league.Losses.ToString()}L) ({winRatePerc.ToString()}%)");
+                                             $"{league.Wins.ToString()}W {league.Losses.ToString()}L) ({winRatePerc.ToString()}%)");
         }
     }
 }

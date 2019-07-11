@@ -7,14 +7,14 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameTable(
-                name: "UserQuests",
+                "UserQuests",
                 newName: "QuestProgress");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameTable(
-                name: "QuestProgress", 
+                "QuestProgress",
                 newName: "UserQuests");
         }
     }

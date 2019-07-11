@@ -22,10 +22,7 @@ namespace Rift.Services
         public RoleService()
         {
             tempRoleTimer = new Timer(
-                async delegate
-                {
-                    await TimerProcAsync();
-                },
+                async delegate { await TimerProcAsync(); },
                 null,
                 TimeSpan.FromSeconds(10),
                 TimeSpan.FromSeconds(5));
@@ -38,10 +35,7 @@ namespace Rift.Services
             if (expiredRoles is null || expiredRoles.Count == 0)
                 return;
 
-            foreach (var expiredRole in expiredRoles)
-            {
-                await RemoveTempRoleAsync(expiredRole.UserId, expiredRole.RoleId);
-            }
+            foreach (var expiredRole in expiredRoles) await RemoveTempRoleAsync(expiredRole.UserId, expiredRole.RoleId);
         }
 
         public async Task<(bool, IonicMessage)> AddPermanentRoleAsync(ulong userId, ulong roleId)

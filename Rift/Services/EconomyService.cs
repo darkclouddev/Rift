@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Settings = Rift.Configuration.Settings;
+
 using Rift.Database;
 using Rift.Events;
 using Rift.Services.Message;
@@ -12,6 +13,7 @@ using Rift.Services.Reward;
 using Rift.Util;
 
 using Discord;
+
 using IonicLib;
 
 namespace Rift.Services
@@ -30,10 +32,11 @@ namespace Rift.Services
         static SemaphoreSlim chestMutex = new SemaphoreSlim(1);
         static SemaphoreSlim capsuleMutex = new SemaphoreSlim(1);
         static SemaphoreSlim sphereMutex = new SemaphoreSlim(1);
-        
+
         public void Init()
         {
-            ratingUpdateTimer = new Timer(async delegate { await UpdateRatingAsync(); }, null, TimeSpan.FromMinutes(5), ratingTimerCooldown);
+            ratingUpdateTimer = new Timer(async delegate { await UpdateRatingAsync(); }, null, TimeSpan.FromMinutes(5),
+                                          ratingTimerCooldown);
             InitActiveUsersTimer();
             InitRichUsersTimer();
         }
@@ -48,7 +51,7 @@ namespace Rift.Services
                 today = today.AddDays(1);
 
             ActiveUsersTimer = new Timer(async delegate { await ShowActiveUsersAsync(); }, null,
-                today - DateTime.UtcNow, TimeSpan.FromDays(1));
+                                         today - DateTime.UtcNow, TimeSpan.FromDays(1));
         }
 
         void InitRichUsersTimer()
@@ -59,13 +62,14 @@ namespace Rift.Services
                 today = today.AddDays(1);
 
             RichUsersTimer = new Timer(async delegate { await ShowRichUsersAsync(); }, null,
-                today - DateTime.UtcNow, TimeSpan.FromDays(1));
+                                       today - DateTime.UtcNow, TimeSpan.FromDays(1));
         }
 
         public static async Task ShowActiveUsersAsync()
         {
-            var topTen = await DB.Users.GetTopTenByExpAsync(x => 
-                !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
+            var topTen = await DB.Users.GetTopTenByExpAsync(x =>
+                                                                !(IonicClient.GetGuildUserById(
+                                                                    Settings.App.MainGuildId, x.UserId) is null));
 
             if (topTen.Count == 0)
                 return;
@@ -81,8 +85,9 @@ namespace Rift.Services
 
         public static async Task ShowRichUsersAsync()
         {
-            var topTen = await DB.Users.GetTopTenByCoinsAsync(x => 
-                !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
+            var topTen = await DB.Users.GetTopTenByCoinsAsync(x =>
+                                                                  !(IonicClient.GetGuildUserById(
+                                                                      Settings.App.MainGuildId, x.UserId) is null));
 
             if (topTen.Count == 0)
                 return;
@@ -104,7 +109,7 @@ namespace Rift.Services
         static async Task AddExpAsync(ulong userId, uint exp)
         {
             await DB.Users.AddExperienceAsync(userId, exp)
-                .ContinueWith(async _ => await CheckLevelUpAsync(userId).ConfigureAwait(false));
+                    .ContinueWith(async _ => await CheckLevelUpAsync(userId).ConfigureAwait(false));
         }
 
         static async Task CheckLevelUpAsync(ulong userId)
@@ -115,10 +120,7 @@ namespace Rift.Services
             {
                 var newLevel = dbUser.Level + 1u;
 
-                while (dbUser.Experience >= GetExpForLevel(newLevel))
-                {
-                    newLevel++;
-                }
+                while (dbUser.Experience >= GetExpForLevel(newLevel)) newLevel++;
 
                 newLevel--;
 
@@ -126,7 +128,8 @@ namespace Rift.Services
                 {
                     await DB.Users.SetLevelAsync(dbUser.UserId, newLevel);
 
-                    RiftBot.Log.Info($"{dbUser.UserId.ToString()} just leveled up: {dbUser.Level.ToString()} => {newLevel.ToString()}");
+                    RiftBot.Log.Info(
+                        $"{dbUser.UserId.ToString()} just leveled up: {dbUser.Level.ToString()} => {newLevel.ToString()}");
 
                     if (newLevel == 1u)
                         return; //no rewards on level 1
@@ -145,8 +148,7 @@ namespace Rift.Services
 
             var reward = new ItemReward();
 
-            for (uint level = fromLevel + 1; level <= toLevel; level++)
-            {
+            for (var level = fromLevel + 1; level <= toLevel; level++)
                 if (level == 100u || level == 50u)
                     reward = new ItemReward().AddCapsules(1u);
                 else if (level % 25u == 0u)
@@ -157,7 +159,6 @@ namespace Rift.Services
                     reward = new ItemReward().AddCoins(2_000u).AddTickets(1u);
                 else
                     reward = new ItemReward().AddCoins(2_000u).AddChests(1u);
-            }
 
             await reward.DeliverToAsync(userId);
             await RiftBot.SendChatMessageAsync("levelup", new FormatData(userId)
@@ -170,7 +171,7 @@ namespace Rift.Services
         {
             return await RiftBot.GetMessageAsync("user-cooldowns", new FormatData(userId));
         }
-        
+
         public async Task<IonicMessage> GetUserProfileAsync(ulong userId)
         {
             var dbUser = await DB.Users.GetAsync(userId);
@@ -178,7 +179,7 @@ namespace Rift.Services
             var messageName = dbUser.ProfileBackground > 0
                 ? "user-profile-background"
                 : "user-profile";
-            
+
             return await RiftBot.GetMessageAsync(messageName, new FormatData(userId));
         }
 
@@ -189,19 +190,22 @@ namespace Rift.Services
             if (sgUser is null)
                 return MessageService.Error;
 
-            var dbSummoner = await DB.LolData.GetAsync(userId);
+            var dbSummoner = await DB.LeagueData.GetAsync(userId);
 
             if (string.IsNullOrWhiteSpace(dbSummoner.PlayerUUID))
                 return await RiftBot.GetMessageAsync("loldata-nodata", new FormatData(userId));
 
             (var summonerResult, var summoner) = await RiftBot.GetService<RiotService>()
-                .GetSummonerByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
+                                                              .GetSummonerByEncryptedSummonerIdAsync(
+                                                                  dbSummoner.SummonerRegion, dbSummoner.SummonerId);
 
             if (summonerResult != RequestResult.Success)
                 return MessageService.Error;
 
             (var requestResult, var leaguePositions) = await RiftBot.GetService<RiotService>()
-                .GetLeaguePositionsByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
+                                                                    .GetLeaguePositionsByEncryptedSummonerIdAsync(
+                                                                        dbSummoner.SummonerRegion,
+                                                                        dbSummoner.SummonerId);
 
             if (requestResult != RequestResult.Success)
                 return MessageService.Error;
@@ -280,12 +284,12 @@ namespace Rift.Services
             if (dbInventory.Chests < amount || amount == 0)
                 return await RiftBot.GetMessageAsync("chests-nochests", new FormatData(userId));
 
-            await DB.Inventory.RemoveAsync(userId, new InventoryData { Chests = amount });
+            await DB.Inventory.RemoveAsync(userId, new InventoryData {Chests = amount});
             ChestsOpened?.Invoke(null, new ChestsOpenedEventArgs(userId, amount));
 
             var chest = new ChestReward();
             await chest.DeliverToAsync(userId);
-            await DB.Statistics.AddAsync(userId, new StatisticData { ChestsOpened = amount });
+            await DB.Statistics.AddAsync(userId, new StatisticData {ChestsOpened = amount});
 
             return await RiftBot.GetMessageAsync("chests-open-success", new FormatData(userId));
         }
@@ -317,11 +321,11 @@ namespace Rift.Services
             if (dbUserInventory.Capsules == 0u)
                 await RiftBot.GetMessageAsync("capsules-nocapsules", new FormatData(userId));
 
-            await DB.Inventory.RemoveAsync(userId, new InventoryData { Capsules = 1u });
+            await DB.Inventory.RemoveAsync(userId, new InventoryData {Capsules = 1u});
 
             var capsule = new CapsuleReward();
             await capsule.DeliverToAsync(userId);
-            await DB.Statistics.AddAsync(userId, new StatisticData { CapsulesOpened = 1u });
+            await DB.Statistics.AddAsync(userId, new StatisticData {CapsulesOpened = 1u});
 
             return await RiftBot.GetMessageAsync("capsules-open-success", new FormatData(userId));
         }
@@ -353,12 +357,12 @@ namespace Rift.Services
             if (dbInventory.Spheres == 0u)
                 return await RiftBot.GetMessageAsync("spheres-nospheres", new FormatData(userId));
 
-            await DB.Inventory.RemoveAsync(userId, new InventoryData { Spheres = 1u });
+            await DB.Inventory.RemoveAsync(userId, new InventoryData {Spheres = 1u});
             OpenedSphere?.Invoke(null, new OpenedSphereEventArgs(userId));
 
             var sphere = new SphereReward();
             await sphere.DeliverToAsync(userId);
-            await DB.Statistics.AddAsync(userId, new StatisticData { SpheresOpened = 1u });
+            await DB.Statistics.AddAsync(userId, new StatisticData {SpheresOpened = 1u});
 
             return await RiftBot.GetMessageAsync("spheres-open-success", new FormatData(userId));
         }
@@ -385,7 +389,7 @@ namespace Rift.Services
                 return;
             }
 
-            await DB.Inventory.RemoveAsync(userId, new InventoryData { DoubleExps = 1 });
+            await DB.Inventory.RemoveAsync(userId, new InventoryData {DoubleExps = 1});
 
             var dateTime = DateTime.UtcNow.AddHours(12.0);
             await DB.Cooldowns.SetDoubleExpTimeAsync(userId, dateTime);
@@ -416,7 +420,7 @@ namespace Rift.Services
                 return;
             }
 
-            await DB.Inventory.RemoveAsync(userId, new InventoryData { BotRespects = 1 });
+            await DB.Inventory.RemoveAsync(userId, new InventoryData {BotRespects = 1});
             ActivatedBotRespects?.Invoke(null, new ActivatedBotRespectsEventArgs(userId));
 
             var dateTime = DateTime.UtcNow.AddHours(12.0);

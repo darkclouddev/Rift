@@ -15,8 +15,10 @@ namespace Rift.Data.Models
         public uint? UsualMonstersKilled { get; set; }
         public uint? RareMonstersKilled { get; set; }
         public uint? EpicMonstersKilled { get; set; }
+
         public uint TotalMonstersKilled =>
             (UsualMonstersKilled ?? 0u) + (RareMonstersKilled ?? 0) + (EpicMonstersKilled ?? 0u);
+
         public uint? GiftsSent { get; set; }
         public uint? GiftsReceived { get; set; }
         public uint? GiftsReceivedFromUltraGay { get; set; }
@@ -31,6 +33,5 @@ namespace Rift.Data.Models
         public uint? ActivatedBotRespects { get; set; }
         public bool? OpenedSphere { get; set; }
         public uint? RolesPurchased { get; set; }
-
     }
 }

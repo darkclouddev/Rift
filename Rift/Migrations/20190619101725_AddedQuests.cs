@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -9,11 +10,12 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Quests",
-                columns: table => new
+                "Quests",
+                table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                              .Annotation("MySql:ValueGenerationStrategy",
+                                          MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: true),
                     StageId = table.Column<int>(nullable: false),
                     Order = table.Column<int>(nullable: false),
@@ -41,30 +43,25 @@ namespace Rift.Migrations
                     OpenedSphere = table.Column<bool>(nullable: false),
                     RolesPurchased = table.Column<uint>(nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Quests", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Quests", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "QuestStages",
-                columns: table => new
+                "QuestStages",
+                table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                              .Annotation("MySql:ValueGenerationStrategy",
+                                          MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: true),
                     StartDate = table.Column<DateTime>(nullable: false),
                     EndDate = table.Column<DateTime>(nullable: false),
                     CompletionRewardId = table.Column<int>(nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_QuestStages", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_QuestStages", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "UserQuests",
-                columns: table => new
+                "UserQuests",
+                table => new
                 {
                     UserId = table.Column<ulong>(nullable: false),
                     QuestId = table.Column<int>(nullable: false),
@@ -92,22 +89,19 @@ namespace Rift.Migrations
                     OpenedSphere = table.Column<bool>(nullable: false),
                     RolesPurchased = table.Column<uint>(nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserQuests", x => new { x.UserId, x.QuestId });
-                });
+                constraints: table => { table.PrimaryKey("PK_UserQuests", x => new {x.UserId, x.QuestId}); });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Quests");
+                "Quests");
 
             migrationBuilder.DropTable(
-                name: "QuestStages");
+                "QuestStages");
 
             migrationBuilder.DropTable(
-                name: "UserQuests");
+                "UserQuests");
         }
     }
 }

@@ -8,7 +8,9 @@ namespace Rift.Services.Message.Templates.Bot
 {
     public class BotHeapSize : TemplateBase
     {
-        public BotHeapSize() : base(nameof(BotHeapSize)) {}
+        public BotHeapSize() : base(nameof(BotHeapSize))
+        {
+        }
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
@@ -16,7 +18,9 @@ namespace Rift.Services.Message.Templates.Bot
         }
 
         static string GetHeapSize()
-            => Math.Round(GC.GetTotalMemory(true) / (1024.0 * 1024.0), 2)
-                .ToString(new CultureInfo("en-US"));
+        {
+            return Math.Round(GC.GetTotalMemory(true) / (1024.0 * 1024.0), 2)
+                       .ToString(new CultureInfo("en-US"));
+        }
     }
 }

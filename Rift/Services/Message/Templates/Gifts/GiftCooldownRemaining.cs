@@ -8,7 +8,9 @@ namespace Rift.Services.Message.Templates.Gifts
 {
     public class GiftCooldownRemaining : TemplateBase
     {
-        public GiftCooldownRemaining() : base(nameof(GiftCooldownRemaining)) {}
+        public GiftCooldownRemaining() : base(nameof(GiftCooldownRemaining))
+        {
+        }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

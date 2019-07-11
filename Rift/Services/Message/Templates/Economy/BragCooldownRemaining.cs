@@ -8,7 +8,9 @@ namespace Rift.Services.Message.Templates.Economy
 {
     public class BragCooldownRemaining : TemplateBase
     {
-        public BragCooldownRemaining() : base(nameof(BragCooldownRemaining)) {}
+        public BragCooldownRemaining() : base(nameof(BragCooldownRemaining))
+        {
+        }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

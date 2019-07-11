@@ -12,10 +12,13 @@ using System.Threading.Tasks;
 using Rift.Configuration;
 using Rift.Data.Models;
 using Rift.Services.Message;
+
 using MessageType = Rift.Services.Message.MessageType;
+
 using Rift.Services.Message.Templates;
 
 using Humanizer;
+
 using IonicLib;
 using IonicLib.Util;
 
@@ -25,23 +28,24 @@ namespace Rift.Services
     {
         public static readonly IonicMessage Error =
             new IonicMessage(new RiftEmbed()
-                .WithAuthor("Ошибка")
-                .WithColor(226, 87, 76)
-                .WithDescription("Обратитесь к хранителю ботов и опишите ваши действия, которые привели к возникновению данной ошибки.")
-                .WithThumbnailUrl("https://cdn.ionpri.me/rift/error.jpg"));
-        
+                             .WithAuthor("Ошибка")
+                             .WithColor(226, 87, 76)
+                             .WithDescription(
+                                 "Обратитесь к хранителю ботов и опишите ваши действия, которые привели к возникновению данной ошибки.")
+                             .WithThumbnailUrl("https://cdn.ionpri.me/rift/error.jpg"));
+
         public static readonly IonicMessage UserNotFound =
             new IonicMessage(new RiftEmbed()
-                .WithAuthor("Ошибка")
-                .WithColor(255, 0, 0)
-                .WithDescription("Пользователь не найден!"));
-        
+                             .WithAuthor("Ошибка")
+                             .WithColor(255, 0, 0)
+                             .WithDescription("Пользователь не найден!"));
+
         public static readonly IonicMessage RoleNotFound =
             new IonicMessage(new RiftEmbed()
-                .WithAuthor("Ошибка")
-                .WithColor(255, 0, 0)
-                .WithDescription("Роль не найдена!"));
-        
+                             .WithAuthor("Ошибка")
+                             .WithColor(255, 0, 0)
+                             .WithDescription("Роль не найдена!"));
+
         public MessageService()
         {
             RiftBot.Log.Info($"Starting up {nameof(MessageService)}.");
@@ -53,28 +57,26 @@ namespace Rift.Services
 
             foreach (var type in GetTemplates())
             {
-                var templateObj = (TemplateBase)Activator.CreateInstance(type);
+                var templateObj = (TemplateBase) Activator.CreateInstance(type);
                 templates.TryAdd(templateObj.Template, templateObj);
             }
 
             sw.Stop();
             RiftBot.Log.Info($"Loaded {templates.Count.ToString()} message templates in" +
-                $" {sw.Elapsed.Humanize(1, new CultureInfo("en-US")).ToLowerInvariant()}.");
+                             $" {sw.Elapsed.Humanize(1, new CultureInfo("en-US")).ToLowerInvariant()}.");
 
             RiftBot.Log.Info("Starting up message scheduler.");
             checkTimer = new Timer(
-                async delegate
-                {
-                    await CheckMessagesAsync();
-                },
+                async delegate { await CheckMessagesAsync(); },
                 null,
                 TimeSpan.FromSeconds(10),
                 TimeSpan.FromSeconds(1));
         }
-        
+
         //TODO: refactor using scheduling timer
+
         #region Delayed messages
-        
+
         static ConcurrentDictionary<Guid, SendMessageBase> toSend = new ConcurrentDictionary<Guid, SendMessageBase>();
 
         static ConcurrentDictionary<Guid, DeleteMessageBase> toDelete =
@@ -82,8 +84,15 @@ namespace Rift.Services
 
         static Timer checkTimer;
 
-        public bool TryAddSend(SendMessageBase message) => toSend.TryAdd(message.Id, message);
-        public bool TryAddDelete(DeleteMessageBase message) => toDelete.TryAdd(message.Id, message);
+        public bool TryAddSend(SendMessageBase message)
+        {
+            return toSend.TryAdd(message.Id, message);
+        }
+
+        public bool TryAddDelete(DeleteMessageBase message)
+        {
+            return toDelete.TryAdd(message.Id, message);
+        }
 
         async Task CheckMessagesAsync()
         {
@@ -96,11 +105,11 @@ namespace Rift.Services
         async Task CheckSendAsync(DateTime dt)
         {
             var unsentId = toSend.Values.ToList()
-                .Where(x => x.DeliveryTime < dt)
-                .OrderBy(x => x.AddedOn)
-                .Take(3)
-                .Select(x => x.Id)
-                .ToList();
+                                 .Where(x => x.DeliveryTime < dt)
+                                 .OrderBy(x => x.AddedOn)
+                                 .Take(3)
+                                 .Select(x => x.Id)
+                                 .ToList();
 
             if (!unsentId.Any())
                 return;
@@ -119,10 +128,10 @@ namespace Rift.Services
         async Task CheckDeleteAsync(DateTime dt)
         {
             var undeletedIds = toDelete.Values.ToList()
-                .Where(x => x.DeletionTime < dt)
-                .Take(3)
-                .Select(x => x.Id)
-                .ToList();
+                                       .Where(x => x.DeletionTime < dt)
+                                       .Take(3)
+                                       .Select(x => x.Id)
+                                       .ToList();
 
             if (!undeletedIds.Any())
                 return;
@@ -165,7 +174,8 @@ namespace Rift.Services
 
                         case MessageType.Mixed:
 
-                            await userChannel.SendMessageAsync(message.Text, embed: message.Embed).ConfigureAwait(false);
+                            await userChannel.SendMessageAsync(message.Text, embed: message.Embed)
+                                             .ConfigureAwait(false);
                             break;
                     }
 
@@ -212,7 +222,7 @@ namespace Rift.Services
 
                 await msg.DeleteAsync().ConfigureAwait(false);
             }
-            catch(Exception ex) // fails when message is already deleted, no delete perms or discord outage
+            catch (Exception ex) // fails when message is already deleted, no delete perms or discord outage
             {
                 RiftBot.Log.Error(ex);
             }
@@ -232,11 +242,18 @@ namespace Rift.Services
             return (result, message);
         }
 
-        public int GetSendQueueLength() => toSend.Count;
-        public int GetDeleteQueueLength() => toDelete.Count;
-        
+        public int GetSendQueueLength()
+        {
+            return toSend.Count;
+        }
+
+        public int GetDeleteQueueLength()
+        {
+            return toDelete.Count;
+        }
+
         #endregion Delayed messages
-        
+
         #region Message formatting
 
         static ConcurrentDictionary<string, TemplateBase> templates;
@@ -250,7 +267,7 @@ namespace Rift.Services
                 RiftBot.Log.Error("Unable to obtain entry assembly, disabling template service.");
                 return null;
             }
-            
+
             return assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(TemplateBase))).ToList();
         }
 
@@ -270,7 +287,7 @@ namespace Rift.Services
             }
 
             var dbMessage = await DB.StoredMessages.GetMessageByIdAsync(mapping.MessageId);
-            
+
             if (dbMessage is null)
             {
                 RiftBot.Log.Warn($"Message with ID \"{mapping.MessageId.ToString()}\" does not exist.");
@@ -333,7 +350,7 @@ namespace Rift.Services
                     }
                 }
             }
-            
+
             return new IonicMessage(message);
         }
 

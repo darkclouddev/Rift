@@ -9,7 +9,9 @@ namespace Rift.Services.Message.Templates.Cooldown
 {
     public class CooldownRoleStore : TemplateBase
     {
-        public CooldownRoleStore() : base(nameof(CooldownRoleStore)) {}
+        public CooldownRoleStore() : base(nameof(CooldownRoleStore))
+        {
+        }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

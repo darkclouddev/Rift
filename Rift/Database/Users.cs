@@ -58,10 +58,10 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Users
-                    .OrderByDescending(x => x.Level)
-                    .ThenByDescending(x => x.Experience)
-                    .Select(x => x.UserId)
-                    .ToListAsync();
+                                    .OrderByDescending(x => x.Level)
+                                    .ThenByDescending(x => x.Experience)
+                                    .Select(x => x.UserId)
+                                    .ToListAsync();
             }
         }
 
@@ -73,7 +73,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Users
-                    .FirstOrDefaultAsync(x => x.UserId == userId);
+                                    .FirstOrDefaultAsync(x => x.UserId == userId);
             }
         }
 
@@ -82,8 +82,8 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Users
-                    .Where(predicate)
-                    .ToListAsync();
+                                    .Where(predicate)
+                                    .ToListAsync();
             }
         }
 
@@ -98,13 +98,13 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 var list = await context.Inventory
-                    .OrderByDescending(x => x.Coins)
-                    .Select(x => new UserTopCoins
-                    {
-                        UserId = x.UserId,
-                        Coins = x.Coins,
-                    })
-                    .ToListAsync();
+                                        .OrderByDescending(x => x.Coins)
+                                        .Select(x => new UserTopCoins
+                                        {
+                                            UserId = x.UserId,
+                                            Coins = x.Coins,
+                                        })
+                                        .ToListAsync();
 
                 return list.Where(predicate).Take(10).ToList();
             }
@@ -115,14 +115,14 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 var list = await context.Users
-                    .OrderByDescending(x => x.Experience)
-                    .Select(x => new UserTopExp
-                    {
-                        UserId = x.UserId,
-                        Level = x.Level,
-                        Experience = x.Experience,
-                    })
-                    .ToListAsync();
+                                        .OrderByDescending(x => x.Experience)
+                                        .Select(x => new UserTopExp
+                                        {
+                                            UserId = x.UserId,
+                                            Level = x.Level,
+                                            Experience = x.Experience,
+                                        })
+                                        .ToListAsync();
 
                 return list.Where(predicate).Take(10).ToList();
             }
@@ -169,7 +169,7 @@ namespace Rift.Database
             if (!await EnsureExistsAsync(userId))
                 throw new DatabaseException(nameof(AddExperienceAsync));
 
-            var dbUser = new RiftUser { UserId = userId };
+            var dbUser = new RiftUser {UserId = userId};
 
             var profile = await GetAsync(userId);
             var cooldowns = await DB.Cooldowns.GetAsync(userId);
@@ -189,7 +189,8 @@ namespace Rift.Database
                     dbUser.Experience = expBefore + exp;
 
                 if (exp > 2) // TODO: wtf is that magic number
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s exp(s): ({expBefore.ToString()} => {dbUser.Experience.ToString()})");
+                    RiftBot.Log.Info(
+                        $"Modified {userId.ToString()}'s exp(s): ({expBefore.ToString()} => {dbUser.Experience.ToString()})");
 
                 entry.Property(x => x.Experience).IsModified = true;
 

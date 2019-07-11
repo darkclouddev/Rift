@@ -7,28 +7,28 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "UsualTickets",
-                table: "Inventory",
-                newName: "Tickets");
+                "UsualTickets",
+                "Inventory",
+                "Tickets");
 
             migrationBuilder.RenameColumn(
-                name: "RareTickets",
-                table: "Inventory",
-                newName: "Essence");
+                "RareTickets",
+                "Inventory",
+                "Essence");
 
             migrationBuilder.RenameColumn(
-                name: "PowerupsDoubleExp",
-                table: "Inventory",
-                newName: "BonusRewind");
+                "PowerupsDoubleExp",
+                "Inventory",
+                "BonusRewind");
 
             migrationBuilder.RenameColumn(
-                name: "PowerupsBotRespect",
-                table: "Inventory",
-                newName: "BonusDoubleExp");
+                "PowerupsBotRespect",
+                "Inventory",
+                "BonusDoubleExp");
 
             migrationBuilder.AddColumn<uint>(
-                name: "BonusBotRespect",
-                table: "Inventory",
+                "BonusBotRespect",
+                "Inventory",
                 nullable: false,
                 defaultValue: 0u);
         }
@@ -36,28 +36,28 @@ namespace Rift.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "BonusBotRespect",
-                table: "Inventory");
+                "BonusBotRespect",
+                "Inventory");
 
             migrationBuilder.RenameColumn(
-                name: "Tickets",
-                table: "Inventory",
-                newName: "UsualTickets");
+                "Tickets",
+                "Inventory",
+                "UsualTickets");
 
             migrationBuilder.RenameColumn(
-                name: "Essence",
-                table: "Inventory",
-                newName: "RareTickets");
+                "Essence",
+                "Inventory",
+                "RareTickets");
 
             migrationBuilder.RenameColumn(
-                name: "BonusRewind",
-                table: "Inventory",
-                newName: "PowerupsDoubleExp");
+                "BonusRewind",
+                "Inventory",
+                "PowerupsDoubleExp");
 
             migrationBuilder.RenameColumn(
-                name: "BonusDoubleExp",
-                table: "Inventory",
-                newName: "PowerupsBotRespect");
+                "BonusDoubleExp",
+                "Inventory",
+                "PowerupsBotRespect");
         }
     }
 }

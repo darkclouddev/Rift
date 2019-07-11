@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -9,472 +10,474 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "DayId",
-                table: "ScheduledEvents");
+                "DayId",
+                "ScheduledEvents");
 
             migrationBuilder.DropColumn(
-                name: "Hour",
-                table: "ScheduledEvents");
+                "Hour",
+                "ScheduledEvents");
 
             migrationBuilder.DropColumn(
-                name: "Minute",
-                table: "ScheduledEvents");
+                "Minute",
+                "ScheduledEvents");
 
             migrationBuilder.DropColumn(
-                name: "VoiceMinutesEarned",
-                table: "Quests");
+                "VoiceMinutesEarned",
+                "Quests");
 
             migrationBuilder.DropColumn(
-                name: "OpenedSpheres",
-                table: "QuestProgress");
+                "OpenedSpheres",
+                "QuestProgress");
 
             migrationBuilder.DropColumn(
-                name: "VoiceMinutesEarned",
-                table: "QuestProgress");
+                "VoiceMinutesEarned",
+                "QuestProgress");
 
             migrationBuilder.RenameColumn(
-                name: "TokensSpentTotal",
-                table: "Statistics",
-                newName: "TokensSpent");
+                "TokensSpentTotal",
+                "Statistics",
+                "TokensSpent");
 
             migrationBuilder.RenameColumn(
-                name: "TokensEarnedTotal",
-                table: "Statistics",
-                newName: "TokensEarned");
+                "TokensEarnedTotal",
+                "Statistics",
+                "TokensEarned");
 
             migrationBuilder.RenameColumn(
-                name: "SphereOpenedTotal",
-                table: "Statistics",
-                newName: "TicketsSpent");
+                "SphereOpenedTotal",
+                "Statistics",
+                "TicketsSpent");
 
             migrationBuilder.RenameColumn(
-                name: "SphereEarnedTotal",
-                table: "Statistics",
-                newName: "TicketsEarned");
+                "SphereEarnedTotal",
+                "Statistics",
+                "TicketsEarned");
 
             migrationBuilder.RenameColumn(
-                name: "PurchasedItemsTotal",
-                table: "Statistics",
-                newName: "SpheresOpened");
+                "PurchasedItemsTotal",
+                "Statistics",
+                "SpheresOpened");
 
             migrationBuilder.RenameColumn(
-                name: "MessagesSentTotal",
-                table: "Statistics",
-                newName: "SpheresEarned");
+                "MessagesSentTotal",
+                "Statistics",
+                "SpheresEarned");
 
             migrationBuilder.RenameColumn(
-                name: "EssenceEarnedTotal",
-                table: "Statistics",
-                newName: "RewindsEarned");
+                "EssenceEarnedTotal",
+                "Statistics",
+                "RewindsEarned");
 
             migrationBuilder.RenameColumn(
-                name: "CoinsSpentTotal",
-                table: "Statistics",
-                newName: "RewindsActivated");
+                "CoinsSpentTotal",
+                "Statistics",
+                "RewindsActivated");
 
             migrationBuilder.RenameColumn(
-                name: "CoinsEarnedTotal",
-                table: "Statistics",
-                newName: "PurchasedItems");
+                "CoinsEarnedTotal",
+                "Statistics",
+                "PurchasedItems");
 
             migrationBuilder.RenameColumn(
-                name: "ChestsOpenedTotal",
-                table: "Statistics",
-                newName: "MessagesSent");
+                "ChestsOpenedTotal",
+                "Statistics",
+                "MessagesSent");
 
             migrationBuilder.RenameColumn(
-                name: "ChestsEarnedTotal",
-                table: "Statistics",
-                newName: "EssenceSpent");
+                "ChestsEarnedTotal",
+                "Statistics",
+                "EssenceSpent");
 
             migrationBuilder.RenameColumn(
-                name: "CapsuleOpenedTotal",
-                table: "Statistics",
-                newName: "EssenceEarned");
+                "CapsuleOpenedTotal",
+                "Statistics",
+                "EssenceEarned");
 
             migrationBuilder.RenameColumn(
-                name: "CapsuleEarnedTotal",
-                table: "Statistics",
-                newName: "DoubleExpsEarned");
+                "CapsuleEarnedTotal",
+                "Statistics",
+                "DoubleExpsEarned");
 
             migrationBuilder.RenameColumn(
-                name: "BragTotal",
-                table: "Statistics",
-                newName: "DoubleExpsActivated");
+                "BragTotal",
+                "Statistics",
+                "DoubleExpsActivated");
 
             migrationBuilder.RenameColumn(
-                name: "AttacksReceived",
-                table: "Statistics",
-                newName: "CoinsSpent");
+                "AttacksReceived",
+                "Statistics",
+                "CoinsSpent");
 
             migrationBuilder.RenameColumn(
-                name: "AttacksDone",
-                table: "Statistics",
-                newName: "CoinsEarned");
+                "AttacksDone",
+                "Statistics",
+                "CoinsEarned");
 
             migrationBuilder.AddColumn<uint>(
-                name: "BotRespectsActivated",
-                table: "Statistics",
+                "BotRespectsActivated",
+                "Statistics",
                 nullable: false,
                 defaultValue: 0u);
 
             migrationBuilder.AddColumn<uint>(
-                name: "BotRespectsEarned",
-                table: "Statistics",
+                "BotRespectsEarned",
+                "Statistics",
                 nullable: false,
                 defaultValue: 0u);
 
             migrationBuilder.AddColumn<uint>(
-                name: "BragsDone",
-                table: "Statistics",
+                "BragsDone",
+                "Statistics",
                 nullable: false,
                 defaultValue: 0u);
 
             migrationBuilder.AddColumn<uint>(
-                name: "CapsulesEarned",
-                table: "Statistics",
+                "CapsulesEarned",
+                "Statistics",
                 nullable: false,
                 defaultValue: 0u);
 
             migrationBuilder.AddColumn<uint>(
-                name: "CapsulesOpened",
-                table: "Statistics",
+                "CapsulesOpened",
+                "Statistics",
                 nullable: false,
                 defaultValue: 0u);
 
             migrationBuilder.AddColumn<uint>(
-                name: "ChestsEarned",
-                table: "Statistics",
+                "ChestsEarned",
+                "Statistics",
                 nullable: false,
                 defaultValue: 0u);
 
             migrationBuilder.AddColumn<uint>(
-                name: "ChestsOpened",
-                table: "Statistics",
+                "ChestsOpened",
+                "Statistics",
                 nullable: false,
                 defaultValue: 0u);
 
             migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "ScheduledEvents",
-                nullable: false,
-                oldClrType: typeof(uint))
-                .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .OldAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+                                "Id",
+                                "ScheduledEvents",
+                                nullable: false,
+                                oldClrType: typeof(uint))
+                            .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
+                            .OldAnnotation("MySql:ValueGenerationStrategy",
+                                           MySqlValueGenerationStrategy.IdentityColumn);
 
             migrationBuilder.AddColumn<DateTime>(
-                name: "Date",
-                table: "ScheduledEvents",
+                "Date",
+                "ScheduledEvents",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
             migrationBuilder.AlterColumn<bool>(
-                name: "OpenedSphere",
-                table: "Quests",
+                "OpenedSphere",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedStreamer",
-                table: "Quests",
+                "GiftedStreamer",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedModerator",
-                table: "Quests",
+                "GiftedModerator",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedBotKeeper",
-                table: "Quests",
+                "GiftedBotKeeper",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "ApprovedLolAccount",
-                table: "Quests",
+                "ApprovedLolAccount",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AddColumn<TimeSpan>(
-                name: "VoiceUptimeEarned",
-                table: "Quests",
+                "VoiceUptimeEarned",
+                "Quests",
                 nullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedStreamer",
-                table: "QuestProgress",
+                "GiftedStreamer",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedModerator",
-                table: "QuestProgress",
+                "GiftedModerator",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedBotKeeper",
-                table: "QuestProgress",
+                "GiftedBotKeeper",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "ApprovedLolAccount",
-                table: "QuestProgress",
+                "ApprovedLolAccount",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AddColumn<bool>(
-                name: "OpenedSphere",
-                table: "QuestProgress",
+                "OpenedSphere",
+                "QuestProgress",
                 nullable: true);
 
             migrationBuilder.AddColumn<TimeSpan>(
-                name: "VoiceUptimeEarned",
-                table: "QuestProgress",
+                "VoiceUptimeEarned",
+                "QuestProgress",
                 nullable: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "BotRespectsActivated",
-                table: "Statistics");
+                "BotRespectsActivated",
+                "Statistics");
 
             migrationBuilder.DropColumn(
-                name: "BotRespectsEarned",
-                table: "Statistics");
+                "BotRespectsEarned",
+                "Statistics");
 
             migrationBuilder.DropColumn(
-                name: "BragsDone",
-                table: "Statistics");
+                "BragsDone",
+                "Statistics");
 
             migrationBuilder.DropColumn(
-                name: "CapsulesEarned",
-                table: "Statistics");
+                "CapsulesEarned",
+                "Statistics");
 
             migrationBuilder.DropColumn(
-                name: "CapsulesOpened",
-                table: "Statistics");
+                "CapsulesOpened",
+                "Statistics");
 
             migrationBuilder.DropColumn(
-                name: "ChestsEarned",
-                table: "Statistics");
+                "ChestsEarned",
+                "Statistics");
 
             migrationBuilder.DropColumn(
-                name: "ChestsOpened",
-                table: "Statistics");
+                "ChestsOpened",
+                "Statistics");
 
             migrationBuilder.DropColumn(
-                name: "Date",
-                table: "ScheduledEvents");
+                "Date",
+                "ScheduledEvents");
 
             migrationBuilder.DropColumn(
-                name: "VoiceUptimeEarned",
-                table: "Quests");
+                "VoiceUptimeEarned",
+                "Quests");
 
             migrationBuilder.DropColumn(
-                name: "OpenedSphere",
-                table: "QuestProgress");
+                "OpenedSphere",
+                "QuestProgress");
 
             migrationBuilder.DropColumn(
-                name: "VoiceUptimeEarned",
-                table: "QuestProgress");
+                "VoiceUptimeEarned",
+                "QuestProgress");
 
             migrationBuilder.RenameColumn(
-                name: "TokensSpent",
-                table: "Statistics",
-                newName: "TokensSpentTotal");
+                "TokensSpent",
+                "Statistics",
+                "TokensSpentTotal");
 
             migrationBuilder.RenameColumn(
-                name: "TokensEarned",
-                table: "Statistics",
-                newName: "TokensEarnedTotal");
+                "TokensEarned",
+                "Statistics",
+                "TokensEarnedTotal");
 
             migrationBuilder.RenameColumn(
-                name: "TicketsSpent",
-                table: "Statistics",
-                newName: "SphereOpenedTotal");
+                "TicketsSpent",
+                "Statistics",
+                "SphereOpenedTotal");
 
             migrationBuilder.RenameColumn(
-                name: "TicketsEarned",
-                table: "Statistics",
-                newName: "SphereEarnedTotal");
+                "TicketsEarned",
+                "Statistics",
+                "SphereEarnedTotal");
 
             migrationBuilder.RenameColumn(
-                name: "SpheresOpened",
-                table: "Statistics",
-                newName: "PurchasedItemsTotal");
+                "SpheresOpened",
+                "Statistics",
+                "PurchasedItemsTotal");
 
             migrationBuilder.RenameColumn(
-                name: "SpheresEarned",
-                table: "Statistics",
-                newName: "MessagesSentTotal");
+                "SpheresEarned",
+                "Statistics",
+                "MessagesSentTotal");
 
             migrationBuilder.RenameColumn(
-                name: "RewindsEarned",
-                table: "Statistics",
-                newName: "EssenceEarnedTotal");
+                "RewindsEarned",
+                "Statistics",
+                "EssenceEarnedTotal");
 
             migrationBuilder.RenameColumn(
-                name: "RewindsActivated",
-                table: "Statistics",
-                newName: "CoinsSpentTotal");
+                "RewindsActivated",
+                "Statistics",
+                "CoinsSpentTotal");
 
             migrationBuilder.RenameColumn(
-                name: "PurchasedItems",
-                table: "Statistics",
-                newName: "CoinsEarnedTotal");
+                "PurchasedItems",
+                "Statistics",
+                "CoinsEarnedTotal");
 
             migrationBuilder.RenameColumn(
-                name: "MessagesSent",
-                table: "Statistics",
-                newName: "ChestsOpenedTotal");
+                "MessagesSent",
+                "Statistics",
+                "ChestsOpenedTotal");
 
             migrationBuilder.RenameColumn(
-                name: "EssenceSpent",
-                table: "Statistics",
-                newName: "ChestsEarnedTotal");
+                "EssenceSpent",
+                "Statistics",
+                "ChestsEarnedTotal");
 
             migrationBuilder.RenameColumn(
-                name: "EssenceEarned",
-                table: "Statistics",
-                newName: "CapsuleOpenedTotal");
+                "EssenceEarned",
+                "Statistics",
+                "CapsuleOpenedTotal");
 
             migrationBuilder.RenameColumn(
-                name: "DoubleExpsEarned",
-                table: "Statistics",
-                newName: "CapsuleEarnedTotal");
+                "DoubleExpsEarned",
+                "Statistics",
+                "CapsuleEarnedTotal");
 
             migrationBuilder.RenameColumn(
-                name: "DoubleExpsActivated",
-                table: "Statistics",
-                newName: "BragTotal");
+                "DoubleExpsActivated",
+                "Statistics",
+                "BragTotal");
 
             migrationBuilder.RenameColumn(
-                name: "CoinsSpent",
-                table: "Statistics",
-                newName: "AttacksReceived");
+                "CoinsSpent",
+                "Statistics",
+                "AttacksReceived");
 
             migrationBuilder.RenameColumn(
-                name: "CoinsEarned",
-                table: "Statistics",
-                newName: "AttacksDone");
+                "CoinsEarned",
+                "Statistics",
+                "AttacksDone");
 
             migrationBuilder.AlterColumn<uint>(
-                name: "Id",
-                table: "ScheduledEvents",
-                nullable: false,
-                oldClrType: typeof(int))
-                .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .OldAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+                                "Id",
+                                "ScheduledEvents",
+                                nullable: false,
+                                oldClrType: typeof(int))
+                            .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
+                            .OldAnnotation("MySql:ValueGenerationStrategy",
+                                           MySqlValueGenerationStrategy.IdentityColumn);
 
             migrationBuilder.AddColumn<int>(
-                name: "DayId",
-                table: "ScheduledEvents",
+                "DayId",
+                "ScheduledEvents",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<int>(
-                name: "Hour",
-                table: "ScheduledEvents",
+                "Hour",
+                "ScheduledEvents",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<int>(
-                name: "Minute",
-                table: "ScheduledEvents",
+                "Minute",
+                "ScheduledEvents",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "OpenedSphere",
-                table: "Quests",
+                "OpenedSphere",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "GiftedStreamer",
-                table: "Quests",
+                "GiftedStreamer",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "GiftedModerator",
-                table: "Quests",
+                "GiftedModerator",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "GiftedBotKeeper",
-                table: "Quests",
+                "GiftedBotKeeper",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "ApprovedLolAccount",
-                table: "Quests",
+                "ApprovedLolAccount",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AddColumn<uint>(
-                name: "VoiceMinutesEarned",
-                table: "Quests",
+                "VoiceMinutesEarned",
+                "Quests",
                 nullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "GiftedStreamer",
-                table: "QuestProgress",
+                "GiftedStreamer",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "GiftedModerator",
-                table: "QuestProgress",
+                "GiftedModerator",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "GiftedBotKeeper",
-                table: "QuestProgress",
+                "GiftedBotKeeper",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "ApprovedLolAccount",
-                table: "QuestProgress",
+                "ApprovedLolAccount",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AddColumn<uint>(
-                name: "OpenedSpheres",
-                table: "QuestProgress",
+                "OpenedSpheres",
+                "QuestProgress",
                 nullable: true);
 
             migrationBuilder.AddColumn<uint>(
-                name: "VoiceMinutesEarned",
-                table: "QuestProgress",
+                "VoiceMinutesEarned",
+                "QuestProgress",
                 nullable: true);
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Rift.Migrations
@@ -8,14 +9,14 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
-                name: "LastBackgroundStoreTime",
-                table: "Cooldowns",
+                "LastBackgroundStoreTime",
+                "Cooldowns",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
 
             migrationBuilder.AddColumn<DateTime>(
-                name: "LastRoleStoreTime",
-                table: "Cooldowns",
+                "LastRoleStoreTime",
+                "Cooldowns",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
         }
@@ -23,12 +24,12 @@ namespace Rift.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "LastBackgroundStoreTime",
-                table: "Cooldowns");
+                "LastBackgroundStoreTime",
+                "Cooldowns");
 
             migrationBuilder.DropColumn(
-                name: "LastRoleStoreTime",
-                table: "Cooldowns");
+                "LastRoleStoreTime",
+                "Cooldowns");
         }
     }
 }

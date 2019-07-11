@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Microsoft.EntityFrameworkCore;
+
 using Rift.Data;
 using Rift.Data.Models;
 
@@ -16,7 +18,7 @@ namespace Rift.Database
                 UserId = userId,
                 BackgroundId = backgroundId
             };
-            
+
             using (var context = new RiftContext())
             {
                 await context.BackgroundInventories.AddAsync(backInv);
@@ -29,8 +31,8 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.BackgroundInventories
-                    .Where(x => x.UserId == userId)
-                    .ToListAsync();
+                                    .Where(x => x.UserId == userId)
+                                    .ToListAsync();
             }
         }
 

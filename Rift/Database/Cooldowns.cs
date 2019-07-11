@@ -51,8 +51,8 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Cooldowns
-                    .Where(x => x.UserId == userId)
-                    .FirstAsync();
+                                    .Where(x => x.UserId == userId)
+                                    .FirstAsync();
             }
         }
 
@@ -61,8 +61,8 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 var users = await context.Cooldowns
-                    .Where(x => x.BotRespectTime > DateTime.UtcNow)
-                    .ToListAsync();
+                                         .Where(x => x.BotRespectTime > DateTime.UtcNow)
+                                         .ToListAsync();
 
                 return users.Select(x => (x.UserId, x.BotRespectTime)).ToList();
             }

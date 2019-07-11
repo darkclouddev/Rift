@@ -122,9 +122,10 @@ namespace Rift.Preconditions
             var now = DateTime.UtcNow;
             var key = context.User.Id;
 
-            var timeout = (invokeTracker.TryGetValue(key, out var t)
-                && ((now - t.FirstInvoke) < invokeLimitPeriod))
-                    ? t : new CommandTimeout(now);
+            var timeout = invokeTracker.TryGetValue(key, out var t)
+                          && now - t.FirstInvoke < invokeLimitPeriod
+                ? t
+                : new CommandTimeout(now);
 
             timeout.TimesInvoked++;
 
@@ -142,7 +143,7 @@ namespace Rift.Preconditions
         /// </summary>
         sealed class CommandTimeout
         {
-             /// <summary>
+            /// <summary>
             /// Initializes a new instance of the <see cref="CommandTimeout"/> class.
             /// </summary>
             /// <param name="timeStarted">
@@ -152,7 +153,7 @@ namespace Rift.Preconditions
             {
                 FirstInvoke = timeStarted;
             }
-            
+
             /// <summary>
             /// Gets or sets the times invoked.
             /// </summary>

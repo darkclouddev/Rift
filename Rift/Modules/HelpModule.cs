@@ -7,8 +7,10 @@ using Rift.Util;
 
 using Discord;
 using Discord.Commands;
+
 using IonicLib;
 using IonicLib.Util;
+
 using Rift.Services.Message;
 
 namespace Rift.Modules
@@ -44,8 +46,10 @@ namespace Rift.Modules
                 var sb = new StringBuilder();
                 sb.AppendLine("__**Список команд**__");
                 sb.AppendLine();
-                sb.AppendLine("**mute** - накладывает мут на упомянутый аккаунт. Снимается автоматически по истечении указанного времени.");
-                sb.AppendLine("Доступные модификаторы времени: **s** (секунды), **m** (минуты), **h** (часы), **d** (дни).");
+                sb.AppendLine(
+                    "**mute** - накладывает мут на упомянутый аккаунт. Снимается автоматически по истечении указанного времени.");
+                sb.AppendLine(
+                    "Доступные модификаторы времени: **s** (секунды), **m** (минуты), **h** (часы), **d** (дни).");
                 sb.AppendLine("Комбинации модификаторов не допускается.");
                 sb.AppendLine("При накладывании мута на уже замученный аккаунт старый мут заменяется новым.");
                 sb.AppendLine();
@@ -74,7 +78,8 @@ namespace Rift.Modules
                 sb.AppendLine("`!kick @Yasuo \"причина\"`");
                 sb.AppendLine();
                 sb.AppendLine();
-                sb.AppendLine($"**ban** - банит упомянутый аккаунт на сервере и удаляет все его сообщения за последние 24 часа.");
+                sb.AppendLine(
+                    $"**ban** - банит упомянутый аккаунт на сервере и удаляет все его сообщения за последние 24 часа.");
                 sb.AppendLine();
                 sb.AppendLine("__Пример использования:__");
                 sb.AppendLine("`!ban @Yasuo \"причина\"`");

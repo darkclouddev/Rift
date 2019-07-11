@@ -6,13 +6,14 @@ namespace Rift.Data.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
+
         public ulong[] Winners // not mapped
         {
             get
             {
                 if (string.IsNullOrEmpty(WinnersString))
-                    return new ulong[]{};
-                
+                    return new ulong[] { };
+
                 return Array.ConvertAll(WinnersString.Split(';'), ulong.Parse);
             }
             set
@@ -22,7 +23,7 @@ namespace Rift.Data.Models
                     WinnersString = string.Empty;
                     return;
                 }
-                
+
                 WinnersString = string.Join(';', value);
             }
         }
@@ -34,8 +35,8 @@ namespace Rift.Data.Models
             get
             {
                 if (string.IsNullOrEmpty(ParticipantsString))
-                    return new ulong[]{};
-                
+                    return new ulong[] { };
+
                 return Array.ConvertAll(ParticipantsString.Split(';'), ulong.Parse);
             }
             set
@@ -45,7 +46,7 @@ namespace Rift.Data.Models
                     ParticipantsString = string.Empty;
                     return;
                 }
-                
+
                 ParticipantsString = string.Join(';', value);
             }
         }

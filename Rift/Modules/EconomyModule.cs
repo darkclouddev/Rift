@@ -15,7 +15,8 @@ namespace Rift.Modules
         readonly BragService bragService;
         readonly GiveawayService giveawayService;
 
-        public EconomyModule(EconomyService economyService, RiotService riotService, BragService bragService, GiveawayService giveawayService)
+        public EconomyModule(EconomyService economyService, RiotService riotService, BragService bragService,
+                             GiveawayService giveawayService)
         {
             this.economyService = economyService;
             this.riotService = riotService;
@@ -32,7 +33,8 @@ namespace Rift.Modules
         }
 
         [Command("обновить")]
-        [RateLimit(1, 10, Measure.Minutes, ErrorMessage = "Запрашивать обновление ранга можно не чаще 1 раза в 10 минут!")]
+        [RateLimit(1, 10, Measure.Minutes, ErrorMessage =
+            "Запрашивать обновление ранга можно не чаще 1 раза в 10 минут!")]
         [RequireContext(ContextType.Guild)]
         public async Task Update()
         {
@@ -72,7 +74,8 @@ namespace Rift.Modules
 
         [Command("таймеры")]
         [Alias("кд")]
-        [RateLimit(1, 10.0, Measure.Seconds, RateLimitFlags.NoLimitForAdmins, ErrorMessage = "Проверять таймеры можно не чаще 1 раза в 10 секунд!")]
+        [RateLimit(1, 10.0, Measure.Seconds, RateLimitFlags.NoLimitForAdmins, ErrorMessage =
+            "Проверять таймеры можно не чаще 1 раза в 10 секунд!")]
         [RequireContext(ContextType.Guild)]
         public async Task Cooldowns()
         {
@@ -108,7 +111,8 @@ namespace Rift.Modules
         }
 
         [Command("игровой профиль")]
-        [RateLimit(1, 10, Measure.Minutes, ErrorMessage = "Запрашивать игровой профиль можно не чаще 1 раза в 10 минут!")]
+        [RateLimit(1, 10, Measure.Minutes, ErrorMessage =
+            "Запрашивать игровой профиль можно не чаще 1 раза в 10 минут!")]
         [RequireContext(ContextType.Guild)]
         public async Task GameStat()
         {
@@ -157,7 +161,7 @@ namespace Rift.Modules
         public class OpenModule : ModuleBase
         {
             readonly EconomyService economyService;
-            
+
             public OpenModule(EconomyService economyService)
             {
                 this.economyService = economyService;

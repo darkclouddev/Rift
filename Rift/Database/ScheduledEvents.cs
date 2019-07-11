@@ -18,26 +18,27 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.ScheduledEvents
-                    .AnyAsync();
+                                    .AnyAsync();
             }
         }
+
         public async Task<List<RiftScheduledEvent>> GetEventsAllAsync()
         {
             using (var context = new RiftContext())
             {
                 return await context.ScheduledEvents
-                    .OrderBy(x => x.Date)
-                    .ToListAsync();
+                                    .OrderBy(x => x.Date)
+                                    .ToListAsync();
             }
         }
-        
-        public async Task<List<RiftGiveawayActive>> GetActiveEventsAsync()
+
+        public async Task<List<RiftActiveGiveaway>> GetActiveEventsAsync()
         {
             using (var context = new RiftContext())
             {
                 return await context.ActiveGiveaways
-                    .OrderBy(x => x.DueTime)
-                    .ToListAsync();
+                                    .OrderBy(x => x.DueTime)
+                                    .ToListAsync();
             }
         }
 
@@ -46,9 +47,9 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.ScheduledEvents
-                    .Where(predicate)
-                    .OrderBy(x => x.Date)
-                    .ToListAsync();
+                                    .Where(predicate)
+                                    .OrderBy(x => x.Date)
+                                    .ToListAsync();
             }
         }
 
@@ -57,9 +58,9 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.ScheduledEvents
-                    .Where(x => x.Date >= dt)
-                    .OrderBy(x => x.Date)
-                    .FirstOrDefaultAsync();
+                                    .Where(x => x.Date >= dt)
+                                    .OrderBy(x => x.Date)
+                                    .FirstOrDefaultAsync();
             }
         }
     }

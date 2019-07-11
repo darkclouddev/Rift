@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.Users
 {
     public class UserInventoryRolesAmount : TemplateBase
     {
-        public UserInventoryRolesAmount() : base(nameof(UserInventoryRolesAmount)) {}
+        public UserInventoryRolesAmount() : base(nameof(UserInventoryRolesAmount))
+        {
+        }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

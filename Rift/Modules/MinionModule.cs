@@ -11,9 +11,9 @@ namespace Rift.Modules
     {
         readonly MinionService minionService;
 
-        public MinionModule(/*MinionService minionService*/)
+        public MinionModule( /*MinionService minionService*/)
         {
-            this.minionService = minionService;
+            minionService = minionService;
         }
 
         [Command("миньон")]

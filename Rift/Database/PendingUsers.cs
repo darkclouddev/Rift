@@ -28,7 +28,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.PendingUsers
-                    .ToListAsync();
+                                    .ToListAsync();
             }
         }
 
@@ -37,18 +37,18 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.PendingUsers
-                    .Select(x => new RiftPendingUser
-                    {
-                        UserId = x.UserId,
-                        Region = x.Region,
-                        PlayerUUID = x.PlayerUUID,
-                        AccountId = x.AccountId,
-                        SummonedId = x.SummonedId,
-                        ConfirmationCode = x.ConfirmationCode,
-                        ExpirationTime = x.ExpirationTime
-                    })
-                    .Where(x => x.UserId == userId)
-                    .FirstOrDefaultAsync();
+                                    .Select(x => new RiftPendingUser
+                                    {
+                                        UserId = x.UserId,
+                                        Region = x.Region,
+                                        PlayerUUID = x.PlayerUUID,
+                                        AccountId = x.AccountId,
+                                        SummonedId = x.SummonedId,
+                                        ConfirmationCode = x.ConfirmationCode,
+                                        ExpirationTime = x.ExpirationTime
+                                    })
+                                    .Where(x => x.UserId == userId)
+                                    .FirstOrDefaultAsync();
             }
         }
 
@@ -84,8 +84,8 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.PendingUsers
-                    .Where(x => x.ExpirationTime > DateTime.UtcNow)
-                    .ToListAsync();
+                                    .Where(x => x.ExpirationTime > DateTime.UtcNow)
+                                    .ToListAsync();
             }
         }
     }

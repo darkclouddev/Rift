@@ -12,7 +12,7 @@ namespace Rift
         public static readonly GiveawayLogs GiveawayLogs;
         public static readonly Giveaways Giveaways;
         public static readonly Inventory Inventory;
-        public static readonly LolData LolData;
+        public static readonly LeagueData LeagueData;
         public static readonly ModerationLogs ModerationLogs;
         public static readonly PendingUsers PendingUsers;
         public static readonly ProfileBackgrounds ProfileBackgrounds;
@@ -37,7 +37,7 @@ namespace Rift
             GiveawayLogs = new GiveawayLogs();
             Giveaways = new Giveaways();
             Inventory = new Inventory();
-            LolData = new LolData();
+            LeagueData = new LeagueData();
             ModerationLogs = new ModerationLogs();
             PendingUsers = new PendingUsers();
             ProfileBackgrounds = new ProfileBackgrounds();

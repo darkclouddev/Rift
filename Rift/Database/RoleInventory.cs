@@ -21,21 +21,21 @@ namespace Rift.Database
                 ObtainedAt = DateTime.UtcNow,
                 ObtainedFrom = source
             };
-            
+
             using (var context = new RiftContext())
             {
                 await context.RoleInventories.AddAsync(invRole);
                 await context.SaveChangesAsync();
             }
         }
-        
+
         public async Task<List<RiftRoleInventory>> GetAsync(ulong userId)
         {
             using (var context = new RiftContext())
             {
                 return await context.RoleInventories
-                    .Where(x => x.UserId == userId)
-                    .ToListAsync();
+                                    .Where(x => x.UserId == userId)
+                                    .ToListAsync();
             }
         }
 
@@ -44,7 +44,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.RoleInventories
-                    .CountAsync(x => x.UserId == userId);
+                                    .CountAsync(x => x.UserId == userId);
             }
         }
     }

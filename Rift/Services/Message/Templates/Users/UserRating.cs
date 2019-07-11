@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.Users
 {
     public class UserRating : TemplateBase
     {
-        public UserRating() : base(nameof(UserRating)) {}
+        public UserRating() : base(nameof(UserRating))
+        {
+        }
 
         const string NoRating = "-";
 

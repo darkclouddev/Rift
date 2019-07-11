@@ -8,7 +8,9 @@ using Rift.Services.Message;
 
 using Discord;
 using Discord.WebSocket;
+
 using Humanizer;
+
 using IonicLib;
 
 namespace Rift.Services
@@ -39,7 +41,6 @@ namespace Rift.Services
             };
 
             await RiftBot.SendChatMessageAsync("mod-kick-success", data);
-            
         }
 
         public async Task BanAsync(IUser target, string reason, IUser moderator)
@@ -122,9 +123,9 @@ namespace Rift.Services
                     await RiftBot.SendChatMessageAsync("mod-wrong-time-format", new FormatData(moderator.Id));
                     return;
             }
-            
+
             await RiftBot.GetService<RoleService>().AddTempRoleAsync(sgTarget.Id, Settings.RoleId.Muted, ts,
-                    $"Muted by {moderator}|{moderator.Id.ToString()} with reason: {reason}");
+                                                                     $"Muted by {moderator}|{moderator.Id.ToString()} with reason: {reason}");
             await DB.ModerationLogs.AddAsync(sgTarget.Id, moderator.Id, "Mute", reason, DateTime.UtcNow, ts);
 
             (var oldToxicity, var newToxicity) = await GetNewToxicityAsync(sgTarget.Id, ToxicitySource.Mute);
@@ -155,7 +156,8 @@ namespace Rift.Services
                 return;
 
             await RiftBot.GetService<RoleService>().RemoveTempRoleAsync(sgTarget.Id, Settings.RoleId.Muted);
-            await DB.ModerationLogs.AddAsync(sgTarget.Id, moderator.Id, "Unmute", reason, DateTime.UtcNow, TimeSpan.Zero);
+            await DB.ModerationLogs.AddAsync(sgTarget.Id, moderator.Id, "Unmute", reason, DateTime.UtcNow,
+                                             TimeSpan.Zero);
         }
 
         public async Task WarnAsync(IUser target, string reason, IUser moderator)
@@ -265,15 +267,17 @@ namespace Rift.Services
             }));
 
             var datetime = string.Join('\n', list.Select(x =>
-                x.CreatedAt.Humanize()));
+                                                             x.CreatedAt.Humanize()));
 
             var moderator = string.Join('\n', list.Select(x =>
-                IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.ModeratorId).Username));
+                                                              IonicClient.GetGuildUserById(Settings.App.MainGuildId,
+                                                                                           x.ModeratorId).Username));
 
             var embed = new RiftEmbed
             {
-                Description = $"Досье товарища {user.Username}\nУровень токсичности: {FormatToxicityLevel(toxicity.Level)}",
-                Fields = new []
+                Description =
+                    $"Досье товарища {user.Username}\nУровень токсичности: {FormatToxicityLevel(toxicity.Level)}",
+                Fields = new[]
                 {
                     new RiftField("Действие", actions, true),
                     new RiftField("Дата и время", datetime, true),
@@ -289,10 +293,12 @@ namespace Rift.Services
             var list = await DB.ModerationLogs.GetLastTenAsync();
 
             var mods = string.Join('\n', list.Select(x =>
-                IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.ModeratorId).Username));
+                                                         IonicClient.GetGuildUserById(Settings.App.MainGuildId,
+                                                                                      x.ModeratorId).Username));
 
             var targets = string.Join('\n', list.Select(x =>
-                IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.TargetId).Username));
+                                                            IonicClient.GetGuildUserById(Settings.App.MainGuildId,
+                                                                                         x.TargetId).Username));
 
             var actions = string.Join('\n', list.Select(x =>
             {

@@ -9,7 +9,9 @@ namespace Rift.Services.Message.Templates.Cooldown
 {
     public class CooldownBrag : TemplateBase
     {
-        public CooldownBrag() : base(nameof(CooldownBrag)) {}
+        public CooldownBrag() : base(nameof(CooldownBrag))
+        {
+        }
 
         const string Available = "доступно";
 
@@ -18,8 +20,8 @@ namespace Rift.Services.Message.Templates.Cooldown
             var cd = await DB.Cooldowns.GetAsync(data.UserId);
 
             return await ReplaceDataAsync(message, cd.BragTimeSpan == TimeSpan.Zero
-                ? Available
-                : $"осталось {cd.BragTimeSpan.Humanize()}");
+                                              ? Available
+                                              : $"осталось {cd.BragTimeSpan.Humanize()}");
         }
     }
 }

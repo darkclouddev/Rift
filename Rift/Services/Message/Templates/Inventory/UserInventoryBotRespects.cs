@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.Inventory
 {
     public class UserInventoryBotRespects : TemplateBase
     {
-        public UserInventoryBotRespects() : base(nameof(UserInventoryBotRespects)) {}
+        public UserInventoryBotRespects() : base(nameof(UserInventoryBotRespects))
+        {
+        }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

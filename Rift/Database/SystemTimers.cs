@@ -15,7 +15,10 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.SystemCooldowns.FirstOrDefaultAsync(x =>
-                    x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+                                                                             x.Name.Equals(
+                                                                                 name,
+                                                                                 StringComparison
+                                                                                     .InvariantCultureIgnoreCase));
             }
         }
 

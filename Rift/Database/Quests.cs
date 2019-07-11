@@ -37,25 +37,24 @@ namespace Rift.Database
                 var stages = new List<StageData>();
 
                 foreach (var dbStage in dbStages)
-                {
                     stages.Add(new StageData
                     {
                         Stage = dbStage,
                         Quests = await GetStageQuestsAsync(dbStage.Id)
                     });
-                }
 
                 return stages;
             }
         }
+
         public async Task<List<RiftQuest>> GetStageQuestsAsync(int stageId)
         {
             using (var context = new RiftContext())
             {
                 return await context.Quests
-                    .Where(x => x.StageId == stageId)
-                    .OrderBy(x => x.Order)
-                    .ToListAsync();
+                                    .Where(x => x.StageId == stageId)
+                                    .OrderBy(x => x.Order)
+                                    .ToListAsync();
             }
         }
 
@@ -64,9 +63,9 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Quests
-                    .OrderBy(x => x.StageId)
-                    .ThenBy(x => x.Order)
-                    .ToListAsync();
+                                    .OrderBy(x => x.StageId)
+                                    .ThenBy(x => x.Order)
+                                    .ToListAsync();
             }
         }
 
@@ -75,7 +74,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.QuestProgress
-                    .FirstOrDefaultAsync(x => x.UserId == userId && x.QuestId == questId);
+                                    .FirstOrDefaultAsync(x => x.UserId == userId && x.QuestId == questId);
             }
         }
 
@@ -84,8 +83,8 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.QuestProgress
-                    .Where(x => x.UserId == userId && !x.IsCompleted)
-                    .ToListAsync();
+                                    .Where(x => x.UserId == userId && !x.IsCompleted)
+                                    .ToListAsync();
             }
         }
 
@@ -94,7 +93,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Quests
-                    .FirstOrDefaultAsync(x => x.Id == id);
+                                    .FirstOrDefaultAsync(x => x.Id == id);
             }
         }
 

@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.Inventory
 {
     public class UserInventoryDoubleExps : TemplateBase
     {
-        public UserInventoryDoubleExps() : base(nameof(UserInventoryDoubleExps)) {}
+        public UserInventoryDoubleExps() : base(nameof(UserInventoryDoubleExps))
+        {
+        }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

@@ -10,6 +10,7 @@ using Discord;
 using Discord.Commands;
 using Discord.Webhook;
 using Discord.WebSocket;
+
 using IonicLib;
 using IonicLib.Util;
 
@@ -49,19 +50,20 @@ namespace Rift.Modules
             }
 
             var eb = new EmbedBuilder()
-                .WithAuthor("Трансляция")
-                .WithThumbnailUrl(streamer.PictureUrl)
-                .WithDescription($"{description}")
-                .AddField($"Ссылка на трансляцию", streamer.StreamUrl)
-                .Build();
+                     .WithAuthor("Трансляция")
+                     .WithThumbnailUrl(streamer.PictureUrl)
+                     .WithDescription($"{description}")
+                     .AddField($"Ссылка на трансляцию", streamer.StreamUrl)
+                     .Build();
 
             var webhook = new DiscordWebhookClient(505849754119569409ul,
-                "NuoQqSufIqYo6_K2UF-NjU2N_-JfAACdLLKPOtqcquJStJLzTQF3OHcjLRcwEQybw4kR");
+                                                   "NuoQqSufIqYo6_K2UF-NjU2N_-JfAACdLLKPOtqcquJStJLzTQF3OHcjLRcwEQybw4kR");
 
             if (IonicClient.HasRolesAny(Context.Guild.Id, Context.User.Id, Settings.RoleId.Streamer))
-                await webhook.SendMessageAsync($"Стример {Context.User.Mention} запустил трансляцию, присоединяйтесь. @here", embeds: new [] { eb });
+                await webhook.SendMessageAsync(
+                    $"Стример {Context.User.Mention} запустил трансляцию, присоединяйтесь. @here", embeds: new[] {eb});
             else
-                await webhook.SendMessageAsync($"{Context.User.Mention} онлайн!", embeds: new [] { eb });
+                await webhook.SendMessageAsync($"{Context.User.Mention} онлайн!", embeds: new[] {eb});
         }
 
         [Group("роль")]
@@ -81,7 +83,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Active(IUser user)
             {
-                if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var commsChannel))
+                if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms,
+                                                out var commsChannel))
                     return;
 
                 if (!(user is SocketGuildUser sgUser))
@@ -102,9 +105,10 @@ namespace Rift.Modules
                 await sgUser.AddRoleAsync(role);
 
                 var chatEmbed = new EmbedBuilder()
-                    .WithAuthor("Оповещение")
-                    .WithDescription($"Призывателю {sgUser.Mention} выдается роль **{role.Name.ToLowerInvariant()}**")
-                    .Build();
+                                .WithAuthor("Оповещение")
+                                .WithDescription(
+                                    $"Призывателю {sgUser.Mention} выдается роль **{role.Name.ToLowerInvariant()}**")
+                                .Build();
 
                 await commsChannel.SendEmbedAsync(chatEmbed);
             }

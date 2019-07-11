@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.Users
 {
     public class UserLevel : TemplateBase
     {
-        public UserLevel() : base(nameof(UserLevel)) {}
+        public UserLevel() : base(nameof(UserLevel))
+        {
+        }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

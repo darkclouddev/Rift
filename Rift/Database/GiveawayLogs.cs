@@ -35,8 +35,8 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.GiveawayLogs
-                    .Where(predicate)
-                    .ToListAsync();
+                                    .Where(predicate)
+                                    .ToListAsync();
             }
         }
     }

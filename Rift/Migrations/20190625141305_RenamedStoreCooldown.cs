@@ -7,17 +7,17 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "LastStoreTime",
-                table: "Cooldowns",
-                newName: "LastItemStoreTime");
+                "LastStoreTime",
+                "Cooldowns",
+                "LastItemStoreTime");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "LastItemStoreTime",
-                table: "Cooldowns",
-                newName: "LastStoreTime");
+                "LastItemStoreTime",
+                "Cooldowns",
+                "LastStoreTime");
         }
     }
 }

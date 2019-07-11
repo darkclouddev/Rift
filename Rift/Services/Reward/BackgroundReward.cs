@@ -6,7 +6,7 @@ namespace Rift.Services.Reward
     public class BackgroundReward : RewardBase
     {
         public int BackgroundId { get; set; }
-        
+
         public BackgroundReward()
         {
             Type = RewardType.Background;
@@ -33,7 +33,7 @@ namespace Rift.Services.Reward
             var dbBack = Task.Run(async () => await DB.ProfileBackgrounds.GetAsync(BackgroundId)).Result;
 
             var text = "фон ";
-            
+
             if (dbBack is null)
             {
                 RiftBot.Log.Error($"{nameof(BackgroundId)} does not exist!");

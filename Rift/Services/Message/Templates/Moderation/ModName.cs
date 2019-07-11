@@ -9,7 +9,9 @@ namespace Rift.Services.Message.Templates.Moderation
 {
     public class ModName : TemplateBase
     {
-        public ModName() : base(nameof(ModName)) {}
+        public ModName() : base(nameof(ModName))
+        {
+        }
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

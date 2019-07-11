@@ -6,7 +6,8 @@ namespace Rift.Services.Message
 {
     public sealed class MixedMessage : SendMessageBase
     {
-        public MixedMessage(DestinationType destType, ulong destId, TimeSpan offset, string text, Embed embed, string imageUrl)
+        public MixedMessage(DestinationType destType, ulong destId, TimeSpan offset, string text, Embed embed,
+                            string imageUrl)
         {
             MessageType = MessageType.Mixed;
 

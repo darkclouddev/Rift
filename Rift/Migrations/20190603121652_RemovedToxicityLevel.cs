@@ -7,15 +7,15 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Level",
-                table: "Toxicity");
+                "Level",
+                "Toxicity");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<uint>(
-                name: "Level",
-                table: "Toxicity",
+                "Level",
+                "Toxicity",
                 nullable: false,
                 defaultValue: 0u);
         }

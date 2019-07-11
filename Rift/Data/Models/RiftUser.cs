@@ -12,7 +12,7 @@ namespace Rift.Data.Models
 
         public RiftCooldowns Cooldowns { get; set; }
         public RiftInventory Inventory { get; set; }
-        public RiftLolData LolData { get; set; }
+        public RiftLeagueData LolData { get; set; }
         public RiftPendingUser PendingUser { get; set; }
         public ICollection<RiftTempRole> TempRoles { get; set; }
         public RiftStatistics Statistics { get; set; }

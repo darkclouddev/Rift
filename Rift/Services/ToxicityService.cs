@@ -28,13 +28,10 @@ namespace Rift.Services
                     ? TimeSpan.Zero
                     : toxicityTimer.Interval - (DateTime.UtcNow - toxicityTimer.LastInvoked);
 
-                checkTimer = new Timer(async delegate
-                    {
-                        await StartAsync();
-                    },
-                    null,
-                    delay,
-                    toxicityTimer.Interval);
+                checkTimer = new Timer(async delegate { await StartAsync(); },
+                                       null,
+                                       delay,
+                                       toxicityTimer.Interval);
             });
         }
 
@@ -56,7 +53,7 @@ namespace Rift.Services
 
             RiftBot.Log.Info("Starting up toxicity reducer.");
 
-            int count = 0;
+            var count = 0;
 
             foreach (var toxic in toxicity)
             {

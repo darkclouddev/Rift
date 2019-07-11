@@ -18,12 +18,8 @@ namespace Rift.Configuration
                 var customAttributes = prop.GetCustomAttributes(true);
 
                 foreach (var attribute in customAttributes)
-                {
                     if (attribute is ResolveChannelAttribute resolvedAttribute)
-                    {
                         dict.Add(prop.Name, (resolvedAttribute.CategoryName, resolvedAttribute.Name));
-                    }
-                }
             }
 
             return dict;
@@ -33,10 +29,7 @@ namespace Rift.Configuration
         {
             var prop = GetType().GetProperty(fieldName, BindingFlags.Public | BindingFlags.Instance);
 
-            if (prop != null && prop.CanWrite)
-            {
-                prop.SetValue(this, value);
-            }
+            if (prop != null && prop.CanWrite) prop.SetValue(this, value);
         }
 
         public ulong Comms { get; set; }

@@ -61,7 +61,6 @@ namespace Rift.Services
                     continue;
 
                 foreach (var quest in stage.Quests)
-                {
                     if (userQuests.All(x => x.QuestId != quest.Id))
                     {
                         await DB.Quests.AddQuestProgressAsync(userId, new RiftQuestProgress
@@ -72,7 +71,6 @@ namespace Rift.Services
                         });
                         break;
                     }
-                }
             }
         }
 

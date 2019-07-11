@@ -69,8 +69,8 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Toxicity
-                    .Where(x => x.Level > 0u)
-                    .ToArrayAsync();
+                                    .Where(x => x.Level > 0u)
+                                    .ToArrayAsync();
             }
         }
 

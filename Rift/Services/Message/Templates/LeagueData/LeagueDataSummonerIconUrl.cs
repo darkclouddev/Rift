@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.LeagueData
 {
     public class LeagueDataSummonerIconUrl : TemplateBase
     {
-        public LeagueDataSummonerIconUrl() : base(nameof(LeagueDataSummonerIconUrl)) {}
+        public LeagueDataSummonerIconUrl() : base(nameof(LeagueDataSummonerIconUrl))
+        {
+        }
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

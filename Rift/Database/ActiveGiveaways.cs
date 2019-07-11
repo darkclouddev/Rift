@@ -12,7 +12,7 @@ namespace Rift.Database
 {
     public class ActiveGiveaways
     {
-        public async Task AddAsync(RiftGiveawayActive giveaway)
+        public async Task AddAsync(RiftActiveGiveaway giveaway)
         {
             using (var context = new RiftContext())
             {
@@ -21,46 +21,46 @@ namespace Rift.Database
             }
         }
 
-        public async Task<RiftGiveawayActive> GetClosestAsync()
+        public async Task<RiftActiveGiveaway> GetClosestAsync()
         {
             using (var context = new RiftContext())
             {
                 return await context.ActiveGiveaways
-                    .OrderBy(x => x.DueTime)
-                    .FirstOrDefaultAsync();
+                                    .OrderBy(x => x.DueTime)
+                                    .FirstOrDefaultAsync();
             }
         }
 
-        public async Task<List<RiftGiveawayActive>> GetExpiredAsync()
+        public async Task<List<RiftActiveGiveaway>> GetExpiredAsync()
         {
             using (var context = new RiftContext())
             {
                 return await context.ActiveGiveaways
-                    .Where(x => x.DueTime < DateTime.UtcNow)
-                    .ToListAsync();
+                                    .Where(x => x.DueTime < DateTime.UtcNow)
+                                    .ToListAsync();
             }
         }
 
-        public async Task<List<RiftGiveawayActive>> GetLinkedAsync(string giveawayName)
+        public async Task<List<RiftActiveGiveaway>> GetLinkedAsync(string giveawayName)
         {
             using (var context = new RiftContext())
             {
                 return await context.ActiveGiveaways
-                    .Where(x => x.GiveawayName.Equals(giveawayName))
-                    .ToListAsync();
+                                    .Where(x => x.GiveawayName.Equals(giveawayName))
+                                    .ToListAsync();
             }
         }
 
-        public async Task<RiftGiveawayActive> GetAsync(int id)
+        public async Task<RiftActiveGiveaway> GetAsync(int id)
         {
             using (var context = new RiftContext())
             {
                 return await context.ActiveGiveaways
-                    .FirstOrDefaultAsync(x => x.Id == id);
+                                    .FirstOrDefaultAsync(x => x.Id == id);
             }
         }
 
-        public async Task<List<RiftGiveawayActive>> GetAllAsync()
+        public async Task<List<RiftActiveGiveaway>> GetAllAsync()
         {
             using (var context = new RiftContext())
             {
@@ -70,11 +70,11 @@ namespace Rift.Database
 
         public async Task RemoveAsync(int id)
         {
-            var giveaway = new RiftGiveawayActive
+            var giveaway = new RiftActiveGiveaway
             {
                 Id = id
             };
-            
+
             using (var context = new RiftContext())
             {
                 context.ActiveGiveaways.Remove(giveaway);

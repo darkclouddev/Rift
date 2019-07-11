@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -9,11 +10,12 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "GiveawayLogs",
-                columns: table => new
+                "GiveawayLogs",
+                table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                              .Annotation("MySql:ValueGenerationStrategy",
+                                          MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: true),
                     WinnersString = table.Column<string>(nullable: true),
                     ParticipantsString = table.Column<string>(nullable: true),
@@ -23,29 +25,24 @@ namespace Rift.Migrations
                     Duration = table.Column<TimeSpan>(nullable: false),
                     FinishedAt = table.Column<DateTime>(nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GiveawayLogs", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_GiveawayLogs", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "Rewards",
-                columns: table => new
+                "Rewards",
+                table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                              .Annotation("MySql:ValueGenerationStrategy",
+                                          MySqlValueGenerationStrategy.IdentityColumn),
                     Description = table.Column<string>(nullable: true),
                     ItemsData = table.Column<string>(nullable: true),
                     RoleData = table.Column<string>(nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Rewards", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_Rewards", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "Giveaways",
-                columns: table => new
+                "Giveaways",
+                table => new
                 {
                     Name = table.Column<string>(nullable: false),
                     Description = table.Column<string>(nullable: true),
@@ -59,30 +56,30 @@ namespace Rift.Migrations
                 {
                     table.PrimaryKey("PK_Giveaways", x => x.Name);
                     table.ForeignKey(
-                        name: "FK_Giveaways_Rewards_RewardId",
-                        column: x => x.RewardId,
-                        principalTable: "Rewards",
-                        principalColumn: "Id",
+                        "FK_Giveaways_Rewards_RewardId",
+                        x => x.RewardId,
+                        "Rewards",
+                        "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Giveaways_RewardId",
-                table: "Giveaways",
-                column: "RewardId",
+                "IX_Giveaways_RewardId",
+                "Giveaways",
+                "RewardId",
                 unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "GiveawayLogs");
+                "GiveawayLogs");
 
             migrationBuilder.DropTable(
-                name: "Giveaways");
+                "Giveaways");
 
             migrationBuilder.DropTable(
-                name: "Rewards");
+                "Rewards");
         }
     }
 }

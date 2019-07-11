@@ -53,7 +53,7 @@ namespace Rift.Database
             var dbInventory = await GetAsync(userId);
             var dbStatistics = await DB.Statistics.GetAsync(userId);
 
-            var inventory = new RiftInventory { UserId = userId };
+            var inventory = new RiftInventory {UserId = userId};
             var stat = new StatisticData();
 
             using (var context = new RiftContext())
@@ -78,7 +78,8 @@ namespace Rift.Database
                         stat.CoinsEarned = dbStatistics.CoinsEarned + value;
 
                     inventoryEntry.Property(x => x.Coins).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s coin(s): ({coinsBefore.ToString()} => {inventory.Coins.ToString()})");
+                    RiftBot.Log.Info(
+                        $"Modified {userId.ToString()}'s coin(s): ({coinsBefore.ToString()} => {inventory.Coins.ToString()})");
                 }
 
                 if (data.Tokens.HasValue)
@@ -97,7 +98,8 @@ namespace Rift.Database
                         stat.TokensEarned = dbStatistics.TokensEarned + value;
 
                     inventoryEntry.Property(x => x.Tokens).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s token(s): ({tokensBefore.ToString()} => {inventory.Tokens.ToString()})");
+                    RiftBot.Log.Info(
+                        $"Modified {userId.ToString()}'s token(s): ({tokensBefore.ToString()} => {inventory.Tokens.ToString()})");
                 }
 
                 if (data.Essence.HasValue)
@@ -116,7 +118,8 @@ namespace Rift.Database
                         stat.EssenceEarned = dbStatistics.EssenceEarned + value;
 
                     inventoryEntry.Property(x => x.Essence).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s essence: ({essenceBefore.ToString()} => {inventory.Essence.ToString()})");
+                    RiftBot.Log.Info(
+                        $"Modified {userId.ToString()}'s essence: ({essenceBefore.ToString()} => {inventory.Essence.ToString()})");
                 }
 
                 if (data.Chests.HasValue)
@@ -135,7 +138,8 @@ namespace Rift.Database
                         stat.ChestsEarned = dbStatistics.ChestsEarned + data.Chests;
 
                     inventoryEntry.Property(x => x.Chests).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s chest(s): ({chestsBefore.ToString()} => {inventory.Chests.ToString()})");
+                    RiftBot.Log.Info(
+                        $"Modified {userId.ToString()}'s chest(s): ({chestsBefore.ToString()} => {inventory.Chests.ToString()})");
                 }
 
                 if (data.Spheres.HasValue)
@@ -154,7 +158,8 @@ namespace Rift.Database
                         stat.SpheresEarned = dbStatistics.SpheresEarned + value;
 
                     inventoryEntry.Property(x => x.Spheres).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s sphere(s): ({spheresBefore.ToString()} => {inventory.Spheres.ToString()})");
+                    RiftBot.Log.Info(
+                        $"Modified {userId.ToString()}'s sphere(s): ({spheresBefore.ToString()} => {inventory.Spheres.ToString()})");
                 }
 
                 if (data.Capsules.HasValue)
@@ -173,7 +178,8 @@ namespace Rift.Database
                         stat.CapsulesEarned = dbStatistics.CapsulesEarned + value;
 
                     inventoryEntry.Property(x => x.Capsules).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s capsule(s): ({capsulesBefore.ToString()} => {inventory.Capsules.ToString()})");
+                    RiftBot.Log.Info(
+                        $"Modified {userId.ToString()}'s capsule(s): ({capsulesBefore.ToString()} => {inventory.Capsules.ToString()})");
                 }
 
                 if (data.Tickets.HasValue)
@@ -192,7 +198,8 @@ namespace Rift.Database
                         stat.TicketsEarned = dbStatistics.TicketsEarned + value;
 
                     inventoryEntry.Property(x => x.Tickets).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s ticket(s): ({ticketsBefore.ToString()} => {inventory.Tickets.ToString()})");
+                    RiftBot.Log.Info(
+                        $"Modified {userId.ToString()}'s ticket(s): ({ticketsBefore.ToString()} => {inventory.Tickets.ToString()})");
                 }
 
                 if (data.DoubleExps.HasValue)
@@ -211,7 +218,8 @@ namespace Rift.Database
                         stat.DoubleExpsEarned = dbStatistics.DoubleExpsEarned + value;
 
                     inventoryEntry.Property(x => x.BonusDoubleExp).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s doubleExp(s): ({doubleExpsBefore.ToString()} => {inventory.BonusDoubleExp.ToString()})");
+                    RiftBot.Log.Info(
+                        $"Modified {userId.ToString()}'s doubleExp(s): ({doubleExpsBefore.ToString()} => {inventory.BonusDoubleExp.ToString()})");
                 }
 
                 if (data.BotRespects.HasValue)
@@ -230,7 +238,8 @@ namespace Rift.Database
                         stat.BotRespectsEarned = dbStatistics.BotRespectsEarned + value;
 
                     inventoryEntry.Property(x => x.BonusBotRespect).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s respect(s): ({respectsBefore.ToString()} => {inventory.BonusBotRespect.ToString()})");
+                    RiftBot.Log.Info(
+                        $"Modified {userId.ToString()}'s respect(s): ({respectsBefore.ToString()} => {inventory.BonusBotRespect.ToString()})");
                 }
 
                 if (data.Rewinds.HasValue)
@@ -249,7 +258,8 @@ namespace Rift.Database
                         stat.RewindsEarned = dbStatistics.RewindsEarned + value;
 
                     inventoryEntry.Property(x => x.BonusRewind).IsModified = true;
-                    RiftBot.Log.Info($"Modified {userId.ToString()}'s rewind(s): ({rewindsBefore.ToString()} => {inventory.BonusRewind.ToString()})");
+                    RiftBot.Log.Info(
+                        $"Modified {userId.ToString()}'s rewind(s): ({rewindsBefore.ToString()} => {inventory.BonusRewind.ToString()})");
                 }
 
                 await context.SaveChangesAsync();
@@ -266,7 +276,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Inventory
-                    .FirstOrDefaultAsync(x => x.UserId == userId);
+                                    .FirstOrDefaultAsync(x => x.UserId == userId);
             }
         }
 
@@ -275,7 +285,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Inventory
-                    .ToListAsync();
+                                    .ToListAsync();
             }
         }
 
@@ -284,8 +294,8 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Inventory
-                    .Where(predicate)
-                    .ToListAsync();
+                                    .Where(predicate)
+                                    .ToListAsync();
             }
         }
 
@@ -293,7 +303,8 @@ namespace Rift.Database
         {
             using (var context = new RiftContext())
             {
-                return await context.Database.ExecuteSqlCommandAsync("CALL giveticketstolowlevels();"); // MariaDB-specific call.
+                return await context.Database.ExecuteSqlCommandAsync(
+                    "CALL giveticketstolowlevels();"); // MariaDB-specific call.
             }
         }
 
@@ -302,7 +313,7 @@ namespace Rift.Database
             var dbInventory = await GetAsync(userId);
             var dbStatistics = await DB.Statistics.GetAsync(userId);
 
-            var inventory = new RiftInventory { UserId = userId };
+            var inventory = new RiftInventory {UserId = userId};
             var stat = new StatisticData();
 
             using (var context = new RiftContext())
@@ -326,7 +337,8 @@ namespace Rift.Database
                             stat.CoinsSpent = dbStatistics.CoinsSpent + value;
 
                         inventoryEntry.Property(x => x.Coins).IsModified = true;
-                        RiftBot.Log.Info($"Modified {userId.ToString()}'s coin(s): ({coinsBefore.ToString()} => {inventory.Coins.ToString()})");
+                        RiftBot.Log.Info(
+                            $"Modified {userId.ToString()}'s coin(s): ({coinsBefore.ToString()} => {inventory.Coins.ToString()})");
                     }
                 }
 
@@ -345,7 +357,8 @@ namespace Rift.Database
                             stat.TokensSpent = dbStatistics.TokensSpent + value;
 
                         inventoryEntry.Property(x => x.Tokens).IsModified = true;
-                        RiftBot.Log.Info($"Modified {userId.ToString()}'s token(s): ({tokensBefore.ToString()} => {inventory.Tokens.ToString()})");
+                        RiftBot.Log.Info(
+                            $"Modified {userId.ToString()}'s token(s): ({tokensBefore.ToString()} => {inventory.Tokens.ToString()})");
                     }
                 }
 
@@ -364,7 +377,8 @@ namespace Rift.Database
                             stat.ChestsOpened = dbStatistics.ChestsOpened + value;
 
                         inventoryEntry.Property(x => x.Essence).IsModified = true;
-                        RiftBot.Log.Info($"Modified {userId.ToString()}'s essence: ({essenceBefore.ToString()} => {inventory.Essence.ToString()})");
+                        RiftBot.Log.Info(
+                            $"Modified {userId.ToString()}'s essence: ({essenceBefore.ToString()} => {inventory.Essence.ToString()})");
                     }
                 }
 
@@ -383,7 +397,8 @@ namespace Rift.Database
                             stat.ChestsOpened = dbStatistics.ChestsOpened + value;
 
                         inventoryEntry.Property(x => x.Chests).IsModified = true;
-                        RiftBot.Log.Info($"Modified {userId.ToString()}'s chest(s): ({chestsBefore.ToString()} => {inventory.Chests.ToString()})");
+                        RiftBot.Log.Info(
+                            $"Modified {userId.ToString()}'s chest(s): ({chestsBefore.ToString()} => {inventory.Chests.ToString()})");
                     }
                 }
 
@@ -402,7 +417,8 @@ namespace Rift.Database
                             stat.SpheresOpened = dbStatistics.SpheresOpened + value;
 
                         inventoryEntry.Property(x => x.Spheres).IsModified = true;
-                        RiftBot.Log.Info($"Modified {userId.ToString()}'s sphere(s): ({spheresBefore.ToString()} => {inventory.Spheres.ToString()})");
+                        RiftBot.Log.Info(
+                            $"Modified {userId.ToString()}'s sphere(s): ({spheresBefore.ToString()} => {inventory.Spheres.ToString()})");
                     }
                 }
 
@@ -421,7 +437,8 @@ namespace Rift.Database
                             stat.CapsulesOpened = dbStatistics.CapsulesOpened + value;
 
                         inventoryEntry.Property(x => x.Capsules).IsModified = true;
-                        RiftBot.Log.Info($"Modified {userId.ToString()}'s capsule(s): ({capsulesBefore.ToString()} => {inventory.Capsules.ToString()})");
+                        RiftBot.Log.Info(
+                            $"Modified {userId.ToString()}'s capsule(s): ({capsulesBefore.ToString()} => {inventory.Capsules.ToString()})");
                     }
                 }
 
@@ -440,7 +457,8 @@ namespace Rift.Database
                             stat.TicketsSpent = dbStatistics.TicketsSpent + value;
 
                         inventoryEntry.Property(x => x.Tickets).IsModified = true;
-                        RiftBot.Log.Info($"Modified {userId.ToString()}'s usual ticket(s): ({ticketsBefore.ToString()} => {inventory.Tickets.ToString()})");
+                        RiftBot.Log.Info(
+                            $"Modified {userId.ToString()}'s usual ticket(s): ({ticketsBefore.ToString()} => {inventory.Tickets.ToString()})");
                     }
                 }
 
@@ -459,7 +477,8 @@ namespace Rift.Database
                             stat.DoubleExpsActivated = dbStatistics.DoubleExpsActivated + value;
 
                         inventoryEntry.Property(x => x.BonusDoubleExp).IsModified = true;
-                        RiftBot.Log.Info($"Modified {userId.ToString()}'s doubleExp(s): ({doubleExpsBefore.ToString()} => {inventory.BonusDoubleExp.ToString()})");
+                        RiftBot.Log.Info(
+                            $"Modified {userId.ToString()}'s doubleExp(s): ({doubleExpsBefore.ToString()} => {inventory.BonusDoubleExp.ToString()})");
                     }
                 }
 
@@ -478,7 +497,8 @@ namespace Rift.Database
                             stat.BotRespectsActivated = dbStatistics.BotRespectsActivated + value;
 
                         inventoryEntry.Property(x => x.BonusBotRespect).IsModified = true;
-                        RiftBot.Log.Info($"Modified {userId.ToString()}'s respect(s): ({respectsBefore.ToString()} => {inventory.BonusBotRespect.ToString()})");
+                        RiftBot.Log.Info(
+                            $"Modified {userId.ToString()}'s respect(s): ({respectsBefore.ToString()} => {inventory.BonusBotRespect.ToString()})");
                     }
                 }
 
@@ -497,7 +517,8 @@ namespace Rift.Database
                             stat.RewindsActivated = dbStatistics.RewindsActivated + value;
 
                         inventoryEntry.Property(x => x.BonusRewind).IsModified = true;
-                        RiftBot.Log.Info($"Modified {userId.ToString()}'s rewind(s): ({rewindsBefore.ToString()} => {inventory.BonusRewind.ToString()})");
+                        RiftBot.Log.Info(
+                            $"Modified {userId.ToString()}'s rewind(s): ({rewindsBefore.ToString()} => {inventory.BonusRewind.ToString()})");
                     }
                 }
 

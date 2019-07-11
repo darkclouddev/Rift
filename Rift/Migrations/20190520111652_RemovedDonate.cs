@@ -7,15 +7,15 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Donate",
-                table: "Users");
+                "Donate",
+                "Users");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<decimal>(
-                name: "Donate",
-                table: "Users",
+                "Donate",
+                "Users",
                 nullable: false,
                 defaultValue: 0m);
         }

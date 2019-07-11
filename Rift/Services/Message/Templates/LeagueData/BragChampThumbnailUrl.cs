@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.LeagueData
 {
     public class BragChampThumbnailUrl : TemplateBase
     {
-        public BragChampThumbnailUrl() : base(nameof(BragChampThumbnailUrl)) {}
+        public BragChampThumbnailUrl() : base(nameof(BragChampThumbnailUrl))
+        {
+        }
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

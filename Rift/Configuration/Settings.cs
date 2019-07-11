@@ -38,6 +38,7 @@ namespace Rift.Configuration
         {
             App = await LoadSettingsAsync<App>(SettingsType.App);
         }
+
         public static async Task SaveAppAsync()
         {
             await SaveAsync(SettingsType.App, App);
@@ -47,6 +48,7 @@ namespace Rift.Configuration
         {
             ChannelId = await LoadSettingsAsync<ChannelId>(SettingsType.ChannelId);
         }
+
         public static async Task SaveChannelsAsync()
         {
             await SaveAsync(SettingsType.ChannelId, ChannelId);
@@ -56,6 +58,7 @@ namespace Rift.Configuration
         {
             Chat = await LoadSettingsAsync<Chat>(SettingsType.Chat);
         }
+
         public static async Task SaveChatAsync()
         {
             await SaveAsync(SettingsType.Chat, Chat);
@@ -65,6 +68,7 @@ namespace Rift.Configuration
         {
             Economy = await LoadSettingsAsync<Economy>(SettingsType.Economy);
         }
+
         public static async Task SaveEconomyAsync()
         {
             await SaveAsync(SettingsType.Economy, Economy);
@@ -74,6 +78,7 @@ namespace Rift.Configuration
         {
             RoleId = await LoadSettingsAsync<RoleId>(SettingsType.RoleId);
         }
+
         public static async Task SaveRolesAsync()
         {
             await SaveAsync(SettingsType.RoleId, RoleId);
@@ -83,6 +88,7 @@ namespace Rift.Configuration
         {
             Thumbnail = await LoadSettingsAsync<Thumbnail>(SettingsType.Thumbnail);
         }
+
         public static async Task SaveThumbnailsAsync()
         {
             await SaveAsync(SettingsType.Thumbnail, Thumbnail);

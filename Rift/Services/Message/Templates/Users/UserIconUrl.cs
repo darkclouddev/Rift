@@ -9,7 +9,9 @@ namespace Rift.Services.Message.Templates.Users
 {
     public class UserIconUrl : TemplateBase
     {
-        public UserIconUrl() : base(nameof(UserIconUrl)) {}
+        public UserIconUrl() : base(nameof(UserIconUrl))
+        {
+        }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

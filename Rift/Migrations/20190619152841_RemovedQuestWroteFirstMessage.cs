@@ -7,24 +7,24 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "WroteFirstMessage",
-                table: "Quests");
+                "WroteFirstMessage",
+                "Quests");
 
             migrationBuilder.DropColumn(
-                name: "WroteFirstMessage",
-                table: "QuestProgress");
+                "WroteFirstMessage",
+                "QuestProgress");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<uint>(
-                name: "WroteFirstMessage",
-                table: "Quests",
+                "WroteFirstMessage",
+                "Quests",
                 nullable: true);
 
             migrationBuilder.AddColumn<uint>(
-                name: "WroteFirstMessage",
-                table: "QuestProgress",
+                "WroteFirstMessage",
+                "QuestProgress",
                 nullable: true);
         }
     }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Rift.Data.Models;
 
 using Discord.WebSocket;
+
 using IonicLib;
 
 namespace Rift.Services
@@ -17,32 +18,36 @@ namespace Rift.Services
             emotes = new ConcurrentDictionary<string, Emote>();
         }
 
-        public Task AddEmotesFromGuild(SocketGuild guild)
+        public async Task AddEmotesFromGuild(SocketGuild guild)
         {
             foreach (var emote in guild.Emotes)
-            {
                 if (!emotes.TryAdd($"$emote{emote.Name}", new Emote(emote.Id, emote.Name, emote.Url)))
                 {
-                    RiftBot.Log.Error(emotes.ContainsKey(emote.Name)
-                        ? $"[{nameof(EmoteService)}] Duplicate emote \"{emote.Name}\" from {guild.Name}, skipping."
-                        : $"[{nameof(EmoteService)}] Failed to add emote \"{emote.Name}\" from {guild.Name}.");
-                }
-            }
+                    if (emotes.ContainsKey(emote.Name))
+                    {
+                        var msg = $"Duplicate emote \"{emote.Name}\" from {guild.Name}, skipping.";
 
-            //RiftBot.Log.Info($"{nameof(EmoteService)} Loaded {guild.Emotes.Count.ToString()} emote(s) from {guild.Name}");
-            return Task.CompletedTask;
+                        await RiftBot.SendMessageToAdmins(msg);
+                        RiftBot.Log.Error($"[{nameof(EmoteService)}] {msg}.");
+                    }
+                    else
+                    {
+                        var msg = $"Failed to add emote \"{emote.Name}\" from {guild.Name}.";
+
+                        await RiftBot.SendMessageToAdmins(msg);
+                        RiftBot.Log.Error($"[{nameof(EmoteService)}] {msg}");
+                    }
+                }
         }
 
         public Task ReloadEmotesAsync()
         {
             emotes.Clear();
 
-            foreach (var guild in IonicClient.Client.Guilds)
-            {
-                AddEmotesFromGuild(guild);
-            }
+            foreach (var guild in IonicClient.Client.Guilds) AddEmotesFromGuild(guild);
 
-            RiftBot.Log.Info($"{nameof(EmoteService)} Loaded {emotes.Count.ToString()} emote(s) from {IonicClient.Client.Guilds.Count.ToString()} guild(s)");
+            RiftBot.Log.Info(
+                $"{nameof(EmoteService)} Loaded {emotes.Count.ToString()} emote(s) from {IonicClient.Client.Guilds.Count.ToString()} guild(s)");
             return Task.CompletedTask;
         }
 
@@ -105,7 +110,7 @@ namespace Rift.Services
         {
             Id = id;
             Name = name;
-            Url = $"https://cdn.discordapp.com/emojis/{Id}.png";
+            Url = $"https://cdn.discordapp.com/emojis/{Id.ToString()}.png";
         }
 
         public Emote(ulong id, string name, string url)

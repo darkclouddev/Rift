@@ -38,7 +38,7 @@ namespace Rift.Services.Reward
                 Coins = amount;
             else
                 Coins += amount;
-            
+
             return this;
         }
 
@@ -46,7 +46,7 @@ namespace Rift.Services.Reward
         {
             if (!Coins.HasValue)
                 Coins = 0u;
-            
+
             Coins += Helper.NextUInt(min, max);
             return this;
         }
@@ -57,7 +57,7 @@ namespace Rift.Services.Reward
                 Tokens = amount;
             else
                 Tokens += amount;
-            
+
             return this;
         }
 
@@ -65,7 +65,7 @@ namespace Rift.Services.Reward
         {
             if (!Tokens.HasValue)
                 Tokens = 0u;
-            
+
             Tokens += Helper.NextUInt(min, max);
             return this;
         }
@@ -76,7 +76,7 @@ namespace Rift.Services.Reward
                 Chests = amount;
             else
                 Chests += amount;
-            
+
             return this;
         }
 
@@ -84,7 +84,7 @@ namespace Rift.Services.Reward
         {
             if (!Chests.HasValue)
                 Chests = 0u;
-            
+
             Chests += Helper.NextUInt(min, max);
             return this;
         }
@@ -95,7 +95,7 @@ namespace Rift.Services.Reward
                 Spheres = amount;
             else
                 Spheres += amount;
-            
+
             return this;
         }
 
@@ -103,7 +103,7 @@ namespace Rift.Services.Reward
         {
             if (!Spheres.HasValue)
                 Spheres = 0u;
-            
+
             Spheres += Helper.NextUInt(min, max);
             return this;
         }
@@ -114,7 +114,7 @@ namespace Rift.Services.Reward
                 Capsules = amount;
             else
                 Capsules += amount;
-            
+
             return this;
         }
 
@@ -122,7 +122,7 @@ namespace Rift.Services.Reward
         {
             if (!Capsules.HasValue)
                 Capsules = 0u;
-            
+
             Capsules += Helper.NextUInt(min, max);
             return this;
         }
@@ -133,7 +133,7 @@ namespace Rift.Services.Reward
                 Tickets = amount;
             else
                 Tickets += amount;
-            
+
             return this;
         }
 
@@ -141,7 +141,7 @@ namespace Rift.Services.Reward
         {
             if (!Tickets.HasValue)
                 Tickets = 0u;
-            
+
             Tickets += Helper.NextUInt(min, max);
             return this;
         }
@@ -152,7 +152,7 @@ namespace Rift.Services.Reward
                 DoubleExps = amount;
             else
                 DoubleExps += amount;
-            
+
             return this;
         }
 
@@ -160,7 +160,7 @@ namespace Rift.Services.Reward
         {
             if (!DoubleExps.HasValue)
                 DoubleExps = 0u;
-            
+
             DoubleExps += Helper.NextUInt(min, max);
             return this;
         }
@@ -171,7 +171,7 @@ namespace Rift.Services.Reward
                 BotRespects = amount;
             else
                 BotRespects += amount;
-            
+
             return this;
         }
 
@@ -179,7 +179,7 @@ namespace Rift.Services.Reward
         {
             if (!BotRespects.HasValue)
                 BotRespects = 0u;
-            
+
             BotRespects += Helper.NextUInt(min, max);
             return this;
         }
@@ -190,7 +190,7 @@ namespace Rift.Services.Reward
                 Rewinds = amount;
             else
                 Rewinds += amount;
-            
+
             return this;
         }
 
@@ -198,7 +198,7 @@ namespace Rift.Services.Reward
         {
             if (!Rewinds.HasValue)
                 Rewinds = 0u;
-            
+
             Rewinds += Helper.NextUInt(min, max);
             return this;
         }
@@ -223,7 +223,7 @@ namespace Rift.Services.Reward
         {
             var emotes = RiftBot.GetService<EmoteService>();
             var sb = new StringBuilder();
-            
+
             if (Coins.HasValue) sb.Append($"{emotes.GetEmoteString("$emotecoins")} {Coins.Value.ToString()} ");
             if (Tokens.HasValue) sb.Append($"{emotes.GetEmoteString("$emotetokens")} {Tokens.Value.ToString()} ");
             if (Chests.HasValue) sb.Append($"{emotes.GetEmoteString("$emotechest")} {Chests.Value.ToString()} ");
@@ -231,7 +231,8 @@ namespace Rift.Services.Reward
             if (Capsules.HasValue) sb.Append($"{emotes.GetEmoteString("$emotecapsule")} {Capsules.Value.ToString()} ");
             if (Tickets.HasValue) sb.Append($"{emotes.GetEmoteString("$emoteticket")} {Tickets.Value.ToString()} ");
             if (DoubleExps.HasValue) sb.Append($"{emotes.GetEmoteString("$emote2exp")} {DoubleExps.Value.ToString()} ");
-            if (BotRespects.HasValue) sb.Append($"{emotes.GetEmoteString("$emoterespect")} {BotRespects.Value.ToString()} ");
+            if (BotRespects.HasValue)
+                sb.Append($"{emotes.GetEmoteString("$emoterespect")} {BotRespects.Value.ToString()} ");
             if (Rewinds.HasValue) sb.Append($"{emotes.GetEmoteString("$emoterewind")} {Rewinds.Value.ToString()} ");
 
             return sb.ToString().TrimEnd();
@@ -240,7 +241,7 @@ namespace Rift.Services.Reward
         public string ToPlainString()
         {
             var sb = new StringBuilder();
-            
+
             if (Coins.HasValue) sb.Append($"{nameof(Coins)} {Coins.Value.ToString()} ");
             if (Tokens.HasValue) sb.Append($"{nameof(Tokens)} {Tokens.Value.ToString()} ");
             if (Chests.HasValue) sb.Append($"{nameof(Chests)} {Chests.Value.ToString()} ");

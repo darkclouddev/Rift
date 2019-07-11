@@ -8,6 +8,7 @@ using Rift.Services.Reward;
 using Rift.Util;
 
 using Humanizer;
+
 using IonicLib;
 using IonicLib.Extensions;
 
@@ -35,19 +36,13 @@ namespace Rift.Services
             RiftBot.Log.Info("Starting BotRespectService..");
 
             Starttimer = new Timer(
-                async delegate
-                {
-                    await InitTimer();
-                },
+                async delegate { await InitTimer(); },
                 null,
                 TimeSpan.FromSeconds(30),
                 TimeSpan.Zero);
 
             timer = new Timer(
-                async delegate
-                {
-                    await StartBotGifts();
-                },
+                async delegate { await StartBotGifts(); },
                 null,
                 Timeout.Infinite,
                 0);
@@ -60,7 +55,8 @@ namespace Rift.Services
             var nextGiftsTimeSpan = Helper.NextUInt(210, 330) * 60;
             timer.Change(TimeSpan.FromSeconds(nextGiftsTimeSpan), TimeSpan.Zero);
 
-            RiftBot.Log.Debug($"Next gifts: {Helper.FromTimestamp(Helper.CurrentUnixTimestamp + nextGiftsTimeSpan).Humanize()}");
+            RiftBot.Log.Debug(
+                $"Next gifts: {Helper.FromTimestamp(Helper.CurrentUnixTimestamp + nextGiftsTimeSpan).Humanize()}");
 
             return Task.CompletedTask;
         }
@@ -82,14 +78,17 @@ namespace Rift.Services
                     await reward.DeliverToAsync(userId);
                 }
 
-                if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var commsChannel))
+                if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms,
+                                                out var commsChannel))
                     return;
 
                 var rewardMsg = await RiftBot.GetMessageAsync("botrespect-success", null);
                 await commsChannel.SendIonicMessageAsync(rewardMsg);
             }
             else
+            {
                 RiftBot.Log.Debug("There was no users with bot respect");
+            }
 
             RiftBot.Log.Debug("Finished sending gifts");
 

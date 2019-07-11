@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Discord;
 using Discord.Rest;
 using Discord.WebSocket;
+
 using IonicLib;
+
 using Rift.Database;
+
 using Settings = Rift.Configuration.Settings;
 
 namespace Rift.Services
@@ -22,10 +26,7 @@ namespace Rift.Services
         {
             client.UserVoiceStateUpdated += ManageChannelsAsync;
             voiceUptimeTimer = new Timer(
-                async delegate
-                {
-                    await UpdateUsersVoiceUptimeAsync();
-                },
+                async delegate { await UpdateUsersVoiceUptimeAsync(); },
                 null,
                 TimeSpan.FromSeconds(15),
                 VoiceRewardsInterval);
@@ -45,14 +46,12 @@ namespace Rift.Services
                 {
                     await sgUser.ModifyAsync(x => { x.Channel = channel; });
 
-                    if (sgUser.VoiceChannel is null)
-                    {
-                        await channel.DeleteAsync();
-                    }
+                    if (sgUser.VoiceChannel is null) await channel.DeleteAsync();
                 }
             }
 
-            var leftChannel = !prevChannelNull && (nextChannelNull || toState.VoiceChannel.Id != fromState.VoiceChannel.Id);
+            var leftChannel = !prevChannelNull &&
+                              (nextChannelNull || toState.VoiceChannel.Id != fromState.VoiceChannel.Id);
 
             if (leftChannel)
             {
@@ -91,28 +90,25 @@ namespace Rift.Services
                 return;
 
             var channels = guild.VoiceChannels
-                .Where(x => x.CategoryId == VoiceCategoryId && x.Id != Settings.ChannelId.VoiceSetup)
-                .ToList();
+                                .Where(x => x.CategoryId == VoiceCategoryId && x.Id != Settings.ChannelId.VoiceSetup)
+                                .ToList();
 
             if (!channels.Any())
                 return;
 
             var users = new List<ulong>();
 
-            foreach (var channel in channels)
-            {
-                users.AddRange(channel.Users.Select(x => x.Id));
-            }
+            foreach (var channel in channels) users.AddRange(channel.Users.Select(x => x.Id));
 
             if (!users.Any())
                 return;
 
-            var reward = new InventoryData { Coins = 1u };
+            var reward = new InventoryData {Coins = 1u};
 
             foreach (var userId in users)
             {
                 await DB.Inventory.AddAsync(userId, reward);
-                await DB.Statistics.AddAsync(userId, new StatisticData { VoiceUptime = VoiceRewardsInterval });
+                await DB.Statistics.AddAsync(userId, new StatisticData {VoiceUptime = VoiceRewardsInterval});
             }
 
             RiftBot.Log.Info($"Gived out voice online rewards for {users.Count.ToString()} user(s).");

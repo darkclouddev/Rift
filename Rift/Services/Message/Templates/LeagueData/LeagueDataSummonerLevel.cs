@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.LeagueData
 {
     public class LeagueDataSummonerLevel : TemplateBase
     {
-        public LeagueDataSummonerLevel() : base(nameof(LeagueDataSummonerLevel)) {}
+        public LeagueDataSummonerLevel() : base(nameof(LeagueDataSummonerLevel))
+        {
+        }
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

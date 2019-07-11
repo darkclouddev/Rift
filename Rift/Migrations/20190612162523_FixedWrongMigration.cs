@@ -7,74 +7,74 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Rewards_Giveaways_GiveawayName",
-                table: "Rewards");
+                "FK_Rewards_Giveaways_GiveawayName",
+                "Rewards");
 
             migrationBuilder.DropIndex(
-                name: "IX_Rewards_GiveawayName",
-                table: "Rewards");
+                "IX_Rewards_GiveawayName",
+                "Rewards");
 
             migrationBuilder.DropColumn(
-                name: "GiveawayName",
-                table: "Rewards");
+                "GiveawayName",
+                "Rewards");
 
             migrationBuilder.RenameColumn(
-                name: "MessageId",
-                table: "Giveaways",
-                newName: "StoredMessageId");
+                "MessageId",
+                "Giveaways",
+                "StoredMessageId");
 
             migrationBuilder.RenameColumn(
-                name: "MessageId",
-                table: "ActiveGiveaways",
-                newName: "ChannelMessageId");
+                "MessageId",
+                "ActiveGiveaways",
+                "ChannelMessageId");
 
             migrationBuilder.RenameColumn(
-                name: "GiveawayId",
-                table: "ActiveGiveaways",
-                newName: "StoredMessageId");
+                "GiveawayId",
+                "ActiveGiveaways",
+                "StoredMessageId");
 
             migrationBuilder.AddColumn<string>(
-                name: "GiveawayName",
-                table: "ActiveGiveaways",
+                "GiveawayName",
+                "ActiveGiveaways",
                 nullable: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "GiveawayName",
-                table: "ActiveGiveaways");
+                "GiveawayName",
+                "ActiveGiveaways");
 
             migrationBuilder.RenameColumn(
-                name: "StoredMessageId",
-                table: "Giveaways",
-                newName: "MessageId");
+                "StoredMessageId",
+                "Giveaways",
+                "MessageId");
 
             migrationBuilder.RenameColumn(
-                name: "StoredMessageId",
-                table: "ActiveGiveaways",
-                newName: "GiveawayId");
+                "StoredMessageId",
+                "ActiveGiveaways",
+                "GiveawayId");
 
             migrationBuilder.RenameColumn(
-                name: "ChannelMessageId",
-                table: "ActiveGiveaways",
-                newName: "MessageId");
+                "ChannelMessageId",
+                "ActiveGiveaways",
+                "MessageId");
 
             migrationBuilder.AddColumn<string>(
-                name: "GiveawayName",
-                table: "Rewards",
+                "GiveawayName",
+                "Rewards",
                 nullable: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Rewards_GiveawayName",
-                table: "Rewards",
-                column: "GiveawayName");
+                "IX_Rewards_GiveawayName",
+                "Rewards",
+                "GiveawayName");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Rewards_Giveaways_GiveawayName",
-                table: "Rewards",
-                column: "GiveawayName",
-                principalTable: "Giveaways",
+                "FK_Rewards_Giveaways_GiveawayName",
+                "Rewards",
+                "GiveawayName",
+                "Giveaways",
                 principalColumn: "Name",
                 onDelete: ReferentialAction.Restrict);
         }

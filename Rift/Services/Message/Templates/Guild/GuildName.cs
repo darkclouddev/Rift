@@ -9,7 +9,9 @@ namespace Rift.Services.Message.Templates.Guild
 {
     public class GuildName : TemplateBase
     {
-        public GuildName() : base(nameof(GuildName)) {}
+        public GuildName() : base(nameof(GuildName))
+        {
+        }
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

@@ -104,7 +104,7 @@ namespace Rift.Data.Models
                 }
             }
         }
-        
+
         public async Task DeliverToAsync(ulong userId)
         {
             var itemReward = ItemReward;
@@ -154,10 +154,7 @@ namespace Rift.Data.Models
             {
                 var roleReward = RoleReward;
 
-                if (!(roleReward is null))
-                {
-                    reward = roleReward;
-                }
+                if (!(roleReward is null)) reward = roleReward;
             }
             else
             {

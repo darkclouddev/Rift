@@ -5,13 +5,16 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Settings = Rift.Configuration.Settings;
+
 using Rift.Data.Models;
 using Rift.Database;
 using Rift.Events;
 using Rift.Services.Message;
 
 using Discord;
+
 using Humanizer;
+
 using IonicLib;
 using IonicLib.Extensions;
 
@@ -20,10 +23,10 @@ namespace Rift.Services
     public class GiveawayService
     {
         public static event EventHandler<GiveawaysParticipatedEventArgs> GiveawaysParticipated;
-        
+
         Timer eventTimer;
         readonly CultureInfo schedulerCulture;
-        
+
         public GiveawayService()
         {
             schedulerCulture = new CultureInfo("en-US");
@@ -34,7 +37,7 @@ namespace Rift.Services
         {
             eventTimer = new Timer(async delegate { await CheckExpiredAsync(); }, null, delay, TimeSpan.Zero);
         }
-        
+
         async Task ScheduleTimerToClosest()
         {
             var closest = await DB.ActiveGiveaways.GetClosestAsync();
@@ -44,11 +47,11 @@ namespace Rift.Services
 
             if (DateTime.UtcNow > closest.DueTime)
                 return;
-            
+
             var ts = closest.DueTime - DateTime.UtcNow;
 
             RiftBot.Log.Info($"Giveaway tracker scheduled to {closest.DueTime.Humanize(culture: schedulerCulture)}.");
-            
+
             eventTimer.Change(ts, TimeSpan.Zero);
         }
 
@@ -62,10 +65,7 @@ namespace Rift.Services
                 return;
             }
 
-            foreach (var giveaway in expiredEvents)
-            {
-                await FinishGiveawayAsync(giveaway);
-            }
+            foreach (var giveaway in expiredEvents) await FinishGiveawayAsync(giveaway);
 
             var all = await DB.ActiveGiveaways.GetAllAsync();
 
@@ -75,12 +75,12 @@ namespace Rift.Services
             await ScheduleTimerToClosest().ConfigureAwait(false);
         }
 
-        async Task FinishGiveawayAsync(RiftGiveawayActive expiredGiveaway)
+        async Task FinishGiveawayAsync(RiftActiveGiveaway expiredGiveaway)
         {
             var dbGiveaway = await DB.Giveaways.GetAsync(expiredGiveaway.GiveawayName);
 
             var giveawayData = $"ID {expiredGiveaway.Id.ToString()} \"{expiredGiveaway.GiveawayName}\"";
-            
+
             if (dbGiveaway is null)
             {
                 RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: {nameof(RiftGiveaway)} is null!");
@@ -93,7 +93,7 @@ namespace Rift.Services
                 return;
             }
 
-            var message = (IUserMessage)await channel.GetMessageAsync(expiredGiveaway.ChannelMessageId);
+            var message = (IUserMessage) await channel.GetMessageAsync(expiredGiveaway.ChannelMessageId);
 
             if (message is null)
             {
@@ -110,7 +110,7 @@ namespace Rift.Services
             // Reaction amount is limited by discord itself.
             // See https://discordapp.com/developers/docs/resources/channel#get-reactions
             var reactions = await message.GetReactionUsersAsync(emote, 100).FlattenAsync();
-            
+
             if (reactions is null)
             {
                 RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: Unable to get reactions.");
@@ -118,31 +118,32 @@ namespace Rift.Services
             }
 
             var dbReward = await DB.Rewards.GetAsync(dbGiveaway.RewardId);
-            
+
             if (dbReward is null)
             {
                 RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: " +
                                   $"Unable to get reward ID {dbGiveaway.RewardId.ToString()}.");
                 return;
             }
-            
+
             var reward = dbReward.ToRewardBase();
-            
+
             var participants = reactions
-                .Where(x => !x.IsBot && x.Id != IonicClient.Client.CurrentUser.Id)
-                .Select(x => x.Id)
-                .ToArray();
-            
+                               .Where(x => !x.IsBot && x.Id != IonicClient.Client.CurrentUser.Id)
+                               .Select(x => x.Id)
+                               .ToArray();
+
             if (participants.Length == 0)
             {
                 await LogGiveawayAsync(dbGiveaway.Name, null, null,
-                    dbReward.ToPlainString(), expiredGiveaway.StartedBy, expiredGiveaway.StartedAt, dbGiveaway.Duration);
+                                       dbReward.ToPlainString(), expiredGiveaway.StartedBy, expiredGiveaway.StartedAt,
+                                       dbGiveaway.Duration);
                 await DB.ActiveGiveaways.RemoveAsync(expiredGiveaway.Id);
 
                 RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: No participants.");
                 return;
             }
-            
+
             var winners = new ulong[dbGiveaway.WinnersAmount];
 
             if (participants.Length < dbGiveaway.WinnersAmount)
@@ -159,31 +160,25 @@ namespace Rift.Services
             else
             {
                 ulong winnerId;
-                
+
                 for (var i = 0; i < dbGiveaway.WinnersAmount; i++)
                 {
                     do
                     {
                         winnerId = participants.Random();
-                    }
-                    while (winners.Contains(winnerId));
-                    
+                    } while (winners.Contains(winnerId));
+
                     winners[i] = winnerId;
                 }
             }
 
-            foreach (var winner in winners)
-            {
-                await reward.DeliverToAsync(winner);
-            }
-            
+            foreach (var winner in winners) await reward.DeliverToAsync(winner);
+
             await DB.ActiveGiveaways.RemoveAsync(expiredGiveaway.Id);
 
             foreach (var participant in participants)
-            {
                 GiveawaysParticipated?.Invoke(null, new GiveawaysParticipatedEventArgs(participant));
-            }
-            
+
             var log = new RiftGiveawayLog
             {
                 Name = dbGiveaway.Name,
@@ -208,13 +203,12 @@ namespace Rift.Services
 
             await LogGiveawayAsync(log).ConfigureAwait(false);
         }
-        
+
         public async Task StartGiveawayAsync(string name, ulong startedById)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
                 RiftBot.Log.Warn("Empty giveaway name, skipping execution.");
-                await RiftBot.SendMessageToDevelopers(new IonicMessage("Не указано название розыгрыша!"));
                 return;
             }
 
@@ -223,7 +217,6 @@ namespace Rift.Services
             if (giveaway is null)
             {
                 RiftBot.Log.Warn("Wrong giveaway name, skipping execution.");
-                await RiftBot.SendMessageToDevelopers(new IonicMessage($"Розыгрыш с названием \"{name}\" отсутствует в моей базе данных."));
                 return;
             }
 
@@ -232,8 +225,6 @@ namespace Rift.Services
             if (msg is null)
             {
                 RiftBot.Log.Warn("Wrong giveaway message ID, skipping execution.");
-                await RiftBot.SendMessageToDevelopers(new IonicMessage(
-                    $"В настройках розыгрыша указан неверный ID сообщения: ({giveaway.StoredMessageId.ToString()})."));
                 return;
             }
 
@@ -242,8 +233,6 @@ namespace Rift.Services
             if (dbReward is null)
             {
                 RiftBot.Log.Warn("Wrong giveaway reward ID, skipping execution.");
-                await RiftBot.SendMessageToDevelopers(new IonicMessage(
-                    $"В настройках розыгрыша указан неверный ID награды: ({giveaway.RewardId.ToString()})."));
                 return;
             }
 
@@ -252,11 +241,10 @@ namespace Rift.Services
             if (!IonicClient.GetEmote(Settings.App.MainGuildId, "smite", out var smite))
             {
                 RiftBot.Log.Warn("No giveaway emote, skipping execution.");
-                await RiftBot.SendMessageToDevelopers(new IonicMessage("Невозможно найти эмоцию: smite"));
                 return;
             }
 
-            var activeGiveaway = new RiftGiveawayActive
+            var activeGiveaway = new RiftActiveGiveaway
             {
                 GiveawayName = giveaway.Name,
                 StoredMessageId = giveaway.StoredMessageId,
@@ -265,23 +253,24 @@ namespace Rift.Services
                 DueTime = DateTime.UtcNow + giveaway.Duration,
             };
 
-            var formattedMsg = await RiftBot.GetService<MessageService>().FormatMessageAsync(msg, new FormatData(startedById)
-            {
-                Giveaway = new GiveawayData
+            var formattedMsg = await RiftBot.GetService<MessageService>().FormatMessageAsync(
+                msg, new FormatData(startedById)
                 {
-                    Stored = giveaway
-                },
-                Reward = reward
-            });
-            
+                    Giveaway = new GiveawayData
+                    {
+                        Stored = giveaway
+                    },
+                    Reward = reward
+                });
+
             var giveawayMessage = await RiftBot.SendChatMessageAsync(formattedMsg).ConfigureAwait(false);
 
             activeGiveaway.ChannelMessageId = giveawayMessage.Id;
-            
+
             await DB.ActiveGiveaways.AddAsync(activeGiveaway).ConfigureAwait(false);
-            
+
             await giveawayMessage.AddReactionAsync(smite);
-            
+
             await ScheduleTimerToClosest().ConfigureAwait(false);
         }
 
@@ -292,13 +281,11 @@ namespace Rift.Services
             if (dbReward is null)
             {
                 RiftBot.Log.Warn("Wrong reward ID, skipping execution.");
-                await RiftBot.SendMessageToDevelopers(new IonicMessage(
-                    $"Неверный ID награды в роызгрыша по билетам: ({rewardId.ToString()})."));
                 return;
             }
 
             var reward = dbReward.ToRewardBase();
-            
+
             var usersWithTickets = await DB.Inventory.GetAsync(x => x.Tickets > 0);
 
             if (usersWithTickets is null || usersWithTickets.Count == 0)
@@ -306,11 +293,12 @@ namespace Rift.Services
                 RiftBot.Log.Warn("No users with tickets, skipping execution.");
                 return;
             }
-            
-            RiftBot.Log.Info($"Ticket giveaway started for {usersWithTickets.Count.ToString()}, reward ID {rewardId.ToString()}.");
 
-            var removeInv = new InventoryData { Tickets = 1u };
-            
+            RiftBot.Log.Info(
+                $"Ticket giveaway started for {usersWithTickets.Count.ToString()}, reward ID {rewardId.ToString()}.");
+
+            var removeInv = new InventoryData {Tickets = 1u};
+
             foreach (var userInventory in usersWithTickets)
             {
                 //await DB.Inventory.RemoveAsync(userInventory.UserId, removeInv); // too slow on tunnel db connection
@@ -336,7 +324,7 @@ namespace Rift.Services
             var log = new RiftGiveawayLog
             {
                 Name = "Ticket Giveaway",
-                Winners = new [] { winnerId },
+                Winners = new[] {winnerId},
                 Participants = usersWithTickets.Select(x => x.UserId).ToArray(),
                 Reward = dbReward.ToPlainString(),
                 StartedBy = startedBy,
@@ -344,25 +332,26 @@ namespace Rift.Services
                 Duration = TimeSpan.Zero,
                 FinishedAt = DateTime.UtcNow,
             };
-            
+
             await DB.GiveawayLogs.AddAsync(log);
         }
 
         public async Task GiveTicketsToLowLevelUsersAsync(ulong startedBy)
         {
             var affectedRows = await DB.Inventory.GiveTicketsToUsersAsync();
-            
+
             RiftBot.Log.Info($"Gived tickets to {affectedRows.ToString()} users");
 
             await RiftBot.SendChatMessageAsync("ticket-charity-success", new FormatData(startedBy));
         }
-        
+
         static async Task LogGiveawayAsync(RiftGiveawayLog log)
         {
             await DB.GiveawayLogs.AddAsync(log);
         }
-        
-        static async Task LogGiveawayAsync(string name, ulong[] winners, ulong[] participants, string rewardPlain, ulong startedBy, DateTime startedAt, TimeSpan duration)
+
+        static async Task LogGiveawayAsync(string name, ulong[] winners, ulong[] participants, string rewardPlain,
+                                           ulong startedBy, DateTime startedAt, TimeSpan duration)
         {
             var log = new RiftGiveawayLog
             {

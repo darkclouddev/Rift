@@ -1,6 +1,6 @@
 ﻿namespace Rift.Data.Models
 {
-    public class RiftLolData
+    public class RiftLeagueData
     {
         public ulong UserId { get; set; }
         public string SummonerRegion { get; set; } = "";

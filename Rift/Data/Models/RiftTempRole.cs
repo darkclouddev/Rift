@@ -28,7 +28,8 @@ namespace Rift.Data.Models
 
         public override string ToString()
         {
-            return $"RiftTempRole: {nameof(UserId)}: {UserId.ToString()}, {nameof(RoleId)}: {RoleId.ToString()}, {nameof(ExpirationTime)}: {ExpirationTime.Humanize()}";
+            return
+                $"RiftTempRole: {nameof(UserId)}: {UserId.ToString()}, {nameof(RoleId)}: {RoleId.ToString()}, {nameof(ExpirationTime)}: {ExpirationTime.Humanize()}";
         }
     }
 }

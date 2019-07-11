@@ -24,7 +24,10 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.MessageMappings.FirstOrDefaultAsync(x =>
-                    x.Identifier.Equals(identifier, StringComparison.InvariantCultureIgnoreCase));
+                                                                             x.Identifier.Equals(
+                                                                                 identifier,
+                                                                                 StringComparison
+                                                                                     .InvariantCultureIgnoreCase));
             }
         }
 
@@ -33,7 +36,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.StoredMessages
-                    .FirstOrDefaultAsync(x => x.Id == id);
+                                    .FirstOrDefaultAsync(x => x.Id == id);
             }
         }
     }

@@ -415,7 +415,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Statistics
-                    .FirstAsync(x => x.UserId == userId);
+                                    .FirstAsync(x => x.UserId == userId);
             }
         }
     }

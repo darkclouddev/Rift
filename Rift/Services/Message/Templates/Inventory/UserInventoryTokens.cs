@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.Inventory
 {
     public class UserInventoryTokens : TemplateBase
     {
-        public UserInventoryTokens() : base(nameof(UserInventoryTokens)) {}
+        public UserInventoryTokens() : base(nameof(UserInventoryTokens))
+        {
+        }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

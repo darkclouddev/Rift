@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.Economy
 {
     public class BragResult : TemplateBase
     {
-        public BragResult() : base(nameof(BragResult)) {}
+        public BragResult() : base(nameof(BragResult))
+        {
+        }
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

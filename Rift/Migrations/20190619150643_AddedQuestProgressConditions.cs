@@ -7,13 +7,13 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
-                name: "RewardId",
-                table: "Quests",
+                "RewardId",
+                "Quests",
                 nullable: true);
 
             migrationBuilder.AddColumn<bool>(
-                name: "IsCompleted",
-                table: "QuestProgress",
+                "IsCompleted",
+                "QuestProgress",
                 nullable: false,
                 defaultValue: false);
         }
@@ -21,12 +21,12 @@ namespace Rift.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "RewardId",
-                table: "Quests");
+                "RewardId",
+                "Quests");
 
             migrationBuilder.DropColumn(
-                name: "IsCompleted",
-                table: "QuestProgress");
+                "IsCompleted",
+                "QuestProgress");
         }
     }
 }

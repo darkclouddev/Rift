@@ -13,6 +13,7 @@ using Rift.Util;
 
 using Discord;
 using Discord.WebSocket;
+
 using IonicLib;
 using IonicLib.Extensions;
 
@@ -74,9 +75,9 @@ namespace Rift.Services
 
             for (var i = 0; i < rareEventDays.Length; i++)
             {
-                var ratio = (int)Math.Floor((double) daysInMonth / rareEventsAmount);
+                var ratio = (int) Math.Floor((double) daysInMonth / rareEventsAmount);
                 var min = i * ratio;
-                var max = (i+1) * ratio;
+                var max = (i + 1) * ratio;
 
                 rareEventDays[i] = Helper.NextInt(min, max + 1);
             }
@@ -149,9 +150,9 @@ namespace Rift.Services
         static TimeSpan GetEventTime(TimeSpan start, TimeSpan maxDeviation)
         {
             var minimum = start - maxDeviation;
-            var diff = (int)(maxDeviation * 2).TotalMinutes;
+            var diff = (int) (maxDeviation * 2).TotalMinutes;
 
-            var offset = Helper.NextUInt(0, diff+1);
+            var offset = Helper.NextUInt(0, diff + 1);
             var result = minimum + TimeSpan.FromMinutes(offset);
 
             return result;
@@ -175,8 +176,7 @@ namespace Rift.Services
 
                 if (eventData is null)
                     dt = dt.Date.AddDays(1);
-            }
-            while (eventData is null);
+            } while (eventData is null);
 
             eventType = (EventType) eventData.EventId;
             switch (eventType)
@@ -223,7 +223,8 @@ namespace Rift.Services
         static List<ulong> reactionIds = new List<ulong>();
         static ulong eventMessageId = 0ul;
 
-        Task Client_AddReactedUser(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
+        Task Client_AddReactedUser(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel,
+                                   SocketReaction reaction)
         {
             if (message.Id != eventMessageId)
                 return Task.CompletedTask;
@@ -294,7 +295,8 @@ namespace Rift.Services
                     return;
             }
 
-            eventMessage = new IonicMessage("Призыватели, @here, атакуйте и получайте награды.", eventMessage.Embed, eventMessage.ImageUrl);
+            eventMessage = new IonicMessage("Призыватели, @here, атакуйте и получайте награды.", eventMessage.Embed,
+                                            eventMessage.ImageUrl);
 
             var msgEventStart = await RiftBot.GetMessageAsync("event-start", null);
             await channel.SendIonicMessageAsync(msgEventStart);
@@ -322,26 +324,22 @@ namespace Rift.Services
             RiftBot.Log.Debug($"EndEvent Reactions: {reactionIds.Count.ToString()}");
 
             if (reactionIds.Count != 0)
-            {
                 foreach (var id in reactionIds)
-                {
                     await reward.DeliverToAsync(id);
-                }
 
-                //switch (eventType)
-                //{
-                //    case EventType.Baron:
-                //    case EventType.Drake:
-                //    {
-                //        ulong winnerId = reactionIds.Random();
-                //        await winnerReward.GiveRewardAsync(winnerId);
+            //switch (eventType)
+            //{
+            //    case EventType.Baron:
+            //    case EventType.Drake:
+            //    {
+            //        ulong winnerId = reactionIds.Random();
+            //        await winnerReward.GiveRewardAsync(winnerId);
 
-                //        var msgEventWinner = await RiftBot.GetMessageAsync("event-winner", null);
-                //        await channel.SendIonicMessageAsync(msgEventWinner);
-                //        break;
-                //    }
-                //}
-            }
+            //        var msgEventWinner = await RiftBot.GetMessageAsync("event-winner", null);
+            //        await channel.SendIonicMessageAsync(msgEventWinner);
+            //        break;
+            //    }
+            //}
 
             var msgEventParticipants = await RiftBot.GetMessageAsync("event-end-participants", null);
             await channel.SendIonicMessageAsync(msgEventParticipants);
@@ -380,8 +378,11 @@ namespace Rift.Services
                 }
                 else
                 {
-                    await channel.AddPermissionOverwriteAsync(role, 
-                        new OverwritePermissions(sendMessages: enable ? PermValue.Inherit : PermValue.Deny));
+                    await channel.AddPermissionOverwriteAsync(role,
+                                                              new OverwritePermissions(
+                                                                  sendMessages: enable
+                                                                      ? PermValue.Inherit
+                                                                      : PermValue.Deny));
                 }
             }
         }

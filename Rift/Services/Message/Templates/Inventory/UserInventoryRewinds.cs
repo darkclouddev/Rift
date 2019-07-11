@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.Inventory
 {
     public class UserInventoryRewinds : TemplateBase
     {
-        public UserInventoryRewinds() : base(nameof(UserInventoryRewinds)) {}
+        public UserInventoryRewinds() : base(nameof(UserInventoryRewinds))
+        {
+        }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

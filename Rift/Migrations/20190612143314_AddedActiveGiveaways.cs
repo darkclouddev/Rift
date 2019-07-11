@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -9,51 +10,49 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Giveaways_Rewards_RewardId",
-                table: "Giveaways");
+                "FK_Giveaways_Rewards_RewardId",
+                "Giveaways");
 
             migrationBuilder.DropIndex(
-                name: "IX_Giveaways_RewardId",
-                table: "Giveaways");
+                "IX_Giveaways_RewardId",
+                "Giveaways");
 
             migrationBuilder.AddColumn<string>(
-                name: "GiveawayName",
-                table: "Rewards",
+                "GiveawayName",
+                "Rewards",
                 nullable: true);
 
             migrationBuilder.AddColumn<int>(
-                name: "MessageId",
-                table: "Giveaways",
+                "MessageId",
+                "Giveaways",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.CreateTable(
-                name: "ActiveGiveaways",
-                columns: table => new
+                "ActiveGiveaways",
+                table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                              .Annotation("MySql:ValueGenerationStrategy",
+                                          MySqlValueGenerationStrategy.IdentityColumn),
                     GiveawayId = table.Column<int>(nullable: false),
                     MessageId = table.Column<ulong>(nullable: false),
                     StartedBy = table.Column<ulong>(nullable: false),
                     StartedAt = table.Column<DateTime>(nullable: false),
                     DueTime = table.Column<DateTime>(nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ActiveGiveaways", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_ActiveGiveaways", x => x.Id); });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Rewards_GiveawayName",
-                table: "Rewards",
-                column: "GiveawayName");
+                "IX_Rewards_GiveawayName",
+                "Rewards",
+                "GiveawayName");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Rewards_Giveaways_GiveawayName",
-                table: "Rewards",
-                column: "GiveawayName",
-                principalTable: "Giveaways",
+                "FK_Rewards_Giveaways_GiveawayName",
+                "Rewards",
+                "GiveawayName",
+                "Giveaways",
                 principalColumn: "Name",
                 onDelete: ReferentialAction.Restrict);
         }
@@ -61,35 +60,35 @@ namespace Rift.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Rewards_Giveaways_GiveawayName",
-                table: "Rewards");
+                "FK_Rewards_Giveaways_GiveawayName",
+                "Rewards");
 
             migrationBuilder.DropTable(
-                name: "ActiveGiveaways");
+                "ActiveGiveaways");
 
             migrationBuilder.DropIndex(
-                name: "IX_Rewards_GiveawayName",
-                table: "Rewards");
+                "IX_Rewards_GiveawayName",
+                "Rewards");
 
             migrationBuilder.DropColumn(
-                name: "GiveawayName",
-                table: "Rewards");
+                "GiveawayName",
+                "Rewards");
 
             migrationBuilder.DropColumn(
-                name: "MessageId",
-                table: "Giveaways");
+                "MessageId",
+                "Giveaways");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Giveaways_RewardId",
-                table: "Giveaways",
-                column: "RewardId",
+                "IX_Giveaways_RewardId",
+                "Giveaways",
+                "RewardId",
                 unique: true);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Giveaways_Rewards_RewardId",
-                table: "Giveaways",
-                column: "RewardId",
-                principalTable: "Rewards",
+                "FK_Giveaways_Rewards_RewardId",
+                "Giveaways",
+                "RewardId",
+                "Rewards",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
         }

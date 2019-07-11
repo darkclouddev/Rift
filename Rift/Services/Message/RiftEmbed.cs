@@ -114,7 +114,9 @@ namespace Rift.Services.Message
                         $"Cannot set field \"{nameof(Author.IconUrl)}\" when \"{nameof(Author.Name)}\" is null!");
 
                 if (hasName && hasUrl)
+                {
                     eb.WithAuthor(Author.Name, Author.IconUrl);
+                }
                 else
                 {
                     if (hasName)
@@ -144,18 +146,14 @@ namespace Rift.Services.Message
                 eb.WithFooter(Footer);
 
             if (Fields != null)
-            {
                 foreach (var field in Fields)
-                {
                     if (!string.IsNullOrWhiteSpace(field.Header) && !string.IsNullOrEmpty(field.Content))
                         eb.AddField(field.Header, field.Content, field.IsInline);
-                }
-            }
 
             return eb.Build();
         }
     }
-    
+
     public class RiftAuthor
     {
         public string Name { get; set; }
@@ -173,7 +171,7 @@ namespace Rift.Services.Message
         public string Header { get; set; }
         public string Content { get; set; }
         public bool IsInline { get; set; } = false;
-        
+
         public RiftField(string header, string content, bool isInline = false)
         {
             Header = header ?? throw new ArgumentNullException(nameof(header));

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Settings = Rift.Configuration.Settings;
+
 using Rift.Database;
 using Rift.Events;
 using Rift.Services.Economy;
@@ -40,24 +41,25 @@ namespace Rift.Services
 
         static async Task<IonicMessage> GetUserBragInternalAsync(ulong userId)
         {
-            (var canBrag, var remaining) = await CanBrag(userId);
-
-            if (!canBrag)
+            if (!await CanBrag(userId))
                 return await RiftBot.GetMessageAsync("brag-cooldown", new FormatData(userId));
 
-            var dbSummoner = await DB.LolData.GetAsync(userId);
+            var dbSummoner = await DB.LeagueData.GetAsync(userId);
 
             if (dbSummoner is null || string.IsNullOrWhiteSpace(dbSummoner.AccountId))
                 return await RiftBot.GetMessageAsync("loldata-nodata", new FormatData(userId));
 
             (var matchlistResult, var matchlist) = await RiftBot.GetService<RiotService>()
-                .GetLast20MatchesByAccountIdAsync(dbSummoner.SummonerRegion, dbSummoner.AccountId);
+                                                                .GetLast20MatchesByAccountIdAsync(
+                                                                    dbSummoner.SummonerRegion, dbSummoner.AccountId);
 
             if (matchlistResult != RequestResult.Success)
                 return await RiftBot.GetMessageAsync("brag-nomatches", new FormatData(userId));
 
             (var matchDataResult, var matchData) = await RiftBot.GetService<RiotService>()
-                .GetMatchById(dbSummoner.SummonerRegion, matchlist.Random().GameId);
+                                                                .GetMatchById(
+                                                                    dbSummoner.SummonerRegion,
+                                                                    matchlist.Random().GameId);
 
             if (matchDataResult != RequestResult.Success)
             {
@@ -66,8 +68,9 @@ namespace Rift.Services
             }
 
             long participantId = matchData.ParticipantIdentities
-                .First(x => x.Player.CurrentAccountId == dbSummoner.AccountId || x.Player.AccountId == dbSummoner.AccountId)
-                .ParticipantId;
+                                          .First(x => x.Player.CurrentAccountId == dbSummoner.AccountId ||
+                                                      x.Player.AccountId == dbSummoner.AccountId)
+                                          .ParticipantId;
 
             var player = matchData.Participants.First(x => x.ParticipantId == participantId);
 
@@ -88,10 +91,10 @@ namespace Rift.Services
             var champThumb = RiotService.GetChampionSquareByName(champData.Image);
 
             await DB.Cooldowns.SetLastBragTimeAsync(userId, DateTime.UtcNow);
-            await DB.Statistics.AddAsync(userId, new StatisticData { BragsDone = 1u });
-            
+            await DB.Statistics.AddAsync(userId, new StatisticData {BragsDone = 1u});
+
             var brag = new Brag(player.Stats.Win);
-            await DB.Inventory.AddAsync(userId, new InventoryData { Coins = brag.Coins });
+            await DB.Inventory.AddAsync(userId, new InventoryData {Coins = brag.Coins});
             OnUserBrag?.Invoke(null, new BragEventArgs(userId));
 
             var queue = RiftBot.GetService<RiotService>().GetQueueNameById(matchData.QueueId);
@@ -106,22 +109,19 @@ namespace Rift.Services
                     QueueName = queue,
                 },
                 Reward = new ItemReward().AddCoins(brag.Coins)
-                
             });
         }
 
-        static async Task<(bool, TimeSpan)> CanBrag(ulong userId)
+        static async Task<bool> CanBrag(ulong userId)
         {
             var data = await DB.Cooldowns.GetAsync(userId);
 
             if (data.BragTimeSpan == TimeSpan.Zero)
-                return (true, TimeSpan.Zero);
+                return true;
 
             var diff = data.BragTimeSpan;
 
-            var result = diff > Settings.Economy.BragCooldown;
-
-            return (result, result ? TimeSpan.Zero : Settings.Economy.BragCooldown - diff);
+            return diff > Settings.Economy.BragCooldown;
         }
     }
 }

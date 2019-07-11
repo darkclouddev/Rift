@@ -9,7 +9,9 @@ namespace Rift.Services.Message.Templates.Users
 {
     public class UserName : TemplateBase
     {
-        public UserName() : base(nameof(UserName)) {}
+        public UserName() : base(nameof(UserName))
+        {
+        }
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

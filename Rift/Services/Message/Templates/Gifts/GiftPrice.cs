@@ -7,7 +7,9 @@ namespace Rift.Services.Message.Templates.Gifts
 {
     public class GiftPrice : TemplateBase
     {
-        public GiftPrice() : base(nameof(GiftPrice)) {}
+        public GiftPrice() : base(nameof(GiftPrice))
+        {
+        }
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

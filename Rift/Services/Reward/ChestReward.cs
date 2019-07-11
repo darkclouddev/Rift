@@ -9,13 +9,9 @@ namespace Rift.Services.Reward
             AddRandomCoins(1_600, 2_301);
 
             if (Helper.GetChance(3u))
-            {
                 AddTickets(1u);
-            }
             else
-            {
                 AddBotRespects(1u);
-            }
         }
     }
 }

@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.Statistic
 {
     public class StatBragsDone : TemplateBase
     {
-        public StatBragsDone() : base(nameof(StatBragsDone)) {}
+        public StatBragsDone() : base(nameof(StatBragsDone))
+        {
+        }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

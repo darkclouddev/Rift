@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -9,68 +10,59 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "MessageMappings",
-                columns: table => new
+                "MessageMappings",
+                table => new
                 {
                     Identifier = table.Column<string>(nullable: false, maxLength: 64),
                     MessageId = table.Column<int>(nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MessageMappings", x => x.Identifier);
-                });
+                constraints: table => { table.PrimaryKey("PK_MessageMappings", x => x.Identifier); });
 
             migrationBuilder.CreateTable(
-                name: "ScheduledEvents",
-                columns: table => new
+                "ScheduledEvents",
+                table => new
                 {
                     Id = table.Column<uint>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                              .Annotation("MySql:ValueGenerationStrategy",
+                                          MySqlValueGenerationStrategy.IdentityColumn),
                     DayId = table.Column<int>(nullable: false),
                     EventId = table.Column<int>(nullable: false),
                     Hour = table.Column<int>(nullable: false),
                     Minute = table.Column<int>(nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ScheduledEvents", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_ScheduledEvents", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "StoredMessages",
-                columns: table => new
+                "StoredMessages",
+                table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                              .Annotation("MySql:ValueGenerationStrategy",
+                                          MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(nullable: true),
                     Text = table.Column<string>(nullable: true),
                     Embed = table.Column<string>(nullable: true),
                     ImageUrl = table.Column<string>(nullable: true),
                     ApplyFormat = table.Column<bool>(nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_StoredMessages", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_StoredMessages", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
+                "Users",
+                table => new
                 {
                     UserId = table.Column<ulong>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                                  .Annotation("MySql:ValueGenerationStrategy",
+                                              MySqlValueGenerationStrategy.IdentityColumn),
                     Experience = table.Column<uint>(nullable: false),
                     Level = table.Column<uint>(nullable: false),
                     Donate = table.Column<decimal>(nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.UserId);
-                });
+                constraints: table => { table.PrimaryKey("PK_Users", x => x.UserId); });
 
             migrationBuilder.CreateTable(
-                name: "Cooldowns",
-                columns: table => new
+                "Cooldowns",
+                table => new
                 {
                     UserId = table.Column<ulong>(nullable: false),
                     LastStoreTime = table.Column<DateTime>(nullable: false),
@@ -85,16 +77,16 @@ namespace Rift.Migrations
                 {
                     table.PrimaryKey("PK_Cooldowns", x => x.UserId);
                     table.ForeignKey(
-                        name: "FK_Cooldowns_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
+                        "FK_Cooldowns_Users_UserId",
+                        x => x.UserId,
+                        "Users",
+                        "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Inventory",
-                columns: table => new
+                "Inventory",
+                table => new
                 {
                     UserId = table.Column<ulong>(nullable: false),
                     Coins = table.Column<uint>(nullable: false),
@@ -111,16 +103,16 @@ namespace Rift.Migrations
                 {
                     table.PrimaryKey("PK_Inventory", x => x.UserId);
                     table.ForeignKey(
-                        name: "FK_Inventory_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
+                        "FK_Inventory_Users_UserId",
+                        x => x.UserId,
+                        "Users",
+                        "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "LolData",
-                columns: table => new
+                "LolData",
+                table => new
                 {
                     UserId = table.Column<ulong>(nullable: false),
                     SummonerRegion = table.Column<string>(nullable: true),
@@ -133,16 +125,16 @@ namespace Rift.Migrations
                 {
                     table.PrimaryKey("PK_LolData", x => x.UserId);
                     table.ForeignKey(
-                        name: "FK_LolData_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
+                        "FK_LolData_Users_UserId",
+                        x => x.UserId,
+                        "Users",
+                        "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PendingUsers",
-                columns: table => new
+                "PendingUsers",
+                table => new
                 {
                     UserId = table.Column<ulong>(nullable: false),
                     Region = table.Column<string>(nullable: true),
@@ -156,16 +148,16 @@ namespace Rift.Migrations
                 {
                     table.PrimaryKey("PK_PendingUsers", x => x.UserId);
                     table.ForeignKey(
-                        name: "FK_PendingUsers_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
+                        "FK_PendingUsers_Users_UserId",
+                        x => x.UserId,
+                        "Users",
+                        "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Statistics",
-                columns: table => new
+                "Statistics",
+                table => new
                 {
                     UserId = table.Column<ulong>(nullable: false),
                     CoinsEarnedTotal = table.Column<uint>(nullable: false),
@@ -190,16 +182,16 @@ namespace Rift.Migrations
                 {
                     table.PrimaryKey("PK_Statistics", x => x.UserId);
                     table.ForeignKey(
-                        name: "FK_Statistics_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
+                        "FK_Statistics_Users_UserId",
+                        x => x.UserId,
+                        "Users",
+                        "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Streamers",
-                columns: table => new
+                "Streamers",
+                table => new
                 {
                     UserId = table.Column<ulong>(nullable: false),
                     PictureUrl = table.Column<string>(nullable: true),
@@ -209,16 +201,16 @@ namespace Rift.Migrations
                 {
                     table.PrimaryKey("PK_Streamers", x => x.UserId);
                     table.ForeignKey(
-                        name: "FK_Streamers_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
+                        "FK_Streamers_Users_UserId",
+                        x => x.UserId,
+                        "Users",
+                        "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "TempRoles",
-                columns: table => new
+                "TempRoles",
+                table => new
                 {
                     UserId = table.Column<ulong>(nullable: false),
                     RoleId = table.Column<ulong>(nullable: false),
@@ -228,12 +220,12 @@ namespace Rift.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TempRoles", x => new { x.UserId, x.RoleId });
+                    table.PrimaryKey("PK_TempRoles", x => new {x.UserId, x.RoleId});
                     table.ForeignKey(
-                        name: "FK_RiftTempRoles_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
+                        "FK_RiftTempRoles_Users_UserId",
+                        x => x.UserId,
+                        "Users",
+                        "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
         }
@@ -241,37 +233,37 @@ namespace Rift.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Cooldowns");
+                "Cooldowns");
 
             migrationBuilder.DropTable(
-                name: "Inventory");
+                "Inventory");
 
             migrationBuilder.DropTable(
-                name: "LolData");
+                "LolData");
 
             migrationBuilder.DropTable(
-                name: "MessageMappings");
+                "MessageMappings");
 
             migrationBuilder.DropTable(
-                name: "PendingUsers");
+                "PendingUsers");
 
             migrationBuilder.DropTable(
-                name: "ScheduledEvents");
+                "ScheduledEvents");
 
             migrationBuilder.DropTable(
-                name: "Statistics");
+                "Statistics");
 
             migrationBuilder.DropTable(
-                name: "StoredMessages");
+                "StoredMessages");
 
             migrationBuilder.DropTable(
-                name: "Streamers");
+                "Streamers");
 
             migrationBuilder.DropTable(
-                name: "TempRoles");
+                "TempRoles");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                "Users");
         }
     }
 }

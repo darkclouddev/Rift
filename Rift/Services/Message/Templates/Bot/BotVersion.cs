@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.Bot
 {
     public class BotVersion : TemplateBase
     {
-        public BotVersion() : base(nameof(BotVersion)) {}
+        public BotVersion() : base(nameof(BotVersion))
+        {
+        }
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {

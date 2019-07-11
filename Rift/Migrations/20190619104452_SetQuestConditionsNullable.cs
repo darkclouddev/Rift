@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Rift.Migrations
@@ -8,278 +9,278 @@ namespace Rift.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<bool>(
-                name: "WroteFirstMessage",
-                table: "Quests",
+                "WroteFirstMessage",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(bool));
 
             migrationBuilder.AlterColumn<TimeSpan>(
-                name: "VoiceTimeEarned",
-                table: "Quests",
+                "VoiceTimeEarned",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(TimeSpan));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "UsualMonstersKilled",
-                table: "Quests",
+                "UsualMonstersKilled",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "RolesPurchased",
-                table: "Quests",
+                "RolesPurchased",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "RareMonstersKilled",
-                table: "Quests",
+                "RareMonstersKilled",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<bool>(
-                name: "OpenedSphere",
-                table: "Quests",
+                "OpenedSphere",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(bool));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "OpenedChests",
-                table: "Quests",
+                "OpenedChests",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "MessagesSent",
-                table: "Quests",
+                "MessagesSent",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "LevelReached",
-                table: "Quests",
+                "LevelReached",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "GiveawaysParticipated",
-                table: "Quests",
+                "GiveawaysParticipated",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "GiftsSent",
-                table: "Quests",
+                "GiftsSent",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "GiftsReceivedFromUltraGay",
-                table: "Quests",
+                "GiftsReceivedFromUltraGay",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "GiftsReceived",
-                table: "Quests",
+                "GiftsReceived",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedStreamer",
-                table: "Quests",
+                "GiftedStreamer",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(bool));
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedModerator",
-                table: "Quests",
+                "GiftedModerator",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(bool));
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedBotKeeper",
-                table: "Quests",
+                "GiftedBotKeeper",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(bool));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "EpicMonstersKilled",
-                table: "Quests",
+                "EpicMonstersKilled",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "CoinsSpent",
-                table: "Quests",
+                "CoinsSpent",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "CoinsReceived",
-                table: "Quests",
+                "CoinsReceived",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "BragsDone",
-                table: "Quests",
+                "BragsDone",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "BoughtChests",
-                table: "Quests",
+                "BoughtChests",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<bool>(
-                name: "ApprovedLolAccount",
-                table: "Quests",
+                "ApprovedLolAccount",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(bool));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "ActivatedBotRespects",
-                table: "Quests",
+                "ActivatedBotRespects",
+                "Quests",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<bool>(
-                name: "WroteFirstMessage",
-                table: "QuestProgress",
+                "WroteFirstMessage",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(bool));
 
             migrationBuilder.AlterColumn<TimeSpan>(
-                name: "VoiceTimeEarned",
-                table: "QuestProgress",
+                "VoiceTimeEarned",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(TimeSpan));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "UsualMonstersKilled",
-                table: "QuestProgress",
+                "UsualMonstersKilled",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "RolesPurchased",
-                table: "QuestProgress",
+                "RolesPurchased",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "RareMonstersKilled",
-                table: "QuestProgress",
-                nullable: true,
-                oldClrType: typeof(uint));
-
-            migrationBuilder.AlterColumn<bool>(
-                name: "OpenedSphere",
-                table: "QuestProgress",
-                nullable: true,
-                oldClrType: typeof(bool));
-
-            migrationBuilder.AlterColumn<uint>(
-                name: "OpenedChests",
-                table: "QuestProgress",
-                nullable: true,
-                oldClrType: typeof(uint));
-
-            migrationBuilder.AlterColumn<uint>(
-                name: "MessagesSent",
-                table: "QuestProgress",
-                nullable: true,
-                oldClrType: typeof(uint));
-
-            migrationBuilder.AlterColumn<uint>(
-                name: "LevelReached",
-                table: "QuestProgress",
-                nullable: true,
-                oldClrType: typeof(uint));
-
-            migrationBuilder.AlterColumn<uint>(
-                name: "GiveawaysParticipated",
-                table: "QuestProgress",
-                nullable: true,
-                oldClrType: typeof(uint));
-
-            migrationBuilder.AlterColumn<uint>(
-                name: "GiftsSent",
-                table: "QuestProgress",
-                nullable: true,
-                oldClrType: typeof(uint));
-
-            migrationBuilder.AlterColumn<uint>(
-                name: "GiftsReceivedFromUltraGay",
-                table: "QuestProgress",
-                nullable: true,
-                oldClrType: typeof(uint));
-
-            migrationBuilder.AlterColumn<uint>(
-                name: "GiftsReceived",
-                table: "QuestProgress",
+                "RareMonstersKilled",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedStreamer",
-                table: "QuestProgress",
+                "OpenedSphere",
+                "QuestProgress",
+                nullable: true,
+                oldClrType: typeof(bool));
+
+            migrationBuilder.AlterColumn<uint>(
+                "OpenedChests",
+                "QuestProgress",
+                nullable: true,
+                oldClrType: typeof(uint));
+
+            migrationBuilder.AlterColumn<uint>(
+                "MessagesSent",
+                "QuestProgress",
+                nullable: true,
+                oldClrType: typeof(uint));
+
+            migrationBuilder.AlterColumn<uint>(
+                "LevelReached",
+                "QuestProgress",
+                nullable: true,
+                oldClrType: typeof(uint));
+
+            migrationBuilder.AlterColumn<uint>(
+                "GiveawaysParticipated",
+                "QuestProgress",
+                nullable: true,
+                oldClrType: typeof(uint));
+
+            migrationBuilder.AlterColumn<uint>(
+                "GiftsSent",
+                "QuestProgress",
+                nullable: true,
+                oldClrType: typeof(uint));
+
+            migrationBuilder.AlterColumn<uint>(
+                "GiftsReceivedFromUltraGay",
+                "QuestProgress",
+                nullable: true,
+                oldClrType: typeof(uint));
+
+            migrationBuilder.AlterColumn<uint>(
+                "GiftsReceived",
+                "QuestProgress",
+                nullable: true,
+                oldClrType: typeof(uint));
+
+            migrationBuilder.AlterColumn<bool>(
+                "GiftedStreamer",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(bool));
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedModerator",
-                table: "QuestProgress",
+                "GiftedModerator",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(bool));
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedBotKeeper",
-                table: "QuestProgress",
+                "GiftedBotKeeper",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(bool));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "EpicMonstersKilled",
-                table: "QuestProgress",
+                "EpicMonstersKilled",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "CoinsSpent",
-                table: "QuestProgress",
+                "CoinsSpent",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "CoinsReceived",
-                table: "QuestProgress",
+                "CoinsReceived",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "BragsDone",
-                table: "QuestProgress",
+                "BragsDone",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "BoughtChests",
-                table: "QuestProgress",
+                "BoughtChests",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(uint));
 
             migrationBuilder.AlterColumn<bool>(
-                name: "ApprovedLolAccount",
-                table: "QuestProgress",
+                "ApprovedLolAccount",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(bool));
 
             migrationBuilder.AlterColumn<uint>(
-                name: "ActivatedBotRespects",
-                table: "QuestProgress",
+                "ActivatedBotRespects",
+                "QuestProgress",
                 nullable: true,
                 oldClrType: typeof(uint));
         }
@@ -287,323 +288,323 @@ namespace Rift.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<bool>(
-                name: "WroteFirstMessage",
-                table: "Quests",
+                "WroteFirstMessage",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<TimeSpan>(
-                name: "VoiceTimeEarned",
-                table: "Quests",
+                "VoiceTimeEarned",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(TimeSpan),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "UsualMonstersKilled",
-                table: "Quests",
+                "UsualMonstersKilled",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "RolesPurchased",
-                table: "Quests",
+                "RolesPurchased",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "RareMonstersKilled",
-                table: "Quests",
+                "RareMonstersKilled",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "OpenedSphere",
-                table: "Quests",
+                "OpenedSphere",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "OpenedChests",
-                table: "Quests",
+                "OpenedChests",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "MessagesSent",
-                table: "Quests",
+                "MessagesSent",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "LevelReached",
-                table: "Quests",
+                "LevelReached",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "GiveawaysParticipated",
-                table: "Quests",
+                "GiveawaysParticipated",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "GiftsSent",
-                table: "Quests",
+                "GiftsSent",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "GiftsReceivedFromUltraGay",
-                table: "Quests",
+                "GiftsReceivedFromUltraGay",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "GiftsReceived",
-                table: "Quests",
+                "GiftsReceived",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedStreamer",
-                table: "Quests",
+                "GiftedStreamer",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedModerator",
-                table: "Quests",
+                "GiftedModerator",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedBotKeeper",
-                table: "Quests",
+                "GiftedBotKeeper",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "EpicMonstersKilled",
-                table: "Quests",
+                "EpicMonstersKilled",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "CoinsSpent",
-                table: "Quests",
+                "CoinsSpent",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "CoinsReceived",
-                table: "Quests",
+                "CoinsReceived",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "BragsDone",
-                table: "Quests",
+                "BragsDone",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "BoughtChests",
-                table: "Quests",
+                "BoughtChests",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "ApprovedLolAccount",
-                table: "Quests",
+                "ApprovedLolAccount",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "ActivatedBotRespects",
-                table: "Quests",
+                "ActivatedBotRespects",
+                "Quests",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "WroteFirstMessage",
-                table: "QuestProgress",
+                "WroteFirstMessage",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<TimeSpan>(
-                name: "VoiceTimeEarned",
-                table: "QuestProgress",
+                "VoiceTimeEarned",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(TimeSpan),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "UsualMonstersKilled",
-                table: "QuestProgress",
+                "UsualMonstersKilled",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "RolesPurchased",
-                table: "QuestProgress",
+                "RolesPurchased",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "RareMonstersKilled",
-                table: "QuestProgress",
-                nullable: false,
-                oldClrType: typeof(uint),
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<bool>(
-                name: "OpenedSphere",
-                table: "QuestProgress",
-                nullable: false,
-                oldClrType: typeof(bool),
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<uint>(
-                name: "OpenedChests",
-                table: "QuestProgress",
-                nullable: false,
-                oldClrType: typeof(uint),
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<uint>(
-                name: "MessagesSent",
-                table: "QuestProgress",
-                nullable: false,
-                oldClrType: typeof(uint),
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<uint>(
-                name: "LevelReached",
-                table: "QuestProgress",
-                nullable: false,
-                oldClrType: typeof(uint),
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<uint>(
-                name: "GiveawaysParticipated",
-                table: "QuestProgress",
-                nullable: false,
-                oldClrType: typeof(uint),
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<uint>(
-                name: "GiftsSent",
-                table: "QuestProgress",
-                nullable: false,
-                oldClrType: typeof(uint),
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<uint>(
-                name: "GiftsReceivedFromUltraGay",
-                table: "QuestProgress",
-                nullable: false,
-                oldClrType: typeof(uint),
-                oldNullable: true);
-
-            migrationBuilder.AlterColumn<uint>(
-                name: "GiftsReceived",
-                table: "QuestProgress",
+                "RareMonstersKilled",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedStreamer",
-                table: "QuestProgress",
+                "OpenedSphere",
+                "QuestProgress",
+                nullable: false,
+                oldClrType: typeof(bool),
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<uint>(
+                "OpenedChests",
+                "QuestProgress",
+                nullable: false,
+                oldClrType: typeof(uint),
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<uint>(
+                "MessagesSent",
+                "QuestProgress",
+                nullable: false,
+                oldClrType: typeof(uint),
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<uint>(
+                "LevelReached",
+                "QuestProgress",
+                nullable: false,
+                oldClrType: typeof(uint),
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<uint>(
+                "GiveawaysParticipated",
+                "QuestProgress",
+                nullable: false,
+                oldClrType: typeof(uint),
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<uint>(
+                "GiftsSent",
+                "QuestProgress",
+                nullable: false,
+                oldClrType: typeof(uint),
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<uint>(
+                "GiftsReceivedFromUltraGay",
+                "QuestProgress",
+                nullable: false,
+                oldClrType: typeof(uint),
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<uint>(
+                "GiftsReceived",
+                "QuestProgress",
+                nullable: false,
+                oldClrType: typeof(uint),
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<bool>(
+                "GiftedStreamer",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedModerator",
-                table: "QuestProgress",
+                "GiftedModerator",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "GiftedBotKeeper",
-                table: "QuestProgress",
+                "GiftedBotKeeper",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "EpicMonstersKilled",
-                table: "QuestProgress",
+                "EpicMonstersKilled",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "CoinsSpent",
-                table: "QuestProgress",
+                "CoinsSpent",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "CoinsReceived",
-                table: "QuestProgress",
+                "CoinsReceived",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "BragsDone",
-                table: "QuestProgress",
+                "BragsDone",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "BoughtChests",
-                table: "QuestProgress",
+                "BoughtChests",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<bool>(
-                name: "ApprovedLolAccount",
-                table: "QuestProgress",
+                "ApprovedLolAccount",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(bool),
                 oldNullable: true);
 
             migrationBuilder.AlterColumn<uint>(
-                name: "ActivatedBotRespects",
-                table: "QuestProgress",
+                "ActivatedBotRespects",
+                "QuestProgress",
                 nullable: false,
                 oldClrType: typeof(uint),
                 oldNullable: true);

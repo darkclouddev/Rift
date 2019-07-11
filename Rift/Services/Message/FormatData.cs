@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using Rift.Data.Models;
 using Rift.Data.Models.Users;
 using Rift.Services.Reward;
@@ -22,7 +23,11 @@ namespace Rift.Services.Message
         public RiftQuest Quest { get; set; }
         public RewardBase Reward { get; set; }
         public RiftStatistics Statistics { get; set; }
-        public FormatData() {}
+
+        public FormatData()
+        {
+        }
+
         public FormatData(ulong userId)
         {
             UserId = userId;
@@ -52,7 +57,7 @@ namespace Rift.Services.Message
 
     public class GiveawayData
     {
-        public RiftGiveawayActive Active { get; set; }
+        public RiftActiveGiveaway Active { get; set; }
         public RiftGiveaway Stored { get; set; }
         public RiftGiveawayLog Log { get; set; }
         public TicketGiveaway TicketGiveaway { get; set; }

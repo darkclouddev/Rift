@@ -6,7 +6,9 @@ namespace Rift.Services.Message.Templates.Statistic
 {
     public class StatCapsuleEarned : TemplateBase
     {
-        public StatCapsuleEarned() : base(nameof(StatCapsuleEarned)) {}
+        public StatCapsuleEarned() : base(nameof(StatCapsuleEarned))
+        {
+        }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
