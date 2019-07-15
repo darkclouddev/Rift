@@ -39,6 +39,14 @@ namespace Rift.Modules
             this.giveawayService = giveawayService;
         }
 
+        [Command("estart")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task EventStart(string eventType)
+        {
+            await eventService.StartAsync(eventType, Context.User.Id);
+        }
+
         [Command("gtstart")]
         [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
@@ -85,7 +93,7 @@ namespace Rift.Modules
 
         [Command("exp")]
         [RequireAdmin]
-        [RequireContext(ContextType.DM)]
+        [RequireContext(ContextType.Guild)]
         public async Task Exp(uint level)
         {
             await ReplyAsync($"Level {level.ToString()}: {EconomyService.GetExpForLevel(level).ToString()} XP")
@@ -94,10 +102,10 @@ namespace Rift.Modules
 
         [Command("getprofile")]
         [RequireAdmin]
-        [RequireContext(ContextType.DM)]
-        public async Task GetProfile(ulong userId)
+        [RequireContext(ContextType.Guild)]
+        public async Task GetProfile(IUser user)
         {
-            var message = await economyService.GetUserProfileAsync(userId);
+            var message = await economyService.GetUserProfileAsync(user.Id);
 
             if (message is null)
                 return;
@@ -107,10 +115,10 @@ namespace Rift.Modules
 
         [Command("getgamestat")]
         [RequireAdmin]
-        [RequireContext(ContextType.DM)]
-        public async Task GetGameStat(ulong userId)
+        [RequireContext(ContextType.Guild)]
+        public async Task GetGameStat(IUser user)
         {
-            var message = await economyService.GetUserGameStatAsync(userId);
+            var message = await economyService.GetUserGameStatAsync(user.Id);
 
             if (message is null)
                 return;
@@ -120,10 +128,10 @@ namespace Rift.Modules
 
         [Command("getstat")]
         [RequireAdmin]
-        [RequireContext(ContextType.DM)]
-        public async Task GetStat(ulong userId)
+        [RequireContext(ContextType.Guild)]
+        public async Task GetStat(IUser user)
         {
-            var message = await economyService.GetUserStatAsync(userId);
+            var message = await economyService.GetUserStatAsync(user.Id);
 
             if (message is null)
                 return;
@@ -135,9 +143,9 @@ namespace Rift.Modules
         [RequireDeveloper]
         [RateLimit(1, 10, Measure.Minutes)]
         [RequireContext(ContextType.Guild)]
-        public async Task Update(ulong userId)
+        public async Task Update(IUser user)
         {
-            await riotService.UpdateRankAsync(userId).ConfigureAwait(false);
+            await riotService.UpdateRankAsync(user.Id).ConfigureAwait(false);
         }
 
         [Command("gastart")]
@@ -158,14 +166,14 @@ namespace Rift.Modules
         }
 
         [Command("code")]
-        [RequireContext(ContextType.DM)]
-        public async Task Code(ulong userId)
+        [RequireContext(ContextType.Guild)]
+        public async Task Code(IUser user)
         {
-            var pendingData = await DB.PendingUsers.GetAsync(userId);
+            var pendingData = await DB.PendingUsers.GetAsync(user.Id);
 
             if (pendingData is null)
             {
-                await ReplyAsync($"No data for that user.");
+                await ReplyAsync("No data for that user.");
                 return;
             }
 
@@ -275,32 +283,20 @@ namespace Rift.Modules
                     {
                         if (channelNames.ContainsKey(field.Name))
                         {
-                            (var categoryName, var channelName) = channelNames[field.Name];
+                            var channelName = channelNames[field.Name];
 
-                            var guildCategory = guild.CategoryChannels.FirstOrDefault(x =>
-                                                                                          x.Name.Equals(categoryName,
-                                                                                                        StringComparison
-                                                                                                            .InvariantCultureIgnoreCase));
-
-                            if (guildCategory is null)
-                            {
-                                errors.Add($"No such category: {categoryName}");
-                                continue;
-                            }
-
-                            var guildChannel = guildCategory.Channels.FirstOrDefault(x =>
-                                                                                         x.Name.Equals(channelName,
-                                                                                                       StringComparison
-                                                                                                           .InvariantCultureIgnoreCase));
+                            var guildChannel = guild.Channels.FirstOrDefault(
+                                x => x.Name.Equals(channelName,
+                                                   StringComparison
+                                                       .InvariantCultureIgnoreCase));
 
                             if (guildChannel is null)
                             {
-                                errors.Add(
-                                    $"Channel ID remains undefined: {field.Name} ({categoryName}|{channelName})");
+                                errors.Add($"Channel ID remains undefined: {field.Name} {channelName}");
                                 continue;
                             }
 
-                            Settings.RoleId.SetValue(field.Name, guildChannel.Id);
+                            Settings.ChannelId.SetValue(field.Name, guildChannel.Id);
                             fixedRoles++;
                         }
                         else
@@ -309,7 +305,7 @@ namespace Rift.Modules
                             continue;
                         }
                     }
-                    else if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, value, out var textChannel) ||
+                    else if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, value, out var textChannel) &&
                              !IonicClient.GetVoiceChannel(Settings.App.MainGuildId, value, out var voiceChannel))
                     {
                         errors.Add($"No channel on server: {field.Name}");
@@ -402,7 +398,7 @@ namespace Rift.Modules
             if (errors.Count == 0)
             {
                 eb.WithColor(0, 255, 0);
-                eb.WithDescription("OK");
+                eb.WithDescription("OK 👌");
             }
             else
             {
@@ -410,14 +406,14 @@ namespace Rift.Modules
 
                 var errorList = string.Join('\n', errors);
 
-                if (errorList.Length >= 1024)
+                if (errorList.Length >= 2048)
                 {
                     errorList = string.Join('\n', errors.Take(10));
-                    eb.AddField($"{errors.Count.ToString()} error(s)", "Displaying first 10\n\n" + errorList);
+                    eb.WithDescription($"**{errors.Count.ToString()} error(s), showing first 10**\n\n{errorList}");
                 }
                 else
                 {
-                    eb.AddField($"{errors.Count.ToString()} error(s)", errorList);
+                    eb.WithDescription($"**{errors.Count.ToString()} error(s)**\n\n{errorList}");
                 }
             }
 
@@ -431,6 +427,7 @@ namespace Rift.Modules
                                .WithDescription($"Automatically resolved {fixedRoles.ToString()} roles.");
 
                 await Context.Channel.SendIonicMessageAsync(new IonicMessage(embedMsg));
+                await Settings.SaveRolesAsync();
             }
         }
 
@@ -547,7 +544,12 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task AppStatus()
         {
-            await RiftBot.SendChatMessageAsync("bot-about", new FormatData(212997107525746690ul));
+            var msg = await RiftBot.GetMessageAsync("bot-about", new FormatData(212997107525746690ul));
+
+            if (msg is null)
+                return;
+            
+            await Context.Channel.SendIonicMessageAsync(msg);
         }
 
         const string addRemoveHeaderText = "Оповещение";

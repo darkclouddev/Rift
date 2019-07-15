@@ -32,6 +32,7 @@ namespace Rift.Database
             {
                 return await context.BackgroundInventories
                                     .Where(x => x.UserId == userId)
+                                    .OrderBy(x => x.BackgroundId)
                                     .ToListAsync();
             }
         }
@@ -48,6 +49,16 @@ namespace Rift.Database
             {
                 context.Entry(dbUser).Property(x => x.ProfileBackground).IsModified = true;
                 await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<int> CountAsync(ulong userId)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.BackgroundInventories
+                                    .Where(x => x.UserId == userId)
+                                    .CountAsync();
             }
         }
     }

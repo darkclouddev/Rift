@@ -18,7 +18,7 @@ namespace Rift.Services
 {
     public class ChannelService
     {
-        const ulong VoiceCategoryId = 360570328197496833ul;
+        const ulong VoiceCategoryId = 599727924039385119ul;
         static Timer voiceUptimeTimer;
         static readonly TimeSpan VoiceRewardsInterval = TimeSpan.FromMinutes(5);
 

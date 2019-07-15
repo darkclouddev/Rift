@@ -129,8 +129,8 @@ namespace Rift.Database
                 if (dbUserQuest.OpenedChests != userQuest.OpenedChests)
                     entry.Property(x => x.OpenedChests).IsModified = true;
 
-                if (dbUserQuest.UsualMonstersKilled != userQuest.UsualMonstersKilled)
-                    entry.Property(x => x.UsualMonstersKilled).IsModified = true;
+                if (dbUserQuest.NormalMonstersKilled != userQuest.NormalMonstersKilled)
+                    entry.Property(x => x.NormalMonstersKilled).IsModified = true;
 
                 if (dbUserQuest.RareMonstersKilled != userQuest.RareMonstersKilled)
                     entry.Property(x => x.RareMonstersKilled).IsModified = true;

@@ -1,10 +1,12 @@
 ﻿using System.Threading.Tasks;
 
+using Newtonsoft.Json;
+
 namespace Rift.Services.Reward
 {
     public abstract class RewardBase
     {
-        public RewardType Type;
+        [JsonIgnore] protected RewardType Type;
         public abstract Task DeliverToAsync(ulong userId);
     }
 

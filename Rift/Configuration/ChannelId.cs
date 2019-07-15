@@ -7,9 +7,9 @@ namespace Rift.Configuration
 {
     public class ChannelId
     {
-        public Dictionary<string, (string, string)> GetNames()
+        public Dictionary<string, string> GetNames()
         {
-            var dict = new Dictionary<string, (string, string)>();
+            var dict = new Dictionary<string, string>();
 
             var props = GetType().GetProperties();
 
@@ -19,7 +19,7 @@ namespace Rift.Configuration
 
                 foreach (var attribute in customAttributes)
                     if (attribute is ResolveChannelAttribute resolvedAttribute)
-                        dict.Add(prop.Name, (resolvedAttribute.CategoryName, resolvedAttribute.Name));
+                        dict.Add(prop.Name, resolvedAttribute.Name);
             }
 
             return dict;
@@ -32,11 +32,13 @@ namespace Rift.Configuration
             if (prop != null && prop.CanWrite) prop.SetValue(this, value);
         }
 
+        [ResolveChannel("общение")]
+        public ulong Chat { get; set; }
+        [ResolveChannel("команды")]
         public ulong Comms { get; set; }
-        public ulong Confirmation { get; set; }
-        public ulong Test { get; set; }
+        [ResolveChannel( "логи")]
         public ulong Logs { get; set; }
-        public ulong Search { get; set; }
+        [ResolveChannel("Создать канал")]
         public ulong VoiceSetup { get; set; }
     }
 }

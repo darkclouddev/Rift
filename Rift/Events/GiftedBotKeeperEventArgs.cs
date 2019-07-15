@@ -2,7 +2,7 @@
 {
     public class GiftedBotKeeperEventArgs : RiftEventArgs
     {
-        public ulong ReceiverId { get; protected set; }
+        public ulong ReceiverId { get; }
 
         public GiftedBotKeeperEventArgs(ulong userId, ulong receiverId) : base(userId)
         {

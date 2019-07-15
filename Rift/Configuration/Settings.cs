@@ -99,7 +99,7 @@ namespace Rift.Configuration
         {
             var dbSettings = await DB.Settings.GetAsync((int) type);
 
-            if (dbSettings is null)
+            if (dbSettings?.Data is null)
             {
                 var settings = new T();
                 await DB.Settings.SetAsync((int) type, JsonConvert.SerializeObject(settings, Formatting.Indented));

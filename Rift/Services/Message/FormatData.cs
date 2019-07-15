@@ -14,14 +14,16 @@ namespace Rift.Services.Message
     public class FormatData
     {
         public ulong UserId { get; set; }
-        public EconomyData Economy { get; set; }
         public BragData Brag { get; set; }
+        public EconomyData Economy { get; set; }
+        public EventData EventData { get; set; }
         public GiftData Gift { get; set; }
         public GiveawayData Giveaway { get; set; }
-        public LolStatData LolStat { get; set; }
+        public LeagueRegistrationData LeagueRegistration { get; set; }
+        public LeagueStatData LeagueStat { get; set; }
         public ModerationData Moderation { get; set; }
-        public RiftQuest Quest { get; set; }
         public RewardBase Reward { get; set; }
+        public RiftQuest Quest { get; set; }
         public RiftStatistics Statistics { get; set; }
 
         public FormatData()
@@ -48,6 +50,13 @@ namespace Rift.Services.Message
         public List<UserTopCoins> Top10Coins { get; set; }
     }
 
+    public class EventData
+    {
+        public RiftActiveEvent Active { get; set; }
+        public RiftEvent Stored { get; set; }
+        public RiftEventLog Log { get; set; }
+    }
+
     public class GiftData
     {
         public ulong TargetId { get; set; }
@@ -63,7 +72,12 @@ namespace Rift.Services.Message
         public TicketGiveaway TicketGiveaway { get; set; }
     }
 
-    public class LolStatData
+    public class LeagueRegistrationData
+    {
+        public string ConfirmationCode { get; set; }
+    }
+
+    public class LeagueStatData
     {
         public Summoner Summoner { get; set; }
         public LeaguePosition SoloQueue { get; set; }

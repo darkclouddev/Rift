@@ -3,96 +3,117 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Rift.Configuration;
-using Rift.Services.Reward;
-using Rift.Util;
-
 using Humanizer;
 
 using IonicLib;
 using IonicLib.Extensions;
 
+using Rift.Database;
+using Rift.Events;
+using Rift.Services.Message;
+using Rift.Services.Reward;
+
+using Settings = Rift.Configuration.Settings;
+
 namespace Rift.Services
 {
     public class BotRespectService
     {
+        public static event EventHandler<ActivatedBotRespectsEventArgs> ActivatedBotRespects;
+        
         Timer timer;
         readonly Timer Starttimer;
 
-        static readonly List<(uint, ItemReward)> AvailableRewards = new List<(uint, ItemReward)>
+        static readonly List<ItemReward> AvailableRewards = new List<ItemReward>
         {
-            (13, new ItemReward().AddChests(1)),
-            (13, new ItemReward().AddTickets(2)),
-            (13, new ItemReward().AddChests(2)),
-            (13, new ItemReward().AddCoins(1000)),
-            (5, new ItemReward().AddDoubleExps(1)),
-            (1, new ItemReward().AddTokens(1)),
-            (10, new ItemReward().AddChests(3)),
-            (100, new ItemReward().AddCoins(500)),
+            new ItemReward().AddChests(1),
+            new ItemReward().AddTickets(2),
+            new ItemReward().AddChests(2),
+            new ItemReward().AddCoins(1000),
+            new ItemReward().AddDoubleExps(1),
+            new ItemReward().AddTokens(1),
+            new ItemReward().AddChests(3),
+            new ItemReward().AddCoins(500),
         };
 
         public BotRespectService()
         {
-            RiftBot.Log.Info("Starting BotRespectService..");
-
-            Starttimer = new Timer(
-                async delegate { await InitTimer(); },
-                null,
-                TimeSpan.FromSeconds(30),
-                TimeSpan.Zero);
-
+            /*RiftBot.Log.Info("Starting BotRespectService..");
+            
             timer = new Timer(
                 async delegate { await StartBotGifts(); },
                 null,
                 Timeout.Infinite,
                 0);
+            
+            InitTimer();
 
-            RiftBot.Log.Info("BotRespectService loaded successfully.");
+            RiftBot.Log.Info("BotRespectService loaded successfully.");*/
         }
 
-        public Task InitTimer()
+        void InitTimer()
         {
-            var nextGiftsTimeSpan = Helper.NextUInt(210, 330) * 60;
-            timer.Change(TimeSpan.FromSeconds(nextGiftsTimeSpan), TimeSpan.Zero);
+            var ts = TimeSpan.FromSeconds(Helper.NextInt(210, 330) * 60);
+            timer.Change(ts, TimeSpan.Zero);
 
-            RiftBot.Log.Debug(
-                $"Next gifts: {Helper.FromTimestamp(Helper.CurrentUnixTimestamp + nextGiftsTimeSpan).Humanize()}");
-
-            return Task.CompletedTask;
+            RiftBot.Log.Debug($"Next gifts: {ts.Humanize()}");
         }
 
-        public async Task StartBotGifts()
+        async Task StartBotGifts()
         {
             RiftBot.Log.Debug("Gifts are on the way..");
 
             var users = await DB.Cooldowns.GetBotRespectedUsersAsync();
-            if (users.Count > 0)
+
+            if (users.Count == 0)
             {
-                foreach ((var userId, var dt) in users)
-                {
-                    var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-                    if (sgUser is null)
-                        continue;
-
-                    (var chance, var reward) = AvailableRewards.Random();
-                    await reward.DeliverToAsync(userId);
-                }
-
-                if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms,
-                                                out var commsChannel))
-                    return;
-
-                var rewardMsg = await RiftBot.GetMessageAsync("botrespect-success", null);
-                await commsChannel.SendIonicMessageAsync(rewardMsg);
+                RiftBot.Log.Debug("No users with bot respect, rescheduling.");
+                InitTimer();
+                return;
             }
-            else
+            
+            foreach (var userId in users)
             {
-                RiftBot.Log.Debug("There was no users with bot respect");
+                var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
+                
+                if (sgUser is null)
+                    continue;
+
+                var reward = AvailableRewards.Random();
+                await reward.DeliverToAsync(userId);
             }
+
+            await RiftBot.SendMessageAsync("botrespect-success", Settings.ChannelId.Chat, null);
 
             RiftBot.Log.Debug("Finished sending gifts");
 
-            await InitTimer();
+            InitTimer();
+        }
+        
+        public async Task ActivateAsync(ulong userId)
+        {
+            var dbInventory = await DB.Inventory.GetAsync(userId);
+
+            if (dbInventory.BonusBotRespect == 0)
+            {
+                await RiftBot.SendMessageAsync("activate-nopowerup", Settings.ChannelId.Comms, new FormatData(userId));
+                return;
+            }
+
+            var dbCooldowns = await DB.Cooldowns.GetAsync(userId);
+            if (dbCooldowns.BotRespectTime > DateTime.UtcNow)
+            {
+                await RiftBot.SendMessageAsync("activate-active", Settings.ChannelId.Comms, new FormatData(userId));
+                return;
+            }
+
+            await DB.Inventory.RemoveAsync(userId, new InventoryData {BotRespects = 1});
+            ActivatedBotRespects?.Invoke(null, new ActivatedBotRespectsEventArgs(userId));
+
+            var dateTime = DateTime.UtcNow.AddHours(12.0);
+            await DB.Cooldowns.SetBotRespeсtTimeAsync(userId, dateTime);
+
+            await RiftBot.SendMessageAsync("activate-success-botrespect", Settings.ChannelId.Comms, new FormatData(userId));
         }
     }
 }

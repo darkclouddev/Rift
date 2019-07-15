@@ -2,7 +2,7 @@
 {
     public class CoinsReceivedEventArgs : RiftEventArgs
     {
-        public uint Amount { get; protected set; }
+        public uint Amount { get; }
 
         public CoinsReceivedEventArgs(ulong userId, uint amount) : base(userId)
         {

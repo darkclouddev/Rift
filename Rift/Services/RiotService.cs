@@ -380,7 +380,7 @@ namespace Rift.Services
                 if (expired)
                 {
                     await DB.PendingUsers.RemoveAsync(user);
-                    await RiftBot.SendChatMessageAsync("register-pending-expired", new FormatData(user.UserId));
+                    await RiftBot.SendMessageAsync("register-pending-expired", Settings.ChannelId.Comms, new FormatData(user.UserId));
                 }
             }
 
@@ -451,8 +451,8 @@ namespace Rift.Services
 
             await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Chests = 2u});
 
-            await RiftBot.SendChatMessageAsync("register-success", new FormatData(pendingUser.UserId));
-            await RiftBot.SendChatMessageAsync("register-reward", new FormatData(pendingUser.UserId));
+            await RiftBot.SendMessageAsync("register-success", Settings.ChannelId.Comms, new FormatData(pendingUser.UserId));
+            await RiftBot.SendMessageAsync("register-reward", Settings.ChannelId.Comms, new FormatData(pendingUser.UserId));
         }
 
         #endregion Validation

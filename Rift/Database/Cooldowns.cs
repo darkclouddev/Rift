@@ -56,15 +56,16 @@ namespace Rift.Database
             }
         }
 
-        public async Task<List<(ulong, DateTime)>> GetBotRespectedUsersAsync()
+        public async Task<List<ulong>> GetBotRespectedUsersAsync()
         {
             using (var context = new RiftContext())
             {
-                var users = await context.Cooldowns
-                                         .Where(x => x.BotRespectTime > DateTime.UtcNow)
-                                         .ToListAsync();
-
-                return users.Select(x => (x.UserId, x.BotRespectTime)).ToList();
+                var dt = DateTime.UtcNow;
+                
+                return await context.Cooldowns
+                                    .Where(x => x.BotRespectTime > dt)
+                                    .Select(x => x.UserId)
+                                    .ToListAsync();;
             }
         }
 

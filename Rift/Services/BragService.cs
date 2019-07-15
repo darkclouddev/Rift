@@ -7,7 +7,6 @@ using Settings = Rift.Configuration.Settings;
 
 using Rift.Database;
 using Rift.Events;
-using Rift.Services.Economy;
 using Rift.Services.Message;
 using Rift.Services.Reward;
 
@@ -93,8 +92,12 @@ namespace Rift.Services
             await DB.Cooldowns.SetLastBragTimeAsync(userId, DateTime.UtcNow);
             await DB.Statistics.AddAsync(userId, new StatisticData {BragsDone = 1u});
 
-            var brag = new Brag(player.Stats.Win);
-            await DB.Inventory.AddAsync(userId, new InventoryData {Coins = brag.Coins});
+            var win = player.Stats.Win;
+            var reward = new ItemReward().AddRandomCoins(
+                win ? Settings.Economy.BragWinCoinsMin : Settings.Economy.BragLossCoinsMin,
+                win ? Settings.Economy.BragWinCoinsMax : Settings.Economy.BragLossCoinsMax);
+
+            await reward.DeliverToAsync(userId);
             OnUserBrag?.Invoke(null, new BragEventArgs(userId));
 
             var queue = RiftBot.GetService<RiotService>().GetQueueNameById(matchData.QueueId);
@@ -108,7 +111,7 @@ namespace Rift.Services
                     Stats = player.Stats,
                     QueueName = queue,
                 },
-                Reward = new ItemReward().AddCoins(brag.Coins)
+                Reward = reward
             });
         }
 

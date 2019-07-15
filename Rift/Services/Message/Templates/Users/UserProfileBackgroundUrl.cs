@@ -14,8 +14,8 @@ namespace Rift.Services.Message.Templates.Users
         {
             var dbUser = await DB.Users.GetAsync(data.UserId);
 
-            if (dbUser.ProfileBackground == 0) // TODO: set default back
-                return message;
+            if (dbUser.ProfileBackground == 0)
+                dbUser.ProfileBackground = 11; //default
 
             var background = await DB.ProfileBackgrounds.GetAsync(dbUser.ProfileBackground);
 

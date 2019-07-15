@@ -14,14 +14,27 @@ namespace Rift.Modules
         readonly RiotService riotService;
         readonly BragService bragService;
         readonly GiveawayService giveawayService;
+        readonly BotRespectService botRespectService;
+        readonly BackgroundService backgroundService;
 
         public EconomyModule(EconomyService economyService, RiotService riotService, BragService bragService,
-                             GiveawayService giveawayService)
+                             GiveawayService giveawayService, BotRespectService botRespectService,
+                             BackgroundService backgroundService)
         {
             this.economyService = economyService;
             this.riotService = riotService;
             this.bragService = bragService;
             this.giveawayService = giveawayService;
+            this.botRespectService = botRespectService;
+            this.backgroundService = backgroundService;
+        }
+
+        [Command("фоны")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task BackgroundInventoryList()
+        {
+            await backgroundService.GetInventoryAsync(Context.User.Id);
         }
 
         [Command("выдать билеты")]
@@ -106,7 +119,7 @@ namespace Rift.Modules
         {
             using (Context.Channel.EnterTypingState())
             {
-                await economyService.ActivateBotRespect(Context.User.Id);
+                await botRespectService.ActivateAsync(Context.User.Id);
             }
         }
 
@@ -160,11 +173,15 @@ namespace Rift.Modules
         [Group("открыть")]
         public class OpenModule : ModuleBase
         {
-            readonly EconomyService economyService;
+            readonly ChestService chestService;
+            readonly CapsuleService capsuleService;
+            readonly SphereService sphereService;
 
-            public OpenModule(EconomyService economyService)
+            public OpenModule(ChestService chestService, CapsuleService capsuleService, SphereService sphereService)
             {
-                this.economyService = economyService;
+                this.chestService = chestService;
+                this.capsuleService = capsuleService;
+                this.sphereService = sphereService;
             }
 
             [Command("сундук")]
@@ -173,11 +190,7 @@ namespace Rift.Modules
             {
                 using (Context.Channel.EnterTypingState())
                 {
-                    var message = await economyService.OpenChestAsync(Context.User.Id, amount);
-
-                    if (message is null)
-                        return;
-
+                    var message = await chestService.OpenAsync(Context.User.Id, amount);
                     await Context.Channel.SendIonicMessageAsync(message);
                 }
             }
@@ -188,11 +201,7 @@ namespace Rift.Modules
             {
                 using (Context.Channel.EnterTypingState())
                 {
-                    var message = await economyService.OpenChestAllAsync(Context.User.Id);
-
-                    if (message is null)
-                        return;
-
+                    var message = await chestService.OpenAllAsync(Context.User.Id);
                     await Context.Channel.SendIonicMessageAsync(message);
                 }
             }
@@ -201,8 +210,7 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Capsule()
             {
-                var message = await economyService.OpenCapsuleAsync(Context.User.Id);
-
+                var message = await capsuleService.OpenAsync(Context.User.Id);
                 await Context.Channel.SendIonicMessageAsync(message);
             }
 
@@ -210,9 +218,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Sphere()
             {
-                var embed = await economyService.OpenSphereAsync(Context.User.Id);
-
-                await Context.Channel.SendIonicMessageAsync(embed);
+                var message = await sphereService.OpenAsync(Context.User.Id);
+                await Context.Channel.SendIonicMessageAsync(message);
             }
         }
     }

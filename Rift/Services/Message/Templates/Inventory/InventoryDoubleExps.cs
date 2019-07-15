@@ -4,9 +4,9 @@ using Rift.Data.Models;
 
 namespace Rift.Services.Message.Templates.Inventory
 {
-    public class UserInventoryDoubleExps : TemplateBase
+    public class InventoryDoubleExps : TemplateBase
     {
-        public UserInventoryDoubleExps() : base(nameof(UserInventoryDoubleExps))
+        public InventoryDoubleExps() : base(nameof(InventoryDoubleExps))
         {
         }
 

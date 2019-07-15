@@ -2,7 +2,7 @@
 {
     public class MessageCreatedEventArgs : RiftEventArgs
     {
-        public uint TotalMessages { get; set; }
+        public uint TotalMessages { get; }
 
         public MessageCreatedEventArgs(ulong userId, uint totalMessages) : base(userId)
         {

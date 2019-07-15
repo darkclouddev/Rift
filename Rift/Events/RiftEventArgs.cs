@@ -4,7 +4,7 @@ namespace Rift.Events
 {
     public class RiftEventArgs : EventArgs
     {
-        public ulong UserId { get; protected set; }
+        public ulong UserId { get; }
 
         public RiftEventArgs(ulong userId)
         {

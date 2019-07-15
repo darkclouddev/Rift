@@ -148,7 +148,6 @@ namespace Rift.Data
                    });
             builder.Entity<RiftQuestProgress>().Property(prop => prop.UserId).ValueGeneratedNever();
             builder.Entity<RiftQuestProgress>().Property(prop => prop.QuestId).ValueGeneratedNever();
-            builder.Entity<RiftQuestProgress>().Ignore(x => x.TotalMonstersKilled);
 
             builder.Entity<RiftProfileBackground>().HasKey(x => x.Id);
             builder.Entity<RiftProfileBackground>().Property(x => x.Id).ValueGeneratedOnAdd();

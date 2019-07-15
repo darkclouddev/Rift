@@ -2,7 +2,7 @@
 {
     public class GiftSentEventArgs : RiftEventArgs
     {
-        public ulong ReceiverId { get; protected set; }
+        public ulong ReceiverId { get; }
 
         public GiftSentEventArgs(ulong userId, ulong receiverId) : base(userId)
         {

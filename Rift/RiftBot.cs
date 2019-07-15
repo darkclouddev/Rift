@@ -105,22 +105,22 @@ namespace Rift
             return await GetService<MessageService>().GetMessageAsync(identifier, data).ConfigureAwait(false);
         }
 
-        public static async Task SendChatMessageAsync(string identifier, FormatData data)
+        public static async Task<IUserMessage> SendMessageAsync(string identifier, ulong channelId, FormatData data)
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
-                return;
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, channelId, out var channel))
+                return null;
 
             var msg = await GetService<MessageService>().GetMessageAsync(identifier, data);
 
             if (msg is null)
-                return;
+                return null;
 
-            await channel.SendIonicMessageAsync(msg).ConfigureAwait(false);
+            return await channel.SendIonicMessageAsync(msg).ConfigureAwait(false);
         }
 
-        public static async Task<IUserMessage> SendChatMessageAsync(IonicMessage message)
+        public static async Task<IUserMessage> SendMessageAsync(IonicMessage message, ulong channelId)
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, channelId, out var channel))
                 return null;
 
             return await channel.SendIonicMessageAsync(message);
@@ -210,13 +210,17 @@ namespace Rift
                            //.AddSingleton(new AnnounceService())
                            .AddSingleton(new EventService())
                            //.AddSingleton(new MinionService())
-                           //.AddSingleton(new BotRespectService())
+                           .AddSingleton(new BotRespectService())
                            .AddSingleton(new QuizService())
                            .AddSingleton(new ModerationService())
                            //.AddSingleton(new ReliabilityService(IonicClient.Client))
-                           //.AddSingleton(new ChannelService(IonicClient.Client))
+                           .AddSingleton(new ChannelService(IonicClient.Client))
                            .AddSingleton(new QuestService())
                            .AddSingleton(new StoreService())
+                           .AddSingleton(new ChestService())
+                           .AddSingleton(new CapsuleService())
+                           .AddSingleton(new SphereService())
+                           .AddSingleton(new BackgroundService())
                            .AddSingleton(new CommandService(new CommandServiceConfig
                            {
                                CaseSensitiveCommands = false,
@@ -224,9 +228,7 @@ namespace Rift
                                DefaultRunMode = RunMode.Async
                            }));
 
-            var provider = services.BuildServiceProvider();
-
-            return provider;
+            return services.BuildServiceProvider();
         }
     }
 }

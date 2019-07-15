@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Settings = Rift.Configuration.Settings;
 
 using Rift.Database;
-using Rift.Events;
 using Rift.Services.Message;
 using Rift.Services.Reward;
 using Rift.Util;
@@ -20,18 +19,10 @@ namespace Rift.Services
 {
     public class EconomyService
     {
-        public static event EventHandler<ChestsOpenedEventArgs> ChestsOpened;
-        public static event EventHandler<ActivatedBotRespectsEventArgs> ActivatedBotRespects;
-        public static event EventHandler<OpenedSphereEventArgs> OpenedSphere;
-
         static Timer ratingUpdateTimer;
         static Timer ActiveUsersTimer;
         static Timer RichUsersTimer;
         static readonly TimeSpan ratingTimerCooldown = TimeSpan.FromMinutes(10);
-
-        static SemaphoreSlim chestMutex = new SemaphoreSlim(1);
-        static SemaphoreSlim capsuleMutex = new SemaphoreSlim(1);
-        static SemaphoreSlim sphereMutex = new SemaphoreSlim(1);
 
         public void Init()
         {
@@ -74,7 +65,7 @@ namespace Rift.Services
             if (topTen.Count == 0)
                 return;
 
-            await RiftBot.SendChatMessageAsync("economy-activeusers", new FormatData
+            await RiftBot.SendMessageAsync("economy-activeusers", Settings.ChannelId.Chat, new FormatData
             {
                 Economy = new EconomyData
                 {
@@ -92,7 +83,7 @@ namespace Rift.Services
             if (topTen.Count == 0)
                 return;
 
-            await RiftBot.SendChatMessageAsync("economy-richusers", new FormatData
+            await RiftBot.SendMessageAsync("economy-richusers", Settings.ChannelId.Chat, new FormatData
             {
                 Economy = new EconomyData
                 {
@@ -147,21 +138,33 @@ namespace Rift.Services
                 return;
 
             var reward = new ItemReward();
-
+            
             for (var level = fromLevel + 1; level <= toLevel; level++)
-                if (level == 100u || level == 50u)
-                    reward = new ItemReward().AddCapsules(1u);
-                else if (level % 25u == 0u)
-                    reward = new ItemReward().AddSpheres(1u);
-                else if (level % 10u == 0u)
-                    reward = new ItemReward().AddTokens(2u);
-                else if (level % 5u == 0u)
-                    reward = new ItemReward().AddCoins(2_000u).AddTickets(1u);
-                else
-                    reward = new ItemReward().AddCoins(2_000u).AddChests(1u);
+            {
+                if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.NitroBooster))
+                    reward = reward.AddChests(1u);
+                
+                if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankGold))
+                    reward = reward.AddCoins(250u);
+                
+                if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankPlatinum))
+                    reward = reward.AddCoins(500u);
+                
+                if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankDiamond))
+                    reward = reward.AddCoins(750u);
+                
+                if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankMaster))
+                    reward = reward.AddCoins(1000u);
+                
+                if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankGrandmaster))
+                    reward = reward.AddCoins(1250u);
+                
+                if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankChallenger))
+                    reward = reward.AddCoins(1500u);
+            }
 
             await reward.DeliverToAsync(userId);
-            await RiftBot.SendChatMessageAsync("levelup", new FormatData(userId)
+            await RiftBot.SendMessageAsync("levelup", Settings.ChannelId.Chat, new FormatData(userId)
             {
                 Reward = reward
             });
@@ -174,13 +177,7 @@ namespace Rift.Services
 
         public async Task<IonicMessage> GetUserProfileAsync(ulong userId)
         {
-            var dbUser = await DB.Users.GetAsync(userId);
-
-            var messageName = dbUser.ProfileBackground > 0
-                ? "user-profile-background"
-                : "user-profile";
-
-            return await RiftBot.GetMessageAsync(messageName, new FormatData(userId));
+            return await RiftBot.GetMessageAsync("user-profile", new FormatData(userId));
         }
 
         public async Task<IonicMessage> GetUserGameStatAsync(ulong userId)
@@ -212,7 +209,7 @@ namespace Rift.Services
 
             return await RiftBot.GetMessageAsync("loldata-stat-success", new FormatData(userId)
             {
-                LolStat = new LolStatData
+                LeagueStat = new LeagueStatData
                 {
                     Summoner = summoner,
                     SoloQueue = leaguePositions.FirstOrDefault(x => x.QueueType == "RANKED_SOLO_5x5"),
@@ -234,137 +231,6 @@ namespace Rift.Services
         static async Task UpdateRatingAsync()
         {
             SortedRating = await DB.Users.GetAllSortedAsync();
-        }
-
-        public async Task<IonicMessage> OpenChestAsync(ulong userId, uint amount)
-        {
-            await chestMutex.WaitAsync().ConfigureAwait(false);
-
-            IonicMessage result;
-
-            RiftBot.Log.Info($"Opening chest for {userId.ToString()}.");
-
-            try
-            {
-                result = await OpenChestInternalAsync(userId, amount).ConfigureAwait(false);
-            }
-            finally
-            {
-                chestMutex.Release();
-            }
-
-            return result;
-        }
-
-        public async Task<IonicMessage> OpenChestAllAsync(ulong userId)
-        {
-            await chestMutex.WaitAsync().ConfigureAwait(false);
-
-            IonicMessage result;
-
-            RiftBot.Log.Info($"Opening all chests for {userId.ToString()}");
-
-            try
-            {
-                var dbInventory = await DB.Inventory.GetAsync(userId);
-                result = await OpenChestInternalAsync(userId, dbInventory.Chests).ConfigureAwait(false);
-            }
-            finally
-            {
-                chestMutex.Release();
-            }
-
-            return result;
-        }
-
-        static async Task<IonicMessage> OpenChestInternalAsync(ulong userId, uint amount)
-        {
-            var dbInventory = await DB.Inventory.GetAsync(userId);
-
-            if (dbInventory.Chests < amount || amount == 0)
-                return await RiftBot.GetMessageAsync("chests-nochests", new FormatData(userId));
-
-            await DB.Inventory.RemoveAsync(userId, new InventoryData {Chests = amount});
-            ChestsOpened?.Invoke(null, new ChestsOpenedEventArgs(userId, amount));
-
-            var chest = new ChestReward();
-            await chest.DeliverToAsync(userId);
-            await DB.Statistics.AddAsync(userId, new StatisticData {ChestsOpened = amount});
-
-            return await RiftBot.GetMessageAsync("chests-open-success", new FormatData(userId));
-        }
-
-        public async Task<IonicMessage> OpenCapsuleAsync(ulong userId)
-        {
-            await capsuleMutex.WaitAsync().ConfigureAwait(false);
-
-            IonicMessage result;
-
-            RiftBot.Log.Info($"Opening capsule for {userId.ToString()}.");
-
-            try
-            {
-                result = await OpenCapsuleInternalAsync(userId).ConfigureAwait(false);
-            }
-            finally
-            {
-                capsuleMutex.Release();
-            }
-
-            return result;
-        }
-
-        static async Task<IonicMessage> OpenCapsuleInternalAsync(ulong userId)
-        {
-            var dbUserInventory = await DB.Inventory.GetAsync(userId);
-
-            if (dbUserInventory.Capsules == 0u)
-                await RiftBot.GetMessageAsync("capsules-nocapsules", new FormatData(userId));
-
-            await DB.Inventory.RemoveAsync(userId, new InventoryData {Capsules = 1u});
-
-            var capsule = new CapsuleReward();
-            await capsule.DeliverToAsync(userId);
-            await DB.Statistics.AddAsync(userId, new StatisticData {CapsulesOpened = 1u});
-
-            return await RiftBot.GetMessageAsync("capsules-open-success", new FormatData(userId));
-        }
-
-        public async Task<IonicMessage> OpenSphereAsync(ulong userId)
-        {
-            await sphereMutex.WaitAsync().ConfigureAwait(false);
-
-            IonicMessage result;
-
-            RiftBot.Log.Info($"Opening sphere for {userId.ToString()}.");
-
-            try
-            {
-                result = await OpenSphereInternalAsync(userId).ConfigureAwait(false);
-            }
-            finally
-            {
-                sphereMutex.Release();
-            }
-
-            return result;
-        }
-
-        static async Task<IonicMessage> OpenSphereInternalAsync(ulong userId)
-        {
-            var dbInventory = await DB.Inventory.GetAsync(userId);
-
-            if (dbInventory.Spheres == 0u)
-                return await RiftBot.GetMessageAsync("spheres-nospheres", new FormatData(userId));
-
-            await DB.Inventory.RemoveAsync(userId, new InventoryData {Spheres = 1u});
-            OpenedSphere?.Invoke(null, new OpenedSphereEventArgs(userId));
-
-            var sphere = new SphereReward();
-            await sphere.DeliverToAsync(userId);
-            await DB.Statistics.AddAsync(userId, new StatisticData {SpheresOpened = 1u});
-
-            return await RiftBot.GetMessageAsync("spheres-open-success", new FormatData(userId));
         }
 
         public async Task ActivateDoubleExp(ulong userId)
@@ -395,38 +261,6 @@ namespace Rift.Services
             await DB.Cooldowns.SetDoubleExpTimeAsync(userId, dateTime);
 
             var msgSuccess = await RiftBot.GetMessageAsync("activate-success-doubleexp", new FormatData(userId));
-            await channel.SendIonicMessageAsync(msgSuccess);
-        }
-
-        public async Task ActivateBotRespect(ulong userId)
-        {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
-                return;
-
-            var dbInventory = await DB.Inventory.GetAsync(userId);
-
-            if (dbInventory.BonusBotRespect == 0)
-            {
-                var msgNoPowerUp = await RiftBot.GetMessageAsync("activate-nopowerup", new FormatData(userId));
-                await channel.SendIonicMessageAsync(msgNoPowerUp);
-                return;
-            }
-
-            var dbCooldowns = await DB.Cooldowns.GetAsync(userId);
-            if (dbCooldowns.BotRespectTime > DateTime.UtcNow)
-            {
-                var msgActive = await RiftBot.GetMessageAsync("activate-active", new FormatData(userId));
-                await channel.SendIonicMessageAsync(msgActive);
-                return;
-            }
-
-            await DB.Inventory.RemoveAsync(userId, new InventoryData {BotRespects = 1});
-            ActivatedBotRespects?.Invoke(null, new ActivatedBotRespectsEventArgs(userId));
-
-            var dateTime = DateTime.UtcNow.AddHours(12.0);
-            await DB.Cooldowns.SetBotRespeсtTimeAsync(userId, dateTime);
-
-            var msgSuccess = await RiftBot.GetMessageAsync("activate-success-botrespect", new FormatData(userId));
             await channel.SendIonicMessageAsync(msgSuccess);
         }
 

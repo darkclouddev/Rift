@@ -14,13 +14,9 @@ namespace Rift.Data.Models
         public uint? MessagesSent { get; set; }
         public uint? BoughtChests { get; set; }
         public uint? OpenedChests { get; set; }
-        public uint? UsualMonstersKilled { get; set; }
+        public uint? NormalMonstersKilled { get; set; }
         public uint? RareMonstersKilled { get; set; }
         public uint? EpicMonstersKilled { get; set; }
-
-        public uint TotalMonstersKilled =>
-            (UsualMonstersKilled ?? 0u) + (RareMonstersKilled ?? 0u) + (EpicMonstersKilled ?? 0u);
-
         public uint? GiftsSent { get; set; }
         public uint? GiftsReceived { get; set; }
         public uint? GiftsReceivedFromUltraGay { get; set; }
@@ -35,5 +31,208 @@ namespace Rift.Data.Models
         public uint? ActivatedBotRespects { get; set; }
         public bool? OpenedSphere { get; set; }
         public uint? RolesPurchased { get; set; }
+
+        public bool IsCompleted(RiftQuestProgress progress)
+        {
+            if (ApprovedLolAccount.HasValue)
+            {
+                if (!progress.ApprovedLolAccount.HasValue)
+                    return false;
+                
+                if (ApprovedLolAccount.Value && !progress.ApprovedLolAccount.Value)
+                    return false;
+            }
+
+            if (BragsDone.HasValue)
+            {
+                if (!progress.BragsDone.HasValue)
+                    return false;
+
+                if (BragsDone.Value <= progress.BragsDone.Value)
+                    return false;
+            }
+
+            if (MessagesSent.HasValue)
+            {
+                if (!progress.MessagesSent.HasValue)
+                    return false;
+
+                if (MessagesSent.Value <= progress.MessagesSent.Value)
+                    return false;
+            }
+
+            if (BoughtChests.HasValue)
+            {
+                if (!progress.BoughtChests.HasValue)
+                    return false;
+
+                if (BoughtChests.Value <= progress.BoughtChests.Value)
+                    return false;
+            }
+
+            if (OpenedChests.HasValue)
+            {
+                if (!progress.OpenedChests.HasValue)
+                    return false;
+
+                if (OpenedChests.Value <= progress.OpenedChests.Value)
+                    return false;
+            }
+
+            if (NormalMonstersKilled.HasValue)
+            {
+                if (!progress.NormalMonstersKilled.HasValue)
+                    return false;
+
+                if (NormalMonstersKilled.Value <= progress.NormalMonstersKilled.Value)
+                    return false;
+            }
+
+            if (RareMonstersKilled.HasValue)
+            {
+                if (!progress.RareMonstersKilled.HasValue)
+                    return false;
+
+                if (RareMonstersKilled.Value <= progress.RareMonstersKilled.Value)
+                    return false;
+            }
+
+            if (EpicMonstersKilled.HasValue)
+            {
+                if (!progress.EpicMonstersKilled.HasValue)
+                    return false;
+
+                if (EpicMonstersKilled.Value <= progress.EpicMonstersKilled.Value)
+                    return false;
+            }
+
+            if (GiftsSent.HasValue)
+            {
+                if (!progress.GiftsSent.HasValue)
+                    return false;
+
+                if (GiftsSent.Value <= progress.GiftsSent.Value)
+                    return false;
+            }
+
+            if (GiftsReceived.HasValue)
+            {
+                if (!progress.GiftsReceived.HasValue)
+                    return false;
+
+                if (GiftsReceived.Value <= progress.GiftsReceived.Value)
+                    return false;
+            }
+
+            if (GiftsReceivedFromUltraGay.HasValue)
+            {
+                if (!progress.GiftsReceivedFromUltraGay.HasValue)
+                    return false;
+
+                if (GiftsReceivedFromUltraGay.Value <= progress.GiftsReceivedFromUltraGay.Value)
+                    return false;
+            }
+
+            if (LevelReached.HasValue)
+            {
+                if (!progress.LevelReached.HasValue)
+                    return false;
+
+                if (LevelReached.Value <= progress.LevelReached.Value)
+                    return false;
+            }
+
+            if (GiveawaysParticipated.HasValue)
+            {
+                if (!progress.GiveawaysParticipated.HasValue)
+                    return false;
+
+                if (GiveawaysParticipated.Value <= progress.GiveawaysParticipated.Value)
+                    return false;
+            }
+
+            if (CoinsReceived.HasValue)
+            {
+                if (!progress.CoinsReceived.HasValue)
+                    return false;
+
+                if (CoinsReceived.Value <= progress.CoinsReceived.Value)
+                    return false;
+            }
+
+            if (CoinsSpent.HasValue)
+            {
+                if (!progress.CoinsSpent.HasValue)
+                    return false;
+
+                if (CoinsSpent.Value <= progress.CoinsSpent.Value)
+                    return false;
+            }
+
+            if (VoiceUptimeEarned.HasValue)
+            {
+                if (!progress.VoiceUptimeEarned.HasValue)
+                    return false;
+
+                if (VoiceUptimeEarned.Value <= progress.VoiceUptimeEarned.Value)
+                    return false;
+            }
+
+            if (GiftedBotKeeper.HasValue)
+            {
+                if (!progress.GiftedBotKeeper.HasValue)
+                    return false;
+
+                if (GiftedBotKeeper.Value && !progress.GiftedBotKeeper.Value)
+                    return false;
+            }
+
+            if (GiftedModerator.HasValue)
+            {
+                if (!progress.GiftedModerator.HasValue)
+                    return false;
+
+                if (GiftedModerator.Value && !progress.GiftedModerator.Value)
+                    return false;
+            }
+
+            if (GiftedStreamer.HasValue)
+            {
+                if (!progress.GiftedStreamer.HasValue)
+                    return false;
+
+                if (GiftedStreamer.Value && !progress.GiftedStreamer.Value)
+                    return false;
+            }
+
+            if (ActivatedBotRespects.HasValue)
+            {
+                if (!progress.ActivatedBotRespects.HasValue)
+                    return false;
+
+                if (ActivatedBotRespects.Value <= progress.ActivatedBotRespects.Value)
+                    return false;
+            }
+
+            if (OpenedSphere.HasValue)
+            {
+                if (!progress.OpenedSphere.HasValue)
+                    return false;
+
+                if (OpenedSphere.Value && !progress.OpenedSphere.Value)
+                    return false;
+            }
+
+            if (RolesPurchased.HasValue)
+            {
+                if (!progress.RolesPurchased.HasValue)
+                    return false;
+
+                if (RolesPurchased.Value <= progress.RolesPurchased.Value)
+                    return false;
+            }
+
+            return true;
+        }
     }
 }

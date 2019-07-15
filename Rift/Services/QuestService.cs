@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using Rift.Configuration;
 using Rift.Data.Models;
 using Rift.Events;
 using Rift.Services.Message;
@@ -19,7 +20,7 @@ namespace Rift.Services
             DB.Users.OnLevelReached += OnLevelReached;
             BragService.OnUserBrag += OnUserBrag;
             DB.Statistics.OnMessageCreated += OnMessageCreated;
-            EconomyService.ChestsOpened += OnChestsOpened;
+            ChestService.ChestsOpened += OnChestsOpened;
             GiftService.GiftSent += OnGiftSent;
             GiftService.GiftReceived += OnGiftReceived;
             GiftService.GiftsReceivedFromFounder += OnGiftReceivedFromFounder;
@@ -29,14 +30,14 @@ namespace Rift.Services
             DB.Inventory.OnCoinsReceived += OnCoinsReceived;
             DB.Inventory.OnCoinsSpent += OnCoinsSpent;
             DB.Statistics.VoiceUptimeEarned += OnVoiceUptimeEarned;
-            EconomyService.ActivatedBotRespects += OnActivatedBotRespects;
-            EconomyService.OpenedSphere += OnOpenedSphere;
+            BotRespectService.ActivatedBotRespects += OnActivatedBotRespects;
+            SphereService.OpenedSphere += OnOpenedSphere;
             StoreService.BoughtChests += OnBoughtChests;
             StoreService.RolesPurchased += OnRolesPurchased;
             GiveawayService.GiveawaysParticipated += OnGiveawaysParticipated;
-            //EventService.UsualMonstersKilled += OnUsualMonstersKilled;
-            //EventService.RareMonstersKilled += OnRareMonstersKilled;
-            //EventService.EpicMonstersKilled += OnEpicMonstersKilled;
+            EventService.NormalMonstersKilled += OnNormalMonstersKilled;
+            EventService.RareMonstersKilled += OnRareMonstersKilled;
+            EventService.EpicMonstersKilled += OnEpicMonstersKilled;
         }
 
         public async Task AddNextQuestAsync(ulong userId)
@@ -101,14 +102,14 @@ namespace Rift.Services
             if (!(reward.ItemReward is null))
             {
                 data.Reward = reward.ItemReward;
-                await RiftBot.SendChatMessageAsync(CompletionMessageName, data);
+                await RiftBot.SendMessageAsync(CompletionMessageName, Settings.ChannelId.Chat, data);
                 await reward.ItemReward.DeliverToAsync(progress.UserId);
             }
 
             if (!(reward.RoleReward is null))
             {
                 data.Reward = reward.RoleReward;
-                await RiftBot.SendChatMessageAsync(CompletionMessageName, data);
+                await RiftBot.SendMessageAsync(CompletionMessageName, Settings.ChannelId.Chat, data);
                 await reward.RoleReward.DeliverToAsync(progress.UserId);
             }
         }
@@ -127,20 +128,20 @@ namespace Rift.Services
                 if (dbQuest?.LevelReached is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     LevelReached = e.Level
                 };
 
-                if (rqp.LevelReached >= dbQuest.LevelReached.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -158,20 +159,20 @@ namespace Rift.Services
                 if (dbQuest?.ApprovedLolAccount is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     ApprovedLolAccount = true
                 };
 
-                if (rqp.ApprovedLolAccount.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -189,20 +190,20 @@ namespace Rift.Services
                 if (dbQuest?.BragsDone is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     BragsDone = (questProgress.BragsDone ?? 0u) + 1u
                 };
 
-                if (rqp.BragsDone >= dbQuest.BragsDone.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -220,20 +221,20 @@ namespace Rift.Services
                 if (dbQuest?.MessagesSent is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     MessagesSent = (questProgress.MessagesSent ?? 0u) + 1u
                 };
 
-                if (rqp.MessagesSent >= dbQuest.MessagesSent.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -251,20 +252,20 @@ namespace Rift.Services
                 if (dbQuest?.OpenedChests is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     OpenedChests = (questProgress.OpenedChests ?? 0u) + e.Amount
                 };
 
-                if (rqp.OpenedChests >= dbQuest.OpenedChests.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -282,20 +283,20 @@ namespace Rift.Services
                 if (dbQuest?.GiftsSent is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     GiftsSent = (questProgress.GiftsSent ?? 0u) + 1u
                 };
 
-                if (rqp.GiftsSent >= dbQuest.GiftsSent.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -313,20 +314,20 @@ namespace Rift.Services
                 if (dbQuest?.GiftsReceived is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     GiftsReceived = (questProgress.GiftsReceived ?? 0u) + 1u
                 };
 
-                if (rqp.GiftsReceived >= dbQuest.GiftsReceived.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -344,20 +345,20 @@ namespace Rift.Services
                 if (dbQuest?.GiftsReceivedFromUltraGay is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     GiftsReceivedFromUltraGay = (questProgress.GiftsReceivedFromUltraGay ?? 0u) + 1u
                 };
 
-                if (rqp.GiftsReceivedFromUltraGay >= dbQuest.GiftsReceivedFromUltraGay)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -375,20 +376,20 @@ namespace Rift.Services
                 if (dbQuest?.GiftedBotKeeper is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     GiftedBotKeeper = true
                 };
 
-                if (rqp.GiftedBotKeeper.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -406,20 +407,20 @@ namespace Rift.Services
                 if (dbQuest?.GiftedModerator is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     GiftedModerator = true
                 };
 
-                if (rqp.GiftedModerator.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -437,20 +438,20 @@ namespace Rift.Services
                 if (dbQuest?.GiftedStreamer is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     GiftedStreamer = true
                 };
 
-                if (rqp.GiftedStreamer.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -468,20 +469,20 @@ namespace Rift.Services
                 if (dbQuest?.CoinsReceived is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     CoinsReceived = (questProgress.CoinsReceived ?? 0u) + e.Amount
                 };
 
-                if (rqp.CoinsReceived >= dbQuest.CoinsReceived.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -499,20 +500,20 @@ namespace Rift.Services
                 if (dbQuest?.CoinsSpent is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     CoinsSpent = (questProgress.CoinsSpent ?? 0u) + e.Amount
                 };
 
-                if (rqp.CoinsSpent >= dbQuest.CoinsSpent.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -530,20 +531,20 @@ namespace Rift.Services
                 if (dbQuest?.VoiceUptimeEarned is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     VoiceUptimeEarned = (questProgress.VoiceUptimeEarned ?? TimeSpan.Zero) + e.Uptime
                 };
 
-                if (rqp.VoiceUptimeEarned >= dbQuest.VoiceUptimeEarned.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -561,20 +562,20 @@ namespace Rift.Services
                 if (dbQuest?.ActivatedBotRespects is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     ActivatedBotRespects = (questProgress.ActivatedBotRespects ?? 0u) + 1u
                 };
 
-                if (rqp.ActivatedBotRespects >= dbQuest.ActivatedBotRespects.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -592,20 +593,20 @@ namespace Rift.Services
                 if (dbQuest?.OpenedSphere is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     OpenedSphere = true
                 };
 
-                if (rqp.OpenedSphere.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -623,20 +624,20 @@ namespace Rift.Services
                 if (dbQuest?.BoughtChests is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     BoughtChests = (questProgress.BoughtChests ?? 0u) + e.Amount
                 };
 
-                if (rqp.BoughtChests.Value >= dbQuest.BoughtChests.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
 
@@ -685,20 +686,113 @@ namespace Rift.Services
                 if (dbQuest?.GiveawaysParticipated is null)
                     continue;
 
-                var rqp = new RiftQuestProgress
+                var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
                     GiveawaysParticipated = (questProgress.GiveawaysParticipated ?? 0u) + 1u
                 };
 
-                if (rqp.GiveawaysParticipated.Value >= dbQuest.GiveawaysParticipated.Value)
+                if (dbQuest.IsCompleted(progress))
                 {
-                    await FinishQuestAsync(dbQuest, rqp);
+                    await FinishQuestAsync(dbQuest, progress);
                     continue;
                 }
 
-                await DB.Quests.SetQuestsProgressAsync(rqp);
+                await DB.Quests.SetQuestsProgressAsync(progress);
+            }
+        }
+
+        static async void OnNormalMonstersKilled(object sender, NormalMonstersKilledEventArgs e)
+        {
+            var quests = await DB.Quests.GetActiveQuestsProgressAsync(e.UserId);
+
+            if (quests is null || quests.Count == 0)
+                return;
+
+            foreach (var questProgress in quests)
+            {
+                var dbQuest = await DB.Quests.GetQuestAsync(questProgress.QuestId);
+
+                if (dbQuest?.NormalMonstersKilled is null)
+                    continue;
+
+                var progress = new RiftQuestProgress
+                {
+                    UserId = e.UserId,
+                    QuestId = dbQuest.Id,
+                    NormalMonstersKilled = (questProgress.NormalMonstersKilled ?? 0u) + 1u
+                };
+
+                if (dbQuest.IsCompleted(progress))
+                {
+                    await FinishQuestAsync(dbQuest, progress);
+                    continue;
+                }
+
+                await DB.Quests.SetQuestsProgressAsync(progress);
+            }
+        }
+
+        static async void OnRareMonstersKilled(object sender, RareMonstersKilledEventArgs e)
+        {
+            var quests = await DB.Quests.GetActiveQuestsProgressAsync(e.UserId);
+
+            if (quests is null || quests.Count == 0)
+                return;
+
+            foreach (var questProgress in quests)
+            {
+                var dbQuest = await DB.Quests.GetQuestAsync(questProgress.QuestId);
+
+                if (dbQuest?.RareMonstersKilled is null)
+                    continue;
+
+                var progress = new RiftQuestProgress
+                {
+                    UserId = e.UserId,
+                    QuestId = dbQuest.Id,
+                    RareMonstersKilled = (questProgress.RareMonstersKilled ?? 0u) + 1u
+                };
+
+                if (dbQuest.IsCompleted(progress))
+                {
+                    await FinishQuestAsync(dbQuest, progress);
+                    continue;
+                }
+
+                await DB.Quests.SetQuestsProgressAsync(progress);
+            }
+        }
+
+        static async void OnEpicMonstersKilled(object sender, EpicMonstersKilledEventArgs e)
+        {
+            var quests = await DB.Quests.GetActiveQuestsProgressAsync(e.UserId);
+
+            if (quests is null || quests.Count == 0)
+                return;
+
+            foreach (var questProgress in quests)
+            {
+                var dbQuest = await DB.Quests.GetQuestAsync(questProgress.QuestId);
+
+                if (dbQuest?.EpicMonstersKilled is null)
+                    continue;
+
+                var progress = new RiftQuestProgress
+                {
+                    UserId = e.UserId,
+                    QuestId = dbQuest.Id,
+                    EpicMonstersKilled = (questProgress.EpicMonstersKilled ?? 0u) + 1u
+                };
+
+                if (dbQuest.IsCompleted(progress))
+                {
+                    await FinishQuestAsync(dbQuest, progress);
+                    continue;
+                }
+
+                await DB.Quests.SetQuestsProgressAsync(progress);
             }
         }
     }

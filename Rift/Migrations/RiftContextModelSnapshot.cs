@@ -121,6 +121,8 @@ namespace Rift.Migrations
 
                     b.Property<int>("StoredMessageId");
 
+                    b.Property<int>("Type");
+
                     b.HasKey("Name");
 
                     b.ToTable("Events");
@@ -378,6 +380,8 @@ namespace Rift.Migrations
 
                     b.Property<string>("Name");
 
+                    b.Property<uint?>("NormalMonstersKilled");
+
                     b.Property<uint?>("OpenedChests");
 
                     b.Property<bool?>("OpenedSphere");
@@ -391,8 +395,6 @@ namespace Rift.Migrations
                     b.Property<uint?>("RolesPurchased");
 
                     b.Property<int>("StageId");
-
-                    b.Property<uint?>("UsualMonstersKilled");
 
                     b.Property<TimeSpan?>("VoiceUptimeEarned");
 
@@ -441,6 +443,8 @@ namespace Rift.Migrations
 
                     b.Property<uint?>("MessagesSent");
 
+                    b.Property<uint?>("NormalMonstersKilled");
+
                     b.Property<uint?>("OpenedChests");
 
                     b.Property<bool?>("OpenedSphere");
@@ -448,8 +452,6 @@ namespace Rift.Migrations
                     b.Property<uint?>("RareMonstersKilled");
 
                     b.Property<uint?>("RolesPurchased");
-
-                    b.Property<uint?>("UsualMonstersKilled");
 
                     b.Property<TimeSpan?>("VoiceUptimeEarned");
 
@@ -494,15 +496,9 @@ namespace Rift.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("Day");
+                    b.Property<int>("EventType");
 
-                    b.Property<string>("EventName");
-
-                    b.Property<int>("Hour");
-
-                    b.Property<int>("Minute");
-
-                    b.Property<int>("Month");
+                    b.Property<DateTime>("StartAt");
 
                     b.HasKey("Id");
 

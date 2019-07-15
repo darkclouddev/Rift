@@ -4,16 +4,17 @@ using Rift.Data.Models;
 
 namespace Rift.Services.Message.Templates.Inventory
 {
-    public class UserInventoryTickets : TemplateBase
+    public class InventoryCoins : TemplateBase
     {
-        public UserInventoryTickets() : base(nameof(UserInventoryTickets))
+        public InventoryCoins() : base(nameof(InventoryCoins))
         {
         }
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             var inventory = await DB.Inventory.GetAsync(data.UserId);
-            return await ReplaceDataAsync(message, inventory.Tickets.ToString());
+
+            return await ReplaceDataAsync(message, inventory.Coins.ToString());
         }
     }
 }

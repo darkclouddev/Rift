@@ -13,10 +13,10 @@ namespace Rift.Services.Message.Templates.LeagueData
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            if (data.LolStat.SoloQueue is null)
+            if (data.LeagueStat.SoloQueue is null)
                 return ReplaceDataAsync(message, "Недостаточно игр");
 
-            var league = data.LolStat.SoloQueue;
+            var league = data.LeagueStat.SoloQueue;
             var totalGames = league.Wins + league.Losses;
             var winRatePerc = (int) Math.Round((double) league.Wins / (double) totalGames * 100);
             var leagueName =

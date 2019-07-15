@@ -29,7 +29,7 @@ namespace Rift.Services
 
         public async Task SendDescriptionAsync()
         {
-            await RiftBot.SendChatMessageAsync("gift-description", null);
+            await RiftBot.SendMessageAsync("gift-description", Settings.ChannelId.Comms, null);
         }
 
         public async Task<IonicMessage> SendGiftAsync(SocketGuildUser fromSgUser, SocketGuildUser toSgUser)

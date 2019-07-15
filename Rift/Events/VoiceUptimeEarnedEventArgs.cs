@@ -4,7 +4,7 @@ namespace Rift.Events
 {
     public class VoiceUptimeEarnedEventArgs : RiftEventArgs
     {
-        public TimeSpan Uptime { get; protected set; }
+        public TimeSpan Uptime { get; }
 
         public VoiceUptimeEarnedEventArgs(ulong userId, TimeSpan uptime) : base(userId)
         {

@@ -6,9 +6,12 @@ namespace Rift
 {
     public static class DB
     {
+        public static readonly ActiveEvents ActiveEvents;
         public static readonly ActiveGiveaways ActiveGiveaways;
         public static readonly BackgroundInventory BackgroundInventory;
         public static readonly Cooldowns Cooldowns;
+        public static readonly Database.Events Events;
+        public static readonly EventLogs EventLogs;
         public static readonly EventSchedule EventSchedule;
         public static readonly GiveawayLogs GiveawayLogs;
         public static readonly Giveaways Giveaways;
@@ -31,9 +34,12 @@ namespace Rift
 
         static DB()
         {
+            ActiveEvents = new ActiveEvents();
             ActiveGiveaways = new ActiveGiveaways();
             BackgroundInventory = new BackgroundInventory();
             Cooldowns = new Cooldowns();
+            Events = new Database.Events();
+            EventLogs = new EventLogs();
             EventSchedule = new EventSchedule();
             GiveawayLogs = new GiveawayLogs();
             Giveaways = new Giveaways();

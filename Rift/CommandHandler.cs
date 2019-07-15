@@ -91,14 +91,19 @@ namespace Rift
                 //&& !RiftBot.IsAdmin(message.Author)
                 //&& !RiftBot.IsModerator(message.Author))
                 return;
-
-            if (await DB.Toxicity.HasBlockingAsync(message.Author.Id).ConfigureAwait(false))
+            
+            if (await DB.Toxicity.HasBlockingAsync(message.Author.Id))
             {
-                await RiftBot.SendChatMessageAsync("toxicity-blocked", new FormatData(message.Author.Id))
-                             .ConfigureAwait(false);
+                var msg = await RiftBot.GetMessageAsync("toxicity-blocked", new FormatData(message.Author.Id));
+
+                if (msg is null)
+                    return;
+
+                await message.Author.SendIonicMessageAsync(msg);
+                
                 return;
             }
-
+            
             var context = new CommandContext(client, message);
 
             if (await HandleCommand(context))
@@ -218,7 +223,7 @@ namespace Rift
 
             await RegisterJoinedLeft(user, UserState.Joined);
 
-            await RiftBot.SendChatMessageAsync("user-joined", new FormatData(user.Id));
+            await RiftBot.SendMessageAsync("user-joined", Settings.ChannelId.Chat, new FormatData(user.Id));
         }
 
         async Task RegisterJoinedLeft(SocketGuildUser sgUser, UserState state)
