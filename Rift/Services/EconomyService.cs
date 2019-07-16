@@ -141,26 +141,39 @@ namespace Rift.Services
             
             for (var level = fromLevel + 1; level <= toLevel; level++)
             {
+                if (level == 100u)
+                    reward.AddCapsules(1u);
+                else if (level == 50u)
+                    reward.AddSpheres(1u);
+                else if (level % 25u == 0u)
+                    reward.AddSpheres(1u);
+                else if (level % 10u == 0u)
+                    reward.AddTokens(2u);
+                else if (level % 5u == 0u)
+                    reward.AddTickets(1u).AddCoins(2_000u);
+                else
+                    reward.AddChests(1u).AddCoins(2_000u);
+                
                 if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.NitroBooster))
-                    reward = reward.AddChests(1u);
+                    reward.AddChests(1u);
                 
                 if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankGold))
-                    reward = reward.AddCoins(250u);
+                    reward.AddCoins(250u);
                 
                 if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankPlatinum))
-                    reward = reward.AddCoins(500u);
+                    reward.AddCoins(500u);
                 
                 if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankDiamond))
-                    reward = reward.AddCoins(750u);
+                    reward.AddCoins(750u);
                 
                 if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankMaster))
-                    reward = reward.AddCoins(1000u);
+                    reward.AddCoins(1000u);
                 
                 if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankGrandmaster))
-                    reward = reward.AddCoins(1250u);
+                    reward.AddCoins(1250u);
                 
                 if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankChallenger))
-                    reward = reward.AddCoins(1500u);
+                    reward.AddCoins(1500u);
             }
 
             await reward.DeliverToAsync(userId);

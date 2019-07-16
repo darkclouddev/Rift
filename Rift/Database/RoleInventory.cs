@@ -12,7 +12,7 @@ namespace Rift.Database
 {
     public class RoleInventory
     {
-        public async Task AddAsync(ulong userId, ulong roleId, string source)
+        public async Task AddAsync(ulong userId, int roleId, string source)
         {
             var invRole = new RiftRoleInventory
             {
@@ -39,12 +39,22 @@ namespace Rift.Database
             }
         }
 
-        public async Task<int> GetCountAsync(ulong userId)
+        public async Task<int> CountAsync(ulong userId)
         {
             using (var context = new RiftContext())
             {
                 return await context.RoleInventories
                                     .CountAsync(x => x.UserId == userId);
+            }
+        }
+        
+        public async Task<bool> HasAsync(ulong userId, int roleId)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.RoleInventories
+                    .Where(x => x.UserId == userId && x.RoleId == roleId)
+                    .AnyAsync();
             }
         }
     }

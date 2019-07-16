@@ -16,10 +16,11 @@ namespace Rift.Modules
         readonly GiveawayService giveawayService;
         readonly BotRespectService botRespectService;
         readonly BackgroundService backgroundService;
+        readonly RoleService roleService;
 
         public EconomyModule(EconomyService economyService, RiotService riotService, BragService bragService,
                              GiveawayService giveawayService, BotRespectService botRespectService,
-                             BackgroundService backgroundService)
+                             BackgroundService backgroundService, RoleService roleService)
         {
             this.economyService = economyService;
             this.riotService = riotService;
@@ -27,6 +28,39 @@ namespace Rift.Modules
             this.giveawayService = giveawayService;
             this.botRespectService = botRespectService;
             this.backgroundService = backgroundService;
+            this.roleService = roleService;
+        }
+
+        [Command("поставить роль")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task AddRole(int id)
+        {
+            await roleService.UpdateInventoryRoleAsync(Context.User.Id, id, true);
+        }
+
+        [Command("убрать роль")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task RemoveRole(int id)
+        {
+            await roleService.UpdateInventoryRoleAsync(Context.User.Id, id, false);
+        }
+
+        [Command("поставить фон")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task SetBackground(int id)
+        {
+            await backgroundService.SetActiveAsync(Context.User.Id, id);
+        }
+
+        [Command("роли")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task RoleInventoryList()
+        {
+            await roleService.GetInventoryAsync(Context.User.Id);
         }
 
         [Command("фоны")]
@@ -77,10 +111,6 @@ namespace Rift.Modules
             using (Context.Channel.EnterTypingState())
             {
                 var message = await economyService.GetUserProfileAsync(Context.User.Id);
-
-                if (message is null)
-                    return;
-
                 await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
             }
         }
@@ -95,10 +125,6 @@ namespace Rift.Modules
             using (Context.Channel.EnterTypingState())
             {
                 var message = await economyService.GetUserCooldownsAsync(Context.User.Id);
-
-                if (message is null)
-                    return;
-
                 await Context.Channel.SendIonicMessageAsync(message);
             }
         }
@@ -132,10 +158,6 @@ namespace Rift.Modules
             using (Context.Channel.EnterTypingState())
             {
                 var message = await economyService.GetUserStatAsync(Context.User.Id);
-
-                if (message is null)
-                    return;
-
                 await Context.Channel.SendIonicMessageAsync(message);
             }
         }
@@ -147,10 +169,6 @@ namespace Rift.Modules
             using (Context.Channel.EnterTypingState())
             {
                 var message = await economyService.GetUserStatAsync(Context.User.Id);
-
-                if (message is null)
-                    return;
-
                 await Context.Channel.SendIonicMessageAsync(message);
             }
         }
@@ -162,10 +180,6 @@ namespace Rift.Modules
             using (Context.Channel.EnterTypingState())
             {
                 var message = await bragService.GetUserBragAsync(Context.User.Id);
-
-                if (message is null)
-                    return;
-
                 await Context.Channel.SendIonicMessageAsync(message);
             }
         }

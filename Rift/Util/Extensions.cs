@@ -42,9 +42,14 @@ namespace Rift.Util
             return await SendIonicMessageAsync(await user.GetOrCreateDMChannelAsync(), message);
         }
 
+        public static string ToLogString(this IUser sgUser)
+        {
+            return $"[{sgUser}|{sgUser.Id.ToString()}]";
+        }
+
         public static string ToLogString(this SocketGuildUser sgUser)
         {
-            return $"[{sgUser}|{sgUser.Id}]";
+            return $"[{sgUser}|{sgUser.Id.ToString()}]";
         }
     }
 }

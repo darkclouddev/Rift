@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,7 +11,9 @@ namespace Rift.Services
 {
     public class QuestService
     {
-        const string CompletionMessageName = "quest-completed";
+        const string QuestCompletionMessageName = "quest-completed";
+        const string StageCompletionMessageName = "stage-completed";
+        const string StageCompletionNoRewardMessageName = "stage-completed-noreward";
 
         public QuestService()
         {
@@ -40,38 +41,42 @@ namespace Rift.Services
             EventService.EpicMonstersKilled += OnEpicMonstersKilled;
         }
 
-        public async Task AddNextQuestAsync(ulong userId)
+        public async Task TryAddFirstQuestAsync(ulong userId)
         {
-            var quests = await DB.Quests.GetAllStagedQuestsAsync();
+            var activeStages = await DB.Quests.GetActiveStageIdsAsync();
 
-            if (quests is null || quests.Count == 0)
+            if (activeStages is null || activeStages.Count == 0)
             {
-                RiftBot.Log.Debug("No quests in system.");
+                RiftBot.Log.Debug("No active stages atm.");
                 return;
             }
 
-            var userQuests = await DB.Quests.GetActiveQuestsProgressAsync(userId)
-                             ?? new List<RiftQuestProgress>();
+            var stagesInProgress = await DB.Quests.GetStageIdsInProgressAsync(userId);
 
-            foreach (var stage in quests)
+            var stagesToAdd = activeStages.Except(stagesInProgress).ToList();
+
+            if (stagesToAdd.Count == 0)
             {
-                if (!stage.Stage.IsInProgress())
-                    continue;
+                RiftBot.Log.Debug("No missing stages atm.");
+                return;
+            }
 
-                if (stage.Quests is null || stage.Quests.Count == 0)
-                    continue;
+            foreach (var stageId in stagesToAdd)
+            {
+                var firstQuest = await DB.Quests.GetFirstQuestAsync(stageId);
 
-                foreach (var quest in stage.Quests)
-                    if (userQuests.All(x => x.QuestId != quest.Id))
-                    {
-                        await DB.Quests.AddQuestProgressAsync(userId, new RiftQuestProgress
-                        {
-                            UserId = userId,
-                            QuestId = quest.Id,
-                            IsCompleted = false
-                        });
-                        break;
-                    }
+                if (firstQuest is null)
+                {
+                    RiftBot.Log.Debug($"No first quest with order 0 in stage ID {stageId.ToString()}.");
+                    continue;
+                }
+
+                await DB.Quests.SetQuestsProgressAsync(new RiftQuestProgress
+                {
+                    UserId = userId,
+                    QuestId = firstQuest.Id,
+                    IsCompleted = false
+                });
             }
         }
 
@@ -85,33 +90,86 @@ namespace Rift.Services
                 Quest = quest
             };
 
-            if (!quest.RewardId.HasValue)
+            var dbReward = await DB.Rewards.GetAsync(quest.RewardId);
+
+            if (dbReward is null)
             {
-                RiftBot.Log.Error($"Quest {quest.Id.ToString()} has no reward to give out!");
+                RiftBot.Log.Error($"Reward {quest.RewardId.ToString()} does not exist in database!");
                 return;
             }
 
-            var reward = await DB.Rewards.GetAsync(quest.RewardId.Value);
+            var reward = dbReward.ToRewardBase();
+            await reward.DeliverToAsync(progress.UserId);
+            data.Reward = reward;
 
-            if (reward is null)
+            await RiftBot.SendMessageAsync(QuestCompletionMessageName, Settings.ChannelId.Chat, data);
+
+            if (!await TryAddNextQuest(progress.UserId, quest))
             {
-                RiftBot.Log.Error($"Reward {quest.RewardId.Value.ToString()} does not exist in database!");
+                // our quest was the last in stage
+                await FinishStageAsync(progress.UserId, quest.StageId);
+                return;
+            }
+        }
+
+        static async Task<bool> TryAddNextQuest(ulong userId, RiftQuest completed)
+        {
+            var nextQuest = await DB.Quests.GetNextQuestInStage(completed.StageId, completed.Order);
+
+            if (nextQuest is null)
+                return false;
+
+            await DB.Quests.SetQuestsProgressAsync(new RiftQuestProgress
+            {
+                UserId = userId,
+                QuestId = nextQuest.Id,
+                IsCompleted = false
+            });
+
+            return true;
+        }
+
+        static async Task FinishStageAsync(ulong userId, int stageId)
+        {
+            var stage = await DB.Quests.GetStageAsync(stageId);
+
+            if (stage is null)
+            {
+                RiftBot.Log.Error($"Stage ID {stageId.ToString()} does not exist in database!");
                 return;
             }
 
-            if (!(reward.ItemReward is null))
+            IonicMessage msg;
+
+            if (!stage.CompletionRewardId.HasValue)
             {
-                data.Reward = reward.ItemReward;
-                await RiftBot.SendMessageAsync(CompletionMessageName, Settings.ChannelId.Chat, data);
-                await reward.ItemReward.DeliverToAsync(progress.UserId);
+                msg = await RiftBot.GetMessageAsync(StageCompletionNoRewardMessageName, new FormatData(userId)
+                {
+                    QuestStage = stage
+                });
+            }
+            else
+            {
+                var reward = await DB.Rewards.GetAsync(stage.CompletionRewardId.Value);
+
+                if (reward is null)
+                {
+                    RiftBot.Log.Error($"Reward {stage.CompletionRewardId.Value.ToString()} does not exist in database!");
+                    return;
+                }
+
+                var data = new FormatData(userId)
+                {
+                    Reward = reward.ToRewardBase(),
+                    QuestStage = stage
+                };
+
+                await data.Reward.DeliverToAsync(userId);
+
+                msg = await RiftBot.GetMessageAsync(StageCompletionMessageName, data);
             }
 
-            if (!(reward.RoleReward is null))
-            {
-                data.Reward = reward.RoleReward;
-                await RiftBot.SendMessageAsync(CompletionMessageName, Settings.ChannelId.Chat, data);
-                await reward.RoleReward.DeliverToAsync(progress.UserId);
-            }
+            await RiftBot.SendMessageAsync(msg, Settings.ChannelId.Chat);
         }
 
         static async void OnLevelReached(object sender, LevelReachedEventArgs e)
@@ -214,9 +272,9 @@ namespace Rift.Services
             if (quests is null || quests.Count == 0)
                 return;
 
-            foreach (var questProgress in quests)
+            foreach (var dbProgress in quests)
             {
-                var dbQuest = await DB.Quests.GetQuestAsync(questProgress.QuestId);
+                var dbQuest = await DB.Quests.GetQuestAsync(dbProgress.QuestId);
 
                 if (dbQuest?.MessagesSent is null)
                     continue;
@@ -225,7 +283,7 @@ namespace Rift.Services
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
-                    MessagesSent = (questProgress.MessagesSent ?? 0u) + 1u
+                    MessagesSent = (dbProgress.MessagesSent ?? 0u) + 1u
                 };
 
                 if (dbQuest.IsCompleted(progress))

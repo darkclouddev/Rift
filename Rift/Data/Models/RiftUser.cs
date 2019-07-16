@@ -8,7 +8,6 @@ namespace Rift.Data.Models
         public uint Experience { get; set; } = 0u;
         public uint Level { get; set; } = 0u;
         public int ProfileBackground { get; set; } = 0;
-        public ulong? SelectedRole { get; set; } = null;
 
         public RiftCooldowns Cooldowns { get; set; }
         public RiftInventory Inventory { get; set; }

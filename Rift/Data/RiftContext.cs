@@ -19,6 +19,7 @@ namespace Rift.Data
         public DbSet<RiftToxicity> Toxicity { get; set; }
         public DbSet<RiftModerationLog> ModerationLog { get; set; }
         public DbSet<RiftSettings> Settings { get; set; }
+        public DbSet<RiftRole> Roles { get; set; }
         public DbSet<RiftRoleInventory> RoleInventories { get; set; }
         public DbSet<RiftSystemTimer> SystemCooldowns { get; set; }
         public DbSet<RiftReward> Rewards { get; set; }
@@ -111,6 +112,9 @@ namespace Rift.Data
             builder.Entity<RiftSettings>().HasKey(prop => prop.Id);
             builder.Entity<RiftSettings>().Property(prop => prop.Id).ValueGeneratedNever();
 
+            builder.Entity<RiftRole>().HasKey(x => x.Id);
+            builder.Entity<RiftRole>().Property(x => x.Id).ValueGeneratedOnAdd();
+            
             builder.Entity<RiftRoleInventory>()
                    .HasKey(x => new
                    {
@@ -153,11 +157,12 @@ namespace Rift.Data
             builder.Entity<RiftProfileBackground>().Property(x => x.Id).ValueGeneratedOnAdd();
 
             builder.Entity<RiftBackgroundInventory>()
-                   .HasKey(prop => new
+                   .HasKey(x => new
                    {
-                       prop.UserId,
-                       prop.BackgroundId
+                       x.UserId,
+                       x.BackgroundId
                    });
+            
             builder.Entity<RiftUser>()
                    .HasOne(user => user.BackgroundInventory)
                    .WithOne(inv => inv.User)

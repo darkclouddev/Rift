@@ -2,11 +2,11 @@ using System.Threading.Tasks;
 
 using Rift.Data.Models;
 
-namespace Rift.Services.Message.Templates.Users
+namespace Rift.Services.Message.Templates.Inventory
 {
-    public class UserInventoryBackgroundsAmount : TemplateBase
+    public class InventoryBackgroundsAmount : TemplateBase
     {
-        public UserInventoryBackgroundsAmount() : base(nameof(UserInventoryBackgroundsAmount))
+        public InventoryBackgroundsAmount() : base(nameof(InventoryBackgroundsAmount))
         {
         }
 

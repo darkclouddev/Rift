@@ -7,7 +7,7 @@ namespace Rift.Data.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public int StageId { get; set; }
-        public int? RewardId { get; set; }
+        public int RewardId { get; set; }
         public int Order { get; set; }
         public bool? ApprovedLolAccount { get; set; }
         public uint? BragsDone { get; set; }
@@ -48,7 +48,7 @@ namespace Rift.Data.Models
                 if (!progress.BragsDone.HasValue)
                     return false;
 
-                if (BragsDone.Value <= progress.BragsDone.Value)
+                if (BragsDone.Value > progress.BragsDone.Value)
                     return false;
             }
 
@@ -57,7 +57,7 @@ namespace Rift.Data.Models
                 if (!progress.MessagesSent.HasValue)
                     return false;
 
-                if (MessagesSent.Value <= progress.MessagesSent.Value)
+                if (MessagesSent.Value > progress.MessagesSent.Value)
                     return false;
             }
 
@@ -66,7 +66,7 @@ namespace Rift.Data.Models
                 if (!progress.BoughtChests.HasValue)
                     return false;
 
-                if (BoughtChests.Value <= progress.BoughtChests.Value)
+                if (BoughtChests.Value > progress.BoughtChests.Value)
                     return false;
             }
 
@@ -75,7 +75,7 @@ namespace Rift.Data.Models
                 if (!progress.OpenedChests.HasValue)
                     return false;
 
-                if (OpenedChests.Value <= progress.OpenedChests.Value)
+                if (OpenedChests.Value > progress.OpenedChests.Value)
                     return false;
             }
 
@@ -84,7 +84,7 @@ namespace Rift.Data.Models
                 if (!progress.NormalMonstersKilled.HasValue)
                     return false;
 
-                if (NormalMonstersKilled.Value <= progress.NormalMonstersKilled.Value)
+                if (NormalMonstersKilled.Value > progress.NormalMonstersKilled.Value)
                     return false;
             }
 
@@ -93,7 +93,7 @@ namespace Rift.Data.Models
                 if (!progress.RareMonstersKilled.HasValue)
                     return false;
 
-                if (RareMonstersKilled.Value <= progress.RareMonstersKilled.Value)
+                if (RareMonstersKilled.Value > progress.RareMonstersKilled.Value)
                     return false;
             }
 
@@ -102,7 +102,7 @@ namespace Rift.Data.Models
                 if (!progress.EpicMonstersKilled.HasValue)
                     return false;
 
-                if (EpicMonstersKilled.Value <= progress.EpicMonstersKilled.Value)
+                if (EpicMonstersKilled.Value > progress.EpicMonstersKilled.Value)
                     return false;
             }
 
@@ -111,7 +111,7 @@ namespace Rift.Data.Models
                 if (!progress.GiftsSent.HasValue)
                     return false;
 
-                if (GiftsSent.Value <= progress.GiftsSent.Value)
+                if (GiftsSent.Value > progress.GiftsSent.Value)
                     return false;
             }
 
@@ -120,7 +120,7 @@ namespace Rift.Data.Models
                 if (!progress.GiftsReceived.HasValue)
                     return false;
 
-                if (GiftsReceived.Value <= progress.GiftsReceived.Value)
+                if (GiftsReceived.Value > progress.GiftsReceived.Value)
                     return false;
             }
 
@@ -129,7 +129,7 @@ namespace Rift.Data.Models
                 if (!progress.GiftsReceivedFromUltraGay.HasValue)
                     return false;
 
-                if (GiftsReceivedFromUltraGay.Value <= progress.GiftsReceivedFromUltraGay.Value)
+                if (GiftsReceivedFromUltraGay.Value > progress.GiftsReceivedFromUltraGay.Value)
                     return false;
             }
 
@@ -138,7 +138,7 @@ namespace Rift.Data.Models
                 if (!progress.LevelReached.HasValue)
                     return false;
 
-                if (LevelReached.Value <= progress.LevelReached.Value)
+                if (LevelReached.Value > progress.LevelReached.Value)
                     return false;
             }
 
@@ -147,7 +147,7 @@ namespace Rift.Data.Models
                 if (!progress.GiveawaysParticipated.HasValue)
                     return false;
 
-                if (GiveawaysParticipated.Value <= progress.GiveawaysParticipated.Value)
+                if (GiveawaysParticipated.Value > progress.GiveawaysParticipated.Value)
                     return false;
             }
 
@@ -156,7 +156,7 @@ namespace Rift.Data.Models
                 if (!progress.CoinsReceived.HasValue)
                     return false;
 
-                if (CoinsReceived.Value <= progress.CoinsReceived.Value)
+                if (CoinsReceived.Value > progress.CoinsReceived.Value)
                     return false;
             }
 
@@ -165,7 +165,7 @@ namespace Rift.Data.Models
                 if (!progress.CoinsSpent.HasValue)
                     return false;
 
-                if (CoinsSpent.Value <= progress.CoinsSpent.Value)
+                if (CoinsSpent.Value > progress.CoinsSpent.Value)
                     return false;
             }
 
@@ -174,7 +174,7 @@ namespace Rift.Data.Models
                 if (!progress.VoiceUptimeEarned.HasValue)
                     return false;
 
-                if (VoiceUptimeEarned.Value <= progress.VoiceUptimeEarned.Value)
+                if (VoiceUptimeEarned.Value > progress.VoiceUptimeEarned.Value)
                     return false;
             }
 
@@ -210,7 +210,7 @@ namespace Rift.Data.Models
                 if (!progress.ActivatedBotRespects.HasValue)
                     return false;
 
-                if (ActivatedBotRespects.Value <= progress.ActivatedBotRespects.Value)
+                if (ActivatedBotRespects.Value > progress.ActivatedBotRespects.Value)
                     return false;
             }
 
@@ -228,7 +228,7 @@ namespace Rift.Data.Models
                 if (!progress.RolesPurchased.HasValue)
                     return false;
 
-                if (RolesPurchased.Value <= progress.RolesPurchased.Value)
+                if (RolesPurchased.Value > progress.RolesPurchased.Value)
                     return false;
             }
 

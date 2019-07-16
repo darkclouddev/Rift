@@ -54,39 +54,35 @@ namespace Rift.Services
             get
             {
                 if (roleShopList is null)
-                    roleShopList = new List<StoreItem>
+                {
+                    try
                     {
-                        new StoreItem(1u, "Мародеры", StoreItemType.PermanentRole, Settings.RoleId.Marauders, 50_000u,
-                                      Currency.Coins),
-                        new StoreItem(2u, "Аркадные", StoreItemType.PermanentRole, Settings.RoleId.Arcade, 200_000u,
-                                      Currency.Coins),
-                        new StoreItem(3u, "Галантные", StoreItemType.PermanentRole, Settings.RoleId.Debonairs, 200_000u,
-                                      Currency.Coins),
-                        new StoreItem(4u, "Хрустальные", StoreItemType.PermanentRole, Settings.RoleId.Crystal, 300_000u,
-                                      Currency.Coins),
-                        new StoreItem(5u, "Тусовые", StoreItemType.PermanentRole, Settings.RoleId.Party, 400_000u,
-                                      Currency.Coins),
-                        new StoreItem(6u, "Вардилочки", StoreItemType.PermanentRole, Settings.RoleId.Wardhole, 600_000u,
-                                      Currency.Coins),
-                        new StoreItem(7u, "Темная звезда", StoreItemType.PermanentRole, Settings.RoleId.DarkStar,
-                                      700_000u, Currency.Coins),
-                        new StoreItem(8u, "Инфернальные", StoreItemType.PermanentRole, Settings.RoleId.Infernal,
-                                      750_000u, Currency.Coins),
-                        new StoreItem(9u, "Звездные защитники", StoreItemType.PermanentRole,
-                                      Settings.RoleId.StarGuardians, 800_000u, Currency.Coins),
-                        new StoreItem(10u, "Вознесение", StoreItemType.PermanentRole, Settings.RoleId.Ascention, 250u,
-                                      Currency.Tokens),
-                        new StoreItem(11u, "Импульсные", StoreItemType.PermanentRole, Settings.RoleId.Impulse, 250u,
-                                      Currency.Tokens),
-                        new StoreItem(12u, "Кровавая луна", StoreItemType.PermanentRole, Settings.RoleId.BloodMoon,
-                                      300u, Currency.Tokens),
-                        new StoreItem(13u, "Юстициары", StoreItemType.PermanentRole, Settings.RoleId.Justicars, 350u,
-                                      Currency.Tokens),
-                        new StoreItem(14u, "Токсичные", StoreItemType.PermanentRole, Settings.RoleId.Toxic, 400u,
-                                      Currency.Tokens),
-                        new StoreItem(15u, "K/DA", StoreItemType.PermanentRole, Settings.RoleId.KDA, 500u,
-                                      Currency.Tokens),
-                    };
+                        roleShopList = new List<StoreItem>
+                        {
+                            new StoreItem(1u, StoreItemType.PermanentRole, 28, 50_000u, Currency.Coins),
+                            new StoreItem(2u, StoreItemType.PermanentRole, 15, 200_000u, Currency.Coins),
+                            new StoreItem(3u, StoreItemType.PermanentRole, 45, 200_000u, Currency.Coins),
+                            new StoreItem(4u, StoreItemType.PermanentRole, 75, 300_000u, Currency.Coins),
+                            new StoreItem(5u, StoreItemType.PermanentRole, 35, 400_000u, Currency.Coins),
+                            new StoreItem(6u, StoreItemType.PermanentRole, 57, 600_000u, Currency.Coins),
+                            new StoreItem(7u, StoreItemType.PermanentRole, 19, 700_000u, Currency.Coins),
+                            new StoreItem(8u, StoreItemType.PermanentRole, 55, 750_000u, Currency.Coins),
+                            new StoreItem(9u, StoreItemType.PermanentRole, 38, 800_000u, Currency.Coins),
+                            new StoreItem(10u, StoreItemType.PermanentRole, 27, 250u, Currency.Tokens),
+                            new StoreItem(11u, StoreItemType.PermanentRole, 37, 250u, Currency.Tokens),
+                            new StoreItem(12u, StoreItemType.PermanentRole, 82, 300u, Currency.Tokens),
+                            new StoreItem(13u, StoreItemType.PermanentRole, 59, 350u, Currency.Tokens),
+                            new StoreItem(14u, StoreItemType.PermanentRole, 63, 400u, Currency.Tokens),
+                            new StoreItem(15u, StoreItemType.PermanentRole, 7, 500u, Currency.Tokens),
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        RiftBot.Log.Error("Failed to get one or more store roles!");
+                        RiftBot.Log.Error(ex);
+                        roleShopList = null;
+                    }
+                }
 
                 return roleShopList;
             }
@@ -104,26 +100,26 @@ namespace Rift.Services
 
                     backgroundShopList = new List<StoreItem>
                     {
-                        new StoreItem(1u, $"[Preview]({backgrounds[0].Url})",
-                                      StoreItemType.ProfileBackground, backgrounds[0].Id, 70_000u, Currency.Coins),
-                        new StoreItem(2u, $"[Preview]({backgrounds[1].Url})",
-                                      StoreItemType.ProfileBackground, backgrounds[1].Id, 120_000u, Currency.Coins),
-                        new StoreItem(3u, $"[Preview]({backgrounds[2].Url})",
-                                      StoreItemType.ProfileBackground, backgrounds[2].Id, 120_000u, Currency.Coins),
-                        new StoreItem(4u, $"[Preview]({backgrounds[3].Url})",
-                                      StoreItemType.ProfileBackground, backgrounds[3].Id, 120_000u, Currency.Coins),
-                        new StoreItem(5u, $"[Preview]({backgrounds[4].Url})",
-                                      StoreItemType.ProfileBackground, backgrounds[4].Id, 120_000u, Currency.Coins),
-                        new StoreItem(6u, $"[Preview]({backgrounds[5].Url})",
-                                      StoreItemType.ProfileBackground, backgrounds[5].Id, 120_000u, Currency.Coins),
-                        new StoreItem(7u, $"[Preview]({backgrounds[6].Url})",
-                                      StoreItemType.ProfileBackground, backgrounds[6].Id, 200_000u, Currency.Coins),
-                        new StoreItem(8u, $"[Preview]({backgrounds[7].Url})",
-                                      StoreItemType.ProfileBackground, backgrounds[7].Id, 200_000u, Currency.Coins),
-                        new StoreItem(9u, $"[Preview]({backgrounds[8].Url})",
-                                      StoreItemType.ProfileBackground, backgrounds[8].Id, 200_000u, Currency.Coins),
-                        new StoreItem(10u, $"[Preview]({backgrounds[9].Url})",
-                                      StoreItemType.ProfileBackground, backgrounds[9].Id, 400_000u, Currency.Coins),
+                        new StoreItem(1u, $"[{backgrounds[0].Name}]({backgrounds[0].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[0].Id, 70_000u, Currency.Coins),
+                        new StoreItem(2u, $"[{backgrounds[1].Name}]({backgrounds[1].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[1].Id, 120_000u, Currency.Coins),
+                        new StoreItem(3u, $"[{backgrounds[2].Name}]({backgrounds[2].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[2].Id, 120_000u, Currency.Coins),
+                        new StoreItem(4u, $"[{backgrounds[3].Name}]({backgrounds[3].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[3].Id, 120_000u, Currency.Coins),
+                        new StoreItem(5u, $"[{backgrounds[4].Name}]({backgrounds[4].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[4].Id, 120_000u, Currency.Coins),
+                        new StoreItem(6u, $"[{backgrounds[5].Name}]({backgrounds[5].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[5].Id, 120_000u, Currency.Coins),
+                        new StoreItem(7u, $"[{backgrounds[6].Name}]({backgrounds[6].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[6].Id, 200_000u, Currency.Coins),
+                        new StoreItem(8u, $"[{backgrounds[7].Name}]({backgrounds[7].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[7].Id, 200_000u, Currency.Coins),
+                        new StoreItem(9u, $"[{backgrounds[8].Name}]({backgrounds[8].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[8].Id, 200_000u, Currency.Coins),
+                        new StoreItem(10u, $"[{backgrounds[9].Name}]({backgrounds[9].Url})",
+                            StoreItemType.ProfileBackground, backgrounds[9].Id, 400_000u, Currency.Coins),
                     };
                 }
 
@@ -138,35 +134,36 @@ namespace Rift.Services
             get
             {
                 if (itemShopMessage is null)
-                    itemShopMessage = Task.Run(async () =>
-                                                   await RiftBot.GetService<MessageService>()
-                                                                .FormatMessageAsync(
-                                                                    new RiftMessage
-                                                                    {
-                                                                        Embed = JsonConvert.SerializeObject(
-                                                                            new RiftEmbed()
-                                                                                .WithTitle("Магазин")
-                                                                                .WithDescription(
-                                                                                    "В магазине находятся сундуки, капсулы, бонусы и билеты.\n" +
-                                                                                    "Для покупки напишите `!купить` и номер желаемого товара.")
-                                                                                .AddField(
-                                                                                    "Товар",
-                                                                                    string.Join(
-                                                                                        '\n',
-                                                                                        ItemShopList.Select(
-                                                                                            x =>
-                                                                                                $"{x.Id.ToString()}. {x.FormattedName}")),
-                                                                                    true)
-                                                                                .AddField("Стоимость",
-                                                                                          string.Join(
-                                                                                              '\n',
-                                                                                              ItemShopList.Select(
-                                                                                                  x => x
-                                                                                                      .FormattedPrice)),
-                                                                                          true)
-                                                                                .WithFooter(
-                                                                                    "Максимум одна покупка в час."))
-                                                                    })).Result;
+                    itemShopMessage = Task.Run(
+                        async () =>
+                            await RiftBot.GetService<MessageService>()
+                                .FormatMessageAsync(
+                                    new RiftMessage
+                                    {
+                                        Embed = JsonConvert.SerializeObject(
+                                            new RiftEmbed()
+                                                .WithTitle("Магазин")
+                                                .WithDescription(
+                                                    "В магазине находятся сундуки, капсулы, бонусы и билеты.\n" +
+                                                    "Для покупки напишите `!купить` и номер желаемого товара.")
+                                                .AddField(
+                                                    "Товар",
+                                                    string.Join(
+                                                        '\n',
+                                                        ItemShopList.Select(
+                                                            x =>
+                                                                $"{x.Id.ToString()}. {x.FormattedName}")),
+                                                    true)
+                                                .AddField("Стоимость",
+                                                    string.Join(
+                                                        '\n',
+                                                        ItemShopList.Select(
+                                                            x => x
+                                                                .FormattedPrice)),
+                                                    true)
+                                                .WithFooter(
+                                                    "Максимум одна покупка в час."))
+                                    })).Result;
 
                 return itemShopMessage;
             }
@@ -179,35 +176,36 @@ namespace Rift.Services
             get
             {
                 if (roleShopMessage is null)
-                    roleShopMessage = Task.Run(async () =>
-                                                   await RiftBot.GetService<MessageService>()
-                                                                .FormatMessageAsync(
-                                                                    new RiftMessage
-                                                                    {
-                                                                        Embed = JsonConvert.SerializeObject(
-                                                                            new RiftEmbed()
-                                                                                .WithTitle("Магазин ролей")
-                                                                                .WithDescription(
-                                                                                    "В магазине находятся обычные и уникальные роли.\n" +
-                                                                                    "Для покупки напишите `!купить роль` и номер желаемого товара.")
-                                                                                .AddField(
-                                                                                    "Товар",
-                                                                                    string.Join(
-                                                                                        '\n',
-                                                                                        RoleShopList.Select(
-                                                                                            x =>
-                                                                                                $"{x.Id.ToString()}. {x.FormattedName}")),
-                                                                                    true)
-                                                                                .AddField("Стоимость",
-                                                                                          string.Join(
-                                                                                              '\n',
-                                                                                              RoleShopList.Select(
-                                                                                                  x => x
-                                                                                                      .FormattedPrice)),
-                                                                                          true)
-                                                                                .WithFooter(
-                                                                                    "Максимум одна покупка в 24 часа."))
-                                                                    })).Result;
+                    roleShopMessage = Task.Run(
+                        async () =>
+                            await RiftBot.GetService<MessageService>()
+                                .FormatMessageAsync(
+                                    new RiftMessage
+                                    {
+                                        Embed = JsonConvert.SerializeObject(
+                                            new RiftEmbed()
+                                                .WithTitle("Магазин ролей")
+                                                .WithDescription(
+                                                    "В магазине находятся обычные и уникальные роли.\n" +
+                                                    "Для покупки напишите `!купить роль` и номер желаемого товара.")
+                                                .AddField(
+                                                    "Товар",
+                                                    string.Join(
+                                                        '\n',
+                                                        RoleShopList.Select(
+                                                            x =>
+                                                                $"{x.Id.ToString()}. {x.FormattedName}")),
+                                                    true)
+                                                .AddField("Стоимость",
+                                                    string.Join(
+                                                        '\n',
+                                                        RoleShopList.Select(
+                                                            x => x
+                                                                .FormattedPrice)),
+                                                    true)
+                                                .WithFooter(
+                                                    "Максимум одна покупка в 24 часа."))
+                                    })).Result;
 
                 return roleShopMessage;
             }
@@ -224,19 +222,19 @@ namespace Rift.Services
                     var things = BackgroundShopList.Select(x => $"{x.Id.ToString()}. {x.FormattedName}");
                     var prices = BackgroundShopList.Select(x => x.FormattedPrice);
                     var embed = new RiftEmbed()
-                                .WithTitle("Магазин фонов")
-                                .WithDescription("В магазине находятся фоны для вашего профиля.\n" +
-                                                 "Для покупки напишите `!купить фон` и номер желаемого товара.")
-                                .AddField("Товар", string.Join('\n', things), true)
-                                .AddField("Стоимость", string.Join('\n', prices), true)
-                                .WithFooter("Максимум одна покупка в час.");
+                        .WithTitle("Магазин фонов")
+                        .WithDescription("В магазине находятся фоны для вашего профиля.\n" +
+                                         "Для покупки напишите `!купить фон` и номер желаемого товара.")
+                        .AddField("Товар", string.Join('\n', things), true)
+                        .AddField("Стоимость", string.Join('\n', prices), true)
+                        .WithFooter("Максимум одна покупка в час.");
                     var json = JsonConvert.SerializeObject(embed);
                     var msg = new RiftMessage {Embed = json};
 
                     backgroundShopMessage = Task.Run(async () =>
-                                                         await RiftBot.GetService<MessageService>()
-                                                                      .FormatMessageAsync(msg))
-                                                .Result;
+                            await RiftBot.GetService<MessageService>()
+                                .FormatMessageAsync(msg))
+                        .Result;
                 }
 
                 return backgroundShopMessage;
@@ -255,7 +253,7 @@ namespace Rift.Services
 
         StoreItem GetBackgroundById(uint id)
         {
-            return backgroundShopList.FirstOrDefault(x => x.Id == id);
+            return BackgroundShopList.FirstOrDefault(x => x.Id == id);
         }
 
         static async Task<bool> TryWithdrawAsync(ulong userId, StoreItem item)
@@ -409,11 +407,13 @@ namespace Rift.Services
             if (!await CanBuyRoleAsync(userId))
                 return await RiftBot.GetMessageAsync("rolestore-cooldown", new FormatData(userId));
 
-            var roleInventory = await DB.RoleInventory.GetAsync(userId);
+            if (await DB.RoleInventory.HasAsync(userId, item.DatabaseId))
+                return await RiftBot.GetMessageAsync("rolestore-hasrole", new FormatData(userId));
 
-            if (!(roleInventory is null) && roleInventory.Count > 0)
-                if (roleInventory.Any(x => x.RoleId == item.RoleId))
-                    return await RiftBot.GetMessageAsync("rolestore-hasrole", new FormatData(userId));
+            var role = await DB.Roles.GetAsync(item.DatabaseId);
+
+            if (role is null)
+                return MessageService.Error;
 
             if (!await TryWithdrawAsync(userId, item))
                 switch (item.Currency)
@@ -425,7 +425,7 @@ namespace Rift.Services
 
             RolesPurchased?.Invoke(null, new RolesPurchasedEventArgs(userId, 1u));
 
-            await DB.RoleInventory.AddAsync(userId, item.RoleId, "Store");
+            await DB.RoleInventory.AddAsync(userId, role.Id, "Store");
 
             var reward = new RoleReward().SetRole(item.RoleId);
 
@@ -500,7 +500,15 @@ namespace Rift.Services
 
             var reward = new BackgroundReward().SetBackgroundId((int) item.Id);
 
-            await reward.DeliverToAsync(userId);
+            try
+            {
+                await reward.DeliverToAsync(userId);
+            }
+            catch (Exception ex)
+            {
+                RiftBot.Log.Error(ex);
+                return MessageService.Error;
+            }
 
             await DB.Cooldowns.SetLastBackgroundStoreTimeAsync(userId, DateTime.UtcNow);
 

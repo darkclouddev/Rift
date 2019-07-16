@@ -5,7 +5,7 @@ namespace Rift.Data.Models
     public class RiftRoleInventory
     {
         public ulong UserId { get; set; }
-        public ulong RoleId { get; set; }
+        public int RoleId { get; set; }
         public DateTime ObtainedAt { get; set; }
         public string ObtainedFrom { get; set; }
 

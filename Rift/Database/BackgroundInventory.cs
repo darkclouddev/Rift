@@ -37,21 +37,6 @@ namespace Rift.Database
             }
         }
 
-        public async Task SetAsBackgroundAsync(ulong userId, int backgroundId)
-        {
-            var dbUser = new RiftUser
-            {
-                UserId = userId,
-                ProfileBackground = backgroundId
-            };
-
-            using (var context = new RiftContext())
-            {
-                context.Entry(dbUser).Property(x => x.ProfileBackground).IsModified = true;
-                await context.SaveChangesAsync();
-            }
-        }
-
         public async Task<int> CountAsync(ulong userId)
         {
             using (var context = new RiftContext())
@@ -59,6 +44,16 @@ namespace Rift.Database
                 return await context.BackgroundInventories
                                     .Where(x => x.UserId == userId)
                                     .CountAsync();
+            }
+        }
+
+        public async Task<bool> HasAsync(ulong userId, int backgroundId)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.BackgroundInventories
+                                    .Where(x => x.UserId == userId && x.BackgroundId == backgroundId)
+                                    .AnyAsync();
             }
         }
     }

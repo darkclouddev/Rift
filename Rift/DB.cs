@@ -23,6 +23,7 @@ namespace Rift
         public static readonly Quests Quests;
         public static readonly Rewards Rewards;
         public static readonly RoleInventory RoleInventory;
+        public static readonly Roles Roles;
         public static readonly Settings Settings;
         public static readonly Statistics Statistics;
         public static readonly StoredMessages StoredMessages;
@@ -51,6 +52,7 @@ namespace Rift
             Quests = new Quests();
             Rewards = new Rewards();
             RoleInventory = new RoleInventory();
+            Roles = new Roles();
             Settings = new Settings();
             Statistics = new Statistics();
             StoredMessages = new StoredMessages();

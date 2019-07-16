@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -25,47 +26,55 @@ namespace Rift.Database
             }
         }
 
-        public async Task<List<StageData>> GetAllStagedQuestsAsync()
-        {
-            using (var context = new RiftContext())
-            {
-                var dbStages = await context.QuestStages.ToListAsync();
-
-                if (dbStages is null || dbStages.Count == 0)
-                    return null;
-
-                var stages = new List<StageData>();
-
-                foreach (var dbStage in dbStages)
-                    stages.Add(new StageData
-                    {
-                        Stage = dbStage,
-                        Quests = await GetStageQuestsAsync(dbStage.Id)
-                    });
-
-                return stages;
-            }
-        }
-
-        public async Task<List<RiftQuest>> GetStageQuestsAsync(int stageId)
+        public async Task<RiftQuest> GetFirstQuestAsync(int stageId)
         {
             using (var context = new RiftContext())
             {
                 return await context.Quests
-                                    .Where(x => x.StageId == stageId)
-                                    .OrderBy(x => x.Order)
-                                    .ToListAsync();
+                    .Where(x => x.StageId == stageId && x.Order == 0)
+                    .FirstOrDefaultAsync();
             }
         }
 
-        public async Task<List<RiftQuest>> GetAllQuestsAsync()
+        public async Task<RiftStage> GetStageAsync(int id)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.QuestStages
+                    .FirstOrDefaultAsync(x => x.Id == id);
+            }
+        }
+
+        public async Task<bool> AnyAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Quests.AnyAsync();
+            }
+        }
+
+        public async Task<RiftQuest[]> GetStageQuestsAsync(int stageId)
         {
             using (var context = new RiftContext())
             {
                 return await context.Quests
-                                    .OrderBy(x => x.StageId)
-                                    .ThenBy(x => x.Order)
-                                    .ToListAsync();
+                    .Where(x => x.StageId == stageId)
+                    .OrderBy(x => x.Order)
+                    .ToArrayAsync();
+            }
+        }
+
+        public async Task<List<int>> GetActiveStageIdsAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                var dt = DateTime.UtcNow;
+
+                return await context.QuestStages
+                    .Where(x => x.StartDate < dt && dt <= x.EndDate)
+                    .OrderBy(x => x.Id)
+                    .Select(x => x.Id)
+                    .ToListAsync();
             }
         }
 
@@ -74,7 +83,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.QuestProgress
-                                    .FirstOrDefaultAsync(x => x.UserId == userId && x.QuestId == questId);
+                    .FirstOrDefaultAsync(x => x.UserId == userId && x.QuestId == questId);
             }
         }
 
@@ -83,8 +92,24 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.QuestProgress
-                                    .Where(x => x.UserId == userId && !x.IsCompleted)
-                                    .ToListAsync();
+                    .Where(x => x.UserId == userId && !x.IsCompleted)
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<List<int>> GetStageIdsInProgressAsync(ulong userId)
+        {
+            using (var context = new RiftContext())
+            {
+                var query =
+                    from stage in context.QuestStages
+                    join quest in context.Quests on stage.Id equals quest.StageId
+                    join progress in context.QuestProgress on quest.Id equals progress.QuestId
+                    where progress.UserId == userId && !progress.IsCompleted && stage.IsInProgress()
+                    orderby stage.Id
+                    select stage.Id;
+
+                return await query.Distinct().ToListAsync();
             }
         }
 
@@ -93,7 +118,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Quests
-                                    .FirstOrDefaultAsync(x => x.Id == id);
+                    .FirstOrDefaultAsync(x => x.Id == id);
             }
         }
 
@@ -183,11 +208,21 @@ namespace Rift.Database
                 await context.SaveChangesAsync();
             }
         }
+
+        public async Task<RiftQuest> GetNextQuestInStage(int stageId, int previousQuestOrder)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Quests
+                    .Where(x => x.StageId == stageId && x.Order > previousQuestOrder)
+                    .FirstOrDefaultAsync();
+            }
+        }
     }
 
     public class StageData
     {
         public RiftStage Stage { get; set; }
-        public List<RiftQuest> Quests { get; set; }
+        public RiftQuest[] Quests { get; set; }
     }
 }

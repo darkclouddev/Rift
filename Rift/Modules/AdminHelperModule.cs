@@ -38,6 +38,31 @@ namespace Rift.Modules
             this.eventService = eventService;
             this.giveawayService = giveawayService;
         }
+        
+        [Command("activestages")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task ActiveStages()
+        {
+            var things = await DB.Quests.GetStageIdsInProgressAsync(Context.User.Id);
+
+            await ReplyAsync($"{things.Count.ToString()} stage(s).");
+        }
+
+        [Command("addroles")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task AddRoles()
+        {
+            var guildRoles = Context.Guild.Roles;
+
+            foreach (var role in guildRoles)
+            {
+                await DB.Roles.AddAsync(role);
+            }
+
+            await ReplyAsync($"Added {guildRoles.Count.ToString()} role(s).");
+        }
 
         [Command("estart")]
         [RequireDeveloper]

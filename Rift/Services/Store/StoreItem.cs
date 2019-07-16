@@ -1,8 +1,14 @@
-﻿namespace Rift.Services.Store
+﻿using System.Globalization;
+using System.Threading.Tasks;
+
+using Rift.Configuration;
+
+namespace Rift.Services.Store
 {
     public class StoreItem
     {
         public readonly uint Id;
+        public readonly int DatabaseId;
         public readonly ulong RoleId;
         public readonly int BackgroundId;
         public readonly string Name;
@@ -25,8 +31,9 @@
         {
             get
             {
+                var format = new NumberFormatInfo {NumberGroupSeparator = " ", NumberDecimalDigits = 0};
                 var emotes = RiftBot.GetService<EmoteService>();
-                return $"{emotes.GetEmoteString(CurrencyEmote)} {Price.ToString()}";
+                return $"{emotes.GetEmoteString(CurrencyEmote)} {Price.ToString("n", format)}";
             }
         }
 
@@ -51,12 +58,12 @@
             }
         }
 
-        public StoreItem(uint id, string name, StoreItemType type, ulong roleId, uint price, Currency currency)
+        public StoreItem(uint id, string name, StoreItemType type, int dbId, uint price, Currency currency)
         {
             Id = id;
             Name = name;
             Type = type;
-            RoleId = roleId;
+            DatabaseId = dbId;
             Price = price;
             Currency = currency;
 
@@ -72,12 +79,11 @@
             }
         }
 
-        public StoreItem(uint id, string name, StoreItemType type, int backgroundId, uint price, Currency currency)
+        public StoreItem(uint id, StoreItemType type, int dbId, uint price, Currency currency)
         {
             Id = id;
-            Name = name;
             Type = type;
-            BackgroundId = backgroundId;
+            DatabaseId = dbId;
             Price = price;
             Currency = currency;
 
@@ -89,6 +95,21 @@
 
                 case Currency.Tokens:
                     CurrencyEmote = "$emotetokens";
+                    break;
+            }
+
+            switch (type)
+            {
+                case StoreItemType.PermanentRole:
+                    var dbData = Task.Run(() => DB.Roles.GetAsync(dbId)).Result;
+                    if (dbData is null)
+                    {
+                        Task.Run(() => RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Comms));
+                        break;
+                    }
+
+                    Name = dbData.Name;
+                    RoleId = dbData.RoleId;
                     break;
             }
         }

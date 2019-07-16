@@ -154,7 +154,7 @@ namespace Rift
                     await context.Channel.SendMessageAsync(result.ErrorReason);
                 }
 
-                messageService.TryAddDelete(new DeleteMessage(context.Message, TimeSpan.FromSeconds(5)));
+                //messageService.TryAddDelete(new DeleteMessage(context.Message, TimeSpan.FromSeconds(5)));
                 return true;
             }
 
@@ -210,7 +210,7 @@ namespace Rift
                 }
 
             await DB.Statistics.AddAsync(context.User.Id, new StatisticData {MessagesSent = 1u});
-            await questService.AddNextQuestAsync(context.User.Id);
+            await questService.TryAddFirstQuestAsync(context.User.Id);
 
             if (IsEligibleForEconomy(context.User.Id))
                 await economyService.ProcessMessageAsync(context.Message).ConfigureAwait(false);

@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rift.Data;
 
 namespace Rift.Migrations
 {
     [DbContext(typeof(RiftContext))]
-    partial class RiftContextModelSnapshot : ModelSnapshot
+    [Migration("20190716153413_ChangedRoleIdField")]
+    partial class ChangedRoleIdField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -390,7 +392,7 @@ namespace Rift.Migrations
 
                     b.Property<uint?>("RareMonstersKilled");
 
-                    b.Property<int>("RewardId");
+                    b.Property<int?>("RewardId");
 
                     b.Property<uint?>("RolesPurchased");
 
@@ -680,6 +682,8 @@ namespace Rift.Migrations
                     b.Property<uint>("Level");
 
                     b.Property<int>("ProfileBackground");
+
+                    b.Property<ulong?>("SelectedRole");
 
                     b.HasKey("UserId");
 

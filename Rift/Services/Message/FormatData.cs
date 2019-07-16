@@ -24,6 +24,7 @@ namespace Rift.Services.Message
         public ModerationData Moderation { get; set; }
         public RewardBase Reward { get; set; }
         public RiftQuest Quest { get; set; }
+        public RiftStage QuestStage { get; set; }
         public RiftStatistics Statistics { get; set; }
 
         public FormatData()

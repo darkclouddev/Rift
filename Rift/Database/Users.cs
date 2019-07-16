@@ -197,5 +197,20 @@ namespace Rift.Database
                 await context.SaveChangesAsync();
             }
         }
+        
+        public async Task SetBackgroundAsync(ulong userId, int backgroundId)
+        {
+            var dbUser = new RiftUser
+            {
+                UserId = userId,
+                ProfileBackground = backgroundId
+            };
+
+            using (var context = new RiftContext())
+            {
+                context.Entry(dbUser).Property(x => x.ProfileBackground).IsModified = true;
+                await context.SaveChangesAsync();
+            }
+        }
     }
 }
