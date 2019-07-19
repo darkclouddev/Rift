@@ -11,7 +11,7 @@ namespace Rift.Services.Reward
             Type = RewardType.Background;
         }
 
-        public BackgroundReward SetBackgroundId(int id)
+        public BackgroundReward SetId(int id)
         {
             backgroundId = id;
             return this;
@@ -19,9 +19,6 @@ namespace Rift.Services.Reward
 
         public override async Task DeliverToAsync(ulong userId)
         {
-            if (await DB.BackgroundInventory.HasAsync(userId, backgroundId))
-                return;
-
             await DB.BackgroundInventory.AddAsync(userId, backgroundId).ConfigureAwait(false);
         }
 

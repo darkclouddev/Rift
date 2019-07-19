@@ -53,10 +53,8 @@ namespace Rift.Services
 
         public event RankChanged OnRankChanged;
 
-        static uint index = 0;
-        static Timer updateTimer;
-
         static Timer approveTimer;
+
         static readonly TimeSpan approveCheckCooldown = TimeSpan.FromMinutes(1);
 
         static readonly SemaphoreSlim registerMutex = new SemaphoreSlim(1);
@@ -80,23 +78,11 @@ namespace Rift.Services
 
             api = RiotApi.NewInstance(Settings.App.RiotApiKey);
 
-            //approveTimer = new Timer(
-            //    async delegate
-            //    {
-            //        await CheckApproveAsync();
-            //    },
-            //    null,
-            //    TimeSpan.FromSeconds(20),
-            //    approveCheckCooldown);
-
-            //updateTimer = new Timer(
-            //    async delegate
-            //    {
-            //        await UpdateUsersAsync();
-            //    },
-            //    null,
-            //    TimeSpan.FromSeconds(20),
-            //    TimeSpan.FromMinutes(5));
+            approveTimer = new Timer(
+                async delegate { await CheckApproveAsync(); },
+                null,
+                TimeSpan.FromSeconds(20),
+                approveCheckCooldown);
         }
 
         #region Data
@@ -469,7 +455,7 @@ namespace Rift.Services
             var lolData = await DB.LeagueData.GetAsync(userId);
 
             await DB.LeagueData.UpdateAsync(userId, lolData.SummonerRegion, lolData.PlayerUUID, lolData.AccountId,
-                                            lolData.SummonerId, lolData.SummonerName);
+                lolData.SummonerId, lolData.SummonerName);
 
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
@@ -562,7 +548,7 @@ namespace Rift.Services
 
             if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var role))
             {
-                RiftBot.Log.Warn($"[User|{userId.ToString()}] Failed to get role {roleId}");
+                RiftBot.Log.Warn($"[User|{userId.ToString()}] Failed to get role {roleId.ToString()}");
                 return;
             }
 
@@ -673,7 +659,7 @@ namespace Rift.Services
                 case LeagueRank.Diamond:
 
                     if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.RankDiamond,
-                                             out var diamondRole))
+                        out var diamondRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(diamondRole);
@@ -690,7 +676,7 @@ namespace Rift.Services
                 case LeagueRank.GrandMaster:
 
                     if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.RankGrandmaster,
-                                             out var grandmasterRole))
+                        out var grandmasterRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(grandmasterRole);
@@ -699,7 +685,7 @@ namespace Rift.Services
                 case LeagueRank.Challenger:
 
                     if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.RankChallenger,
-                                             out var challengerRole))
+                        out var challengerRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(challengerRole);
@@ -841,8 +827,7 @@ namespace Rift.Services
 
         #endregion Rank
 
-        public async Task<(RequestResult, Summoner)> GetSummonerByEncryptedSummonerIdAsync(
-            string region, string encryptedSummonerId)
+        public async Task<(RequestResult, Summoner)> GetSummonerByEncryptedSummonerIdAsync(string region, string encryptedSummonerId)
         {
             try
             {
@@ -858,8 +843,7 @@ namespace Rift.Services
             }
         }
 
-        public async Task<(RequestResult, Summoner)> GetSummonerByEncryptedUUIDAsync(
-            string region, string encryptedUUID)
+        public async Task<(RequestResult, Summoner)> GetSummonerByEncryptedUUIDAsync(string region, string encryptedUUID)
         {
             try
             {
@@ -925,14 +909,12 @@ namespace Rift.Services
             }
         }
 
-        public async Task<(RequestResult, MatchReference[])> GetLast20MatchesByAccountIdAsync(
-            string region, string encryptedAccountId)
+        public async Task<(RequestResult, MatchReference[])> GetLast20MatchesByAccountIdAsync(string region, string encryptedAccountId)
         {
             try
             {
                 var matchlist =
-                    await api.MatchV4.GetMatchlistAsync(GetRegionFromString(region), encryptedAccountId, beginIndex: 0,
-                                                        endIndex: 19);
+                    await api.MatchV4.GetMatchlistAsync(GetRegionFromString(region), encryptedAccountId, beginIndex: 0, endIndex: 19);
 
                 return (RequestResult.Success, matchlist.Matches);
             }
@@ -975,8 +957,7 @@ namespace Rift.Services
 
         public string GetSummonerIconUrlById(int iconId)
         {
-            return
-                $"http://ddragon.leagueoflegends.com/cdn/{Settings.App.LolVersion}/img/profileicon/{iconId.ToString()}.png";
+            return $"http://ddragon.leagueoflegends.com/cdn/{Settings.App.LolVersion}/img/profileicon/{iconId.ToString()}.png";
         }
 
         public static string GetChampionSquareByName(ChampionImage ci)
@@ -1107,22 +1088,28 @@ namespace Rift.Services
 
     public class Champion
     {
-        [JsonProperty("data")] public Dictionary<string, ChampionData> Data { get; set; }
+        [JsonProperty("data")]
+        public Dictionary<string, ChampionData> Data { get; set; }
     }
 
     public class ChampionData
     {
-        [JsonProperty("id")] public string Id { get; set; }
+        [JsonProperty("id")]
+        public string Id { get; set; }
 
-        [JsonProperty("name")] public string Name { get; set; }
+        [JsonProperty("name")]
+        public string Name { get; set; }
 
-        [JsonProperty("key")] public string Key { get; set; }
+        [JsonProperty("key")]
+        public string Key { get; set; }
 
-        [JsonProperty("image")] public ChampionImage Image { get; set; }
+        [JsonProperty("image")]
+        public ChampionImage Image { get; set; }
     }
 
     public class ChampionImage
     {
-        [JsonProperty("full")] public string Full { get; set; }
+        [JsonProperty("full")]
+        public string Full { get; set; }
     }
 }

@@ -209,7 +209,6 @@ namespace Rift
                            .AddSingleton(new BragService())
                            //.AddSingleton(new AnnounceService())
                            .AddSingleton(new EventService())
-                           //.AddSingleton(new MinionService())
                            .AddSingleton(new BotRespectService())
                            .AddSingleton(new QuizService())
                            .AddSingleton(new ModerationService())
@@ -221,6 +220,7 @@ namespace Rift
                            .AddSingleton(new CapsuleService())
                            .AddSingleton(new SphereService())
                            .AddSingleton(new BackgroundService())
+                           .AddSingleton(new VoteService())
                            .AddSingleton(new CommandService(new CommandServiceConfig
                            {
                                CaseSensitiveCommands = false,

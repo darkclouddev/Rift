@@ -35,6 +35,9 @@ namespace Rift.Data
         public DbSet<RiftEvent> Events { get; set; }
         public DbSet<RiftActiveEvent> ActiveEvents { get; set; }
         public DbSet<RiftEventLog> EventLogs { get; set; }
+        public DbSet<RiftCommunity> Communities { get; set; }
+        public DbSet<RiftTeam> Teams { get; set; }
+        public DbSet<RiftVote> Votes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -180,6 +183,20 @@ namespace Rift.Data
             builder.Entity<RiftEventLog>().HasKey(x => x.Id);
             builder.Entity<RiftEventLog>().Property(x => x.Id).ValueGeneratedOnAdd();
             builder.Entity<RiftEventLog>().Ignore(x => x.HadSpecialReward);
+            
+            builder.Entity<RiftCommunity>().HasKey(x => x.Id);
+            builder.Entity<RiftCommunity>().Property(x => x.Id).ValueGeneratedOnAdd();
+            
+            builder.Entity<RiftTeam>().HasKey(x => x.Id);
+            builder.Entity<RiftTeam>().Property(x => x.Id).ValueGeneratedOnAdd();
+            
+            builder.Entity<RiftVote>().HasKey(x => x.UserId);
+            builder.Entity<RiftVote>().Property(x => x.UserId).ValueGeneratedOnAdd();
+            
+            builder.Entity<RiftUser>()
+                   .HasOne(x => x.Votes)
+                   .WithOne(x => x.User)
+                   .HasForeignKey<RiftVote>(x => x.UserId);
         }
     }
 }

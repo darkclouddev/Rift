@@ -26,10 +26,7 @@ namespace Rift.Services.Message
         public RiftQuest Quest { get; set; }
         public RiftStage QuestStage { get; set; }
         public RiftStatistics Statistics { get; set; }
-
-        public FormatData()
-        {
-        }
+        public VoteData VoteData { get; set; }
 
         public FormatData(ulong userId)
         {
@@ -108,5 +105,10 @@ namespace Rift.Services.Message
     {
         public int ParticipantsCount { get; set; }
         public ulong WinnerId { get; set; }
+    }
+
+    public class VoteData
+    {
+        public string Name { get; set; }
     }
 }

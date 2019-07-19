@@ -498,7 +498,7 @@ namespace Rift.Services
                         return await RiftBot.GetMessageAsync("store-notokens", new FormatData(userId));
                 }
 
-            var reward = new BackgroundReward().SetBackgroundId((int) item.Id);
+            var reward = new BackgroundReward().SetId((int) item.Id);
 
             try
             {

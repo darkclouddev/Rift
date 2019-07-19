@@ -65,13 +65,14 @@ namespace Rift.Services
             if (topTen.Count == 0)
                 return;
 
-            await RiftBot.SendMessageAsync("economy-activeusers", Settings.ChannelId.Chat, new FormatData
-            {
-                Economy = new EconomyData
+            await RiftBot.SendMessageAsync("economy-activeusers", Settings.ChannelId.Chat,
+                new FormatData(IonicClient.Client.CurrentUser.Id)
                 {
-                    Top10Exp = topTen
-                }
-            });
+                    Economy = new EconomyData
+                    {
+                        Top10Exp = topTen
+                    }
+                });
         }
 
         public static async Task ShowRichUsersAsync()
@@ -83,13 +84,14 @@ namespace Rift.Services
             if (topTen.Count == 0)
                 return;
 
-            await RiftBot.SendMessageAsync("economy-richusers", Settings.ChannelId.Chat, new FormatData
-            {
-                Economy = new EconomyData
+            await RiftBot.SendMessageAsync("economy-richusers", Settings.ChannelId.Chat,
+                new FormatData(IonicClient.Client.CurrentUser.Id)
                 {
-                    Top10Coins = topTen
-                }
-            });
+                    Economy = new EconomyData
+                    {
+                        Top10Coins = topTen
+                    }
+                });
         }
 
         public async Task ProcessMessageAsync(IUserMessage message)

@@ -24,8 +24,7 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.Streamers
-                                    .Where(x => x.UserId == userId)
-                                    .FirstOrDefaultAsync();
+                                    .FirstOrDefaultAsync(x => x.UserId == userId);
             }
         }
     }

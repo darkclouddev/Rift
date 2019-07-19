@@ -49,20 +49,6 @@ namespace Rift.Data.Models
             }
         }
 
-        public DateTime LastDailyChestTime { get; set; }
-
-        public TimeSpan DailyChestTimeSpan
-        {
-            get
-            {
-                var dt = DateTime.UtcNow;
-                var nextTime = LastDailyChestTime + TimeSpan.FromHours(22);
-                return nextTime > dt
-                    ? nextTime - dt
-                    : TimeSpan.Zero;
-            }
-        }
-
         public DateTime LastBragTime { get; set; }
 
         public TimeSpan BragTimeSpan
@@ -129,6 +115,45 @@ namespace Rift.Data.Models
                     : TimeSpan.Zero;
             }
         }
+
+        public DateTime LastCommunityVoteTime { get; set; }
+
+        public TimeSpan LastCommunityVoteTimeSpan
+        {
+            get
+            {
+                var dt = DateTime.UtcNow;
+                return dt > LastCommunityVoteTime
+                    ? dt - LastCommunityVoteTime
+                    : TimeSpan.Zero;
+            }
+        }
+        
+        public DateTime LastStreamerVoteTime { get; set; }
+
+        public TimeSpan LastStreamerVoteTimeSpan
+        {
+            get
+            {
+                var dt = DateTime.UtcNow;
+                return dt > LastStreamerVoteTime
+                    ? dt - LastStreamerVoteTime
+                    : TimeSpan.Zero;
+            }
+        }
+        
+        public DateTime LastTeamVoteTime { get; set; }
+
+        public TimeSpan LastTeamVoteTimeSpan
+        {
+            get
+            {
+                var dt = DateTime.UtcNow;
+                return dt > LastTeamVoteTime
+                    ? dt - LastTeamVoteTime
+                    : TimeSpan.Zero;
+            }
+        } 
 
         public RiftUser User { get; set; }
     }

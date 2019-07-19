@@ -9,6 +9,7 @@ namespace Rift
         public static readonly ActiveEvents ActiveEvents;
         public static readonly ActiveGiveaways ActiveGiveaways;
         public static readonly BackgroundInventory BackgroundInventory;
+        public static readonly Communities Communities;
         public static readonly Cooldowns Cooldowns;
         public static readonly Database.Events Events;
         public static readonly EventLogs EventLogs;
@@ -29,15 +30,18 @@ namespace Rift
         public static readonly StoredMessages StoredMessages;
         public static readonly Streamers Streamers;
         public static readonly SystemTimers SystemTimers;
+        public static readonly Teams Teams;
         public static readonly TempRoles TempRoles;
         public static readonly Toxicity Toxicity;
         public static readonly Users Users;
+        public static readonly Votes Votes;
 
         static DB()
         {
             ActiveEvents = new ActiveEvents();
             ActiveGiveaways = new ActiveGiveaways();
             BackgroundInventory = new BackgroundInventory();
+            Communities = new Communities();
             Cooldowns = new Cooldowns();
             Events = new Database.Events();
             EventLogs = new EventLogs();
@@ -58,9 +62,11 @@ namespace Rift
             StoredMessages = new StoredMessages();
             Streamers = new Streamers();
             SystemTimers = new SystemTimers();
+            Teams = new Teams();
             TempRoles = new TempRoles();
             Toxicity = new Toxicity();
             Users = new Users();
+            Votes = new Votes();
         }
     }
 

@@ -18,5 +18,6 @@ namespace Rift.Data.Models
         public RiftStreamer Streamers { get; set; }
         public RiftToxicity Toxicity { get; set; }
         public RiftBackgroundInventory BackgroundInventory { get; set; }
+        public RiftVote Votes { get; set; }
     }
 }

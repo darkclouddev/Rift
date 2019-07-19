@@ -33,7 +33,6 @@ namespace Rift
         static EconomyService economyService;
         static RoleService roleService;
         static RiotService riotService;
-        static MinionService minionService;
         static MessageService messageService;
         static QuizService quizService;
         static EmoteService emoteService;
@@ -46,7 +45,6 @@ namespace Rift
             client = provider.GetService<DiscordSocketClient>();
             commandService = provider.GetService<CommandService>();
             economyService = provider.GetService<EconomyService>();
-            minionService = provider.GetService<MinionService>();
             roleService = provider.GetService<RoleService>();
             messageService = provider.GetService<MessageService>();
             riotService = provider.GetService<RiotService>();

@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rift.Data;
 
 namespace Rift.Migrations
 {
     [DbContext(typeof(RiftContext))]
-    partial class RiftContextModelSnapshot : ModelSnapshot
+    [Migration("20190719023655_AddedCommunitiesTeamsUpdatedStreamers")]
+    partial class AddedCommunitiesTeamsUpdatedStreamers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -715,31 +717,23 @@ namespace Rift.Migrations
                     b.Property<ulong>("UserId")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int?>("CommunityId");
+
                     b.Property<uint>("Experience");
 
                     b.Property<uint>("Level");
 
                     b.Property<int>("ProfileBackground");
 
+                    b.Property<int?>("TeamId");
+
                     b.HasKey("UserId");
+
+                    b.HasIndex("CommunityId");
+
+                    b.HasIndex("TeamId");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("Rift.Data.Models.RiftVote", b =>
-                {
-                    b.Property<ulong>("UserId")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("CommunityId");
-
-                    b.Property<ulong>("StreamerId");
-
-                    b.Property<int>("TeamId");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("Votes");
                 });
 
             modelBuilder.Entity("Rift.Data.Models.RiftBackgroundInventory", b =>
@@ -823,12 +817,15 @@ namespace Rift.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("Rift.Data.Models.RiftVote", b =>
+            modelBuilder.Entity("Rift.Data.Models.RiftUser", b =>
                 {
-                    b.HasOne("Rift.Data.Models.RiftUser", "User")
-                        .WithOne("Votes")
-                        .HasForeignKey("Rift.Data.Models.RiftVote", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                    b.HasOne("Rift.Data.Models.RiftCommunity", "Community")
+                        .WithMany()
+                        .HasForeignKey("CommunityId");
+
+                    b.HasOne("Rift.Data.Models.RiftTeam", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId");
                 });
 #pragma warning restore 612, 618
         }

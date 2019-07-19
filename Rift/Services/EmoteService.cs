@@ -40,15 +40,14 @@ namespace Rift.Services
                 }
         }
 
-        public Task ReloadEmotesAsync()
+        public async Task ReloadEmotesAsync()
         {
             emotes.Clear();
 
-            foreach (var guild in IonicClient.Client.Guilds) AddEmotesFromGuild(guild);
+            foreach (var guild in IonicClient.Client.Guilds)
+                await AddEmotesFromGuild(guild);
 
-            RiftBot.Log.Info(
-                $"{nameof(EmoteService)} Loaded {emotes.Count.ToString()} emote(s) from {IonicClient.Client.Guilds.Count.ToString()} guild(s)");
-            return Task.CompletedTask;
+            RiftBot.Log.Info($"{nameof(EmoteService)} Loaded {emotes.Count.ToString()} emote(s) from {IonicClient.Client.Guilds.Count.ToString()} guild(s)");
         }
 
         const string EmoteUrlPostfix = "Url";
