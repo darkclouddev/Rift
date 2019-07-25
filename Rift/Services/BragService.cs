@@ -3,6 +3,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Discord;
+
 using Settings = Rift.Configuration.Settings;
 
 using Rift.Database;
@@ -18,65 +20,75 @@ namespace Rift.Services
     {
         public static EventHandler<BragEventArgs> OnUserBrag;
 
-        static readonly SemaphoreSlim mutex = new SemaphoreSlim(1);
+        static readonly SemaphoreSlim Mutex = new SemaphoreSlim(1);
 
-        public async Task<IonicMessage> GetUserBragAsync(ulong userId)
+        public async Task GetUserBragAsync(ulong userId)
         {
-            await mutex.WaitAsync().ConfigureAwait(false);
-
-            IonicMessage result;
+            await Mutex.WaitAsync().ConfigureAwait(false);
 
             try
             {
-                result = await GetUserBragInternalAsync(userId).ConfigureAwait(false);
+                await GetUserBragInternalAsync(userId).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                RiftBot.Log.Error("Failed to brag:");
+                RiftBot.Log.Error(ex);
+                return;
             }
             finally
             {
-                mutex.Release();
+                Mutex.Release();
             }
-
-            return result;
         }
 
-        static async Task<IonicMessage> GetUserBragInternalAsync(ulong userId)
+        static async Task GetUserBragInternalAsync(ulong userId)
         {
             if (!await CanBrag(userId))
-                return await RiftBot.GetMessageAsync("brag-cooldown", new FormatData(userId));
+            {
+                await RiftBot.SendMessageAsync("brag-cooldown", Settings.ChannelId.Comms, new FormatData(userId));
+                return;
+            }
 
             var dbSummoner = await DB.LeagueData.GetAsync(userId);
 
             if (dbSummoner is null || string.IsNullOrWhiteSpace(dbSummoner.AccountId))
-                return await RiftBot.GetMessageAsync("loldata-nodata", new FormatData(userId));
+            {
+                await RiftBot.SendMessageAsync("loldata-nodata", Settings.ChannelId.Comms, new FormatData(userId));
+                return;
+            }
 
             (var matchlistResult, var matchlist) = await RiftBot.GetService<RiotService>()
-                                                                .GetLast20MatchesByAccountIdAsync(
-                                                                    dbSummoner.SummonerRegion, dbSummoner.AccountId);
+                .GetLast20MatchesByAccountIdAsync(dbSummoner.SummonerRegion, dbSummoner.AccountId);
 
             if (matchlistResult != RequestResult.Success)
-                return await RiftBot.GetMessageAsync("brag-nomatches", new FormatData(userId));
+            {
+                await RiftBot.SendMessageAsync("brag-nomatches", Settings.ChannelId.Comms, new FormatData(userId));
+                return;
+            }
 
             (var matchDataResult, var matchData) = await RiftBot.GetService<RiotService>()
-                                                                .GetMatchById(
-                                                                    dbSummoner.SummonerRegion,
-                                                                    matchlist.Random().GameId);
+                .GetMatchById(dbSummoner.SummonerRegion, matchlist.Random().GameId);
 
             if (matchDataResult != RequestResult.Success)
             {
                 RiftBot.Log.Error("Failed to get match data");
-                return MessageService.Error;
+                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Comms);
+                return ;
             }
 
             long participantId = matchData.ParticipantIdentities
-                                          .First(x => x.Player.CurrentAccountId == dbSummoner.AccountId ||
-                                                      x.Player.AccountId == dbSummoner.AccountId)
-                                          .ParticipantId;
+                .First(x => x.Player.CurrentAccountId == dbSummoner.AccountId ||
+                            x.Player.AccountId == dbSummoner.AccountId)
+                .ParticipantId;
 
             var player = matchData.Participants.First(x => x.ParticipantId == participantId);
 
             if (player is null)
             {
                 RiftBot.Log.Error("Failed to get player object");
-                return MessageService.Error;
+                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Comms);
+                return ;
             }
 
             var champData = RiftBot.GetService<RiotService>().GetChampionById(player.ChampionId.ToString());
@@ -84,7 +96,8 @@ namespace Rift.Services
             if (champData is null)
             {
                 RiftBot.Log.Error("Failed to obtain champ data");
-                return MessageService.Error;
+                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Comms);
+                return ;
             }
 
             var champThumb = RiotService.GetChampionSquareByName(champData.Image);
@@ -102,7 +115,7 @@ namespace Rift.Services
 
             var queue = RiftBot.GetService<RiotService>().GetQueueNameById(matchData.QueueId);
 
-            return await RiftBot.GetMessageAsync("brag-success", new FormatData(userId)
+            var msg = await RiftBot.SendMessageAsync("brag-success", Settings.ChannelId.Chat, new FormatData(userId)
             {
                 Brag = new BragData
                 {
@@ -113,6 +126,12 @@ namespace Rift.Services
                 },
                 Reward = reward
             });
+
+            await RiftBot.SendMessageAsync(
+                new IonicMessage(new RiftEmbed()
+                    .WithTitle("Успешная хвастулька")
+                    .WithDescription($"Дуй [сюда]({msg.GetJumpUrl()})"))
+                , Settings.ChannelId.Comms);
         }
 
         static async Task<bool> CanBrag(ulong userId)

@@ -179,8 +179,7 @@ namespace Rift.Modules
         {
             using (Context.Channel.EnterTypingState())
             {
-                var message = await bragService.GetUserBragAsync(Context.User.Id);
-                await Context.Channel.SendIonicMessageAsync(message);
+                await bragService.GetUserBragAsync(Context.User.Id);
             }
         }
 

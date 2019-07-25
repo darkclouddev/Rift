@@ -37,7 +37,8 @@ namespace Rift.Services
             if (expiredRoles is null || expiredRoles.Count == 0)
                 return;
 
-            foreach (var expiredRole in expiredRoles) await RemoveTempRoleAsync(expiredRole.UserId, expiredRole.RoleId);
+            foreach (var expiredRole in expiredRoles)
+                await RemoveTempRoleAsync(expiredRole.UserId, expiredRole.RoleId);
         }
 
         public async Task<(bool, IonicMessage)> AddPermanentRoleAsync(ulong userId, ulong roleId)
@@ -132,7 +133,7 @@ namespace Rift.Services
                 await RiftBot.SendMessageAsync("roleinventory-wrongnumber", Settings.ChannelId.Comms, new FormatData(userId));
                 return;
             }
-            
+
             var dbUser = await DB.Users.GetAsync(userId);
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
             if (dbUser is null || sgUser is null)
@@ -155,32 +156,32 @@ namespace Rift.Services
                 return;
             }
 
+            var hasRole = IonicClient.HasRolesAny(Settings.App.MainGuildId, userId, role.RoleId);
+
             if (add)
             {
-                if (IonicClient.HasRolesAny(Settings.App.MainGuildId, userId, role.RoleId))
+                if (hasRole)
                 {
                     await RiftBot.SendMessageAsync("roleinventory-hasrole", Settings.ChannelId.Comms, new FormatData(userId));
                     return;
                 }
-                
+
                 await sgUser.AddRoleAsync(guildRole);
-                //await RiftBot.SendMessageAsync("roleinventory-setrole-success", Settings.ChannelId.Comms, new FormatData(userId));
             }
             else
             {
-                if (!IonicClient.HasRolesAny(Settings.App.MainGuildId, userId, role.RoleId))
+                if (!hasRole)
                 {
                     await RiftBot.SendMessageAsync("roleinventory-norole", Settings.ChannelId.Comms, new FormatData(userId));
                     return;
                 }
-                
+
                 await sgUser.RemoveRoleAsync(guildRole);
-                //await RiftBot.SendMessageAsync("roleinventory-removerole-success", Settings.ChannelId.Comms, new FormatData(userId));
             }
         }
 
         const string InventoryIdentifier = "role-inventory-list";
-        
+
         public async Task GetInventoryAsync(ulong userId)
         {
             await RiftBot.SendMessageAsync(InventoryIdentifier, Settings.ChannelId.Comms, new FormatData(userId))

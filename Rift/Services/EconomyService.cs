@@ -26,8 +26,14 @@ namespace Rift.Services
 
         public void Init()
         {
-            ratingUpdateTimer = new Timer(async delegate { await UpdateRatingAsync(); }, null, TimeSpan.FromMinutes(5),
-                                          ratingTimerCooldown);
+            ratingUpdateTimer = new Timer(
+                async delegate
+                {
+                    await UpdateRatingAsync();
+                },
+                null,
+                TimeSpan.FromMinutes(5),
+                ratingTimerCooldown);
             InitActiveUsersTimer();
             InitRichUsersTimer();
         }
@@ -59,8 +65,7 @@ namespace Rift.Services
         public static async Task ShowActiveUsersAsync()
         {
             var topTen = await DB.Users.GetTopTenByExpAsync(x =>
-                                                                !(IonicClient.GetGuildUserById(
-                                                                    Settings.App.MainGuildId, x.UserId) is null));
+                !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
 
             if (topTen.Count == 0)
                 return;
@@ -78,8 +83,7 @@ namespace Rift.Services
         public static async Task ShowRichUsersAsync()
         {
             var topTen = await DB.Users.GetTopTenByCoinsAsync(x =>
-                                                                  !(IonicClient.GetGuildUserById(
-                                                                      Settings.App.MainGuildId, x.UserId) is null));
+                !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
 
             if (topTen.Count == 0)
                 return;
@@ -121,8 +125,8 @@ namespace Rift.Services
                 {
                     await DB.Users.SetLevelAsync(dbUser.UserId, newLevel);
 
-                    RiftBot.Log.Info(
-                        $"{dbUser.UserId.ToString()} just leveled up: {dbUser.Level.ToString()} => {newLevel.ToString()}");
+                    RiftBot.Log.Info($"{dbUser.UserId.ToString()} just leveled up: " +
+                                     $"{dbUser.Level.ToString()} => {newLevel.ToString()}");
 
                     if (newLevel == 1u)
                         return; //no rewards on level 1
