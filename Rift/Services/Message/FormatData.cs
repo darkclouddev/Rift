@@ -78,8 +78,8 @@ namespace Rift.Services.Message
     public class LeagueStatData
     {
         public Summoner Summoner { get; set; }
-        public LeaguePosition SoloQueue { get; set; }
-        public LeaguePosition Flex5v5 { get; set; }
+        public LeagueEntry SoloQueue { get; set; }
+        public LeagueEntry Flex5v5 { get; set; }
     }
 
     public class ModerationData

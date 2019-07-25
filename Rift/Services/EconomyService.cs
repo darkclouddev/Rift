@@ -208,16 +208,13 @@ namespace Rift.Services
                 return await RiftBot.GetMessageAsync("loldata-nodata", new FormatData(userId));
 
             (var summonerResult, var summoner) = await RiftBot.GetService<RiotService>()
-                                                              .GetSummonerByEncryptedSummonerIdAsync(
-                                                                  dbSummoner.SummonerRegion, dbSummoner.SummonerId);
+                .GetSummonerByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
 
             if (summonerResult != RequestResult.Success)
                 return MessageService.Error;
 
             (var requestResult, var leaguePositions) = await RiftBot.GetService<RiotService>()
-                                                                    .GetLeaguePositionsByEncryptedSummonerIdAsync(
-                                                                        dbSummoner.SummonerRegion,
-                                                                        dbSummoner.SummonerId);
+                .GetLeaguePositionsByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
 
             if (requestResult != RequestResult.Success)
                 return MessageService.Error;

@@ -786,12 +786,12 @@ namespace Rift.Services
             return LeagueRank.Unranked;
         }
 
-        public static LeagueRank GetRankFromPosition(LeaguePosition pos)
+        public static LeagueRank GetRankFromPosition(LeagueEntry entry)
         {
-            if (pos is null)
+            if (entry is null)
                 return LeagueRank.Unranked;
 
-            switch (pos.Tier)
+            switch (entry.Tier)
             {
                 case "IRON": return LeagueRank.Iron;
                 case "BRONZE": return LeagueRank.Bronze;
@@ -873,14 +873,11 @@ namespace Rift.Services
             }
         }
 
-        public async Task<(RequestResult, LeaguePosition[])> GetLeaguePositionsByEncryptedSummonerIdAsync(
-            string region, string encryptedSummonerId)
+        public async Task<(RequestResult, LeagueEntry[])> GetLeaguePositionsByEncryptedSummonerIdAsync(string region, string encryptedSummonerId)
         {
             try
             {
-                var result =
-                    await api.LeagueV4.GetAllLeaguePositionsForSummonerAsync(
-                        GetRegionFromString(region), encryptedSummonerId);
+                var result = await api.LeagueV4.GetLeagueEntriesForSummonerAsync(GetRegionFromString(region), encryptedSummonerId);
 
                 return (RequestResult.Success, result);
             }
@@ -891,8 +888,7 @@ namespace Rift.Services
             }
         }
 
-        public async Task<(RequestResult, string)> GetThirdPartyCodeByEncryptedSummonerIdAsync(
-            string region, string encryptedSummonerId)
+        public async Task<(RequestResult, string)> GetThirdPartyCodeByEncryptedSummonerIdAsync(string region, string encryptedSummonerId)
         {
             try
             {

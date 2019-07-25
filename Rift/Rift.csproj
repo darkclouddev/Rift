@@ -30,9 +30,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MingweiSamuel.Camille" Version="2.2.0" />
+    <PackageReference Include="MingweiSamuel.Camille" Version="2.2.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="NLog" Version="4.6.5" />
+    <PackageReference Include="NLog" Version="4.6.6" />
     <PackageReference Include="NLog.Extensions.Logging" Version="1.5.1" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.2.0" />
     <PackageReference Include="SharpZipLib" Version="1.1.0" />
