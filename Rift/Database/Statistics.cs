@@ -364,15 +364,15 @@ namespace Rift.Database
 
                 if (data.BragsDone.HasValue)
                 {
-                    var before = dbStatistics.MessagesSent;
-                    var value = data.MessagesSent.Value;
+                    var before = dbStatistics.BragsDone;
+                    var value = data.BragsDone.Value;
 
                     if (uint.MaxValue - before < value)
-                        stat.MessagesSent = uint.MaxValue;
+                        stat.BragsDone = uint.MaxValue;
                     else
-                        stat.MessagesSent = before + value;
+                        stat.BragsDone = before + value;
 
-                    entry.Property(x => x.MessagesSent).IsModified = true;
+                    entry.Property(x => x.BragsDone).IsModified = true;
                 }
 
                 if (data.PurchasedItems.HasValue)
