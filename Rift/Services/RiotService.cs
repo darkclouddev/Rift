@@ -338,7 +338,13 @@ namespace Rift.Services
             if (!await AddForApprovalAsync(pendingUser))
                 return MessageService.Error;
 
-            return await RiftBot.GetMessageAsync("register-code", new FormatData(userId));
+            return await RiftBot.GetMessageAsync("register-code", new FormatData(userId)
+            {
+                LeagueRegistration = new LeagueRegistrationData
+                {
+                    ConfirmationCode = code
+                }
+            });
         }
 
         static async Task<bool> AddForApprovalAsync(RiftPendingUser pendingUser)
