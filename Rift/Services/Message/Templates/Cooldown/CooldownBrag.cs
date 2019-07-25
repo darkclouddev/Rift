@@ -17,7 +17,7 @@ namespace Rift.Services.Message.Templates.Cooldown
         {
             var cd = await DB.Cooldowns.GetAsync(data.UserId);
 
-            return await ReplaceDataAsync(message, cd.BragTimeSpan.Humanize(minUnit: TimeUnit.Second));
+            return await ReplaceDataAsync(message, cd.BragTimeSpan.Humanize(minUnit: TimeUnit.Second, culture: RiftBot.Culture));
         }
     }
 }

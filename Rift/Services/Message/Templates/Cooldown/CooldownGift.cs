@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Threading.Tasks;
 
 using Rift.Data.Models;
@@ -21,7 +22,7 @@ namespace Rift.Services.Message.Templates.Cooldown
 
             return await ReplaceDataAsync(message, cd.GiftTimeSpan == TimeSpan.Zero
                                               ? Available
-                                              : $"осталось {cd.GiftTimeSpan.Humanize()}");
+                                              : $"осталось {cd.GiftTimeSpan.Humanize(culture: RiftBot.Culture)}");
         }
     }
 }

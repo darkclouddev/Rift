@@ -22,7 +22,7 @@ namespace Rift.Services.Message.Templates.Cooldown
 
             return await ReplaceDataAsync(message, cd.ItemStoreTimeSpan == TimeSpan.Zero
                                               ? Available
-                                              : $"осталось {cd.ItemStoreTimeSpan.Humanize(minUnit: TimeUnit.Second)}");
+                                              : $"осталось {cd.ItemStoreTimeSpan.Humanize(minUnit: TimeUnit.Second, culture: RiftBot.Culture)}");
         }
     }
 }

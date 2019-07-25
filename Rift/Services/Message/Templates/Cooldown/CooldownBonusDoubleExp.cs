@@ -21,7 +21,7 @@ namespace Rift.Services.Message.Templates.Cooldown
 
             return await ReplaceDataAsync(message, cd.DoubleExpTimeSpan == TimeSpan.Zero
                                               ? NotActive
-                                              : $"осталось {cd.DoubleExpTimeSpan.Humanize()}");
+                                              : $"осталось {cd.DoubleExpTimeSpan.Humanize(culture: RiftBot.Culture)}");
         }
     }
 }

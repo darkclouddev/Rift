@@ -21,7 +21,7 @@ namespace Rift.Services.Message.Templates.Cooldown
 
             return await ReplaceDataAsync(message, cd.BragTimeSpan == TimeSpan.Zero
                                               ? Available
-                                              : $"осталось {cd.BragTimeSpan.Humanize()}");
+                                              : $"осталось {cd.BragTimeSpan.Humanize(culture: RiftBot.Culture)}");
         }
     }
 }
