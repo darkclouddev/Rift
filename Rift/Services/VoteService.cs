@@ -2,8 +2,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Rift.Configuration;
 using Rift.Services.Message;
+using Rift.Services.Reward;
+
+using Settings = Rift.Configuration.Settings;
 
 namespace Rift.Services
 {
@@ -94,23 +96,50 @@ namespace Rift.Services
                 }
             }
 
+            var rewardId = 0;
+
             switch (type)
             {
                 case VoteType.Community:
-                    await VoteCommunityAsync(userId, (int) voteId);
+                    rewardId = 20;
                     break;
 
                 case VoteType.Team:
-                    await VoteTeamAsync(userId, (int) voteId);
+                    rewardId = 21;
                     break;
 
                 case VoteType.Streamer:
-                    await VoteStreamerAsync(userId, voteId);
+                    rewardId = 22;
+                    break;
+            }
+            
+            var dbReward = await DB.Rewards.GetAsync(rewardId);
+
+            if (dbReward is null)
+            {
+                RiftBot.Log.Error($"Could not get reward ID {rewardId.ToString()}");
+                return;
+            }
+
+            var reward = dbReward.ToRewardBase();
+            
+            switch (type)
+            {
+                case VoteType.Community:
+                    await VoteCommunityAsync(userId, (int) voteId, reward);
+                    break;
+
+                case VoteType.Team:
+                    await VoteTeamAsync(userId, (int) voteId, reward);
+                    break;
+
+                case VoteType.Streamer:
+                    await VoteStreamerAsync(userId, voteId, reward);
                     break;
             }
         }
 
-        static async Task VoteCommunityAsync(ulong userId, int id)
+        static async Task VoteCommunityAsync(ulong userId, int id, RewardBase reward)
         {
             var community = await DB.Communities.GetAsync(id);
 
@@ -119,19 +148,24 @@ namespace Rift.Services
                 await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Comms);
                 return;
             }
+            
+            await DB.Votes.AddOrUpdateAsync(userId, communityId: id);
 
-            // TODO: give rewards
+            await reward.DeliverToAsync(userId);
+            
+            // TODO: give background
 
             await RiftBot.SendMessageAsync("vote-success-community", Settings.ChannelId.Comms, new FormatData(userId)
             {
                 VoteData = new VoteData
                 {
                     Name = community.Name
-                }
+                },
+                Reward = reward
             });
         }
 
-        static async Task VoteTeamAsync(ulong userId, int id)
+        static async Task VoteTeamAsync(ulong userId, int id, RewardBase reward)
         {
             var team = await DB.Teams.GetAsync(id);
 
@@ -140,19 +174,24 @@ namespace Rift.Services
                 await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Comms);
                 return;
             }
+            
+            await DB.Votes.AddOrUpdateAsync(userId, teamId: id);
 
-            // TODO: give rewards
+            await reward.DeliverToAsync(userId);
+            
+            // TODO: give background
 
             await RiftBot.SendMessageAsync("vote-success-team", Settings.ChannelId.Comms, new FormatData(userId)
             {
                 VoteData = new VoteData
                 {
                     Name = team.Name
-                }
+                },
+                Reward = reward
             });
         }
 
-        static async Task VoteStreamerAsync(ulong userId, ulong id)
+        static async Task VoteStreamerAsync(ulong userId, ulong id, RewardBase reward)
         {
             var streamer = await DB.Streamers.GetAsync(id);
 
@@ -162,14 +201,19 @@ namespace Rift.Services
                 return;
             }
 
-            // TODO: give rewards
+            await DB.Votes.AddOrUpdateAsync(userId, streamerId: id);
+
+            await reward.DeliverToAsync(userId);
+            
+            // TODO: give background
 
             await RiftBot.SendMessageAsync("vote-success-streamer", Settings.ChannelId.Comms, new FormatData(userId)
             {
                 VoteData = new VoteData
                 {
                     Name = streamer.Name
-                }
+                },
+                Reward = reward
             });
         }
     }

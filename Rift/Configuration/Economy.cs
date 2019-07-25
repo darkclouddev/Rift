@@ -10,6 +10,9 @@ namespace Rift.Configuration
         public TimeSpan RoleStoreCooldown { get; set; } = TimeSpan.FromHours(24);
         public TimeSpan BackgroundStoreCooldown { get; set; } = TimeSpan.FromMinutes(60);
         public TimeSpan BragCooldown { get; set; } = TimeSpan.FromHours(6);
+        public TimeSpan VoteCommunityCooldown { get; set; } = TimeSpan.FromDays(14);
+        public TimeSpan VoteTeamCooldown { get; set; } = TimeSpan.FromDays(14);
+        public TimeSpan VoteStreamerCooldown { get; set; } = TimeSpan.FromDays(14);
         public int BragWinCoinsMin { get; set; } = 0;
         public int BragWinCoinsMax { get; set; } = 0;
         public int BragLossCoinsMin { get; set; } = 0;

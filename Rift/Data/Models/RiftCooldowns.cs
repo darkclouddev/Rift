@@ -123,8 +123,9 @@ namespace Rift.Data.Models
             get
             {
                 var dt = DateTime.UtcNow;
-                return dt > LastCommunityVoteTime
-                    ? dt - LastCommunityVoteTime
+                var nextTime = LastBragTime + Settings.Economy.VoteCommunityCooldown;
+                return nextTime > dt
+                    ? nextTime - dt
                     : TimeSpan.Zero;
             }
         }
@@ -136,8 +137,9 @@ namespace Rift.Data.Models
             get
             {
                 var dt = DateTime.UtcNow;
-                return dt > LastStreamerVoteTime
-                    ? dt - LastStreamerVoteTime
+                var nextTime = LastBragTime + Settings.Economy.VoteStreamerCooldown;
+                return nextTime > dt
+                    ? nextTime - dt
                     : TimeSpan.Zero;
             }
         }
@@ -149,8 +151,9 @@ namespace Rift.Data.Models
             get
             {
                 var dt = DateTime.UtcNow;
-                return dt > LastTeamVoteTime
-                    ? dt - LastTeamVoteTime
+                var nextTime = LastBragTime + Settings.Economy.VoteTeamCooldown;
+                return nextTime > dt
+                    ? nextTime - dt
                     : TimeSpan.Zero;
             }
         } 
