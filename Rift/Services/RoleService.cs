@@ -186,5 +186,14 @@ namespace Rift.Services
             await RiftBot.SendMessageAsync(InventoryIdentifier, Settings.ChannelId.Comms, new FormatData(userId))
                 .ConfigureAwait(false);
         }
+        
+        public List<ulong> GetNitroBoosters()
+        {
+            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.NitroBooster, out var role)
+                || !(role is SocketRole sgRole))
+                return null;
+
+            return sgRole.Members.Select(x => x.Id).ToList();
+        }
     }
 }
