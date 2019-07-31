@@ -201,8 +201,7 @@ namespace Rift.Services
             var formattedMsg = await RiftBot.GetService<MessageService>().FormatMessageAsync(
                 msg, new FormatData(startedById));
 
-            // TODO: sent to event channel
-            var eventMessage = await RiftBot.SendMessageAsync(formattedMsg, Settings.ChannelId.Chat).ConfigureAwait(false);
+            var eventMessage = await RiftBot.SendMessageAsync(formattedMsg, Settings.ChannelId.Monsters).ConfigureAwait(false);
 
             activeGiveaway.ChannelMessageId = eventMessage.Id;
 
@@ -225,8 +224,7 @@ namespace Rift.Services
                 return;
             }
 
-            // TODO: set event channel
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Monsters, out var channel))
             {
                 RiftBot.Log.Error($"Could not finish event {eventLogString}: Event channel is null!");
                 return;
@@ -340,7 +338,7 @@ namespace Rift.Services
                 SpecialWinnerId = specialWinnerId
             };
 
-            await RiftBot.SendMessageAsync("event-finished", Settings.ChannelId.Chat, new FormatData(expiredEvent.StartedBy)
+            await RiftBot.SendMessageAsync("event-finished", Settings.ChannelId.Monsters, new FormatData(expiredEvent.StartedBy)
             {
                 EventData = new EventData
                 {
@@ -351,7 +349,7 @@ namespace Rift.Services
 
             if (dbEvent.HasSpecialReward)
             {
-                await RiftBot.SendMessageAsync("event-finished-special", Settings.ChannelId.Chat, new FormatData(specialWinnerId)
+                await RiftBot.SendMessageAsync("event-finished-special", Settings.ChannelId.Monsters, new FormatData(specialWinnerId)
                 {
                     Reward = specialReward.ToRewardBase()
                 });
@@ -437,7 +435,7 @@ namespace Rift.Services
                 {
                     dt += GetEventTime(epicEventsBaseHour, epicEventsOffset);
 
-                    events.Add(new RiftScheduledEvent()
+                    events.Add(new RiftScheduledEvent
                     {
                         StartAt = new DateTime(2000, dt.Month, dt.Day, dt.Hour, dt.Minute, 0),
                         EventType = typeEpic

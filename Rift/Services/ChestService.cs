@@ -58,17 +58,23 @@ namespace Rift.Services
         {
             var dbInventory = await DB.Inventory.GetAsync(userId);
 
-            if (dbInventory.Chests < amount || amount == 0)
+            if (dbInventory.Chests == 0)
                 return await RiftBot.GetMessageAsync("chests-nochests", new FormatData(userId));
+            
+            if (dbInventory.Chests < amount || amount == 0)
+                return await RiftBot.GetMessageAsync("chests-notenoughchests", new FormatData(userId));
 
             await DB.Inventory.RemoveAsync(userId, new InventoryData {Chests = amount});
             ChestsOpened?.Invoke(null, new ChestsOpenedEventArgs(userId, amount));
 
-            var chest = new ChestReward();
+            var chest = new ChestReward(amount);
             await chest.DeliverToAsync(userId);
             await DB.Statistics.AddAsync(userId, new StatisticData {ChestsOpened = amount});
 
-            return await RiftBot.GetMessageAsync("chests-open-success", new FormatData(userId));
+            return await RiftBot.GetMessageAsync("chests-open-success", new FormatData(userId)
+            {
+                Reward = chest
+            });
         }
     }
 }

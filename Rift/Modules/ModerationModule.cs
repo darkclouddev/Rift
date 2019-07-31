@@ -6,6 +6,8 @@ using Rift.Services;
 using Discord;
 using Discord.Commands;
 
+using Rift.Util;
+
 namespace Rift.Modules
 {
     public class ModerationModule : RiftModuleBase
@@ -59,6 +61,15 @@ namespace Rift.Modules
         public async Task WarnAsync(IUser user, string reason)
         {
             await moderationService.WarnAsync(user, reason, Context.User).ConfigureAwait(false);
+        }
+        
+        [Command("нарушения")]
+        [RequireModerator]
+        [RequireContext(ContextType.Guild)]
+        public async Task ListActions(IUser user)
+        {
+            var msg = await RiftBot.GetService<ModerationService>().GetUserActionLogsAsync(user);
+            await Context.Channel.SendIonicMessageAsync(msg).ConfigureAwait(false);
         }
     }
 }

@@ -13,6 +13,7 @@ using Rift.Services.Message;
 using Rift.Services.Reward;
 
 using IonicLib.Extensions;
+using IonicLib.Util;
 
 namespace Rift.Services
 {
@@ -46,7 +47,7 @@ namespace Rift.Services
         {
             if (!await CanBrag(userId))
             {
-                await RiftBot.SendMessageAsync("brag-cooldown", Settings.ChannelId.Comms, new FormatData(userId));
+                await RiftBot.SendMessageAsync("brag-cooldown", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
@@ -54,7 +55,7 @@ namespace Rift.Services
 
             if (dbSummoner is null || string.IsNullOrWhiteSpace(dbSummoner.AccountId))
             {
-                await RiftBot.SendMessageAsync("loldata-nodata", Settings.ChannelId.Comms, new FormatData(userId));
+                await RiftBot.SendMessageAsync("loldata-nodata", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
@@ -63,7 +64,7 @@ namespace Rift.Services
 
             if (matchlistResult != RequestResult.Success)
             {
-                await RiftBot.SendMessageAsync("brag-nomatches", Settings.ChannelId.Comms, new FormatData(userId));
+                await RiftBot.SendMessageAsync("brag-nomatches", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
@@ -73,7 +74,7 @@ namespace Rift.Services
             if (matchDataResult != RequestResult.Success)
             {
                 RiftBot.Log.Error("Failed to get match data");
-                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Comms);
+                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
                 return ;
             }
 
@@ -87,7 +88,7 @@ namespace Rift.Services
             if (player is null)
             {
                 RiftBot.Log.Error("Failed to get player object");
-                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Comms);
+                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
                 return ;
             }
 
@@ -96,7 +97,7 @@ namespace Rift.Services
             if (champData is null)
             {
                 RiftBot.Log.Error("Failed to obtain champ data");
-                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Comms);
+                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
                 return ;
             }
 
@@ -131,7 +132,7 @@ namespace Rift.Services
                 new IonicMessage(new RiftEmbed()
                     .WithTitle("Успешная хвастулька")
                     .WithDescription($"Дуй [сюда]({msg.GetJumpUrl()})"))
-                , Settings.ChannelId.Comms);
+                , Settings.ChannelId.Commands);
         }
 
         static async Task<bool> CanBrag(ulong userId)

@@ -1,5 +1,7 @@
 ﻿using System;
 
+using Rift.Attributes;
+
 namespace Rift.Data.Models
 {
     public class RiftQuest
@@ -9,27 +11,71 @@ namespace Rift.Data.Models
         public int StageId { get; set; }
         public int RewardId { get; set; }
         public int Order { get; set; }
+        
+        [QuestCondition("Подтвердить игровой аккаунт")]
         public bool? ApprovedLolAccount { get; set; }
+        
+        [QuestCondition("Похвастаться {0} раз")]
         public uint? BragsDone { get; set; }
+        
+        [QuestCondition("Написать {0} сообщений")]
         public uint? MessagesSent { get; set; }
+        
+        [QuestCondition("Купить {0} сундуков")]
         public uint? BoughtChests { get; set; }
+        
+        [QuestCondition("Открыть {0} сундуков")]
         public uint? OpenedChests { get; set; }
+        
+        [QuestCondition("Убить {0} обычных монстров")]
         public uint? NormalMonstersKilled { get; set; }
+        
+        [QuestCondition("Убить {0} редких монстров")]
         public uint? RareMonstersKilled { get; set; }
+        
+        [QuestCondition("Убить {0} эпических монстров")]
         public uint? EpicMonstersKilled { get; set; }
+        
+        [QuestCondition("Отправить {0} подарков")]
         public uint? GiftsSent { get; set; }
+        
+        [QuestCondition("Получить {0} подарков")]
         public uint? GiftsReceived { get; set; }
+        
+        [QuestCondition("Получить подарок от основателя")]
         public uint? GiftsReceivedFromUltraGay { get; set; }
+        
+        [QuestCondition("Достичь {0} уровня")]
         public uint? LevelReached { get; set; }
+        
+        [QuestCondition("Принять участие в {0} розыгрышах")]
         public uint? GiveawaysParticipated { get; set; }
+        
+        [QuestCondition("Заработать {0} монет")]
         public uint? CoinsReceived { get; set; }
+        
+        [QuestCondition("Потратить {0} монет")]
         public uint? CoinsSpent { get; set; }
+        
+        [QuestCondition("Просидеть {0} в голосовых чатах")]
         public TimeSpan? VoiceUptimeEarned { get; set; }
-        public bool? GiftedBotKeeper { get; set; }
+        
+        [QuestCondition("Подарить подарок разработчику")]
+        public bool? GiftedDeveloper { get; set; }
+        
+        [QuestCondition("Подарить подарок модератору")]
         public bool? GiftedModerator { get; set; }
+        
+        [QuestCondition("Подарить подарок любимому стримеру")]
         public bool? GiftedStreamer { get; set; }
+        
+        [QuestCondition("Активировать {0} уважений ботов")]
         public uint? ActivatedBotRespects { get; set; }
+        
+        [QuestCondition("Открыть сферу")]
         public bool? OpenedSphere { get; set; }
+        
+        [QuestCondition("Купить {0} ролей")]
         public uint? RolesPurchased { get; set; }
 
         public bool IsCompleted(RiftQuestProgress progress)
@@ -178,12 +224,12 @@ namespace Rift.Data.Models
                     return false;
             }
 
-            if (GiftedBotKeeper.HasValue)
+            if (GiftedDeveloper.HasValue)
             {
-                if (!progress.GiftedBotKeeper.HasValue)
+                if (!progress.GiftedDeveloper.HasValue)
                     return false;
 
-                if (GiftedBotKeeper.Value && !progress.GiftedBotKeeper.Value)
+                if (GiftedDeveloper.Value && !progress.GiftedDeveloper.Value)
                     return false;
             }
 

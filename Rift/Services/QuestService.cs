@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
@@ -14,6 +15,8 @@ namespace Rift.Services
         const string QuestCompletionMessageName = "quest-completed";
         const string StageCompletionMessageName = "stage-completed";
         const string StageCompletionNoRewardMessageName = "stage-completed-noreward";
+        
+        static readonly SemaphoreSlim QuestFinishMutex = new SemaphoreSlim(1);
 
         public QuestService()
         {
@@ -25,7 +28,7 @@ namespace Rift.Services
             GiftService.GiftSent += OnGiftSent;
             GiftService.GiftReceived += OnGiftReceived;
             GiftService.GiftsReceivedFromFounder += OnGiftReceivedFromFounder;
-            GiftService.GiftedBotKeeper += OnGiftedBotKeeper;
+            GiftService.GiftedDeveloper += OnGiftedDeveloper;
             GiftService.GiftedModerator += OnGiftedModerator;
             GiftService.GiftedStreamer += OnGiftedStreamer;
             DB.Inventory.OnCoinsReceived += OnCoinsReceived;
@@ -39,6 +42,49 @@ namespace Rift.Services
             EventService.NormalMonstersKilled += OnNormalMonstersKilled;
             EventService.RareMonstersKilled += OnRareMonstersKilled;
             EventService.EpicMonstersKilled += OnEpicMonstersKilled;
+        }
+
+        public async Task GetUserQuests(ulong userId)
+        {
+            var stageId = (await DB.Quests.GetActiveStageIdsAsync()).FirstOrDefault();
+            if (stageId == 0)
+            {
+                RiftBot.Log.Error("No active quest stages found!");
+                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
+                return;
+            }
+
+            var stage = await DB.Quests.GetStageAsync(stageId);
+            if (stage is null)
+            {
+                RiftBot.Log.Error($"No stage data found! (ID {stageId.ToString()})");
+                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
+                return;
+            }
+
+            var questProgress = await DB.Quests.GetLastQuestProgressAsync(userId, stageId);
+            if (questProgress is null)
+            {
+                await TryAddFirstQuestAsync(userId).ContinueWith(async _ =>
+                {
+                    questProgress = await DB.Quests.GetLastQuestProgressAsync(userId, stageId);
+                });
+            }
+
+            var quest = await DB.Quests.GetQuestAsync(questProgress.QuestId);
+            if (quest is null)
+            {
+                RiftBot.Log.Error($"Unable to get quest data! (ID {questProgress.QuestId.ToString()})");
+                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
+                return;
+            }
+
+            await RiftBot.SendMessageAsync("user-quests", Settings.ChannelId.Commands, new FormatData(userId)
+            {
+                QuestStage = stage,
+                QuestProgress = questProgress,
+                Quest = quest
+            });
         }
 
         public async Task TryAddFirstQuestAsync(ulong userId)
@@ -63,6 +109,9 @@ namespace Rift.Services
 
             foreach (var stageId in stagesToAdd)
             {
+                if (await DB.Quests.HasCompletedStageAsync(userId, stageId))
+                    continue;
+                
                 var firstQuest = await DB.Quests.GetFirstQuestAsync(stageId);
 
                 if (firstQuest is null)
@@ -82,8 +131,17 @@ namespace Rift.Services
 
         static async Task FinishQuestAsync(RiftQuest quest, RiftQuestProgress progress)
         {
-            progress.IsCompleted = true;
-            await DB.Quests.SetQuestsProgressAsync(progress);
+            await QuestFinishMutex.WaitAsync();
+
+            try
+            {
+                progress.IsCompleted = true;
+                await DB.Quests.SetQuestsProgressAsync(progress);
+            }
+            finally
+            {
+                QuestFinishMutex.Release();
+            }
 
             var data = new FormatData(progress.UserId)
             {
@@ -420,7 +478,7 @@ namespace Rift.Services
             }
         }
 
-        static async void OnGiftedBotKeeper(object sender, GiftedBotKeeperEventArgs e)
+        static async void OnGiftedDeveloper(object sender, GiftedDeveloperEventArgs e)
         {
             var quests = await DB.Quests.GetActiveQuestsProgressAsync(e.UserId);
 
@@ -431,14 +489,14 @@ namespace Rift.Services
             {
                 var dbQuest = await DB.Quests.GetQuestAsync(questProgress.QuestId);
 
-                if (dbQuest?.GiftedBotKeeper is null)
+                if (dbQuest?.GiftedDeveloper is null)
                     continue;
 
                 var progress = new RiftQuestProgress
                 {
                     UserId = e.UserId,
                     QuestId = dbQuest.Id,
-                    GiftedBotKeeper = true
+                    GiftedDeveloper = true
                 };
 
                 if (dbQuest.IsCompleted(progress))

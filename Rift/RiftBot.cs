@@ -16,6 +16,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 
 using IonicLib;
+using IonicLib.Services;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,7 +37,7 @@ namespace Rift
 
         public static string InternalVersion { get; private set; } = "6.0";
         public const string CommandDenyMessage = "У вас нет доступа к этой команде.";
-        public static string BotStatusMessage => Settings.App.MaintenanceMode ? "Тестовый режим" : "!команды";
+        public static string BotStatusMessage => Settings.App.MaintenanceMode ? "Тестовый режим" : "Закрытый тест";
 
         public static bool ShouldReboot;
 
@@ -138,12 +139,12 @@ namespace Rift
             Console.WriteLine($"Using content root: {AppPath}");
 
             await new IonicClient(Path.Combine(AppPath, ".token"))
-                  .RunAsync()
-                  .ConfigureAwait(false);
+                .RunAsync()
+                .ConfigureAwait(false);
 
             await new RiftBot()
-                  .RunAsync()
-                  .ConfigureAwait(false);
+                .RunAsync()
+                .ConfigureAwait(false);
         }
 
         public static string GetContentRoot()
@@ -196,37 +197,39 @@ namespace Rift
         static IServiceProvider SetupServices()
         {
             var services = new ServiceCollection()
-                           .AddSingleton(Log)
-                           .AddSingleton(IonicClient.Client)
-                           .AddSingleton(new EconomyService())
-                           .AddSingleton(new GiftService())
-                           .AddSingleton(new RoleService())
-                           .AddSingleton(new RiotService())
-                           .AddSingleton(new EmoteService())
-                           .AddSingleton(new MessageService())
-                           .AddSingleton(new ToxicityService())
-                           .AddSingleton(new GiveawayService())
-                           .AddSingleton(new BragService())
-                           //.AddSingleton(new AnnounceService())
-                           .AddSingleton(new EventService())
-                           .AddSingleton(new BotRespectService())
-                           .AddSingleton(new QuizService())
-                           .AddSingleton(new ModerationService())
-                           //.AddSingleton(new ReliabilityService(IonicClient.Client))
-                           .AddSingleton(new ChannelService(IonicClient.Client))
-                           .AddSingleton(new QuestService())
-                           .AddSingleton(new StoreService())
-                           .AddSingleton(new ChestService())
-                           .AddSingleton(new CapsuleService())
-                           .AddSingleton(new SphereService())
-                           .AddSingleton(new BackgroundService())
-                           .AddSingleton(new VoteService())
-                           .AddSingleton(new CommandService(new CommandServiceConfig
-                           {
-                               CaseSensitiveCommands = false,
-                               ThrowOnError = true,
-                               DefaultRunMode = RunMode.Async
-                           }));
+                .AddSingleton(Log)
+                .AddSingleton(IonicClient.Client)
+                .AddSingleton(new EconomyService())
+                .AddSingleton(new GiftService())
+                .AddSingleton(new RoleService())
+                .AddSingleton(new RiotService())
+                .AddSingleton(new EmoteService())
+                .AddSingleton(new MessageService())
+                .AddSingleton(new ToxicityService())
+                .AddSingleton(new GiveawayService())
+                .AddSingleton(new BragService())
+                .AddSingleton(new EventService())
+                .AddSingleton(new BotRespectService())
+                .AddSingleton(new QuizService())
+                .AddSingleton(new ModerationService())
+                .AddSingleton(new ReliabilityService(IonicClient.Client))
+                .AddSingleton(new ChannelService(IonicClient.Client))
+                .AddSingleton(new QuestService())
+                .AddSingleton(new StoreService())
+                .AddSingleton(new ChestService())
+                .AddSingleton(new CapsuleService())
+                .AddSingleton(new SphereService())
+                .AddSingleton(new BackgroundService())
+                .AddSingleton(new VoteService())
+                .AddSingleton(new RewindService())
+                .AddSingleton(new DoubleExpService())
+                .AddSingleton(new DailyService())
+                .AddSingleton(new CommandService(new CommandServiceConfig
+                {
+                    CaseSensitiveCommands = false,
+                    ThrowOnError = true,
+                    DefaultRunMode = RunMode.Async
+                }));
 
             return services.BuildServiceProvider();
         }

@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +13,9 @@ namespace Rift.Database
     {
         public async Task AddAsync(ulong userId, int backgroundId)
         {
+            if (!await DB.Users.EnsureExistsAsync(userId))
+                throw new DatabaseException(nameof(BackgroundInventory) + nameof(AddAsync));
+            
             var backInv = new RiftBackgroundInventory
             {
                 UserId = userId,
@@ -33,19 +34,20 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.BackgroundInventories
-                                    .Where(x => x.UserId == userId)
-                                    .OrderBy(x => x.BackgroundId)
-                                    .ToListAsync();
+                    .Where(x => x.UserId == userId)
+                    .OrderBy(x => x.BackgroundId)
+                    .ToListAsync();
             }
         }
 
-        public async Task<List<RiftBackgroundInventory>> GetNitroBoostUsersAsync()
+        public async Task<List<ulong>> GetNitroBoostUsersAsync()
         {
             using (var context = new RiftContext())
             {
                 return await context.BackgroundInventories
-                                    .Where(x => x.BackgroundId == 13) // nitro booster background
-                                    .ToListAsync();
+                    .Where(x => x.BackgroundId == 13) // nitro booster background
+                    .Select(x => x.UserId)
+                    .ToListAsync();
             }
         }
 
@@ -54,8 +56,8 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.BackgroundInventories
-                                    .Where(x => x.UserId == userId)
-                                    .CountAsync();
+                    .Where(x => x.UserId == userId)
+                    .CountAsync();
             }
         }
 
@@ -64,8 +66,8 @@ namespace Rift.Database
             using (var context = new RiftContext())
             {
                 return await context.BackgroundInventories
-                                    .Where(x => x.UserId == userId && x.BackgroundId == backgroundId)
-                                    .AnyAsync();
+                    .Where(x => x.UserId == userId && x.BackgroundId == backgroundId)
+                    .AnyAsync();
             }
         }
 
@@ -84,9 +86,93 @@ namespace Rift.Database
         {
             using (var context = new RiftContext())
             {
-                context.BackgroundInventories.Remove(backInv);
-                await context.SaveChangesAsync();
+                if (await context.BackgroundInventories.AnyAsync(x => x.Equals(backInv)))
+                {
+                    context.BackgroundInventories.Remove(backInv);
+                    await context.SaveChangesAsync();
+                }
             }
+        }
+        
+        public async Task RemoveCommunitiesAsync(ulong userId)
+        {
+            var backs = await DB.Communities.GetAllAsync();
+            if (backs is null || backs.Count == 0)
+                return;
+
+            foreach (var inv in backs)
+            {
+                await DB.BackgroundInventory.DeleteAsync(userId, inv.BackgroundId);
+            }
+        }
+        
+        public async Task RemoveStreamersAsync(ulong userId)
+        {
+            var backs = await DB.Streamers.GetAllAsync();
+            if (backs is null || backs.Count == 0)
+                return;
+
+            foreach (var inv in backs)
+            {
+                if (inv.BackgroundId == 0)
+                    continue;
+                
+                await DB.BackgroundInventory.DeleteAsync(userId, inv.BackgroundId);
+            }
+        }
+        
+        public async Task RemoveTeamsAsync(ulong userId)
+        {
+            var backs = await DB.Teams.GetAllAsync();
+            if (backs is null || backs.Count == 0)
+                return;
+
+            foreach (var inv in backs)
+            {
+                await DB.BackgroundInventory.DeleteAsync(userId, inv.BackgroundId);
+            }
+        }
+
+        public async Task UnsetCommunitiesBackgroundsAsync(ulong userId)
+        {
+            var communities = await DB.Communities.GetAllAsync();
+            if (communities is null || communities.Count == 0)
+                return;
+
+            await UnsetBackgroundAsync(userId, communities.Select(x => x.BackgroundId));
+        }
+
+        public async Task UnsetStreamersBackgroundsAsync(ulong userId)
+        {
+            var streamers = await DB.Streamers.GetAllAsync();
+            if (streamers is null || streamers.Count == 0)
+                return;
+
+            await UnsetBackgroundAsync(userId, streamers.Select(x => x.BackgroundId));
+        }
+
+        public async Task UnsetTeamsBackgroundsAsync(ulong userId)
+        {
+            var teams = await DB.Teams.GetAllAsync();
+            if (teams is null || teams.Count == 0)
+                return;
+
+            await UnsetBackgroundAsync(userId, teams.Select(x => x.BackgroundId));
+        }
+
+        async Task UnsetBackgroundAsync(ulong userId, IEnumerable<int> items)
+        {
+            var dbUser = await DB.Users.GetAsync(userId);
+            if (dbUser is null)
+                return;
+
+            if (dbUser.ProfileBackground == 0)
+                return;
+
+            if (items.All(x => x != dbUser.ProfileBackground))
+                return;
+
+            await DB.Users.SetBackgroundAsync(userId, 0);
         }
     }
 }

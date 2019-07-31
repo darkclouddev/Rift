@@ -25,6 +25,7 @@ namespace Rift.Services.Message
         public RewardBase Reward { get; set; }
         public RiftQuest Quest { get; set; }
         public RiftStage QuestStage { get; set; }
+        public RiftQuestProgress QuestProgress { get; set; }
         public RiftStatistics Statistics { get; set; }
         public VoteData VoteData { get; set; }
 

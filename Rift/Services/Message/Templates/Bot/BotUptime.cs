@@ -21,7 +21,7 @@ namespace Rift.Services.Message.Templates.Bot
 
         static string GetUptime()
         {
-            return (DateTime.Now - Process.GetCurrentProcess().StartTime).Humanize();
+            return (DateTime.Now - Process.GetCurrentProcess().StartTime).Humanize(culture: RiftBot.Culture);
         }
     }
 }

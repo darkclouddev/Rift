@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,13 @@ namespace Rift.Database
             {
                 return await context.Communities
                     .FirstOrDefaultAsync(x => x.Id == id);
+            }
+        }
+        public async Task<List<RiftCommunity>> GetAllAsync()
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Communities.ToListAsync();
             }
         }
     }

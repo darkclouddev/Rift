@@ -33,7 +33,10 @@ namespace Rift.Services
             var nitroUsers = RiftBot.GetService<RoleService>().GetNitroBoosters();
 
             if (nitroUsers is null || nitroUsers.Count == 0)
+            {
+                await RemoveBackgroundsIfNotBoosting(new List<ulong>());
                 return;
+            }
 
             await FixMissingBackgroundsAsync(nitroUsers);
             await RemoveBackgroundsIfNotBoosting(nitroUsers);
@@ -65,11 +68,11 @@ namespace Rift.Services
 
             var fixedBackgrounds = 0;
             
-            foreach (var inv in backOwners)
+            foreach (var userId in backOwners)
             {
-                if (!users.Contains(inv.UserId))
+                if (!users.Contains(userId))
                 {
-                    await DB.BackgroundInventory.DeleteAsync(inv);
+                    await DB.BackgroundInventory.DeleteAsync(userId, 13);
                     fixedBackgrounds++;
                 }
             }
@@ -80,7 +83,7 @@ namespace Rift.Services
 
         public async Task GetInventoryAsync(ulong userId)
         {
-            await RiftBot.SendMessageAsync(InventoryIdentifier, Settings.ChannelId.Comms, new FormatData(userId))
+            await RiftBot.SendMessageAsync(InventoryIdentifier, Settings.ChannelId.Commands, new FormatData(userId))
                          .ConfigureAwait(false);
         }
 
@@ -109,25 +112,25 @@ namespace Rift.Services
             
             if (!setDefault && !await DB.BackgroundInventory.HasAsync(userId, backgroundId))
             {
-                await RiftBot.SendMessageAsync("backgrounds-wrongnumber", Settings.ChannelId.Comms, new FormatData(userId));
+                await RiftBot.SendMessageAsync("backgrounds-wrongnumber", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
             var dbUser = await DB.Users.GetAsync(userId);
             if (dbUser is null)
             {
-                await RiftBot.SendMessageAsync(MessageService.UserNotFound, Settings.ChannelId.Comms);
+                await RiftBot.SendMessageAsync(MessageService.UserNotFound, Settings.ChannelId.Commands);
                 return;
             }
             
             if (!setDefault && dbUser.ProfileBackground == backgroundId)
             {
-                await RiftBot.SendMessageAsync("backgrounds-alreadyactive", Settings.ChannelId.Comms, new FormatData(userId));
+                await RiftBot.SendMessageAsync("backgrounds-alreadyactive", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
             await DB.Users.SetBackgroundAsync(userId, backgroundId);
-            await RiftBot.SendMessageAsync("backgrounds-set-success", Settings.ChannelId.Comms, new FormatData(userId));
+            await RiftBot.SendMessageAsync("backgrounds-set-success", Settings.ChannelId.Commands, new FormatData(userId));
         }
     }
 }

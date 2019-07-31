@@ -8,6 +8,8 @@ using Rift.Util;
 using Discord;
 using Discord.Commands;
 
+using Rift.Configuration;
+
 namespace Rift.Modules
 {
     public class LeagueModule : RiftModuleBase
@@ -40,8 +42,7 @@ namespace Rift.Modules
             }
 
             await DB.LeagueData.RemoveAsync(user.Id);
-            var msg = await RiftBot.GetMessageAsync("loldata-removed", new FormatData(user.Id));
-            await Context.Channel.SendIonicMessageAsync(msg);
+            await RiftBot.SendMessageAsync("loldata-removed", Settings.ChannelId.Commands, new FormatData(user.Id));
         }
     }
 }

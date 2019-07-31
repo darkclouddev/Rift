@@ -37,6 +37,7 @@ namespace Rift
         static QuizService quizService;
         static EmoteService emoteService;
         static QuestService questService;
+        static DailyService dailyService;
 
         public CommandHandler(IServiceProvider serviceProvider)
         {
@@ -51,6 +52,7 @@ namespace Rift
             quizService = provider.GetService<QuizService>();
             emoteService = provider.GetService<EmoteService>();
             questService = provider.GetService<QuestService>();
+            dailyService = provider.GetService<DailyService>();
         }
 
         public async Task ConfigureAsync()
@@ -89,21 +91,15 @@ namespace Rift
                 //&& !RiftBot.IsAdmin(message.Author)
                 //&& !RiftBot.IsModerator(message.Author))
                 return;
-            
+
             if (await DB.Toxicity.HasBlockingAsync(message.Author.Id))
-            {
-                var msg = await RiftBot.GetMessageAsync("toxicity-blocked", new FormatData(message.Author.Id));
-
-                if (msg is null)
-                    return;
-
-                await message.Author.SendIonicMessageAsync(msg);
-                
                 return;
-            }
             
             var context = new CommandContext(client, message);
 
+            if (context.IsPrivate)
+                return;
+            
             if (await HandleCommand(context))
                 return;
 
@@ -114,29 +110,11 @@ namespace Rift
         {
             var argPos = 0;
 
-            if (context.IsPrivate)
-            {
-                var result = await commandService.ExecuteAsync(context, argPos, provider);
-
-                if (result.IsSuccess)
-                {
-                    RiftBot.Log.Info(
-                        $"[{context.Message.Author}|{context.Message.Author.Id.ToString()}] sent DM command: \"{context.Message.Content}\"");
-                }
-                else
-                {
-                    if (result.Error != null && result.Error.Value != CommandError.UnknownCommand)
-                        RiftBot.Log.Error(
-                            $"{context.Message.Author} | {context.Message.Content} | {result.ErrorReason}");
-
-                    await context.User.SendMessageAsync(result.ErrorReason);
-                }
-
-                return true;
-            }
-
             if (context.Message.HasCharPrefix(CommandPrefix, ref argPos))
             {
+                if (context.Channel.Id != Settings.ChannelId.Commands)
+                    return true;
+                
                 var result = await commandService.ExecuteAsync(context, argPos, provider);
 
                 if (result.IsSuccess)
@@ -149,7 +127,30 @@ namespace Rift
                     if (result.Error != null && result.Error.Value != CommandError.UnknownCommand)
                         RiftBot.Log.Error(result.ErrorReason);
 
-                    await context.Channel.SendMessageAsync(result.ErrorReason);
+                    if (result.Error != null)
+                    {
+                        string errorMessage;
+                        
+                        var error = result.Error.Value;
+
+                        switch (error)
+                        {
+                            case CommandError.UnknownCommand:
+                                errorMessage = "Неизвестная команда!";
+                                break;
+
+                            case CommandError.BadArgCount:
+                            case CommandError.ParseFailed:
+                                errorMessage = "Неверные параметры команды!";
+                                break;
+
+                            default:
+                                errorMessage = result.ErrorReason;
+                                break;
+                        }
+
+                        await context.Channel.SendMessageAsync($"<@{context.Message.Author.Id.ToString()}> {errorMessage}");
+                    }
                 }
 
                 //messageService.TryAddDelete(new DeleteMessage(context.Message, TimeSpan.FromSeconds(5)));
@@ -161,11 +162,11 @@ namespace Rift
 
         async Task HandlePlainText(CommandContext context)
         {
-            if (context.Message.Channel.Id != Settings.ChannelId.Comms)
+            if (context.Message.Channel.Id != Settings.ChannelId.Chat)
                 return;
 
-            if (quizService.IsActive)
-                quizService.Answers.Enqueue(new QuizGuess(context.User.Id, context.Message.Content));
+            //if (quizService.IsActive)
+            //    quizService.Answers.Enqueue(new QuizGuess(context.User.Id, context.Message.Content));
 
             if (Settings.Chat.AttachmentFilterEnabled && !RiftBot.IsAdmin(context.Message.Author))
                 if (context.Message.Attachments != null && context.Message.Attachments.Count > 0)
@@ -193,7 +194,7 @@ namespace Rift
                 return;
             }
 
-            if (Settings.Chat.ProcessUserNames)
+            if (Settings.Chat.ProcessUserNames) // TODO: experimental feature
                 if (context.User is SocketGuildUser sgUser)
                 {
                     var name = string.IsNullOrWhiteSpace(sgUser.Nickname) ? sgUser.Username : sgUser.Nickname;
@@ -211,7 +212,10 @@ namespace Rift
             await questService.TryAddFirstQuestAsync(context.User.Id);
 
             if (IsEligibleForEconomy(context.User.Id))
-                await economyService.ProcessMessageAsync(context.Message).ConfigureAwait(false);
+            {
+                await dailyService.CheckAsync(context.User.Id);
+                await EconomyService.ProcessMessageAsync(context.Message).ConfigureAwait(false);
+            }
         }
 
         async Task UserJoined(SocketGuildUser user)

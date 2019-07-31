@@ -23,7 +23,7 @@ namespace Rift.Data.Models
         public uint? CoinsReceived { get; set; }
         public uint? CoinsSpent { get; set; }
         public TimeSpan? VoiceUptimeEarned { get; set; }
-        public bool? GiftedBotKeeper { get; set; }
+        public bool? GiftedDeveloper { get; set; }
         public bool? GiftedModerator { get; set; }
         public bool? GiftedStreamer { get; set; }
         public uint? ActivatedBotRespects { get; set; }

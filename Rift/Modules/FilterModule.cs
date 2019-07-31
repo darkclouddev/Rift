@@ -41,7 +41,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Chat()
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Commands, out var channel))
                 return;
 
             Settings.Chat.CapsFilterEnabled = !Settings.Chat.CapsFilterEnabled;
@@ -56,7 +56,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Attach()
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Commands, out var channel))
                 return;
 
             Settings.Chat.AttachmentFilterEnabled = !Settings.Chat.AttachmentFilterEnabled;
@@ -71,7 +71,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task URL()
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Commands, out var channel))
                 return;
 
             Settings.Chat.UrlFilterEnabled = !Settings.Chat.UrlFilterEnabled;

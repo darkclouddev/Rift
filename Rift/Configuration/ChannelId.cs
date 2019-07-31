@@ -29,16 +29,23 @@ namespace Rift.Configuration
         {
             var prop = GetType().GetProperty(fieldName, BindingFlags.Public | BindingFlags.Instance);
 
-            if (prop != null && prop.CanWrite) prop.SetValue(this, value);
+            if (prop != null && prop.CanWrite)
+                prop.SetValue(this, value);
         }
 
         [ResolveChannel("общение")]
         public ulong Chat { get; set; }
+
         [ResolveChannel("команды")]
-        public ulong Comms { get; set; }
-        [ResolveChannel( "логи")]
+        public ulong Commands { get; set; }
+
+        [ResolveChannel("логи")]
         public ulong Logs { get; set; }
+
         [ResolveChannel("Создать канал")]
         public ulong VoiceSetup { get; set; }
+
+        [ResolveChannel("монстры")]
+        public ulong Monsters { get; set; }
     }
 }

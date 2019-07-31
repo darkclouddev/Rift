@@ -20,9 +20,8 @@ namespace Rift.Services
     public class BotRespectService
     {
         public static event EventHandler<ActivatedBotRespectsEventArgs> ActivatedBotRespects;
-        
-        Timer timer;
-        readonly Timer Starttimer;
+
+        readonly Timer timer;
 
         static readonly List<ItemReward> AvailableRewards = new List<ItemReward>
         {
@@ -38,7 +37,7 @@ namespace Rift.Services
 
         public BotRespectService()
         {
-            /*RiftBot.Log.Info("Starting BotRespectService..");
+            RiftBot.Log.Info($"Starting {nameof(BotRespectService)}..");
             
             timer = new Timer(
                 async delegate { await StartBotGifts(); },
@@ -48,7 +47,7 @@ namespace Rift.Services
             
             InitTimer();
 
-            RiftBot.Log.Info("BotRespectService loaded successfully.");*/
+            RiftBot.Log.Info($"{nameof(BotRespectService)} loaded successfully.");
         }
 
         void InitTimer()
@@ -83,7 +82,7 @@ namespace Rift.Services
                 await reward.DeliverToAsync(userId);
             }
 
-            await RiftBot.SendMessageAsync("botrespect-success", Settings.ChannelId.Chat, null);
+            await RiftBot.SendMessageAsync("yasuo-botrespect-success", Settings.ChannelId.Chat, null);
 
             RiftBot.Log.Debug("Finished sending gifts");
 
@@ -93,17 +92,16 @@ namespace Rift.Services
         public async Task ActivateAsync(ulong userId)
         {
             var dbInventory = await DB.Inventory.GetAsync(userId);
-
             if (dbInventory.BonusBotRespect == 0)
             {
-                await RiftBot.SendMessageAsync("activate-nopowerup", Settings.ChannelId.Comms, new FormatData(userId));
+                await RiftBot.SendMessageAsync("bonus-nobonus", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
             var dbCooldowns = await DB.Cooldowns.GetAsync(userId);
             if (dbCooldowns.BotRespectTime > DateTime.UtcNow)
             {
-                await RiftBot.SendMessageAsync("activate-active", Settings.ChannelId.Comms, new FormatData(userId));
+                await RiftBot.SendMessageAsync("bonus-active", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
@@ -113,7 +111,7 @@ namespace Rift.Services
             var dateTime = DateTime.UtcNow.AddHours(12.0);
             await DB.Cooldowns.SetBotRespeсtTimeAsync(userId, dateTime);
 
-            await RiftBot.SendMessageAsync("activate-success-botrespect", Settings.ChannelId.Comms, new FormatData(userId));
+            await RiftBot.SendMessageAsync("botrespect-success", Settings.ChannelId.Commands, new FormatData(userId));
         }
     }
 }

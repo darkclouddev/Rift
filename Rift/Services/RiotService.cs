@@ -372,7 +372,7 @@ namespace Rift.Services
                 if (expired)
                 {
                     await DB.PendingUsers.RemoveAsync(user);
-                    await RiftBot.SendMessageAsync("register-pending-expired", Settings.ChannelId.Comms, new FormatData(user.UserId));
+                    await RiftBot.SendMessageAsync("register-pending-expired", Settings.ChannelId.Commands, new FormatData(user.UserId));
                 }
             }
 
@@ -443,8 +443,7 @@ namespace Rift.Services
 
             await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Chests = 2u});
 
-            await RiftBot.SendMessageAsync("register-success", Settings.ChannelId.Comms, new FormatData(pendingUser.UserId));
-            await RiftBot.SendMessageAsync("register-reward", Settings.ChannelId.Comms, new FormatData(pendingUser.UserId));
+            await RiftBot.SendMessageAsync("register-success", Settings.ChannelId.Commands, new FormatData(pendingUser.UserId));
         }
 
         #endregion Validation
@@ -453,7 +452,7 @@ namespace Rift.Services
 
         public async Task UpdateRankAsync(ulong userId, bool silentMode = false)
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Commands, out var channel))
                 return;
 
             RiftBot.Log.Debug($"[User|{userId.ToString()}] Getting summoner for rank update");
@@ -502,55 +501,7 @@ namespace Rift.Services
 
             await RemoveRankedRole(sgUser, currentRank);
 
-            var roleId = 0ul;
-
-            switch (newRank)
-            {
-                case LeagueRank.Iron:
-
-                    roleId = Settings.RoleId.RankIron;
-                    break;
-
-                case LeagueRank.Bronze:
-
-                    roleId = Settings.RoleId.RankBronze;
-                    break;
-
-                case LeagueRank.Silver:
-
-                    roleId = Settings.RoleId.RankSilver;
-                    break;
-
-                case LeagueRank.Gold:
-
-                    roleId = Settings.RoleId.RankGold;
-                    break;
-
-                case LeagueRank.Platinum:
-
-                    roleId = Settings.RoleId.RankPlatinum;
-                    break;
-
-                case LeagueRank.Diamond:
-
-                    roleId = Settings.RoleId.RankDiamond;
-                    break;
-
-                case LeagueRank.Master:
-
-                    roleId = Settings.RoleId.RankMaster;
-                    break;
-
-                case LeagueRank.GrandMaster:
-
-                    roleId = Settings.RoleId.RankGrandmaster;
-                    break;
-
-                case LeagueRank.Challenger:
-
-                    roleId = Settings.RoleId.RankChallenger;
-                    break;
-            }
+            var roleId = GetRoleIdByLeagueRank(newRank);
 
             if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var role))
             {
@@ -562,8 +513,7 @@ namespace Rift.Services
 
             if (isUp)
             {
-                var msgRankUp = await RiftBot.GetMessageAsync("lol-rank-up", new FormatData(userId));
-                await channel.SendIonicMessageAsync(msgRankUp);
+                await RiftBot.SendMessageAsync("lol-rank-up", Settings.ChannelId.Commands, new FormatData(userId));
 
                 if (newRank < LeagueRank.Bronze)
                     return;
@@ -580,6 +530,23 @@ namespace Rift.Services
             }
 
             RiftBot.Log.Debug($"{sgUser.ToLogString()} Rank update completed.");
+        }
+
+        static ulong GetRoleIdByLeagueRank(LeagueRank rank)
+        {
+            switch (rank)
+            {
+                case LeagueRank.Iron: return Settings.RoleId.RankIron;
+                case LeagueRank.Bronze: return Settings.RoleId.RankBronze;
+                case LeagueRank.Silver: return Settings.RoleId.RankSilver;
+                case LeagueRank.Gold: return Settings.RoleId.RankGold;
+                case LeagueRank.Platinum: return Settings.RoleId.RankPlatinum;
+                case LeagueRank.Diamond: return Settings.RoleId.RankDiamond;
+                case LeagueRank.Master: return Settings.RoleId.RankMaster;
+                case LeagueRank.GrandMaster: return Settings.RoleId.RankGrandmaster;
+                case LeagueRank.Challenger: return Settings.RoleId.RankChallenger;
+                default: return 0ul;
+            }
         }
 
         static LeagueRank GetCurrentRank(IGuildUser user)
@@ -714,47 +681,38 @@ namespace Rift.Services
             switch (soloqRank)
             {
                 case LeagueRank.Iron:
-
                     roleId = Settings.RoleId.RankIron;
                     break;
 
                 case LeagueRank.Bronze:
-
                     roleId = Settings.RoleId.RankBronze;
                     break;
 
                 case LeagueRank.Silver:
-
                     roleId = Settings.RoleId.RankSilver;
                     break;
 
                 case LeagueRank.Gold:
-
                     roleId = Settings.RoleId.RankGold;
                     break;
 
                 case LeagueRank.Platinum:
-
                     roleId = Settings.RoleId.RankPlatinum;
                     break;
 
                 case LeagueRank.Diamond:
-
                     roleId = Settings.RoleId.RankDiamond;
                     break;
 
                 case LeagueRank.Master:
-
                     roleId = Settings.RoleId.RankMaster;
                     break;
 
                 case LeagueRank.GrandMaster:
-
                     roleId = Settings.RoleId.RankGrandmaster;
                     break;
 
                 case LeagueRank.Challenger:
-
                     roleId = Settings.RoleId.RankChallenger;
                     break;
             }
@@ -768,7 +726,7 @@ namespace Rift.Services
             await guildUser.AddRoleAsync(role);
         }
 
-        public static LeagueRank GetRankFromRoleId(ulong roleId)
+        static LeagueRank GetRankFromRoleId(ulong roleId)
         {
             if (roleId == Settings.RoleId.RankIron)
                 return LeagueRank.Iron;

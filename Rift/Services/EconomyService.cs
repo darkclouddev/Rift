@@ -20,9 +20,7 @@ namespace Rift.Services
     public class EconomyService
     {
         static Timer ratingUpdateTimer;
-        static Timer ActiveUsersTimer;
-        static Timer RichUsersTimer;
-        static readonly TimeSpan ratingTimerCooldown = TimeSpan.FromMinutes(10);
+        static readonly TimeSpan RatingTimerCooldown = TimeSpan.FromMinutes(10);
 
         public void Init()
         {
@@ -33,34 +31,10 @@ namespace Rift.Services
                 },
                 null,
                 TimeSpan.FromMinutes(5),
-                ratingTimerCooldown);
-            InitActiveUsersTimer();
-            InitRichUsersTimer();
+                RatingTimerCooldown);
         }
 
         public static List<ulong> SortedRating { get; private set; }
-
-        static void InitActiveUsersTimer()
-        {
-            var today = DateTime.Today.AddHours(16);
-
-            if (DateTime.UtcNow > today)
-                today = today.AddDays(1);
-
-            ActiveUsersTimer = new Timer(async delegate { await ShowActiveUsersAsync(); }, null,
-                                         today - DateTime.UtcNow, TimeSpan.FromDays(1));
-        }
-
-        void InitRichUsersTimer()
-        {
-            var today = DateTime.Today.AddHours(18);
-
-            if (DateTime.UtcNow > today)
-                today = today.AddDays(1);
-
-            RichUsersTimer = new Timer(async delegate { await ShowRichUsersAsync(); }, null,
-                                       today - DateTime.UtcNow, TimeSpan.FromDays(1));
-        }
 
         public static async Task ShowActiveUsersAsync()
         {
@@ -98,7 +72,7 @@ namespace Rift.Services
                 });
         }
 
-        public async Task ProcessMessageAsync(IUserMessage message)
+        public static async Task ProcessMessageAsync(IUserMessage message)
         {
             await AddExpAsync(message.Author.Id, 1u).ConfigureAwait(false);
         }
@@ -247,37 +221,6 @@ namespace Rift.Services
         static async Task UpdateRatingAsync()
         {
             SortedRating = await DB.Users.GetAllSortedAsync();
-        }
-
-        public async Task ActivateDoubleExp(ulong userId)
-        {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
-                return;
-
-            var dbInventory = await DB.Inventory.GetAsync(userId);
-
-            if (dbInventory.BonusDoubleExp == 0)
-            {
-                var msg = await RiftBot.GetMessageAsync("activate-nopowerup", new FormatData(userId));
-                await channel.SendIonicMessageAsync(msg);
-                return;
-            }
-
-            var dbDoubleExp = await DB.Cooldowns.GetAsync(userId);
-            if (dbDoubleExp.DoubleExpTime > DateTime.UtcNow)
-            {
-                var msg = await RiftBot.GetMessageAsync("activate-active", new FormatData(userId));
-                await channel.SendIonicMessageAsync(msg);
-                return;
-            }
-
-            await DB.Inventory.RemoveAsync(userId, new InventoryData {DoubleExps = 1});
-
-            var dateTime = DateTime.UtcNow.AddHours(12.0);
-            await DB.Cooldowns.SetDoubleExpTimeAsync(userId, dateTime);
-
-            var msgSuccess = await RiftBot.GetMessageAsync("activate-success-doubleexp", new FormatData(userId));
-            await channel.SendIonicMessageAsync(msgSuccess);
         }
 
         public static uint GetExpForLevel(uint level)

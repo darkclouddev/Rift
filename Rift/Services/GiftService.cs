@@ -21,7 +21,7 @@ namespace Rift.Services
         public static event EventHandler<GiftSentEventArgs> GiftSent;
         public static event EventHandler<GiftReceivedEventArgs> GiftReceived;
         public static event EventHandler<GiftsReceivedFromFounderEventArgs> GiftsReceivedFromFounder;
-        public static event EventHandler<GiftedBotKeeperEventArgs> GiftedBotKeeper;
+        public static event EventHandler<GiftedDeveloperEventArgs> GiftedDeveloper;
         public static event EventHandler<GiftedModeratorEventArgs> GiftedModerator;
         public static event EventHandler<GiftedStreamerEventArgs> GiftedStreamer;
 
@@ -29,7 +29,7 @@ namespace Rift.Services
 
         public async Task SendDescriptionAsync()
         {
-            await RiftBot.SendMessageAsync("gift-description", Settings.ChannelId.Comms, null);
+            await RiftBot.SendMessageAsync("gift-description", Settings.ChannelId.Commands, null);
         }
 
         public async Task<IonicMessage> SendGiftAsync(SocketGuildUser fromSgUser, SocketGuildUser toSgUser)
@@ -101,8 +101,8 @@ namespace Rift.Services
             if (fromSgUser.Id == 178443743026872321ul)
                 GiftsReceivedFromFounder?.Invoke(null, new GiftsReceivedFromFounderEventArgs(receiverId, senderId));
 
-            if (IonicClient.HasRolesAny(toSgUser, Settings.RoleId.BotKeepers))
-                GiftedBotKeeper?.Invoke(null, new GiftedBotKeeperEventArgs(senderId, receiverId));
+            if (IonicClient.HasRolesAny(toSgUser, Settings.RoleId.Developers))
+                GiftedDeveloper?.Invoke(null, new GiftedDeveloperEventArgs(senderId, receiverId));
 
             if (RiftBot.IsModerator(toSgUser))
                 GiftedModerator?.Invoke(null, new GiftedModeratorEventArgs(senderId, receiverId));

@@ -40,7 +40,7 @@ namespace Rift.Services
                 }
             };
 
-            await RiftBot.SendMessageAsync("mod-kick-success", Settings.ChannelId.Comms, data);
+            await RiftBot.SendMessageAsync("mod-kick-success", Settings.ChannelId.Commands, data);
         }
 
         public async Task BanAsync(IUser target, string reason, IUser moderator)
@@ -52,7 +52,7 @@ namespace Rift.Services
 
             if (RiftBot.IsAdmin(sgTarget) || RiftBot.IsModerator(sgTarget))
             {
-                await RiftBot.SendMessageAsync("mod-friendly-fire", Settings.ChannelId.Comms, new FormatData(moderator.Id));
+                await RiftBot.SendMessageAsync("mod-friendly-fire", Settings.ChannelId.Commands, new FormatData(moderator.Id));
                 return;
             }
 
@@ -75,7 +75,7 @@ namespace Rift.Services
                 }
             };
 
-            await RiftBot.SendMessageAsync("mod-ban-success", Settings.ChannelId.Comms, data);
+            await RiftBot.SendMessageAsync("mod-ban-success", Settings.ChannelId.Commands, data);
         }
 
         public async Task MuteAsync(IUser target, string reason, string time, IUser moderator)
@@ -87,13 +87,13 @@ namespace Rift.Services
 
             if (RiftBot.IsAdmin(sgTarget) || RiftBot.IsModerator(sgTarget))
             {
-                await RiftBot.SendMessageAsync("mod-friendly-fire", Settings.ChannelId.Comms, new FormatData(moderator.Id));
+                await RiftBot.SendMessageAsync("mod-friendly-fire", Settings.ChannelId.Commands, new FormatData(moderator.Id));
                 return;
             }
 
             if (!int.TryParse(time.Remove(time.Length - 1), out var timeInt))
             {
-                await RiftBot.SendMessageAsync("mod-wrong-time-format", Settings.ChannelId.Comms, new FormatData(moderator.Id));
+                await RiftBot.SendMessageAsync("mod-wrong-time-format", Settings.ChannelId.Commands, new FormatData(moderator.Id));
                 return;
             }
 
@@ -120,7 +120,7 @@ namespace Rift.Services
                     break;
 
                 default:
-                    await RiftBot.SendMessageAsync("mod-wrong-time-format", Settings.ChannelId.Comms, new FormatData(moderator.Id));
+                    await RiftBot.SendMessageAsync("mod-wrong-time-format", Settings.ChannelId.Commands, new FormatData(moderator.Id));
                     return;
             }
 
@@ -132,7 +132,7 @@ namespace Rift.Services
             await DB.Toxicity.UpdatePercentAsync(sgTarget.Id, newToxicity.Percent);
 
             if (newToxicity.Level > oldToxicity.Level)
-                await RiftBot.SendMessageAsync("mod-toxicity-increased", Settings.ChannelId.Comms, new FormatData(sgTarget.Id));
+                await RiftBot.SendMessageAsync("mod-toxicity-increased", Settings.ChannelId.Commands, new FormatData(sgTarget.Id));
 
             var data = new FormatData(sgTarget.Id)
             {
@@ -145,7 +145,7 @@ namespace Rift.Services
                 }
             };
 
-            await RiftBot.SendMessageAsync("mod-mute-success", Settings.ChannelId.Comms, data);
+            await RiftBot.SendMessageAsync("mod-mute-success", Settings.ChannelId.Commands, data);
         }
 
         public async Task UnmuteAsync(IUser target, string reason, IUser moderator)
@@ -173,7 +173,7 @@ namespace Rift.Services
             await DB.Toxicity.UpdatePercentAsync(sgTarget.Id, newToxicity.Percent);
 
             if (newToxicity.Level > oldToxicity.Level)
-                await RiftBot.SendMessageAsync("mod-toxicity-increased", Settings.ChannelId.Comms, new FormatData(sgTarget.Id));
+                await RiftBot.SendMessageAsync("mod-toxicity-increased", Settings.ChannelId.Commands, new FormatData(sgTarget.Id));
 
             var data = new FormatData(sgTarget.Id)
             {
@@ -185,20 +185,20 @@ namespace Rift.Services
                 }
             };
 
-            await RiftBot.SendMessageAsync("mod-warn-success", Settings.ChannelId.Comms, data);
+            await RiftBot.SendMessageAsync("mod-warn-success", Settings.ChannelId.Commands, data);
         }
 
         static async Task<(bool, SocketGuildUser)> ValidateAsync(IUser target, string reason, IUser moderator)
         {
             if (string.IsNullOrEmpty(reason))
             {
-                await RiftBot.SendMessageAsync("mod-empty-reason", Settings.ChannelId.Comms, new FormatData(moderator.Id));
+                await RiftBot.SendMessageAsync("mod-empty-reason", Settings.ChannelId.Commands, new FormatData(moderator.Id));
                 return (false, null);
             }
 
             if (!(target is SocketGuildUser sgTarget))
             {
-                await RiftBot.SendMessageAsync("mod-user-not-found", Settings.ChannelId.Comms, new FormatData(moderator.Id));
+                await RiftBot.SendMessageAsync("mod-user-not-found", Settings.ChannelId.Commands, new FormatData(moderator.Id));
                 return (false, null);
             }
 

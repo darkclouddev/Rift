@@ -4,14 +4,19 @@ namespace Rift.Services.Reward
 {
     public class ChestReward : ItemReward
     {
-        public ChestReward()
+        public ChestReward(uint amount)
         {
-            AddRandomCoins(1_600, 2_301);
+            for (uint i = 0; i < amount; i++)
+            {
+                AddRandomCoins(1_600, 2_301);
 
-            if (Helper.GetChance(3u))
-                AddTickets(1u);
-            else
-                AddBotRespects(1u);
+                if (Helper.GetChance(3u))
+                    AddTickets(1u);
+                else if (Helper.GetChance(3u))
+                    AddBotRespects(1u);
+                else if (Helper.GetChance(3u))
+                    AddTickets(1u);
+            }
         }
     }
 }

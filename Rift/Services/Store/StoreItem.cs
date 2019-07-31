@@ -104,7 +104,7 @@ namespace Rift.Services.Store
                     var dbData = Task.Run(() => DB.Roles.GetAsync(dbId)).Result;
                     if (dbData is null)
                     {
-                        Task.Run(() => RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Comms));
+                        Task.Run(() => RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands));
                         break;
                     }
 

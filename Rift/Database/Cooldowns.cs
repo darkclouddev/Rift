@@ -194,5 +194,101 @@ namespace Rift.Database
                 await context.SaveChangesAsync();
             }
         }
+        
+        public async Task SetLastCommunityVoteTimeAsync(ulong userId, DateTime time)
+        {
+            if (!await EnsureExistsAsync(userId))
+                throw new DatabaseException(nameof(SetLastCommunityVoteTimeAsync));
+
+            var cd = new RiftCooldowns
+            {
+                UserId = userId,
+                LastCommunityVoteTime = time,
+            };
+
+            using (var context = new RiftContext())
+            {
+                context.Attach(cd).Property(x => x.LastCommunityVoteTime).IsModified = true;
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task SetLastStreamerVoteTimeAsync(ulong userId, DateTime time)
+        {
+            if (!await EnsureExistsAsync(userId))
+                throw new DatabaseException(nameof(SetLastStreamerVoteTimeAsync));
+
+            var cd = new RiftCooldowns
+            {
+                UserId = userId,
+                LastStreamerVoteTime = time,
+            };
+
+            using (var context = new RiftContext())
+            {
+                context.Attach(cd).Property(x => x.LastStreamerVoteTime).IsModified = true;
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task SetLastTeamVoteTimeAsync(ulong userId, DateTime time)
+        {
+            if (!await EnsureExistsAsync(userId))
+                throw new DatabaseException(nameof(SetLastTeamVoteTimeAsync));
+
+            var cd = new RiftCooldowns
+            {
+                UserId = userId,
+                LastTeamVoteTime = time,
+            };
+
+            using (var context = new RiftContext())
+            {
+                context.Attach(cd).Property(x => x.LastTeamVoteTime).IsModified = true;
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task SetLastDailyRewardTimeAsync(ulong userId, DateTime time)
+        {
+            if (!await EnsureExistsAsync(userId))
+                throw new DatabaseException(nameof(SetLastDailyRewardTimeAsync));
+
+            var cd = new RiftCooldowns
+            {
+                UserId = userId,
+                LastDailyRewardTime = time,
+            };
+
+            using (var context = new RiftContext())
+            {
+                context.Attach(cd).Property(x => x.LastDailyRewardTime).IsModified = true;
+                await context.SaveChangesAsync();
+            }
+        }
+        
+        public async Task ResetAsync(ulong userId)
+        {
+            if (!await EnsureExistsAsync(userId))
+                throw new DatabaseException(nameof(ResetAsync));
+
+            var cds = await GetAsync(userId);
+            var minDate = DateTime.MinValue;
+
+            if (cds.ItemStoreTimeSpan != TimeSpan.Zero)
+                await SetLastItemStoreTimeAsync(userId, minDate);
+            
+            if (cds.RoleStoreTimeSpan != TimeSpan.Zero)
+                await SetLastRoleStoreTimeAsync(userId, minDate);
+            
+            if (cds.BackgroundStoreTimeSpan != TimeSpan.Zero)
+                await SetLastBackgroundStoreTimeAsync(userId, minDate);
+            
+            if (cds.BragTimeSpan != TimeSpan.Zero)
+                await SetLastBragTimeAsync(userId, minDate);
+            
+            if (cds.GiftTimeSpan != TimeSpan.Zero)
+                await SetLastGiftTimeAsync(userId, minDate);
+        }
     }
 }

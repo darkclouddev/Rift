@@ -49,21 +49,6 @@ namespace Rift.Modules
             await ReplyAsync($"{things.Count.ToString()} stage(s).");
         }
 
-        [Command("addroles")]
-        [RequireDeveloper]
-        [RequireContext(ContextType.Guild)]
-        public async Task AddRoles()
-        {
-            var guildRoles = Context.Guild.Roles;
-
-            foreach (var role in guildRoles)
-            {
-                await DB.Roles.AddAsync(role);
-            }
-
-            await ReplyAsync($"Added {guildRoles.Count.ToString()} role(s).");
-        }
-
         [Command("estart")]
         [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
@@ -152,7 +137,7 @@ namespace Rift.Modules
         }
 
         [Command("getstat")]
-        [RequireAdmin]
+        [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
         public async Task GetStat(IUser user)
         {
@@ -165,7 +150,7 @@ namespace Rift.Modules
         }
 
         [Command("update")]
-        [RequireDeveloper]
+        [RequireAdmin]
         [RateLimit(1, 10, Measure.Minutes)]
         [RequireContext(ContextType.Guild)]
         public async Task Update(IUser user)
@@ -179,15 +164,6 @@ namespace Rift.Modules
         public async Task StartGiveaway(string name)
         {
             await RiftBot.GetService<GiveawayService>().StartGiveawayAsync(name, Context.User.Id).ConfigureAwait(false);
-        }
-
-        [Command("la")]
-        [RequireDeveloper]
-        [RequireContext(ContextType.Guild)]
-        public async Task ListActions(IUser user)
-        {
-            var msg = await RiftBot.GetService<ModerationService>().GetUserActionLogsAsync(user);
-            await Context.Channel.SendIonicMessageAsync(msg).ConfigureAwait(false);
         }
 
         [Command("code")]
@@ -213,69 +189,6 @@ namespace Rift.Modules
             }
 
             await ReplyAsync($"Expected code: \"{pendingData.ConfirmationCode}\"\nActual code: \"{code}\"");
-        }
-
-        [Command("донат подарки")]
-        [RequireAdmin]
-        [RequireContext(ContextType.Guild)]
-        public async Task DonateRewards()
-        {
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.Absolute, out var absoluteRole))
-                return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.Legendary, out var legendaryRole))
-                return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateBore, out var pvtBore))
-                return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateKayn, out var pvtKayn))
-                return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateMellifluous,
-                                     out var pvtMellifluous))
-                return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateOctopusMom, out var pvtOctopus))
-                return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateSempai, out var pvtSempai))
-                return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateToxic, out var pvtToxic))
-                return;
-
-            if (!(absoluteRole is SocketRole srAbsolute))
-                return;
-            if (!(legendaryRole is SocketRole srLegendary))
-                return;
-            if (!(pvtBore is SocketRole srBore))
-                return;
-            if (!(pvtKayn is SocketRole srKayn))
-                return;
-            if (!(pvtMellifluous is SocketRole srMellifluous))
-                return;
-            if (!(pvtOctopus is SocketRole srOctopus))
-                return;
-            if (!(pvtSempai is SocketRole srSempai))
-                return;
-            if (!(pvtToxic is SocketRole srToxic))
-                return;
-
-            foreach (var user in srAbsolute.Members)
-                await DB.Inventory.AddAsync(user.Id, new InventoryData {Coins = 10_000u, Spheres = 1u});
-
-            foreach (var user in srLegendary.Members)
-                await DB.Inventory.AddAsync(user.Id, new InventoryData {Coins = 50_000u, Tickets = 2u});
-
-            var privateRoleUsers = new List<SocketGuildUser>();
-            privateRoleUsers.AddRange(srBore.Members);
-            privateRoleUsers.AddRange(srKayn.Members);
-            privateRoleUsers.AddRange(srMellifluous.Members);
-            privateRoleUsers.AddRange(srOctopus.Members);
-            privateRoleUsers.AddRange(srSempai.Members);
-            privateRoleUsers.AddRange(srToxic.Members);
-
-            foreach (var user in privateRoleUsers)
-                await DB.Inventory.AddAsync(user.Id, new InventoryData {Coins = 20_000u, Spheres = 1u});
-
-            await Context.User.SendMessageAsync($"Выдача подарков завершена!\n\n"
-                                                + $"{srAbsolute.Name}: {srAbsolute.Members.Count().ToString()}\n"
-                                                + $"{srLegendary.Name}: {srLegendary.Members.Count().ToString()}\n"
-                                                + $"Личные роли: {privateRoleUsers.Count.ToString()}");
         }
 
         [Command("selftest")]

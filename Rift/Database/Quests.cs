@@ -36,6 +36,33 @@ namespace Rift.Database
             }
         }
 
+        public async Task<RiftQuest> GetLastQuestAsync(int stageId)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Quests
+                    .Where(x => x.StageId == stageId)
+                    .OrderByDescending(x => x.Order)
+                    .FirstOrDefaultAsync();
+            }
+        }
+
+        public async Task<RiftQuestProgress> GetLastQuestProgressAsync(ulong userId, int stageId)
+        {
+            using (var context = new RiftContext())
+            {
+                var query =
+                    from stage in context.QuestStages
+                    join quest in context.Quests on stage.Id equals quest.StageId
+                    join progress in context.QuestProgress on quest.Id equals progress.QuestId
+                    where progress.UserId == userId && stage.IsInProgress()
+                    orderby quest.Order descending
+                    select progress;
+
+                return await query.FirstOrDefaultAsync();
+            }
+        }
+
         public async Task<RiftStage> GetStageAsync(int id)
         {
             using (var context = new RiftContext())
@@ -45,22 +72,13 @@ namespace Rift.Database
             }
         }
 
-        public async Task<bool> AnyAsync()
-        {
-            using (var context = new RiftContext())
-            {
-                return await context.Quests.AnyAsync();
-            }
-        }
-
-        public async Task<RiftQuest[]> GetStageQuestsAsync(int stageId)
+        public async Task<int> GetStageQuestCountAsync(int stageId)
         {
             using (var context = new RiftContext())
             {
                 return await context.Quests
                     .Where(x => x.StageId == stageId)
-                    .OrderBy(x => x.Order)
-                    .ToArrayAsync();
+                    .CountAsync();
             }
         }
 
@@ -187,8 +205,8 @@ namespace Rift.Database
                 if (dbUserQuest.VoiceUptimeEarned != userQuest.VoiceUptimeEarned)
                     entry.Property(x => x.VoiceUptimeEarned).IsModified = true;
 
-                if (dbUserQuest.GiftedBotKeeper != userQuest.GiftedBotKeeper)
-                    entry.Property(x => x.GiftedBotKeeper).IsModified = true;
+                if (dbUserQuest.GiftedDeveloper != userQuest.GiftedDeveloper)
+                    entry.Property(x => x.GiftedDeveloper).IsModified = true;
 
                 if (dbUserQuest.GiftedModerator != userQuest.GiftedModerator)
                     entry.Property(x => x.GiftedModerator).IsModified = true;
@@ -218,11 +236,16 @@ namespace Rift.Database
                     .FirstOrDefaultAsync();
             }
         }
-    }
 
-    public class StageData
-    {
-        public RiftStage Stage { get; set; }
-        public RiftQuest[] Quests { get; set; }
+        public async Task<bool> HasCompletedStageAsync(ulong userId, int stageId)
+        {
+            var lastQuest = await GetLastQuestAsync(stageId);
+            
+            using (var context = new RiftContext())
+            {
+                return await context.QuestProgress
+                    .AnyAsync(x => x.UserId == userId && x.QuestId == lastQuest.Id && x.IsCompleted);
+            }
+        }
     }
 }

@@ -106,7 +106,9 @@ namespace Rift.Configuration
 
         [ResolveRole("K/DA")] public ulong KDA { get; set; }
 
-        [ResolveRole("Хранители ботов")] public ulong BotKeepers { get; set; }
+        [ResolveRole("Разработчики")] public ulong Developers { get; set; }
+
+        [ResolveRole("Хранители билетов")] public ulong TicketKeepers { get; set; }
 
         [ResolveRole("Nitro Booster")] public ulong NitroBooster { get; set; }
     }

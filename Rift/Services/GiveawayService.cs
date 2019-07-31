@@ -87,8 +87,8 @@ namespace Rift.Services
                 return;
             }
 
-            // TODO: set event channel
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
+            // TODO: set giveaway channel
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Commands, out var channel))
             {
                 RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: Giveaway channel is null!");
                 return;
@@ -193,7 +193,7 @@ namespace Rift.Services
             };
 
             await RiftBot.SendMessageAsync("giveaway-finished",
-                                           Settings.ChannelId.Comms,
+                                           Settings.ChannelId.Commands,
                                            new FormatData(expiredGiveaway.StartedBy)
                                            {
                                                Giveaway = new GiveawayData
@@ -266,8 +266,8 @@ namespace Rift.Services
                     Reward = reward
                 });
 
-            // TODO: sent to event channel
-            var giveawayMessage = await RiftBot.SendMessageAsync(formattedMsg, Settings.ChannelId.Comms).ConfigureAwait(false);
+            // TODO: send to giveaway channel
+            var giveawayMessage = await RiftBot.SendMessageAsync(formattedMsg, Settings.ChannelId.Commands).ConfigureAwait(false);
 
             activeGiveaway.ChannelMessageId = giveawayMessage.Id;
 
@@ -312,7 +312,7 @@ namespace Rift.Services
 
             await reward.DeliverToAsync(winnerId);
 
-            await RiftBot.SendMessageAsync("giveaway-ticket-success", Settings.ChannelId.Comms, new FormatData(startedBy)
+            await RiftBot.SendMessageAsync("giveaway-ticket-success", Settings.ChannelId.Commands, new FormatData(startedBy)
             {
                 Giveaway = new GiveawayData
                 {
@@ -346,7 +346,7 @@ namespace Rift.Services
 
             RiftBot.Log.Info($"Gived tickets to {affectedRows.ToString()} users");
 
-            await RiftBot.SendMessageAsync("ticket-charity-success", Settings.ChannelId.Comms, new FormatData(startedBy));
+            await RiftBot.SendMessageAsync("ticket-charity-success", Settings.ChannelId.Commands, new FormatData(startedBy));
         }
 
         static async Task LogGiveawayAsync(RiftGiveawayLog log)

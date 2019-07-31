@@ -1,10 +1,14 @@
 using System.Threading.Tasks;
 
+using Discord;
+
 using Rift.Preconditions;
 using Rift.Services;
 using Rift.Util;
 
 using Discord.Commands;
+
+using Rift.Configuration;
 
 namespace Rift.Modules
 {
@@ -17,10 +21,14 @@ namespace Rift.Modules
         readonly BotRespectService botRespectService;
         readonly BackgroundService backgroundService;
         readonly RoleService roleService;
+        readonly RewindService rewindService;
+        readonly DoubleExpService doubleExpService;
+        readonly QuestService questService;
 
         public EconomyModule(EconomyService economyService, RiotService riotService, BragService bragService,
-                             GiveawayService giveawayService, BotRespectService botRespectService,
-                             BackgroundService backgroundService, RoleService roleService)
+                             GiveawayService giveawayService, BotRespectService botRespectService, BackgroundService backgroundService,
+                             RoleService roleService, RewindService rewindService, DoubleExpService doubleExpService,
+                             QuestService questService)
         {
             this.economyService = economyService;
             this.riotService = riotService;
@@ -29,10 +37,20 @@ namespace Rift.Modules
             this.botRespectService = botRespectService;
             this.backgroundService = backgroundService;
             this.roleService = roleService;
+            this.rewindService = rewindService;
+            this.doubleExpService = doubleExpService;
+            this.questService = questService;
+        }
+
+        [Command("задания")]
+        [Alias("квесты")]
+        [RequireContext(ContextType.Guild)]
+        public async Task Quests()
+        {
+            await questService.GetUserQuests(Context.User.Id);
         }
 
         [Command("поставить роль")]
-        [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
         public async Task AddRole(int id)
         {
@@ -40,7 +58,6 @@ namespace Rift.Modules
         }
 
         [Command("убрать роль")]
-        [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
         public async Task RemoveRole(int id)
         {
@@ -48,7 +65,6 @@ namespace Rift.Modules
         }
 
         [Command("поставить фон")]
-        [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
         public async Task SetBackground(int id)
         {
@@ -56,7 +72,6 @@ namespace Rift.Modules
         }
 
         [Command("роли")]
-        [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
         public async Task RoleInventoryList()
         {
@@ -64,7 +79,6 @@ namespace Rift.Modules
         }
 
         [Command("фоны")]
-        [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
         public async Task BackgroundInventoryList()
         {
@@ -72,7 +86,7 @@ namespace Rift.Modules
         }
 
         [Command("выдать билеты")]
-        [RequireDeveloper]
+        [RequireTicketKeeper]
         [RequireContext(ContextType.Guild)]
         public async Task GiveTickets()
         {
@@ -80,8 +94,8 @@ namespace Rift.Modules
         }
 
         [Command("обновить")]
-        [RateLimit(1, 10, Measure.Minutes, ErrorMessage =
-            "Запрашивать обновление ранга можно не чаще 1 раза в 10 минут!")]
+        [RateLimit(1, 10, Measure.Minutes,
+            ErrorMessage = "Запрашивать обновление ранга можно не чаще 1 раза в 10 минут!")]
         [RequireContext(ContextType.Guild)]
         public async Task Update()
         {
@@ -89,7 +103,6 @@ namespace Rift.Modules
         }
 
         [Command("активные")]
-        [RequireAdmin]
         [RequireContext(ContextType.Guild)]
         public async Task Active()
         {
@@ -97,7 +110,6 @@ namespace Rift.Modules
         }
 
         [Command("богатые")]
-        [RequireAdmin]
         [RequireContext(ContextType.Guild)]
         public async Task RichBitch()
         {
@@ -106,19 +118,19 @@ namespace Rift.Modules
 
         [Command("профиль")]
         [RequireContext(ContextType.Guild)]
-        public async Task Profile()
+        public async Task Profile(IUser user = null)
         {
             using (Context.Channel.EnterTypingState())
             {
-                var message = await economyService.GetUserProfileAsync(Context.User.Id);
+                var message = await economyService.GetUserProfileAsync(user?.Id ?? Context.User.Id);
                 await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
             }
         }
-
+        
         [Command("таймеры")]
         [Alias("кд")]
-        [RateLimit(1, 10.0, Measure.Seconds, RateLimitFlags.NoLimitForAdmins, ErrorMessage =
-            "Проверять таймеры можно не чаще 1 раза в 10 секунд!")]
+        [RateLimit(1, 10.0, Measure.Seconds, RateLimitFlags.NoLimitForAdmins,
+            ErrorMessage = "Проверять таймеры можно не чаще 1 раза в 10 секунд!")]
         [RequireContext(ContextType.Guild)]
         public async Task Cooldowns()
         {
@@ -135,7 +147,7 @@ namespace Rift.Modules
         {
             using (Context.Channel.EnterTypingState())
             {
-                await economyService.ActivateDoubleExp(Context.User.Id);
+                await doubleExpService.ActivateAsync(Context.User.Id);
             }
         }
 
@@ -149,6 +161,16 @@ namespace Rift.Modules
             }
         }
 
+        [Command("перемотка")]
+        [RequireContext(ContextType.Guild)]
+        public async Task Rewind()
+        {
+            using (Context.Channel.EnterTypingState())
+            {
+                await rewindService.ActivateAsync(Context.User.Id);
+            }
+        }
+
         [Command("игровой профиль")]
         [RateLimit(1, 10, Measure.Minutes, ErrorMessage =
             "Запрашивать игровой профиль можно не чаще 1 раза в 10 минут!")]
@@ -157,7 +179,7 @@ namespace Rift.Modules
         {
             using (Context.Channel.EnterTypingState())
             {
-                var message = await economyService.GetUserStatAsync(Context.User.Id);
+                var message = await economyService.GetUserGameStatAsync(Context.User.Id);
                 await Context.Channel.SendIonicMessageAsync(message);
             }
         }
@@ -180,6 +202,16 @@ namespace Rift.Modules
             using (Context.Channel.EnterTypingState())
             {
                 await bragService.GetUserBragAsync(Context.User.Id);
+            }
+        }
+        
+        [Command("роли")]
+        [RequireContext(ContextType.Guild)]
+        public async Task Roles()
+        {
+            using (Context.Channel.EnterTypingState())
+            {
+                await RiftBot.SendMessageAsync("roles-list", Settings.ChannelId.Commands, null);
             }
         }
 

@@ -24,7 +24,6 @@ namespace Rift.Services
 
         public ChannelService(DiscordSocketClient client)
         {
-            client.UserVoiceStateUpdated += ManageChannelsAsync;
             voiceUptimeTimer = new Timer(
                 async delegate { await UpdateUsersVoiceUptimeAsync(); },
                 null,
@@ -90,8 +89,8 @@ namespace Rift.Services
                 return;
 
             var channels = guild.VoiceChannels
-                                .Where(x => x.CategoryId == VoiceCategoryId && x.Id != Settings.ChannelId.VoiceSetup)
-                                .ToList();
+                .Where(x => x.CategoryId == VoiceCategoryId && x.Id != Settings.ChannelId.VoiceSetup)
+                .ToList();
 
             if (!channels.Any())
                 return;

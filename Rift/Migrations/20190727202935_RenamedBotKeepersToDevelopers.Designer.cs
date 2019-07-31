@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rift.Data;
 
 namespace Rift.Migrations
 {
     [DbContext(typeof(RiftContext))]
-    partial class RiftContextModelSnapshot : ModelSnapshot
+    [Migration("20190727202935_RenamedBotKeepersToDevelopers")]
+    partial class RenamedBotKeepersToDevelopers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -104,8 +106,6 @@ namespace Rift.Migrations
                     b.Property<DateTime>("LastBragTime");
 
                     b.Property<DateTime>("LastCommunityVoteTime");
-
-                    b.Property<DateTime>("LastDailyRewardTime");
 
                     b.Property<DateTime>("LastGiftTime");
 
@@ -558,8 +558,6 @@ namespace Rift.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<int?>("CompletionRewardId");
-
-                    b.Property<string>("Description");
 
                     b.Property<DateTime>("EndDate");
 

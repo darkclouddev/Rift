@@ -7,6 +7,7 @@ namespace Rift.Data.Models
     public class RiftCooldowns
     {
         public ulong UserId { get; set; }
+        
         public DateTime LastItemStoreTime { get; set; }
 
         public TimeSpan ItemStoreTimeSpan
@@ -123,7 +124,7 @@ namespace Rift.Data.Models
             get
             {
                 var dt = DateTime.UtcNow;
-                var nextTime = LastBragTime + Settings.Economy.VoteCommunityCooldown;
+                var nextTime = LastCommunityVoteTime + Settings.Economy.VoteCommunityCooldown;
                 return nextTime > dt
                     ? nextTime - dt
                     : TimeSpan.Zero;
@@ -132,12 +133,12 @@ namespace Rift.Data.Models
         
         public DateTime LastStreamerVoteTime { get; set; }
 
-        public TimeSpan LastStreamerVoteTimeSpan
+        public TimeSpan StreamerVoteTimeSpan
         {
             get
             {
                 var dt = DateTime.UtcNow;
-                var nextTime = LastBragTime + Settings.Economy.VoteStreamerCooldown;
+                var nextTime = LastStreamerVoteTime + Settings.Economy.VoteStreamerCooldown;
                 return nextTime > dt
                     ? nextTime - dt
                     : TimeSpan.Zero;
@@ -146,12 +147,26 @@ namespace Rift.Data.Models
         
         public DateTime LastTeamVoteTime { get; set; }
 
-        public TimeSpan LastTeamVoteTimeSpan
+        public TimeSpan TeamVoteTimeSpan
         {
             get
             {
                 var dt = DateTime.UtcNow;
-                var nextTime = LastBragTime + Settings.Economy.VoteTeamCooldown;
+                var nextTime = LastTeamVoteTime + Settings.Economy.VoteTeamCooldown;
+                return nextTime > dt
+                    ? nextTime - dt
+                    : TimeSpan.Zero;
+            }
+        } 
+        
+        public DateTime LastDailyRewardTime { get; set; }
+
+        public TimeSpan DailyRewardTimeSpan
+        {
+            get
+            {
+                var dt = DateTime.UtcNow;
+                var nextTime = LastDailyRewardTime + TimeSpan.FromHours(22);
                 return nextTime > dt
                     ? nextTime - dt
                     : TimeSpan.Zero;

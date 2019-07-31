@@ -36,25 +36,25 @@ namespace Rift.Services
                 case VoteType.Community:
                     if (cds.LastCommunityVoteTimeSpan != TimeSpan.Zero)
                     {
-                        await RiftBot.SendMessageAsync("vote-cooldown-community", Settings.ChannelId.Comms, new FormatData(userId));
+                        await RiftBot.SendMessageAsync("vote-cooldown-community", Settings.ChannelId.Commands, new FormatData(userId));
                         return;
                     }
 
                     break;
 
                 case VoteType.Team:
-                    if (cds.LastTeamVoteTimeSpan != TimeSpan.Zero)
+                    if (cds.TeamVoteTimeSpan != TimeSpan.Zero)
                     {
-                        await RiftBot.SendMessageAsync("vote-cooldown-team", Settings.ChannelId.Comms, new FormatData(userId));
+                        await RiftBot.SendMessageAsync("vote-cooldown-team", Settings.ChannelId.Commands, new FormatData(userId));
                         return;
                     }
 
                     break;
 
                 case VoteType.Streamer:
-                    if (cds.LastStreamerVoteTimeSpan != TimeSpan.Zero)
+                    if (cds.StreamerVoteTimeSpan != TimeSpan.Zero)
                     {
-                        await RiftBot.SendMessageAsync("vote-cooldown-streamer", Settings.ChannelId.Comms, new FormatData(userId));
+                        await RiftBot.SendMessageAsync("vote-cooldown-streamer", Settings.ChannelId.Commands, new FormatData(userId));
                         return;
                     }
 
@@ -70,7 +70,7 @@ namespace Rift.Services
                     case VoteType.Community:
                         if (votes.CommunityId == (int) voteId)
                         {
-                            await RiftBot.SendMessageAsync("vote-already-community", Settings.ChannelId.Comms, new FormatData(userId));
+                            await RiftBot.SendMessageAsync("vote-already-community", Settings.ChannelId.Commands, new FormatData(userId));
                             return;
                         }
 
@@ -79,7 +79,7 @@ namespace Rift.Services
                     case VoteType.Team:
                         if (votes.TeamId == (int) voteId)
                         {
-                            await RiftBot.SendMessageAsync("vote-already-team", Settings.ChannelId.Comms, new FormatData(userId));
+                            await RiftBot.SendMessageAsync("vote-already-team", Settings.ChannelId.Commands, new FormatData(userId));
                             return;
                         }
 
@@ -88,7 +88,7 @@ namespace Rift.Services
                     case VoteType.Streamer:
                         if (votes.StreamerId == voteId)
                         {
-                            await RiftBot.SendMessageAsync("vote-already-streamer", Settings.ChannelId.Comms, new FormatData(userId));
+                            await RiftBot.SendMessageAsync("vote-already-streamer", Settings.ChannelId.Commands, new FormatData(userId));
                             return;
                         }
 
@@ -145,17 +145,24 @@ namespace Rift.Services
 
             if (community is null)
             {
-                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Comms);
+                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
                 return;
             }
+
+            await DB.Cooldowns.SetLastCommunityVoteTimeAsync(userId, DateTime.UtcNow);
             
             await DB.Votes.AddOrUpdateAsync(userId, communityId: id);
 
             await reward.DeliverToAsync(userId);
             
-            // TODO: give background
+            await DB.BackgroundInventory.RemoveCommunitiesAsync(userId)
+                .ContinueWith(async _ =>
+                {
+                    await DB.BackgroundInventory.UnsetCommunitiesBackgroundsAsync(userId);
+                    await DB.BackgroundInventory.AddAsync(userId, community.BackgroundId);
+                });
 
-            await RiftBot.SendMessageAsync("vote-success-community", Settings.ChannelId.Comms, new FormatData(userId)
+            await RiftBot.SendMessageAsync("vote-success-community", Settings.ChannelId.Commands, new FormatData(userId)
             {
                 VoteData = new VoteData
                 {
@@ -171,17 +178,24 @@ namespace Rift.Services
 
             if (team is null)
             {
-                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Comms);
+                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
                 return;
             }
+            
+            await DB.Cooldowns.SetLastTeamVoteTimeAsync(userId, DateTime.UtcNow);
             
             await DB.Votes.AddOrUpdateAsync(userId, teamId: id);
 
             await reward.DeliverToAsync(userId);
             
-            // TODO: give background
+            await DB.BackgroundInventory.RemoveTeamsAsync(userId)
+                .ContinueWith(async _ =>
+                {
+                    await DB.BackgroundInventory.UnsetTeamsBackgroundsAsync(userId);
+                    await DB.BackgroundInventory.AddAsync(userId, team.BackgroundId);
+                });
 
-            await RiftBot.SendMessageAsync("vote-success-team", Settings.ChannelId.Comms, new FormatData(userId)
+            await RiftBot.SendMessageAsync("vote-success-team", Settings.ChannelId.Commands, new FormatData(userId)
             {
                 VoteData = new VoteData
                 {
@@ -197,17 +211,24 @@ namespace Rift.Services
 
             if (streamer is null)
             {
-                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Comms);
+                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
                 return;
             }
+            
+            await DB.Cooldowns.SetLastStreamerVoteTimeAsync(userId, DateTime.UtcNow);
 
             await DB.Votes.AddOrUpdateAsync(userId, streamerId: id);
 
             await reward.DeliverToAsync(userId);
             
-            // TODO: give background
+            await DB.BackgroundInventory.RemoveStreamersAsync(userId)
+                .ContinueWith(async _ =>
+                {
+                    await DB.BackgroundInventory.UnsetStreamersBackgroundsAsync(userId);
+                    await DB.BackgroundInventory.AddAsync(userId, streamer.BackgroundId);
+                });
 
-            await RiftBot.SendMessageAsync("vote-success-streamer", Settings.ChannelId.Comms, new FormatData(userId)
+            await RiftBot.SendMessageAsync("vote-success-streamer", Settings.ChannelId.Commands, new FormatData(userId)
             {
                 VoteData = new VoteData
                 {
