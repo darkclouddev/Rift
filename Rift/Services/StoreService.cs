@@ -407,7 +407,7 @@ namespace Rift.Services
             if (!await CanBuyRoleAsync(userId))
                 return await RiftBot.GetMessageAsync("rolestore-cooldown", new FormatData(userId));
 
-            if (await DB.RoleInventory.HasAsync(userId, item.DatabaseId))
+            if (await DB.RoleInventory.HasAnyAsync(userId, item.DatabaseId))
                 return await RiftBot.GetMessageAsync("rolestore-hasrole", new FormatData(userId));
 
             var role = await DB.Roles.GetAsync(item.DatabaseId);

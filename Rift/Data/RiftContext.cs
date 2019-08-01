@@ -26,7 +26,7 @@ namespace Rift.Data
         public DbSet<RiftGiveaway> Giveaways { get; set; }
         public DbSet<RiftGiveawayLog> GiveawayLogs { get; set; }
         public DbSet<RiftActiveGiveaway> ActiveGiveaways { get; set; }
-        public DbSet<RiftStage> QuestStages { get; set; }
+        public DbSet<RiftQuestStage> QuestStages { get; set; }
         public DbSet<RiftQuest> Quests { get; set; }
         public DbSet<RiftQuestProgress> QuestProgress { get; set; }
         public DbSet<RiftProfileBackground> ProfileBackgrounds { get; set; }
@@ -143,7 +143,7 @@ namespace Rift.Data
             builder.Entity<RiftActiveGiveaway>().HasKey(prop => prop.Id);
             builder.Entity<RiftActiveGiveaway>().Property(prop => prop.Id).ValueGeneratedOnAdd();
 
-            builder.Entity<RiftStage>().HasKey(prop => prop.Id);
+            builder.Entity<RiftQuestStage>().HasKey(prop => prop.Id);
 
             builder.Entity<RiftQuest>().HasKey(prop => prop.Id);
 

@@ -48,13 +48,21 @@ namespace Rift.Database
             }
         }
         
-        public async Task<bool> HasAsync(ulong userId, int roleId)
+        public async Task<bool> HasAnyAsync(ulong userId, params int[] roleIds)
         {
             using (var context = new RiftContext())
             {
                 return await context.RoleInventories
-                    .Where(x => x.UserId == userId && x.RoleId == roleId)
-                    .AnyAsync();
+                    .AnyAsync(x => x.UserId == userId && roleIds.Contains(x.RoleId));
+            }
+        }
+        
+        public async Task<bool> HasAllAsync(ulong userId, params int[] roleIds)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.RoleInventories
+                    .AllAsync(x => x.UserId == userId && roleIds.Contains(x.RoleId));
             }
         }
     }

@@ -128,7 +128,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task GetGameStat(IUser user)
         {
-            var message = await economyService.GetUserGameStatAsync(user.Id);
+            var message = await riotService.GetUserGameStatAsync(user.Id);
 
             if (message is null)
                 return;

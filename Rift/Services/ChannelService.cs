@@ -102,11 +102,11 @@ namespace Rift.Services
             if (!users.Any())
                 return;
 
-            var reward = new InventoryData {Coins = 1u};
+            var reward = await DB.Rewards.GetAsync(24);
 
             foreach (var userId in users)
             {
-                await DB.Inventory.AddAsync(userId, reward);
+                await reward.DeliverToAsync(userId);
                 await DB.Statistics.AddAsync(userId, new StatisticData {VoiceUptime = VoiceRewardsInterval});
             }
 

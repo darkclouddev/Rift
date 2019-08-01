@@ -29,6 +29,28 @@ namespace Rift.Modules
 
             await Context.Channel.SendIonicMessageAsync(message);
         }
+        
+        [Command("обновить")]
+        [RateLimit(1, 10, Measure.Minutes,
+            ErrorMessage = "Запрашивать обновление ранга можно не чаще 1 раза в 10 минут!")]
+        [RequireContext(ContextType.Guild)]
+        public async Task Update()
+        {
+            await riotService.UpdateRankAsync(Context.User.Id);
+        }
+        
+        [Command("игровой профиль")]
+        [RateLimit(1, 10, Measure.Minutes, ErrorMessage =
+            "Запрашивать игровой профиль можно не чаще 1 раза в 10 минут!")]
+        [RequireContext(ContextType.Guild)]
+        public async Task GameStat()
+        {
+            using (Context.Channel.EnterTypingState())
+            {
+                var message = await riotService.GetUserGameStatAsync(Context.User.Id);
+                await Context.Channel.SendIonicMessageAsync(message);
+            }
+        }
 
         [Command("отвязать")]
         [RequireModerator]

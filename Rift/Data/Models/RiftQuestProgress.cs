@@ -17,7 +17,7 @@ namespace Rift.Data.Models
         public uint? EpicMonstersKilled { get; set; }
         public uint? GiftsSent { get; set; }
         public uint? GiftsReceived { get; set; }
-        public uint? GiftsReceivedFromUltraGay { get; set; }
+        public bool? GiftedFounder { get; set; }
         public uint? LevelReached { get; set; }
         public uint? GiveawaysParticipated { get; set; }
         public uint? CoinsReceived { get; set; }

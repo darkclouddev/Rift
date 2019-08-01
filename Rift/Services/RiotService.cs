@@ -51,8 +51,6 @@ namespace Rift.Services
 
         public delegate void RankChanged(RankChangedEventArgs e);
 
-        public event RankChanged OnRankChanged;
-
         static Timer approveTimer;
 
         static readonly TimeSpan approveCheckCooldown = TimeSpan.FromMinutes(1);
@@ -450,86 +448,23 @@ namespace Rift.Services
 
         #region Rank
 
-        public async Task UpdateRankAsync(ulong userId, bool silentMode = false)
+        public async Task UpdateRankAsync(ulong userId)
         {
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Commands, out var channel))
                 return;
 
-            RiftBot.Log.Debug($"[User|{userId.ToString()}] Getting summoner for rank update");
+            RiftBot.Log.Debug($"[User|{userId.ToString()}] Getting summoner for the league data update");
 
-            var lolData = await DB.LeagueData.GetAsync(userId);
+            var leagueData = await DB.LeagueData.GetAsync(userId);
+            (var result, var data) = await GetSummonerByEncryptedSummonerIdAsync(leagueData.SummonerRegion, leagueData.SummonerId);
 
-            await DB.LeagueData.UpdateAsync(userId, lolData.SummonerRegion, lolData.PlayerUUID, lolData.AccountId,
-                lolData.SummonerId, lolData.SummonerName);
-
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (sgUser is null)
-            {
-                RiftBot.Log.Warn($"[User|{userId.ToString()}] SGUser is null!");
+            if (result == RequestResult.Error)
                 return;
-            }
+            
+            await DB.LeagueData.UpdateAsync(userId, leagueData.SummonerRegion, leagueData.PlayerUUID, leagueData.AccountId,
+                leagueData.SummonerId, data.Name);
 
-            (var rankResult, var rankData) =
-                await GetLeaguePositionsByEncryptedSummonerIdAsync(lolData.SummonerRegion, lolData.SummonerId);
-
-            if (rankResult != RequestResult.Success)
-            {
-                RiftBot.Log.Warn($"[User|{userId.ToString()}] No rank data");
-                return;
-            }
-
-            var newRank = GetRankFromPosition(rankData.FirstOrDefault(x => x.QueueType == "RANKED_SOLO_5x5"));
-
-            var currentRank = GetCurrentRank(sgUser);
-
-            if (currentRank == newRank)
-            {
-                if (!silentMode)
-                {
-                    var msg = await RiftBot.GetMessageAsync("lol-samerank", new FormatData(userId));
-                    await channel.SendIonicMessageAsync(msg);
-                }
-
-                return;
-            }
-
-            var isUp = newRank > currentRank;
-
-            if (newRank != currentRank)
-                OnRankChanged?.Invoke(new RankChangedEventArgs(userId, currentRank, newRank, isUp));
-
-            await RemoveRankedRole(sgUser, currentRank);
-
-            var roleId = GetRoleIdByLeagueRank(newRank);
-
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var role))
-            {
-                RiftBot.Log.Warn($"[User|{userId.ToString()}] Failed to get role {roleId.ToString()}");
-                return;
-            }
-
-            await sgUser.AddRoleAsync(role);
-
-            if (isUp)
-            {
-                await RiftBot.SendMessageAsync("lol-rank-up", Settings.ChannelId.Commands, new FormatData(userId));
-
-                if (newRank < LeagueRank.Bronze)
-                    return;
-
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Chests = 4u});
-            }
-            else
-            {
-                if (!silentMode)
-                {
-                    var msg = await RiftBot.GetMessageAsync("lol-samerank", new FormatData(userId));
-                    await channel.SendIonicMessageAsync(msg);
-                }
-            }
-
-            RiftBot.Log.Debug($"{sgUser.ToLogString()} Rank update completed.");
+            RiftBot.Log.Debug($"{userId.ToString()} League data update completed.");
         }
 
         static ulong GetRoleIdByLeagueRank(LeagueRank rank)
@@ -773,23 +708,60 @@ namespace Rift.Services
 
         public static string GetStatStringFromRank(LeagueRank rank)
         {
+            var emoteService = RiftBot.GetService<EmoteService>();
+            
             switch (rank)
             {
-                case LeagueRank.Iron: return "$emoteRankIron Железо";
-                case LeagueRank.Bronze: return "$emoteRankBronze Бронза";
-                case LeagueRank.Silver: return "$emoteRankSilver Серебро";
-                case LeagueRank.Gold: return "$emoteRankGold Золото";
-                case LeagueRank.Platinum: return "$emoteRankPlatinum Платина";
-                case LeagueRank.Diamond: return "$emoteRankDiamond Алмаз";
-                case LeagueRank.Master: return "$emoteRankMaster Мастер";
-                case LeagueRank.GrandMaster: return "$emoteRankGrandmaster Грандмастер";
-                case LeagueRank.Challenger: return "$emoteRankChallenger Претендент";
+                case LeagueRank.Iron: return $"{emoteService.GetEmoteString("$emoteRankIron")} Железо";
+                case LeagueRank.Bronze: return $"{emoteService.GetEmoteString("$emoteRankBronze")} Бронза";
+                case LeagueRank.Silver: return $"{emoteService.GetEmoteString("$emoteRankSilver")} Серебро";
+                case LeagueRank.Gold: return $"{emoteService.GetEmoteString("$emoteRankGold")} Золото";
+                case LeagueRank.Platinum: return $"{emoteService.GetEmoteString("$emoteRankPlatinum")} Платина";
+                case LeagueRank.Diamond: return $"{emoteService.GetEmoteString("$emoteRankDiamond")} Алмаз";
+                case LeagueRank.Master: return $"{emoteService.GetEmoteString("$emoteRankMaster")} Мастер";
+                case LeagueRank.GrandMaster: return $"{emoteService.GetEmoteString("$emoteRankGrandmaster")} Грандмастер";
+                case LeagueRank.Challenger: return $"{emoteService.GetEmoteString("$emoteRankChallenger")} Претендент";
             }
 
             return string.Empty;
         }
 
         #endregion Rank
+        
+        public async Task<IonicMessage> GetUserGameStatAsync(ulong userId)
+        {
+            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
+
+            if (sgUser is null)
+                return MessageService.Error;
+
+            var dbSummoner = await DB.LeagueData.GetAsync(userId);
+
+            if (string.IsNullOrWhiteSpace(dbSummoner.PlayerUUID))
+                return await RiftBot.GetMessageAsync("loldata-nodata", new FormatData(userId));
+
+            (var summonerResult, var summoner) = await RiftBot.GetService<RiotService>()
+                .GetSummonerByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
+
+            if (summonerResult != RequestResult.Success)
+                return MessageService.Error;
+
+            (var requestResult, var leaguePositions) = await RiftBot.GetService<RiotService>()
+                .GetLeaguePositionsByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
+
+            if (requestResult != RequestResult.Success)
+                return MessageService.Error;
+
+            return await RiftBot.GetMessageAsync("loldata-stat-success", new FormatData(userId)
+            {
+                LeagueStat = new LeagueStatData
+                {
+                    Summoner = summoner,
+                    SoloQueue = leaguePositions.FirstOrDefault(x => x.QueueType == "RANKED_SOLO_5x5"),
+                    Flex5v5 = leaguePositions.FirstOrDefault(x => x.QueueType == "RANKED_FLEX_SR"),
+                }
+            });
+        }
 
         public async Task<(RequestResult, Summoner)> GetSummonerByEncryptedSummonerIdAsync(string region, string encryptedSummonerId)
         {

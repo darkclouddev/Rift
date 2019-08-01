@@ -173,41 +173,6 @@ namespace Rift.Services
             return await RiftBot.GetMessageAsync("user-profile", new FormatData(userId));
         }
 
-        public async Task<IonicMessage> GetUserGameStatAsync(ulong userId)
-        {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (sgUser is null)
-                return MessageService.Error;
-
-            var dbSummoner = await DB.LeagueData.GetAsync(userId);
-
-            if (string.IsNullOrWhiteSpace(dbSummoner.PlayerUUID))
-                return await RiftBot.GetMessageAsync("loldata-nodata", new FormatData(userId));
-
-            (var summonerResult, var summoner) = await RiftBot.GetService<RiotService>()
-                .GetSummonerByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
-
-            if (summonerResult != RequestResult.Success)
-                return MessageService.Error;
-
-            (var requestResult, var leaguePositions) = await RiftBot.GetService<RiotService>()
-                .GetLeaguePositionsByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
-
-            if (requestResult != RequestResult.Success)
-                return MessageService.Error;
-
-            return await RiftBot.GetMessageAsync("loldata-stat-success", new FormatData(userId)
-            {
-                LeagueStat = new LeagueStatData
-                {
-                    Summoner = summoner,
-                    SoloQueue = leaguePositions.FirstOrDefault(x => x.QueueType == "RANKED_SOLO_5x5"),
-                    Flex5v5 = leaguePositions.FirstOrDefault(x => x.QueueType == "RANKED_FLEX_5x5"),
-                }
-            });
-        }
-
         public async Task<IonicMessage> GetUserStatAsync(ulong userId)
         {
             var statistics = await DB.Statistics.GetAsync(userId);

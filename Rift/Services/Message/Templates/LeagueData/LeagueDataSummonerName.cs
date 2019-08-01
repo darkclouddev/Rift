@@ -12,9 +12,7 @@ namespace Rift.Services.Message.Templates.LeagueData
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            var leagueData = await DB.LeagueData.GetAsync(data.UserId);
-
-            return await ReplaceDataAsync(message, leagueData.SummonerName);
+            return await ReplaceDataAsync(message, data.LeagueStat.Summoner.Name);
         }
     }
 }

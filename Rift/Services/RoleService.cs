@@ -55,6 +55,20 @@ namespace Rift.Services
             return (true, null);
         }
 
+        public async Task<(bool, IonicMessage)> RemovePermanentRoleAsync(ulong userId, ulong roleId)
+        {
+            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
+
+            if (sgUser is null)
+                return (false, MessageService.UserNotFound);
+
+            if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var role))
+                return (false, MessageService.RoleNotFound);
+
+            await sgUser.RemoveRoleAsync(role);
+            return (true, null);
+        }
+
         public async Task AddTempRoleAsync(ulong userId, ulong roleId, TimeSpan duration, string reason)
         {
             var role = new RiftTempRole
@@ -128,7 +142,7 @@ namespace Rift.Services
 
         public async Task UpdateInventoryRoleAsync(ulong userId, int id, bool add)
         {
-            if (!await DB.RoleInventory.HasAsync(userId, id))
+            if (!await DB.RoleInventory.HasAnyAsync(userId, id))
             {
                 await RiftBot.SendMessageAsync("roleinventory-wrongnumber", Settings.ChannelId.Commands, new FormatData(userId));
                 return;

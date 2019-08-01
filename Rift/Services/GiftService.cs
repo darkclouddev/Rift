@@ -20,7 +20,7 @@ namespace Rift.Services
     {
         public static event EventHandler<GiftSentEventArgs> GiftSent;
         public static event EventHandler<GiftReceivedEventArgs> GiftReceived;
-        public static event EventHandler<GiftsReceivedFromFounderEventArgs> GiftsReceivedFromFounder;
+        public static event EventHandler<GiftedFounderEventArgs> GiftedFounder;
         public static event EventHandler<GiftedDeveloperEventArgs> GiftedDeveloper;
         public static event EventHandler<GiftedModeratorEventArgs> GiftedModerator;
         public static event EventHandler<GiftedStreamerEventArgs> GiftedStreamer;
@@ -98,8 +98,8 @@ namespace Rift.Services
             GiftSent?.Invoke(null, new GiftSentEventArgs(senderId, receiverId));
             GiftReceived?.Invoke(null, new GiftReceivedEventArgs(senderId, fromSgUser.Id));
 
-            if (fromSgUser.Id == 178443743026872321ul)
-                GiftsReceivedFromFounder?.Invoke(null, new GiftsReceivedFromFounderEventArgs(receiverId, senderId));
+            if (toSgUser.Id == 178443743026872321ul)
+                GiftedFounder?.Invoke(null, new GiftedFounderEventArgs(receiverId, senderId));
 
             if (IonicClient.HasRolesAny(toSgUser, Settings.RoleId.Developers))
                 GiftedDeveloper?.Invoke(null, new GiftedDeveloperEventArgs(senderId, receiverId));

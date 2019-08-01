@@ -44,7 +44,10 @@ namespace Rift.Services
             await capsule.DeliverToAsync(userId);
             await DB.Statistics.AddAsync(userId, new StatisticData {CapsulesOpened = 1u});
 
-            return await RiftBot.GetMessageAsync("capsules-open-success", new FormatData(userId));
+            return await RiftBot.GetMessageAsync("capsules-open-success", new FormatData(userId)
+            {
+                Reward = capsule
+            });
         }
     }
 }

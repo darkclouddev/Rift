@@ -8,7 +8,7 @@ namespace Rift.Modules
 {
     public class VoteModule : RiftModuleBase
     {
-        readonly VoteService voteService;
+        /*readonly VoteService voteService;
 
         public VoteModule(VoteService voteService)
         {
@@ -173,5 +173,6 @@ namespace Rift.Modules
         }
         
         #endregion Teams
+        */
     }
 }

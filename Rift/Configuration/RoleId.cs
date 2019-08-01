@@ -111,5 +111,25 @@ namespace Rift.Configuration
         [ResolveRole("Хранители билетов")] public ulong TicketKeepers { get; set; }
 
         [ResolveRole("Nitro Booster")] public ulong NitroBooster { get; set; }
+        
+        [ResolveRole("Храбрые поро")] public ulong BravePoro { get; set; }
+        
+        [ResolveRole("Довольные поро")] public ulong HappyPoro { get; set; }
+        
+        [ResolveRole("Призрачные поро")] public ulong GhostPoro { get; set; }
+        
+        [ResolveRole("Верхняя линия")] public ulong GameRoleTop { get; set; }
+        
+        [ResolveRole("Лес")] public ulong GameRoleJungle { get; set; }
+        
+        [ResolveRole("Средняя линия")] public ulong GameRoleMid { get; set; }
+        
+        [ResolveRole("Нижняя линия")] public ulong GameRoleBot { get; set; }
+        
+        [ResolveRole("Поддержка")] public ulong GameRoleSupport { get; set; }
+        
+        [ResolveRole("Любая")] public ulong GameRoleFill { get; set; }
+        
+        [ResolveRole("Вишнёвые")] public ulong Cherry { get; set; }
     }
 }

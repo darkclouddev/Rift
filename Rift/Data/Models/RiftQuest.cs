@@ -15,49 +15,49 @@ namespace Rift.Data.Models
         [QuestCondition("Подтвердить игровой аккаунт")]
         public bool? ApprovedLolAccount { get; set; }
         
-        [QuestCondition("Похвастаться {0} раз")]
+        [QuestCondition("Похвастаться играми")]
         public uint? BragsDone { get; set; }
         
-        [QuestCondition("Написать {0} сообщений")]
+        [QuestCondition("Написать сообщения")]
         public uint? MessagesSent { get; set; }
         
-        [QuestCondition("Купить {0} сундуков")]
+        [QuestCondition("Купить сундуки")]
         public uint? BoughtChests { get; set; }
         
-        [QuestCondition("Открыть {0} сундуков")]
+        [QuestCondition("Открыть сундуки")]
         public uint? OpenedChests { get; set; }
         
-        [QuestCondition("Убить {0} обычных монстров")]
+        [QuestCondition("Убить обычных монстров")]
         public uint? NormalMonstersKilled { get; set; }
         
-        [QuestCondition("Убить {0} редких монстров")]
+        [QuestCondition("Убить редких монстров")]
         public uint? RareMonstersKilled { get; set; }
         
-        [QuestCondition("Убить {0} эпических монстров")]
+        [QuestCondition("Убить эпических монстров")]
         public uint? EpicMonstersKilled { get; set; }
         
-        [QuestCondition("Отправить {0} подарков")]
+        [QuestCondition("Отправить подарки")]
         public uint? GiftsSent { get; set; }
         
-        [QuestCondition("Получить {0} подарков")]
+        [QuestCondition("Получить подарки")]
         public uint? GiftsReceived { get; set; }
         
-        [QuestCondition("Получить подарок от основателя")]
-        public uint? GiftsReceivedFromUltraGay { get; set; }
+        [QuestCondition("Отправить подарок основателю")]
+        public bool? GiftedFounder { get; set; }
         
-        [QuestCondition("Достичь {0} уровня")]
+        [QuestCondition("Поднять уровень в системе")]
         public uint? LevelReached { get; set; }
         
-        [QuestCondition("Принять участие в {0} розыгрышах")]
+        [QuestCondition("Принять участие в розыгрышах")]
         public uint? GiveawaysParticipated { get; set; }
         
-        [QuestCondition("Заработать {0} монет")]
+        [QuestCondition("Заработать монеты")]
         public uint? CoinsReceived { get; set; }
         
-        [QuestCondition("Потратить {0} монет")]
+        [QuestCondition("Потратить монеты")]
         public uint? CoinsSpent { get; set; }
         
-        [QuestCondition("Просидеть {0} в голосовых чатах")]
+        [QuestCondition("Провести {0} в голосовых каналах")]
         public TimeSpan? VoiceUptimeEarned { get; set; }
         
         [QuestCondition("Подарить подарок разработчику")]
@@ -69,13 +69,13 @@ namespace Rift.Data.Models
         [QuestCondition("Подарить подарок любимому стримеру")]
         public bool? GiftedStreamer { get; set; }
         
-        [QuestCondition("Активировать {0} уважений ботов")]
+        [QuestCondition("Активировать уважений ботов")]
         public uint? ActivatedBotRespects { get; set; }
         
         [QuestCondition("Открыть сферу")]
         public bool? OpenedSphere { get; set; }
         
-        [QuestCondition("Купить {0} ролей")]
+        [QuestCondition("Купить роли")]
         public uint? RolesPurchased { get; set; }
 
         public bool IsCompleted(RiftQuestProgress progress)
@@ -170,12 +170,12 @@ namespace Rift.Data.Models
                     return false;
             }
 
-            if (GiftsReceivedFromUltraGay.HasValue)
+            if (GiftedFounder.HasValue)
             {
-                if (!progress.GiftsReceivedFromUltraGay.HasValue)
+                if (!progress.GiftedFounder.HasValue)
                     return false;
 
-                if (GiftsReceivedFromUltraGay.Value > progress.GiftsReceivedFromUltraGay.Value)
+                if (GiftedFounder.Value && !progress.GiftedFounder.Value)
                     return false;
             }
 

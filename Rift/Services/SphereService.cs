@@ -49,7 +49,10 @@ namespace Rift.Services
             await sphere.DeliverToAsync(userId);
             await DB.Statistics.AddAsync(userId, new StatisticData {SpheresOpened = 1u});
 
-            return await RiftBot.GetMessageAsync("spheres-open-success", new FormatData(userId));
+            return await RiftBot.GetMessageAsync("spheres-open-success", new FormatData(userId)
+            {
+                Reward = sphere
+            });
         }
     }
 }

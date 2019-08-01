@@ -37,7 +37,7 @@ namespace Rift
 
         public static string InternalVersion { get; private set; } = "6.0";
         public const string CommandDenyMessage = "У вас нет доступа к этой команде.";
-        public static string BotStatusMessage => Settings.App.MaintenanceMode ? "Тестовый режим" : "Закрытый тест";
+        public static string BotStatusMessage => Settings.App.MaintenanceMode ? "Тестовый режим" : "Подготовка к запуску";
 
         public static bool ShouldReboot;
 
@@ -224,6 +224,7 @@ namespace Rift
                 .AddSingleton(new RewindService())
                 .AddSingleton(new DoubleExpService())
                 .AddSingleton(new DailyService())
+                .AddSingleton(new RoleSetupService(IonicClient.Client))
                 .AddSingleton(new CommandService(new CommandServiceConfig
                 {
                     CaseSensitiveCommands = false,

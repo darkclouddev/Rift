@@ -3,7 +3,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Humanizer;
-using Humanizer.Localisation;
 
 using Rift.Attributes;
 using Rift.Data.Models;
@@ -205,22 +204,20 @@ namespace Rift.Services.Message.Templates.Quest
                     sb.AppendLine($"{notFinishedEmote} {description} {pr}");
             }
             
-            if (quest.GiftsReceivedFromUltraGay.HasValue)
+            if (quest.GiftedFounder.HasValue)
             {
-                var description = GetDescription(questType, nameof(quest.GiftsReceivedFromUltraGay));
-                description = string.Format(description, quest.GiftsReceivedFromUltraGay.Value);
-                var pr = GetProgress(progress.GiftsReceivedFromUltraGay, quest.GiftsReceivedFromUltraGay.Value);
+                var description = GetDescription(questType, nameof(quest.GiftedFounder));
+                description = string.Format(description, quest.GiftedFounder.Value);
                 
-                if (progress.GiftsReceivedFromUltraGay.HasValue)
+                if (progress.GiftedFounder.HasValue)
                 {
-                    description = $"{description} {pr}";
-                    sb.AppendLine(progress.GiftsReceivedFromUltraGay.Value >= quest.GiftsReceivedFromUltraGay
+                    sb.AppendLine(progress.GiftedFounder.Value
                         ? finishedEmote + description
                         : notFinishedEmote + description
                     );
                 }
                 else
-                    sb.AppendLine($"{notFinishedEmote} {description} {pr}");
+                    sb.AppendLine($"{notFinishedEmote} {description}");
             }
             
             if (quest.LevelReached.HasValue)
@@ -298,8 +295,8 @@ namespace Rift.Services.Message.Templates.Quest
             if (quest.VoiceUptimeEarned.HasValue)
             {
                 var description = GetDescription(questType, nameof(quest.VoiceUptimeEarned));
-                description = string.Format(description, quest.VoiceUptimeEarned.Value);
-                var pr = GetProgress(progress.VoiceUptimeEarned, quest.VoiceUptimeEarned.Value);
+                description = string.Format(description, quest.VoiceUptimeEarned.Value.Humanize(culture: RiftBot.Culture));
+                var pr = GetProgress(progress.VoiceUptimeEarned);
                 
                 if (progress.VoiceUptimeEarned.HasValue)
                 {
@@ -442,11 +439,11 @@ namespace Rift.Services.Message.Templates.Quest
                 : $"({current.Value.ToString()}/{goal.ToString()})";
         }
 
-        static string GetProgress(TimeSpan? current, TimeSpan goal)
+        static string GetProgress(TimeSpan? current)
         {
             return !current.HasValue
-                ? "(0 минут)"
-                : $"({current.Value.Humanize(culture: RiftBot.Culture, minUnit: TimeUnit.Minute)})";
+                ? "(0 часов)"
+                : $"({current.Value.Humanize(culture: RiftBot.Culture)})";
         }
     }
 }

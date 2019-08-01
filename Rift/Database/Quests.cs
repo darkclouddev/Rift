@@ -14,7 +14,14 @@ namespace Rift.Database
     {
         public async Task AddQuestProgressAsync(ulong userId, RiftQuestProgress userQuest)
         {
+            if (!await DB.Users.EnsureExistsAsync(userId))
+                throw new DatabaseException(nameof(AddQuestProgressAsync));
+                
             var dbUserQuest = await GetQuestProgressAsync(userId, userQuest.QuestId);
+            var dbQuest = await GetQuestAsync(userQuest.QuestId);
+
+            if (dbQuest.LevelReached.HasValue)
+                userQuest.LevelReached = await DB.Users.GetLevelAsync(userId);
 
             if (!(dbUserQuest is null))
                 return;
@@ -63,7 +70,7 @@ namespace Rift.Database
             }
         }
 
-        public async Task<RiftStage> GetStageAsync(int id)
+        public async Task<RiftQuestStage> GetStageAsync(int id)
         {
             using (var context = new RiftContext())
             {
@@ -187,8 +194,8 @@ namespace Rift.Database
                 if (dbUserQuest.GiftsReceived != userQuest.GiftsReceived)
                     entry.Property(x => x.GiftsReceived).IsModified = true;
 
-                if (dbUserQuest.GiftsReceivedFromUltraGay != userQuest.GiftsReceivedFromUltraGay)
-                    entry.Property(x => x.GiftsReceivedFromUltraGay).IsModified = true;
+                if (dbUserQuest.GiftedFounder != userQuest.GiftedFounder)
+                    entry.Property(x => x.GiftedFounder).IsModified = true;
 
                 if (dbUserQuest.LevelReached != userQuest.LevelReached)
                     entry.Property(x => x.LevelReached).IsModified = true;

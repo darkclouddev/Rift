@@ -1,14 +1,12 @@
 using System.Threading.Tasks;
 
 using Discord;
-
-using Rift.Preconditions;
-using Rift.Services;
-using Rift.Util;
-
 using Discord.Commands;
 
 using Rift.Configuration;
+using Rift.Preconditions;
+using Rift.Services;
+using Rift.Util;
 
 namespace Rift.Modules
 {
@@ -93,15 +91,6 @@ namespace Rift.Modules
             await giveawayService.GiveTicketsToLowLevelUsersAsync(Context.User.Id);
         }
 
-        [Command("обновить")]
-        [RateLimit(1, 10, Measure.Minutes,
-            ErrorMessage = "Запрашивать обновление ранга можно не чаще 1 раза в 10 минут!")]
-        [RequireContext(ContextType.Guild)]
-        public async Task Update()
-        {
-            await riotService.UpdateRankAsync(Context.User.Id);
-        }
-
         [Command("активные")]
         [RequireContext(ContextType.Guild)]
         public async Task Active()
@@ -168,19 +157,6 @@ namespace Rift.Modules
             using (Context.Channel.EnterTypingState())
             {
                 await rewindService.ActivateAsync(Context.User.Id);
-            }
-        }
-
-        [Command("игровой профиль")]
-        [RateLimit(1, 10, Measure.Minutes, ErrorMessage =
-            "Запрашивать игровой профиль можно не чаще 1 раза в 10 минут!")]
-        [RequireContext(ContextType.Guild)]
-        public async Task GameStat()
-        {
-            using (Context.Channel.EnterTypingState())
-            {
-                var message = await economyService.GetUserGameStatAsync(Context.User.Id);
-                await Context.Channel.SendIonicMessageAsync(message);
             }
         }
 
