@@ -92,7 +92,7 @@ namespace Rift.Services
 
             if (activeStages is null || activeStages.Count == 0)
             {
-                RiftBot.Log.Debug("No active stages atm.");
+                //RiftBot.Log.Debug("No active stages atm.");
                 return;
             }
 
@@ -102,7 +102,7 @@ namespace Rift.Services
 
             if (stagesToAdd.Count == 0)
             {
-                RiftBot.Log.Debug("No missing stages atm.");
+                //RiftBot.Log.Debug("No missing stages atm.");
                 return;
             }
 
