@@ -11,9 +11,11 @@ namespace Rift.Services.Message.Templates.Roles
         {
         }
 
-        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            return ReplaceDataAsync(message, $"<@&{Settings.RoleId.Hunters.ToString()}>");
+            var role = await DB.Roles.GetAsync(39);
+            
+            return await ReplaceDataAsync(message, $"<@&{role.RoleId.ToString()}>");
         }
     }
 }

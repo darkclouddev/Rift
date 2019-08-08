@@ -47,5 +47,7 @@ namespace Rift.Configuration
 
         [ResolveChannel("монстры")]
         public ulong Monsters { get; set; }
+        
+        public ulong Afk { get; set; }
     }
 }

@@ -23,6 +23,9 @@ namespace Rift.Database
             if (dbQuest.LevelReached.HasValue)
                 userQuest.LevelReached = await DB.Users.GetLevelAsync(userId);
 
+            if (dbQuest.ApprovedLolAccount.HasValue)
+                userQuest.ApprovedLolAccount = await DB.LeagueData.HasAsync(userId);
+
             if (!(dbUserQuest is null))
                 return;
 

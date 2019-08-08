@@ -15,9 +15,11 @@ namespace Rift.Services
         const string BotEmoteName = "r4";
         const string SupportEmoteName = "r5";
         const string FillEmoteName = "r6";
-        const ulong MessageId = 606229842605899776ul;
+        const string HuntersEmoteName = "swords";
+        const ulong PositionsMessageId = 606528013022003267ul;
+        const ulong HuntersMessageId = 608748661773697051ul;
         
-        static readonly int[] StarterRoles = { 86, 87, 88 };
+        static readonly int[] StarterRoles = { 81, 87, 88 };
         
         public RoleSetupService(DiscordSocketClient client)
         {
@@ -27,57 +29,17 @@ namespace Rift.Services
 
         static async Task ReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
         {
-            var msg = await message.GetOrDownloadAsync();
-            if (msg is null)
-                return;
-
-            if (msg.Id != MessageId)
-                return;
-
-            if (reaction is null)
-                return;
-
-            var userId = reaction.UserId;
-
-            await GiveStarterRoles(userId);
-
-            switch (reaction.Emote.Name)
-            {
-                case TopEmoteName:
-                    await AddTopAsync(userId);
-                    break;
-                
-                case JungleEmoteName:
-                    await AddJungleAsync(userId);
-                    break;
-                
-                case MidEmoteName:
-                    await AddMidAsync(userId);
-                    break;
-                
-                case BotEmoteName:
-                    await AddBotAsync(userId);
-                    break;
-                
-                case SupportEmoteName:
-                    await AddSupportAsync(userId);
-                    break;
-                
-                case FillEmoteName:
-                    await AddFillAsync(userId);
-                    break;
-                
-                default:
-                    return;
-            }
+            await OnReactionAsync(true, message, channel, reaction);
         }
         static async Task ReactionRemoved(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
         {
+            await OnReactionAsync(false, message, channel, reaction);
+        }
+        
+        static async Task OnReactionAsync(bool added, Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
+        {
             var msg = await message.GetOrDownloadAsync();
             if (msg is null)
-                return;
-
-            if (msg.Id != MessageId)
                 return;
 
             if (reaction is null)
@@ -85,38 +47,63 @@ namespace Rift.Services
 
             var userId = reaction.UserId;
             
-            switch (reaction.Emote.Name)
+            if (msg.Id == PositionsMessageId)
+            {
+                await LeagueReactionAsync(userId, added, reaction.Emote.Name);
+                return;
+            }
+
+            if (msg.Id == HuntersMessageId)
+            {
+                await HuntersReactionAsync(userId, true, reaction.Emote.Name);
+                return;
+            }
+        }
+        
+        static async Task LeagueReactionAsync(ulong userId, bool added, string emoteName)
+        {
+            if (added) 
+                await TryGiveStarterRoles(userId);
+
+            switch (emoteName)
             {
                 case TopEmoteName:
-                    await RemoveTopAsync(userId);
+                    await (added ? AddTopAsync(userId) : RemoveTopAsync(userId));
                     break;
                 
                 case JungleEmoteName:
-                    await RemoveJungleAsync(userId);
+                    await (added ? AddJungleAsync(userId) : RemoveJungleAsync(userId));
                     break;
                 
                 case MidEmoteName:
-                    await RemoveMidAsync(userId);
+                    await (added ? AddMidAsync(userId) : RemoveMidAsync(userId));
                     break;
                 
                 case BotEmoteName:
-                    await RemoveBotAsync(userId);
+                    await (added ? AddBotAsync(userId) : RemoveBotAsync(userId));
                     break;
                 
                 case SupportEmoteName:
-                    await RemoveSupportAsync(userId);
+                    await (added ? AddSupportAsync(userId) : RemoveSupportAsync(userId));
                     break;
                 
                 case FillEmoteName:
-                    await RemoveFillAsync(userId);
+                    await (added ? AddFillAsync(userId) : RemoveFillAsync(userId));
                     break;
                 
                 default:
                     return;
             }
         }
+        static async Task HuntersReactionAsync(ulong userId, bool added, string emoteName)
+        {
+            if (!emoteName.Equals(HuntersEmoteName))
+                return;
 
-        static async Task GiveStarterRoles(ulong userId)
+            await (added ? AddHuntersAsync(userId) : RemoveHuntersAsync(userId));
+        }
+        
+        static async Task TryGiveStarterRoles(ulong userId)
         {
             var dbUser = await DB.Users.GetAsync(userId);
             
@@ -125,11 +112,22 @@ namespace Rift.Services
             
             var roleId = StarterRoles.Random();
             
-            await DB.RoleInventory.AddAsync(userId, StarterRoles.Random(), "Starter role");
+            await DB.RoleInventory.AddAsync(userId, roleId, "Starter role");
             var dbRole = await DB.Roles.GetAsync(roleId);
             await RiftBot.GetService<RoleService>().AddPermanentRoleAsync(userId, dbRole.RoleId);
         }
 
+        static async Task AddHuntersAsync(ulong userId)
+        {
+            var role = await DB.Roles.GetAsync(39);
+            await AddRoleAsync(userId, role.RoleId);
+        }
+        static async Task RemoveHuntersAsync(ulong userId)
+        {
+            var role = await DB.Roles.GetAsync(39);
+            await RemoveRoleAsync(userId, role.RoleId);
+        }
+        
         static async Task AddTopAsync(ulong userId)
         {
             var role = await DB.Roles.GetAsync(16);

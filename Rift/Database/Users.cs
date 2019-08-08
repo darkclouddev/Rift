@@ -188,10 +188,6 @@ namespace Rift.Database
                 else
                     dbUser.Experience = expBefore + exp;
 
-                if (exp > 2) // TODO: wtf is that magic number
-                    RiftBot.Log.Info(
-                        $"Modified {userId.ToString()}'s exp(s): ({expBefore.ToString()} => {dbUser.Experience.ToString()})");
-
                 entry.Property(x => x.Experience).IsModified = true;
 
                 await context.SaveChangesAsync();

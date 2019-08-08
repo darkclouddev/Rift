@@ -5,13 +5,13 @@ using Rift.Data.Models;
 
 namespace Rift.Services.Message.Templates.BackgroundInventory
 {
-    public class BackgroundInventoryList : TemplateBase
+    public class BackgroundInventoryIds : TemplateBase
     {
-        public BackgroundInventoryList() : base(nameof(BackgroundInventoryList))
+        public BackgroundInventoryIds() : base(nameof(BackgroundInventoryIds))
         {
         }
 
-        const string NoItems = "Пусто :(";
+        const string NoItems = "-";
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
@@ -32,7 +32,7 @@ namespace Rift.Services.Message.Templates.BackgroundInventory
                     return "N/A";
                 }
 
-                return $"{x.BackgroundId.ToString()}. [{back.Name}]({back.Url})";
+                return x.BackgroundId.ToString();
             }));
 
             return await ReplaceDataAsync(message, replacement);

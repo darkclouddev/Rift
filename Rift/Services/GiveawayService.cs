@@ -35,7 +35,11 @@ namespace Rift.Services
 
         void InitializeTimer(TimeSpan delay)
         {
-            eventTimer = new Timer(async delegate { await CheckExpiredAsync(); }, null, delay, TimeSpan.Zero);
+            eventTimer = new Timer(
+                async delegate { await CheckExpiredAsync(); },
+                null,
+                delay,
+                TimeSpan.Zero);
         }
 
         async Task ScheduleTimerToClosest()
@@ -87,8 +91,7 @@ namespace Rift.Services
                 return;
             }
 
-            // TODO: set giveaway channel
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Commands, out var channel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
             {
                 RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: Giveaway channel is null!");
                 return;
@@ -102,7 +105,7 @@ namespace Rift.Services
                 return;
             }
 
-            if (!IonicClient.GetEmote(Settings.App.MainGuildId, "smite", out var emote))
+            if (!IonicClient.GetEmote(403616665603932162, "giveaway", out var emote))
             {
                 RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: Emote is null! Deleted?");
                 return;
@@ -192,17 +195,16 @@ namespace Rift.Services
                 FinishedAt = DateTime.UtcNow,
             };
 
-            await RiftBot.SendMessageAsync("giveaway-finished",
-                                           Settings.ChannelId.Commands,
-                                           new FormatData(expiredGiveaway.StartedBy)
-                                           {
-                                               Giveaway = new GiveawayData
-                                               {
-                                                   Log = log,
-                                                   Stored = dbGiveaway,
-                                               },
-                                               Reward = reward
-                                           });
+            await RiftBot.SendMessageAsync("giveaway-finished", Settings.ChannelId.Chat,
+                new FormatData(expiredGiveaway.StartedBy)
+                {
+                    Giveaway = new GiveawayData
+                    {
+                        Log = log,
+                        Stored = dbGiveaway,
+                    },
+                    Reward = reward          
+                });
 
             await LogGiveawayAsync(log).ConfigureAwait(false);
         }
@@ -241,7 +243,7 @@ namespace Rift.Services
 
             var reward = dbReward.ToRewardBase();
 
-            if (!IonicClient.GetEmote(Settings.App.MainGuildId, "smite", out var smite))
+            if (!IonicClient.GetEmote(403616665603932162, "giveaway", out var smite))
             {
                 RiftBot.Log.Warn("No giveaway emote, skipping execution.");
                 return;
@@ -266,8 +268,7 @@ namespace Rift.Services
                     Reward = reward
                 });
 
-            // TODO: send to giveaway channel
-            var giveawayMessage = await RiftBot.SendMessageAsync(formattedMsg, Settings.ChannelId.Commands).ConfigureAwait(false);
+            var giveawayMessage = await RiftBot.SendMessageAsync(formattedMsg, Settings.ChannelId.Chat).ConfigureAwait(false);
 
             activeGiveaway.ChannelMessageId = giveawayMessage.Id;
 
@@ -290,7 +291,7 @@ namespace Rift.Services
 
             var reward = dbReward.ToRewardBase();
 
-            var usersWithTickets = await DB.Inventory.GetAsync(x => x.Tickets > 0);
+            var usersWithTickets = await DB.Inventory.GetAsync(x => x.Tickets >= 1);
 
             if (usersWithTickets is null || usersWithTickets.Count == 0)
             {
@@ -305,7 +306,7 @@ namespace Rift.Services
 
             foreach (var userInventory in usersWithTickets)
             {
-                //await DB.Inventory.RemoveAsync(userInventory.UserId, removeInv); // too slow on tunnel db connection
+                await DB.Inventory.RemoveAsync(userInventory.UserId, removeInv); // very slow on tunneled db connection
             }
 
             var winnerId = usersWithTickets.Random().UserId;

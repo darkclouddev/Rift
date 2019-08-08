@@ -59,10 +59,12 @@ namespace Rift
             return adminIds.Contains(user.Id) || developersIds.Contains(user.Id);
         }
 
-        public static bool IsModerator(IUser user)
+        public static async Task<bool> IsModeratorAsync(IUser user)
         {
+            var role = await DB.Roles.GetAsync(43);
+            
             return user is SocketGuildUser socketUser
-                   && socketUser.Roles.Any(x => x.Id == Settings.RoleId.Moderator);
+                   && socketUser.Roles.Any(x => x.Id == role.RoleId);
         }
 
         public static bool IsDeveloper(IUser user)

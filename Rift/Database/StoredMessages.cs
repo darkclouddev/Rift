@@ -14,7 +14,7 @@ namespace Rift.Database
         {
             using (var context = new RiftContext())
             {
-                await context.StoredMessages.AddAsync(message);
+                await context.Messages.AddAsync(message);
                 await context.SaveChangesAsync();
             }
         }
@@ -35,7 +35,7 @@ namespace Rift.Database
         {
             using (var context = new RiftContext())
             {
-                return await context.StoredMessages
+                return await context.Messages
                                     .FirstOrDefaultAsync(x => x.Id == id);
             }
         }

@@ -11,8 +11,6 @@ namespace Rift.Configuration
         public static ChannelId ChannelId;
         public static Chat Chat;
         public static Economy Economy;
-        public static RoleId RoleId;
-        public static Thumbnail Thumbnail;
 
         public static async Task ReloadAllAsync()
         {
@@ -20,8 +18,6 @@ namespace Rift.Configuration
             await ReloadChannelsAsync();
             await ReloadChatAsync();
             await ReloadEconomyAsync();
-            await ReloadRolesAsync();
-            await ReloadThumbnailsAsync();
         }
 
         public static async Task SaveAllAsync()
@@ -30,8 +26,6 @@ namespace Rift.Configuration
             await SaveChannelsAsync();
             await SaveChatAsync();
             await SaveEconomyAsync();
-            await SaveRolesAsync();
-            await SaveThumbnailsAsync();
         }
 
         public static async Task ReloadAppAsync()
@@ -72,26 +66,6 @@ namespace Rift.Configuration
         public static async Task SaveEconomyAsync()
         {
             await SaveAsync(SettingsType.Economy, Economy);
-        }
-
-        public static async Task ReloadRolesAsync()
-        {
-            RoleId = await LoadSettingsAsync<RoleId>(SettingsType.RoleId);
-        }
-
-        public static async Task SaveRolesAsync()
-        {
-            await SaveAsync(SettingsType.RoleId, RoleId);
-        }
-
-        public static async Task ReloadThumbnailsAsync()
-        {
-            Thumbnail = await LoadSettingsAsync<Thumbnail>(SettingsType.Thumbnail);
-        }
-
-        public static async Task SaveThumbnailsAsync()
-        {
-            await SaveAsync(SettingsType.Thumbnail, Thumbnail);
         }
 
         static async Task<T> LoadSettingsAsync<T>(SettingsType type)
@@ -146,7 +120,5 @@ namespace Rift.Configuration
         ChannelId = 1,
         Chat = 2,
         Economy = 3,
-        RoleId = 4,
-        Thumbnail = 5,
     }
 }

@@ -14,7 +14,10 @@ namespace Rift.Preconditions
     {
         public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
-            if (await Task.Run(() => IonicClient.HasRolesAny(context.User.Id, Settings.RoleId.TicketKeepers) || RiftBot.IsAdmin(context.User)))
+            var role = await DB.Roles.GetAsync(173);
+            
+            if (await Task.Run(() => IonicClient.HasRolesAny(context.User.Id, role.RoleId)
+                                     || RiftBot.IsAdmin(context.User)))
                 return PreconditionResult.FromSuccess();
 
             return PreconditionResult.FromError(RiftBot.CommandDenyMessage);

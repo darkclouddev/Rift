@@ -9,12 +9,12 @@ namespace Rift.Data
         public DbSet<RiftUser> Users { get; set; }
         public DbSet<RiftInventory> Inventory { get; set; }
         public DbSet<RiftCooldowns> Cooldowns { get; set; }
-        public DbSet<RiftLeagueData> LolData { get; set; }
+        public DbSet<RiftLeagueData> LeagueData { get; set; }
         public DbSet<RiftStatistics> Statistics { get; set; }
         public DbSet<RiftPendingUser> PendingUsers { get; set; }
         public DbSet<RiftTempRole> TempRoles { get; set; }
         public DbSet<RiftStreamer> Streamers { get; set; }
-        public DbSet<RiftMessage> StoredMessages { get; set; }
+        public DbSet<RiftMessage> Messages { get; set; }
         public DbSet<RiftMapping> MessageMappings { get; set; }
         public DbSet<RiftToxicity> Toxicity { get; set; }
         public DbSet<RiftModerationLog> ModerationLog { get; set; }
@@ -29,7 +29,7 @@ namespace Rift.Data
         public DbSet<RiftQuestStage> QuestStages { get; set; }
         public DbSet<RiftQuest> Quests { get; set; }
         public DbSet<RiftQuestProgress> QuestProgress { get; set; }
-        public DbSet<RiftProfileBackground> ProfileBackgrounds { get; set; }
+        public DbSet<RiftProfileBackground> Backgrounds { get; set; }
         public DbSet<RiftBackgroundInventory> BackgroundInventories { get; set; }
         public DbSet<RiftScheduledEvent> EventSchedule { get; set; }
         public DbSet<RiftEvent> Events { get; set; }

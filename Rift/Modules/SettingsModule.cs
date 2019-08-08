@@ -61,14 +61,6 @@ namespace Rift.Modules
                 await RiftBot.GetService<EmoteService>().ReloadEmotesAsync();
                 await ReplyAsync("Reloaded emotes.");
             }
-
-            [Command("roles")]
-            public async Task Roles()
-            {
-                await Settings.ReloadRolesAsync();
-
-                await ReplyAsync("Roles reloaded successfully.");
-            }
         }
 
         [Group("save")]
@@ -108,20 +100,6 @@ namespace Rift.Modules
             {
                 await Settings.SaveEconomyAsync();
                 await ReplyAsync("Economy settings saved.");
-            }
-
-            [Command("roles")]
-            public async Task Roles()
-            {
-                await Settings.SaveRolesAsync();
-                await ReplyAsync("Roles saved.");
-            }
-
-            [Command("thumbnails")]
-            public async Task Thumbnails()
-            {
-                await Settings.SaveThumbnailsAsync();
-                await ReplyAsync("Thumbnails saved.");
             }
         }
     }

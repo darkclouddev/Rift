@@ -434,9 +434,13 @@ namespace Rift.Services.Message.Templates.Quest
 
         static string GetProgress(uint? current, uint goal)
         {
-            return !current.HasValue
-                ? $"(0/{goal.ToString()})"
-                : $"({current.Value.ToString()}/{goal.ToString()})";
+            if (!current.HasValue)
+                return $"(0/{goal.ToString()})";
+
+            if (current >= goal)
+                current = goal;
+            
+            return $"({current.Value.ToString()}/{goal.ToString()})";
         }
 
         static string GetProgress(TimeSpan? current)

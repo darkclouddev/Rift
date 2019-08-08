@@ -16,7 +16,7 @@ namespace Rift.Database
 
             using (var context = new RiftContext())
             {
-                await context.LolData.AddAsync(data);
+                await context.LeagueData.AddAsync(data);
                 await context.SaveChangesAsync();
             }
         }
@@ -25,7 +25,7 @@ namespace Rift.Database
         {
             using (var context = new RiftContext())
             {
-                return await context.LolData
+                return await context.LeagueData
                                     .Where(x => x.UserId == userId)
                                     .Select(x => new RiftLeagueData
                                     {
@@ -83,7 +83,7 @@ namespace Rift.Database
 
             using (var context = new RiftContext())
             {
-                context.LolData.Remove(lolData);
+                context.LeagueData.Remove(lolData);
                 await context.SaveChangesAsync();
             }
         }
@@ -99,7 +99,7 @@ namespace Rift.Database
         {
             using (var context = new RiftContext())
             {
-                return await context.LolData.AnyAsync(x => x.PlayerUUID == playerUUID && x.SummonerRegion == region);
+                return await context.LeagueData.AnyAsync(x => x.PlayerUUID == playerUUID && x.SummonerRegion == region);
             }
         }
     }

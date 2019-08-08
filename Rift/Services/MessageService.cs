@@ -318,36 +318,33 @@ namespace Rift.Services
                 RiftBot.Log.Error($"Message \"{message.Id.ToString()}\" has no data!");
                 return Error;
             }
+            
+            var matches = new List<Match>();
 
-            if (message.ApplyFormat)
+            if (!string.IsNullOrWhiteSpace(message.Text))
+                matches.AddRange(Regex.Matches(message.Text, TemplateRegex));
+
+            if (!string.IsNullOrWhiteSpace(message.Embed))
+                matches.AddRange(Regex.Matches(message.Embed, TemplateRegex));
+
+            foreach (var match in matches)
             {
-                var matches = new List<Match>();
-
-                if (!string.IsNullOrWhiteSpace(message.Text))
-                    matches.AddRange(Regex.Matches(message.Text, TemplateRegex));
-
-                if (!string.IsNullOrWhiteSpace(message.Embed))
-                    matches.AddRange(Regex.Matches(message.Embed, TemplateRegex));
-
-                foreach (var match in matches)
+                if (!templates.TryGetValue(match.Value, out var template))
                 {
-                    if (!templates.TryGetValue(match.Value, out var template))
-                    {
-                        if (!match.Value.StartsWith(EmotePrefix))
-                            continue;
-
-                        RiftBot.GetService<EmoteService>().FormatMessage(match.Value, message);
+                    if (!match.Value.StartsWith(EmotePrefix))
                         continue;
-                    }
 
-                    try
-                    {
-                        await template.ApplyAsync(message, data).ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        RiftBot.Log.Error(ex);
-                    }
+                    RiftBot.GetService<EmoteService>().FormatMessage(match.Value, message);
+                    continue;
+                }
+
+                try
+                {
+                    await template.ApplyAsync(message, data).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    RiftBot.Log.Error(ex);
                 }
             }
 

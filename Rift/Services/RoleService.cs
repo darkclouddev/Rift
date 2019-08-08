@@ -202,9 +202,11 @@ namespace Rift.Services
                 .ConfigureAwait(false);
         }
         
-        public List<ulong> GetNitroBoosters()
+        public async Task<List<ulong>> GetNitroBoostersAsync()
         {
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.NitroBooster, out var role)
+            var nitro = await DB.Roles.GetAsync(91);
+            
+            if (!IonicClient.GetRole(Settings.App.MainGuildId, nitro.RoleId, out var role)
                 || !(role is SocketRole sgRole))
                 return null;
 

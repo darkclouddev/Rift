@@ -30,7 +30,7 @@ namespace Rift.Services
         {
             RiftBot.Log.Info("Checking nitro boosters integrity..");
             
-            var nitroUsers = RiftBot.GetService<RoleService>().GetNitroBoosters();
+            var nitroUsers = await RiftBot.GetService<RoleService>().GetNitroBoostersAsync();
 
             if (nitroUsers is null || nitroUsers.Count == 0)
             {

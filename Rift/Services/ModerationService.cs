@@ -50,7 +50,7 @@ namespace Rift.Services
             if (!passed)
                 return;
 
-            if (RiftBot.IsAdmin(sgTarget) || RiftBot.IsModerator(sgTarget))
+            if (RiftBot.IsAdmin(sgTarget) || await RiftBot.IsModeratorAsync(sgTarget))
             {
                 await RiftBot.SendMessageAsync("mod-friendly-fire", Settings.ChannelId.Commands, new FormatData(moderator.Id));
                 return;
@@ -85,7 +85,7 @@ namespace Rift.Services
             if (!passed)
                 return;
 
-            if (RiftBot.IsAdmin(sgTarget) || RiftBot.IsModerator(sgTarget))
+            if (RiftBot.IsAdmin(sgTarget) || await RiftBot.IsModeratorAsync(sgTarget))
             {
                 await RiftBot.SendMessageAsync("mod-friendly-fire", Settings.ChannelId.Commands, new FormatData(moderator.Id));
                 return;
@@ -124,7 +124,8 @@ namespace Rift.Services
                     return;
             }
 
-            await RiftBot.GetService<RoleService>().AddTempRoleAsync(sgTarget.Id, Settings.RoleId.Muted, ts,
+            var muted = await DB.Roles.GetAsync(40);
+            await RiftBot.GetService<RoleService>().AddTempRoleAsync(sgTarget.Id, muted.RoleId, ts,
                                                                      $"Muted by {moderator}|{moderator.Id.ToString()} with reason: {reason}");
             await DB.ModerationLogs.AddAsync(sgTarget.Id, moderator.Id, "Mute", reason, DateTime.UtcNow, ts);
 
@@ -155,7 +156,8 @@ namespace Rift.Services
             if (!passed)
                 return;
 
-            await RiftBot.GetService<RoleService>().RemoveTempRoleAsync(sgTarget.Id, Settings.RoleId.Muted);
+            var muted = await DB.Roles.GetAsync(40);
+            await RiftBot.GetService<RoleService>().RemoveTempRoleAsync(sgTarget.Id, muted.RoleId);
             await DB.ModerationLogs.AddAsync(sgTarget.Id, moderator.Id, "Unmute", reason, DateTime.UtcNow,
                                              TimeSpan.Zero);
         }

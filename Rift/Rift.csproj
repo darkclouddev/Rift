@@ -5,7 +5,7 @@
     <UserSecretsId>aspnet-Rift-7FB4B985-CBC2-46EC-BC11-E0EEC9BDC2E4</UserSecretsId>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     <LangVersion>8</LangVersion>
-    <Version>5.0.0</Version>
+    <Version>6.0.0</Version>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 

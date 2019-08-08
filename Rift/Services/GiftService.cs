@@ -101,10 +101,11 @@ namespace Rift.Services
             if (toSgUser.Id == 178443743026872321ul)
                 GiftedFounder?.Invoke(null, new GiftedFounderEventArgs(receiverId, senderId));
 
-            if (IonicClient.HasRolesAny(toSgUser, Settings.RoleId.Developers))
+            var developers = await DB.Roles.GetAsync(44);
+            if (IonicClient.HasRolesAny(toSgUser, developers.RoleId))
                 GiftedDeveloper?.Invoke(null, new GiftedDeveloperEventArgs(senderId, receiverId));
 
-            if (RiftBot.IsModerator(toSgUser))
+            if (await RiftBot.IsModeratorAsync(toSgUser))
                 GiftedModerator?.Invoke(null, new GiftedModeratorEventArgs(senderId, receiverId));
 
             if (!(await DB.Streamers.GetAsync(receiverId) is null))

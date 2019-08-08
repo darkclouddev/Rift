@@ -22,11 +22,12 @@ namespace Rift.Modules
         readonly RewindService rewindService;
         readonly DoubleExpService doubleExpService;
         readonly QuestService questService;
+        readonly ChannelService channelService;
 
         public EconomyModule(EconomyService economyService, RiotService riotService, BragService bragService,
                              GiveawayService giveawayService, BotRespectService botRespectService, BackgroundService backgroundService,
                              RoleService roleService, RewindService rewindService, DoubleExpService doubleExpService,
-                             QuestService questService)
+                             QuestService questService, ChannelService channelService)
         {
             this.economyService = economyService;
             this.riotService = riotService;
@@ -38,6 +39,14 @@ namespace Rift.Modules
             this.rewindService = rewindService;
             this.doubleExpService = doubleExpService;
             this.questService = questService;
+            this.channelService = channelService;
+        }
+
+        [Command("выгнать")]
+        [RequireContext(ContextType.Guild)]
+        public async Task BanFromChannel(IUser targetUser)
+        {
+            await channelService.DenyAccessToUserAsync(Context.User, targetUser);
         }
 
         [Command("задания")]

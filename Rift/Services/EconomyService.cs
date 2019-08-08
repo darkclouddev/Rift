@@ -44,7 +44,7 @@ namespace Rift.Services
             if (topTen.Count == 0)
                 return;
 
-            await RiftBot.SendMessageAsync("economy-activeusers", Settings.ChannelId.Chat,
+            await RiftBot.SendMessageAsync("economy-activeusers", Settings.ChannelId.Commands,
                 new FormatData(IonicClient.Client.CurrentUser.Id)
                 {
                     Economy = new EconomyData
@@ -62,7 +62,7 @@ namespace Rift.Services
             if (topTen.Count == 0)
                 return;
 
-            await RiftBot.SendMessageAsync("economy-richusers", Settings.ChannelId.Chat,
+            await RiftBot.SendMessageAsync("economy-richusers", Settings.ChannelId.Commands,
                 new FormatData(IonicClient.Client.CurrentUser.Id)
                 {
                     Economy = new EconomyData
@@ -133,26 +133,33 @@ namespace Rift.Services
                     reward.AddTickets(1u).AddCoins(2_000u);
                 else
                     reward.AddChests(1u).AddCoins(2_000u);
-                
-                if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.NitroBooster))
+
+                var nitroBooster = await DB.Roles.GetAsync(91);
+                if (IonicClient.HasRolesAny(sgUser, nitroBooster.RoleId))
                     reward.AddChests(1u);
                 
-                if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankGold))
+                var rankGold = await DB.Roles.GetAsync(3);
+                if (IonicClient.HasRolesAny(sgUser, rankGold.RoleId))
                     reward.AddCoins(250u);
                 
-                if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankPlatinum))
+                var rankPlatinum = await DB.Roles.GetAsync(11);
+                if (IonicClient.HasRolesAny(sgUser, rankPlatinum.RoleId))
                     reward.AddCoins(500u);
                 
-                if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankDiamond))
+                var rankDiamond = await DB.Roles.GetAsync(8);
+                if (IonicClient.HasRolesAny(sgUser, rankDiamond.RoleId))
                     reward.AddCoins(750u);
                 
-                if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankMaster))
+                var rankMaster = await DB.Roles.GetAsync(79);
+                if (IonicClient.HasRolesAny(sgUser, rankMaster.RoleId))
                     reward.AddCoins(1000u);
                 
-                if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankGrandmaster))
+                var rankGrandmaster = await DB.Roles.GetAsync(71);
+                if (IonicClient.HasRolesAny(sgUser, rankGrandmaster.RoleId))
                     reward.AddCoins(1250u);
                 
-                if (IonicClient.HasRolesAny(sgUser, Settings.RoleId.RankChallenger))
+                var rankChallenger = await DB.Roles.GetAsync(23);
+                if (IonicClient.HasRolesAny(sgUser, rankChallenger.RoleId))
                     reward.AddCoins(1500u);
             }
 

@@ -64,23 +64,19 @@ namespace Rift.Preconditions
             invokeLimit = times;
             noLimitInDMs = (flags & RateLimitFlags.NoLimitInDMs) == RateLimitFlags.NoLimitInDMs;
             noLimitForAdmins = (flags & RateLimitFlags.NoLimitForAdmins) == RateLimitFlags.NoLimitForAdmins;
+            invokeLimitPeriod = GetPeriod(measure, period);
+        }
 
-            // TODO: C# 8 candidate switch expression
-            switch (measure)
-            {
-                case Measure.Days:
-                    invokeLimitPeriod = TimeSpan.FromDays(period);
-                    break;
-                case Measure.Hours:
-                    invokeLimitPeriod = TimeSpan.FromHours(period);
-                    break;
-                case Measure.Minutes:
-                    invokeLimitPeriod = TimeSpan.FromMinutes(period);
-                    break;
-                case Measure.Seconds:
-                    invokeLimitPeriod = TimeSpan.FromSeconds(period);
-                    break;
-            }
+        static TimeSpan GetPeriod(Measure measure, double period)
+        {
+            return measure switch
+                {
+                Measure.Days => TimeSpan.FromDays(period),
+                Measure.Hours => TimeSpan.FromHours(period),
+                Measure.Minutes => TimeSpan.FromMinutes(period),
+                Measure.Seconds => TimeSpan.FromSeconds(period),
+                _ => TimeSpan.Zero
+                };
         }
 
         /// <summary>

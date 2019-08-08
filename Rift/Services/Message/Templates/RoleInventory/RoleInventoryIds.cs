@@ -5,13 +5,13 @@ using Rift.Data.Models;
 
 namespace Rift.Services.Message.Templates.RoleInventory
 {
-    public class RoleInventoryList : TemplateBase
+    public class RoleInventoryIds : TemplateBase
     {
-        public RoleInventoryList() : base(nameof(RoleInventoryList))
+        public RoleInventoryIds() : base(nameof(RoleInventoryIds))
         {
         }
         
-        const string NoItems = "Пусто :(";
+        const string NoItems = "-";
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
@@ -32,7 +32,7 @@ namespace Rift.Services.Message.Templates.RoleInventory
                     return "N/A";
                 }
 
-                return $"{x.RoleId.ToString()}. {role.Name}";
+                return x.RoleId.ToString();
             }));
 
             return await ReplaceDataAsync(message, replacement);

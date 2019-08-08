@@ -63,8 +63,8 @@ namespace Rift
             await riotService.InitAsync();
 
             client.MessageReceived += ProcessMessage;
-            //client.UserJoined += UserJoined;
-            //client.UserLeft += UserLeft;
+            client.UserJoined += UserJoined;
+            client.UserLeft += UserLeft;
             client.Ready += ReadyAsync;
         }
 
@@ -72,11 +72,6 @@ namespace Rift
         {
             await emoteService.ReloadEmotesAsync();
             await client.SetGameAsync(RiftBot.BotStatusMessage);
-
-            //if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Comms, out var channel))
-            //    return;
-
-            //await channel.SendIonicMessageAsync(new IonicMessage(new RiftEmbed().WithDescription("Основной бот сервера включен.")));
         }
 
         async Task ProcessMessage(SocketMessage socketMsg)
@@ -87,9 +82,9 @@ namespace Rift
             if (message.Author.IsBot)
                 return;
 
-            if (Settings.App.MaintenanceMode && !RiftBot.IsDeveloper(message.Author))
-                //&& !RiftBot.IsAdmin(message.Author)
-                //&& !RiftBot.IsModerator(message.Author))
+            if (Settings.App.MaintenanceMode && !RiftBot.IsDeveloper(message.Author)
+                && !RiftBot.IsAdmin(message.Author)
+                && !await RiftBot.IsModeratorAsync(message.Author))
                 return;
 
             if (await DB.Toxicity.HasBlockingAsync(message.Author.Id))
@@ -160,12 +155,12 @@ namespace Rift
             return false;
         }
 
-        async Task HandlePlainText(CommandContext context)
+        static async Task HandlePlainText(CommandContext context)
         {
             if (context.Message.Channel.Id != Settings.ChannelId.Chat)
                 return;
 
-            //if (quizService.IsActive)
+            //if (quizService.IsActive) // TODO: uncomment when quiz will be ready
             //    quizService.Answers.Enqueue(new QuizGuess(context.User.Id, context.Message.Content));
 
             if (Settings.Chat.AttachmentFilterEnabled && !RiftBot.IsAdmin(context.Message.Author))
@@ -183,7 +178,7 @@ namespace Rift
                 return;
             }
 
-            if (Settings.Chat.UrlFilterEnabled && HasURL(context.Message.Content))
+            if (Settings.Chat.UrlFilterEnabled && HasUrl(context.Message.Content))
             {
                 await context.Message.DeleteAsync();
 
@@ -218,7 +213,7 @@ namespace Rift
             }
         }
 
-        async Task UserJoined(SocketGuildUser user)
+        static async Task UserJoined(SocketGuildUser user)
         {
             if (user.Guild.Id != Settings.App.MainGuildId)
                 return;
@@ -228,7 +223,7 @@ namespace Rift
             await RiftBot.SendMessageAsync("user-joined", Settings.ChannelId.Chat, new FormatData(user.Id));
         }
 
-        async Task RegisterJoinedLeft(SocketGuildUser sgUser, UserState state)
+        static async Task RegisterJoinedLeft(SocketGuildUser sgUser, UserState state)
         {
             if (state == UserState.Joined)
             {
@@ -254,15 +249,15 @@ namespace Rift
                      .WithFooter($"ID: {sgUser.Id.ToString()}")
                      .WithCurrentTimestamp();
 
-            //await usersChannel.SendIonicMessageAsync(eb);
+            await usersChannel.SendIonicMessageAsync(new IonicMessage(eb));
         }
 
-        async Task UserLeft(SocketGuildUser user)
+        static async Task UserLeft(SocketGuildUser user)
         {
             await RegisterJoinedLeft(user, UserState.Left);
         }
 
-        async Task<bool> HasCaps(string content)
+        static async Task<bool> HasCaps(string content)
         {
             var msg = new Regex(@"\<[^>]+>")
                       .Replace(content, "")
@@ -287,14 +282,14 @@ namespace Rift
         const string YoutubeRegex =
             "^(?:https?\\:\\/\\/)?(?:www\\.)?(?:youtu\\.be\\/|youtube\\.com\\/(?:embed\\/|v\\/|watch\\?v\\=))([\\w-]{10,12})(?:[\\&\\?\\#].*?)*?(?:[\\&\\?\\#]t=([\\dhm]+s))?$";
 
-        static Regex ytRegex = new Regex(YoutubeRegex);
+        static readonly Regex YtRegex = new Regex(YoutubeRegex);
 
         static bool IsYoutubeLink(string url)
         {
-            return ytRegex.IsMatch(url);
+            return YtRegex.IsMatch(url);
         }
 
-        static bool HasURL(string message)
+        static bool HasUrl(string message)
         {
             var link = message.Replace(" ", string.Empty)
                               .Split("\t\n ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)

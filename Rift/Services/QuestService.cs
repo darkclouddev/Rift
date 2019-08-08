@@ -49,8 +49,7 @@ namespace Rift.Services
             var stageId = (await DB.Quests.GetActiveStageIdsAsync()).FirstOrDefault();
             if (stageId == 0)
             {
-                RiftBot.Log.Error("No active quest stages found!");
-                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
+                await RiftBot.SendMessageAsync("user-noquests", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
@@ -58,7 +57,7 @@ namespace Rift.Services
             if (stage is null)
             {
                 RiftBot.Log.Error($"No stage data found! (ID {stageId.ToString()})");
-                await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
+                await RiftBot.SendMessageAsync("user-noquests", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
@@ -160,7 +159,7 @@ namespace Rift.Services
             await reward.DeliverToAsync(progress.UserId);
             data.Reward = reward;
 
-            await RiftBot.SendMessageAsync(QuestCompletionMessageName, Settings.ChannelId.Chat, data);
+            await RiftBot.SendMessageAsync(QuestCompletionMessageName, Settings.ChannelId.Commands, data);
 
             if (!await TryAddNextQuest(progress.UserId, quest))
             {
@@ -227,7 +226,7 @@ namespace Rift.Services
                 msg = await RiftBot.GetMessageAsync(StageCompletionMessageName, data);
             }
 
-            await RiftBot.SendMessageAsync(msg, Settings.ChannelId.Chat);
+            await RiftBot.SendMessageAsync(msg, Settings.ChannelId.Commands);
         }
 
         static async void OnLevelReached(object sender, LevelReachedEventArgs e)

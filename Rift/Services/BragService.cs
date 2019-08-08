@@ -127,12 +127,14 @@ namespace Rift.Services
                 },
                 Reward = reward
             });
-
-            await RiftBot.SendMessageAsync(
-                new IonicMessage(new RiftEmbed()
-                    .WithTitle("Успешная хвастулька")
-                    .WithDescription($"Дуй [сюда]({msg.GetJumpUrl()})"))
-                , Settings.ChannelId.Commands);
+            
+            await RiftBot.SendMessageAsync("brag-success-link", Settings.ChannelId.Commands, new FormatData(userId)
+            {
+                MessageData = new MessageData
+                {
+                    Link = msg.GetJumpUrl()
+                }
+            });
         }
 
         static async Task<bool> CanBrag(ulong userId)

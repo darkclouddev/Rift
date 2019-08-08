@@ -21,6 +21,7 @@ namespace Rift.Services.Message
         public GiveawayData Giveaway { get; set; }
         public LeagueRegistrationData LeagueRegistration { get; set; }
         public LeagueStatData LeagueStat { get; set; }
+        public MessageData MessageData { get; set; }
         public ModerationData Moderation { get; set; }
         public RewardBase Reward { get; set; }
         public RiftQuest Quest { get; set; }
@@ -111,5 +112,10 @@ namespace Rift.Services.Message
     public class VoteData
     {
         public string Name { get; set; }
+    }
+
+    public class MessageData
+    {
+        public string Link { get; set; }
     }
 }

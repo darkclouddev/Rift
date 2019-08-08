@@ -18,7 +18,7 @@ namespace Rift.Services.Message.Templates.Quest
         {
             var ts = data.QuestStage.EndDate - DateTime.UtcNow;
 
-            return ReplaceDataAsync(message, ts.Humanize(culture: RiftBot.Culture, precision: 3, minUnit: TimeUnit.Second));
+            return ReplaceDataAsync(message, ts.Humanize(culture: RiftBot.Culture, precision: 3, minUnit: TimeUnit.Second, maxUnit: TimeUnit.Day));
         }
     }
 }

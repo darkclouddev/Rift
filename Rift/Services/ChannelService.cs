@@ -11,6 +11,7 @@ using Discord.WebSocket;
 using IonicLib;
 
 using Rift.Database;
+using Rift.Util;
 
 using Settings = Rift.Configuration.Settings;
 
@@ -18,7 +19,7 @@ namespace Rift.Services
 {
     public class ChannelService
     {
-        const ulong VoiceCategoryId = 599727924039385119ul;
+        const ulong VoiceCategoryId = 360570328197496833ul;
         static Timer voiceUptimeTimer;
         static readonly TimeSpan VoiceRewardsInterval = TimeSpan.FromMinutes(5);
 
@@ -49,9 +50,7 @@ namespace Rift.Services
                 }
             }
 
-            var leftChannel = !prevChannelNull &&
-                              (nextChannelNull || toState.VoiceChannel.Id != fromState.VoiceChannel.Id);
-
+            var leftChannel = !prevChannelNull && (nextChannelNull || toState.VoiceChannel.Id != fromState.VoiceChannel.Id);
             if (leftChannel)
             {
                 if (fromState.VoiceChannel.CategoryId != VoiceCategoryId)
@@ -97,7 +96,8 @@ namespace Rift.Services
 
             var users = new List<ulong>();
 
-            foreach (var channel in channels) users.AddRange(channel.Users.Select(x => x.Id));
+            foreach (var channel in channels)
+                users.AddRange(channel.Users.Select(x => x.Id));
 
             if (!users.Any())
                 return;
@@ -111,6 +111,62 @@ namespace Rift.Services
             }
 
             RiftBot.Log.Info($"Gived out voice online rewards for {users.Count.ToString()} user(s).");
+        }
+
+        public async Task DenyAccessToUserAsync(IUser roomOwnerUser, IUser targetUser)
+        {
+            if (!(roomOwnerUser is SocketGuildUser roomOwnerSgUser)
+                || !(targetUser is SocketGuildUser targetSgUser))
+                return;
+            
+            if (roomOwnerSgUser.VoiceChannel is null)
+                return; // TODO: issuer not in any voice channel
+            
+            if (targetSgUser.VoiceChannel is null)
+                return; // TODO: target is not in any voice channel
+
+            if (roomOwnerSgUser.VoiceChannel.Id != targetSgUser.VoiceChannel.Id)
+                return; // TODO: target is not in issuer's channel
+            
+            var channel = roomOwnerSgUser.VoiceChannel;
+
+            var channelPerms = channel.GetPermissionOverwrite(roomOwnerSgUser);
+
+            if (!channelPerms.HasValue || channelPerms.Value.ManageChannel != PermValue.Allow)
+                return; // TODO: no rights to kick
+            
+            var targetPerms = channel.GetPermissionOverwrite(targetSgUser);
+
+            if (targetPerms.HasValue && targetPerms.Value.Connect == PermValue.Deny)
+                return; // TODO: already banned from this channel
+
+            try
+            {
+                var permissions = new OverwritePermissions(connect: PermValue.Deny);
+                await channel.AddPermissionOverwriteAsync(targetSgUser, permissions);
+            }
+            catch (Exception ex)
+            {
+                RiftBot.Log.Warn("Channel was disposed while executing command, skipping");
+                RiftBot.Log.Warn(ex);
+                return;
+            }
+            
+            try
+            {
+                if (!IonicClient.GetVoiceChannel(Settings.App.MainGuildId, Settings.ChannelId.Afk, out var afkChannel))
+                    return;
+                    
+                await targetSgUser.ModifyAsync(x => { x.Channel = afkChannel; });
+            }
+            catch (Exception ex)
+            {
+                RiftBot.Log.Warn($"User {targetSgUser.ToLogString()} wasn't in any channel when kick issued, skipping");
+                RiftBot.Log.Warn(ex);
+                return;
+            }
+            
+            // TODO: done
         }
     }
 }

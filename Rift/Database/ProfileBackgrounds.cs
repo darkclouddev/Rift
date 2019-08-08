@@ -14,7 +14,7 @@ namespace Rift.Database
         {
             using (var context = new RiftContext())
             {
-                await context.ProfileBackgrounds.AddAsync(background);
+                await context.Backgrounds.AddAsync(background);
                 await context.SaveChangesAsync();
             }
         }
@@ -23,7 +23,7 @@ namespace Rift.Database
         {
             using (var context = new RiftContext())
             {
-                return await context.ProfileBackgrounds
+                return await context.Backgrounds
                                     .FirstOrDefaultAsync(x => x.Id == id);
             }
         }
@@ -32,7 +32,7 @@ namespace Rift.Database
         {
             using (var context = new RiftContext())
             {
-                return await context.ProfileBackgrounds
+                return await context.Backgrounds
                                     .OrderBy(x => x.Id)
                                     .ToArrayAsync();
             }

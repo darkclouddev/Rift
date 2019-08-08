@@ -36,7 +36,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Update()
         {
-            await riotService.UpdateRankAsync(Context.User.Id);
+            await riotService.UpdateSummonerAsync(Context.User.Id);
         }
         
         [Command("игровой профиль")]

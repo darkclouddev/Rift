@@ -39,6 +39,86 @@ namespace Rift.Modules
             this.giveawayService = giveawayService;
         }
         
+        [Command("msg")]
+        [RequireAdmin]
+        [RequireContext(ContextType.Guild)]
+        public async Task GetMsgByMapping(string mapping)
+        {
+            await RiftBot.SendMessageAsync(mapping, Context.Channel.Id, new FormatData(Context.User.Id));
+        }
+        
+        [Command("addback")]
+        [RequireAdmin]
+        [RequireContext(ContextType.Guild)]
+        public async Task AddBack(ulong roleId, int backId)
+        {
+            var dbBack = await DB.ProfileBackgrounds.GetAsync(backId);
+            
+            if (dbBack is null
+                || !IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var sr)
+                || !(sr is SocketRole role))
+            {
+                await RiftBot.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
+                return;
+            }
+
+            var count = 0;
+
+            foreach (var user in role.Members)
+            {
+                if (!await DB.Users.EnsureExistsAsync(user.Id))
+                {
+                    await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
+                    return;
+                }
+                
+                if (await DB.BackgroundInventory.HasAsync(user.Id, dbBack.Id))
+                    continue;
+                
+                await DB.BackgroundInventory.AddAsync(user.Id, dbBack.Id);
+                count++;
+            }
+            
+            await ReplyAsync($"Added background \"{dbBack.Name}\" for role \"{role.Name}\" ({count.ToString()} user(s)).");
+        }
+        
+        [Command("addrole")]
+        [RequireAdmin]
+        [RequireContext(ContextType.Guild)]
+        public async Task AddRole(ulong roleId)
+        {
+            var dbRole = await DB.Roles.GetByRoleIdAsync(roleId);
+            
+            if (dbRole is null
+                || !IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var sr)
+                || !(sr is SocketRole role))
+            {
+                await RiftBot.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
+                return;
+            }
+
+            var count = 0;
+
+            foreach (var user in role.Members)
+            {
+                await user.RemoveRoleAsync(sr);
+                
+                if (!await DB.Users.EnsureExistsAsync(user.Id))
+                {
+                    await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
+                    return;
+                }
+                
+                if (await DB.RoleInventory.HasAnyAsync(user.Id, dbRole.Id))
+                    continue;
+                
+                await DB.RoleInventory.AddAsync(user.Id, dbRole.Id, "Launch seeding");
+                count++;
+            }
+            
+            await ReplyAsync($"Added role \"{role.Name}\" to {count.ToString()} user(s).");
+        }
+        
         [Command("activestages")]
         [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
@@ -155,7 +235,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Update(IUser user)
         {
-            await riotService.UpdateRankAsync(user.Id).ConfigureAwait(false);
+            await riotService.UpdateSummonerAsync(user.Id).ConfigureAwait(false);
         }
 
         [Command("gastart")]
@@ -195,7 +275,7 @@ namespace Rift.Modules
         [RequireDeveloper]
         public async Task SelfTest()
         {
-            var skipChecks = false; // TODO: Make it configurable
+            var skipChecks = false;
 
             var errors = new List<string>();
             var fixedRoles = 0u;
@@ -296,41 +376,29 @@ namespace Rift.Modules
                 }
             }
 
-            var roleNames = Settings.RoleId.GetNames();
-
-            foreach (var field in Settings.RoleId.GetType().GetProperties())
+            var serverRoles = Context.Guild.Roles.ToList();
+            var roles = await DB.Roles.GetAllAsync();
+            
+            foreach (var role in serverRoles)
             {
                 if (skipChecks)
                     break;
-
-                if (field.GetValue(Settings.RoleId, null) is ulong value)
+                
+                var matchedRole = roles.FirstOrDefault(x => x.Name.Equals(role.Name));
+                
+                if (matchedRole is null)
                 {
-                    if (value == 0ul)
-                    {
-                        if (roleNames.ContainsKey(field.Name))
-                        {
-                            var serverRole = guild.Roles.FirstOrDefault(x => x.Name.Contains(roleNames[field.Name]));
-
-                            if (serverRole is null)
-                            {
-                                errors.Add($"Role ID undefined: {field.Name}");
-                                continue;
-                            }
-
-                            Settings.RoleId.SetValue(field.Name, serverRole.Id);
-                            fixedRoles++;
-                        }
-                        else
-                        {
-                            errors.Add($"Role ID undefined: {field.Name}");
-                            continue;
-                        }
-                    }
-                    else if (!IonicClient.GetRole(Settings.App.MainGuildId, value, out var channel))
-                    {
-                        errors.Add($"No role on server: {field.Name}");
-                    }
+                    await DB.Roles.AddAsync(role);
+                    fixedRoles++;
+                    continue;
                 }
+                
+                if (matchedRole.RoleId.Equals(role.Id))
+                    continue;
+                
+                matchedRole.RoleId = role.Id;
+                await DB.Roles.UpdateAsync(matchedRole);
+                fixedRoles++;
             }
 
             if (errors.Count == 0)
@@ -362,10 +430,9 @@ namespace Rift.Modules
                 var embedMsg = new RiftEmbed()
                                .WithColor(255, 255, 0)
                                .WithAuthor("Self-test")
-                               .WithDescription($"Automatically resolved {fixedRoles.ToString()} roles.");
+                               .WithDescription($"Fixed {fixedRoles.ToString()} roles.");
 
                 await Context.Channel.SendIonicMessageAsync(new IonicMessage(embedMsg));
-                await Settings.SaveRolesAsync();
             }
         }
 
@@ -445,8 +512,6 @@ namespace Rift.Modules
         public async Task FF()
         {
             await Context.Message.DeleteAsync();
-            //await ReplyAsync(embed: AdminEmbeds.ShutDown); // TODO
-
             IonicClient.TokenSource.Cancel();
         }
 
@@ -478,7 +543,7 @@ namespace Rift.Modules
         }
 
         [Command("about")]
-        [RequireDeveloper]
+        [RequireModerator]
         [RequireContext(ContextType.Guild)]
         public async Task AppStatus()
         {

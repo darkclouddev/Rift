@@ -26,12 +26,31 @@ namespace Rift.Database
                 await context.SaveChangesAsync();
             }
         }
+        public async Task UpdateAsync(RiftRole role)
+        {
+            using (var context = new RiftContext())
+            {
+                var entry = context.Entry(role);
+                entry.Property(x => x.Name).IsModified = true;
+                entry.Property(x => x.RoleId).IsModified = true;
+                
+                await context.SaveChangesAsync();
+            }
+        }
         
         public async Task<RiftRole> GetAsync(int id)
         {
             using (var context = new RiftContext())
             {
                 return await context.Roles.FirstOrDefaultAsync(x => x.Id == id);
+            }
+        }
+        
+        public async Task<RiftRole> GetByRoleIdAsync(ulong roleId)
+        {
+            using (var context = new RiftContext())
+            {
+                return await context.Roles.FirstOrDefaultAsync(x => x.RoleId == roleId);
             }
         }
         

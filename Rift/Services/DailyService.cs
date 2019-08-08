@@ -57,7 +57,7 @@ namespace Rift.Services
 
             await DB.Cooldowns.SetLastDailyRewardTimeAsync(userId, DateTime.UtcNow);
             
-            await RiftBot.SendMessageAsync("daily-success", Settings.ChannelId.Chat, new FormatData(userId)
+            await RiftBot.SendMessageAsync("daily-success", Settings.ChannelId.Commands, new FormatData(userId)
             {
                 Reward = reward
             });

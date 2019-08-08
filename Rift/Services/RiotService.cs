@@ -13,7 +13,6 @@ using Rift.Database;
 using Rift.Events;
 using Rift.Services.Message;
 using Rift.Services.Riot;
-using Rift.Util;
 
 using Discord;
 using Discord.WebSocket;
@@ -448,7 +447,7 @@ namespace Rift.Services
 
         #region Rank
 
-        public async Task UpdateRankAsync(ulong userId)
+        public async Task UpdateSummonerAsync(ulong userId)
         {
             if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Commands, out var channel))
                 return;
@@ -467,52 +466,61 @@ namespace Rift.Services
             RiftBot.Log.Debug($"{userId.ToString()} League data update completed.");
         }
 
-        static ulong GetRoleIdByLeagueRank(LeagueRank rank)
+        static async Task<RiftRole> GetRoleByLeagueRank(LeagueRank rank)
         {
-            switch (rank)
-            {
-                case LeagueRank.Iron: return Settings.RoleId.RankIron;
-                case LeagueRank.Bronze: return Settings.RoleId.RankBronze;
-                case LeagueRank.Silver: return Settings.RoleId.RankSilver;
-                case LeagueRank.Gold: return Settings.RoleId.RankGold;
-                case LeagueRank.Platinum: return Settings.RoleId.RankPlatinum;
-                case LeagueRank.Diamond: return Settings.RoleId.RankDiamond;
-                case LeagueRank.Master: return Settings.RoleId.RankMaster;
-                case LeagueRank.GrandMaster: return Settings.RoleId.RankGrandmaster;
-                case LeagueRank.Challenger: return Settings.RoleId.RankChallenger;
-                default: return 0ul;
-            }
+            return rank switch
+                {
+                LeagueRank.Iron => await DB.Roles.GetAsync(58),
+                LeagueRank.Bronze => await DB.Roles.GetAsync(25),
+                LeagueRank.Silver => await DB.Roles.GetAsync(33),
+                LeagueRank.Gold => await DB.Roles.GetAsync(3),
+                LeagueRank.Platinum => await DB.Roles.GetAsync(11),
+                LeagueRank.Diamond => await DB.Roles.GetAsync(8),
+                LeagueRank.Master => await DB.Roles.GetAsync(79),
+                LeagueRank.GrandMaster => await DB.Roles.GetAsync(71),
+                LeagueRank.Challenger => await DB.Roles.GetAsync(23),
+                _ => null
+                };
         }
 
-        static LeagueRank GetCurrentRank(IGuildUser user)
+        static async Task<LeagueRank> GetCurrentRank(IGuildUser user)
         {
             var currentRoleIds = user.RoleIds;
 
-            if (currentRoleIds.Contains(Settings.RoleId.RankIron))
+            var iron = await DB.Roles.GetAsync(58);
+            if (currentRoleIds.Contains(iron.RoleId))
                 return LeagueRank.Iron;
 
-            if (currentRoleIds.Contains(Settings.RoleId.RankBronze))
+            var bronze = await DB.Roles.GetAsync(25);
+            if (currentRoleIds.Contains(bronze.RoleId))
                 return LeagueRank.Bronze;
 
-            if (currentRoleIds.Contains(Settings.RoleId.RankSilver))
+            var silver = await DB.Roles.GetAsync(33);
+            if (currentRoleIds.Contains(silver.RoleId))
                 return LeagueRank.Silver;
 
-            if (currentRoleIds.Contains(Settings.RoleId.RankGold))
+            var gold = await DB.Roles.GetAsync(3);
+            if (currentRoleIds.Contains(gold.RoleId))
                 return LeagueRank.Gold;
 
-            if (currentRoleIds.Contains(Settings.RoleId.RankPlatinum))
+            var platinum = await DB.Roles.GetAsync(11);
+            if (currentRoleIds.Contains(platinum.RoleId))
                 return LeagueRank.Platinum;
 
-            if (currentRoleIds.Contains(Settings.RoleId.RankDiamond))
+            var diamond = await DB.Roles.GetAsync(8);
+            if (currentRoleIds.Contains(diamond.RoleId))
                 return LeagueRank.Diamond;
 
-            if (currentRoleIds.Contains(Settings.RoleId.RankMaster))
+            var master = await DB.Roles.GetAsync(79);
+            if (currentRoleIds.Contains(master.RoleId))
                 return LeagueRank.Master;
 
-            if (currentRoleIds.Contains(Settings.RoleId.RankGrandmaster))
+            var grandmaster = await DB.Roles.GetAsync(71);
+            if (currentRoleIds.Contains(grandmaster.RoleId))
                 return LeagueRank.GrandMaster;
 
-            if (currentRoleIds.Contains(Settings.RoleId.RankChallenger))
+            var challenger = await DB.Roles.GetAsync(23);
+            if (currentRoleIds.Contains(challenger.RoleId))
                 return LeagueRank.Challenger;
 
             return LeagueRank.Unranked;
@@ -523,26 +531,30 @@ namespace Rift.Services
             switch (rank)
             {
                 case LeagueRank.Iron:
-
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.RankIron, out var ironRole))
+                    
+                    var iron = await DB.Roles.GetAsync(58);
+                    
+                    if (!IonicClient.GetRole(Settings.App.MainGuildId, iron.RoleId, out var ironRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(ironRole);
-
                     break;
 
                 case LeagueRank.Bronze:
-
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.RankBronze, out var bronzeRole))
+                    
+                    var bronze = await DB.Roles.GetAsync(25);
+                    
+                    if (!IonicClient.GetRole(Settings.App.MainGuildId, bronze.RoleId, out var bronzeRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(bronzeRole);
-
                     break;
 
                 case LeagueRank.Silver:
-
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.RankSilver, out var silverRole))
+                    
+                    var silver = await DB.Roles.GetAsync(33);
+                    
+                    if (!IonicClient.GetRole(Settings.App.MainGuildId, silver.RoleId, out var silverRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(silverRole);
@@ -550,7 +562,9 @@ namespace Rift.Services
 
                 case LeagueRank.Gold:
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.RankGold, out var goldRole))
+                    var gold = await DB.Roles.GetAsync(3);
+                    
+                    if (!IonicClient.GetRole(Settings.App.MainGuildId, gold.RoleId, out var goldRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(goldRole);
@@ -558,7 +572,9 @@ namespace Rift.Services
 
                 case LeagueRank.Platinum:
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.RankPlatinum, out var platRole))
+                    var platinum = await DB.Roles.GetAsync(11);
+                    
+                    if (!IonicClient.GetRole(Settings.App.MainGuildId, platinum.RoleId, out var platRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(platRole);
@@ -566,8 +582,9 @@ namespace Rift.Services
 
                 case LeagueRank.Diamond:
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.RankDiamond,
-                        out var diamondRole))
+                    var diamond = await DB.Roles.GetAsync(8);
+                    
+                    if (!IonicClient.GetRole(Settings.App.MainGuildId, diamond.RoleId, out var diamondRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(diamondRole);
@@ -575,7 +592,9 @@ namespace Rift.Services
 
                 case LeagueRank.Master:
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.RankMaster, out var masterRole))
+                    var master = await DB.Roles.GetAsync(79);
+                    
+                    if (!IonicClient.GetRole(Settings.App.MainGuildId, master.RoleId, out var masterRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(masterRole);
@@ -583,8 +602,9 @@ namespace Rift.Services
 
                 case LeagueRank.GrandMaster:
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.RankGrandmaster,
-                        out var grandmasterRole))
+                    var grandmaster = await DB.Roles.GetAsync(71);
+                    
+                    if (!IonicClient.GetRole(Settings.App.MainGuildId, grandmaster.RoleId, out var grandmasterRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(grandmasterRole);
@@ -592,8 +612,9 @@ namespace Rift.Services
 
                 case LeagueRank.Challenger:
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.RankChallenger,
-                        out var challengerRole))
+                    var challenger = await DB.Roles.GetAsync(23);
+                    
+                    if (!IonicClient.GetRole(Settings.App.MainGuildId, challenger.RoleId, out var challengerRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(challengerRole);
@@ -611,78 +632,14 @@ namespace Rift.Services
 
             var soloqRank = GetRankFromPosition(rankData.FirstOrDefault(x => x.QueueType == "RANKED_SOLO_5x5"));
 
-            var roleId = 0ul;
-
-            switch (soloqRank)
-            {
-                case LeagueRank.Iron:
-                    roleId = Settings.RoleId.RankIron;
-                    break;
-
-                case LeagueRank.Bronze:
-                    roleId = Settings.RoleId.RankBronze;
-                    break;
-
-                case LeagueRank.Silver:
-                    roleId = Settings.RoleId.RankSilver;
-                    break;
-
-                case LeagueRank.Gold:
-                    roleId = Settings.RoleId.RankGold;
-                    break;
-
-                case LeagueRank.Platinum:
-                    roleId = Settings.RoleId.RankPlatinum;
-                    break;
-
-                case LeagueRank.Diamond:
-                    roleId = Settings.RoleId.RankDiamond;
-                    break;
-
-                case LeagueRank.Master:
-                    roleId = Settings.RoleId.RankMaster;
-                    break;
-
-                case LeagueRank.GrandMaster:
-                    roleId = Settings.RoleId.RankGrandmaster;
-                    break;
-
-                case LeagueRank.Challenger:
-                    roleId = Settings.RoleId.RankChallenger;
-                    break;
-            }
-
-            if (roleId == 0ul)
+            var roleId = await GetRoleByLeagueRank(soloqRank);
+            if (roleId is null || roleId.RoleId == 0ul)
                 return;
 
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var role))
+            if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId.RoleId, out var role))
                 return;
 
             await guildUser.AddRoleAsync(role);
-        }
-
-        static LeagueRank GetRankFromRoleId(ulong roleId)
-        {
-            if (roleId == Settings.RoleId.RankIron)
-                return LeagueRank.Iron;
-            if (roleId == Settings.RoleId.RankBronze)
-                return LeagueRank.Bronze;
-            if (roleId == Settings.RoleId.RankSilver)
-                return LeagueRank.Silver;
-            if (roleId == Settings.RoleId.RankGold)
-                return LeagueRank.Gold;
-            if (roleId == Settings.RoleId.RankPlatinum)
-                return LeagueRank.Platinum;
-            if (roleId == Settings.RoleId.RankDiamond)
-                return LeagueRank.Diamond;
-            if (roleId == Settings.RoleId.RankMaster)
-                return LeagueRank.Master;
-            if (roleId == Settings.RoleId.RankGrandmaster)
-                return LeagueRank.GrandMaster;
-            if (roleId == Settings.RoleId.RankChallenger)
-                return LeagueRank.Challenger;
-
-            return LeagueRank.Unranked;
         }
 
         public static LeagueRank GetRankFromPosition(LeagueEntry entry)
