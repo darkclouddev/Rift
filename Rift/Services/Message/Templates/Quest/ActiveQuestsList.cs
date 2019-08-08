@@ -50,7 +50,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.BragsDone.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.BragsDone.Value >= quest.BragsDone
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -68,7 +68,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.MessagesSent.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.MessagesSent.Value >= quest.MessagesSent
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -86,7 +86,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.BoughtChests.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.BoughtChests.Value >= quest.BoughtChests
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -104,7 +104,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.OpenedChests.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.OpenedChests.Value >= quest.OpenedChests
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -122,7 +122,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.NormalMonstersKilled.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.NormalMonstersKilled.Value >= quest.NormalMonstersKilled
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -140,7 +140,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.RareMonstersKilled.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.RareMonstersKilled.Value >= quest.RareMonstersKilled
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -158,7 +158,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.EpicMonstersKilled.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.EpicMonstersKilled.Value >= quest.EpicMonstersKilled
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -176,7 +176,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.GiftsSent.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.GiftsSent.Value >= quest.GiftsSent
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -194,7 +194,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.GiftsReceived.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.GiftsReceived.Value >= quest.GiftsReceived
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -212,8 +212,8 @@ namespace Rift.Services.Message.Templates.Quest
                 if (progress.GiftedFounder.HasValue)
                 {
                     sb.AppendLine(progress.GiftedFounder.Value
-                        ? finishedEmote + description
-                        : notFinishedEmote + description
+                        ? $"{finishedEmote} {description}"
+                        : $"{notFinishedEmote} {description}"
                     );
                 }
                 else
@@ -228,7 +228,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.LevelReached.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.LevelReached.Value >= quest.LevelReached
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -246,7 +246,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.GiveawaysParticipated.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.GiveawaysParticipated.Value >= quest.GiveawaysParticipated
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -264,7 +264,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.CoinsReceived.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.CoinsReceived.Value >= quest.CoinsReceived
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -282,7 +282,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.CoinsSpent.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.CoinsSpent.Value >= quest.CoinsSpent
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -300,7 +300,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.VoiceUptimeEarned.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.VoiceUptimeEarned.Value >= quest.VoiceUptimeEarned
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -318,8 +318,8 @@ namespace Rift.Services.Message.Templates.Quest
                 if (progress.GiftedDeveloper.HasValue)
                 {
                     sb.AppendLine(progress.GiftedDeveloper.Value
-                        ? finishedEmote + description
-                        : notFinishedEmote + description
+                        ? $"{finishedEmote} {description}"
+                        : $"{notFinishedEmote} {description}"
                     );
                 }
                 else
@@ -334,8 +334,8 @@ namespace Rift.Services.Message.Templates.Quest
                 if (progress.GiftedModerator.HasValue)
                 {
                     sb.AppendLine(progress.GiftedModerator.Value
-                        ? finishedEmote + description
-                        : notFinishedEmote + description
+                        ? $"{finishedEmote} {description}"
+                        : $"{notFinishedEmote} {description}"
                     );
                 }
                 else
@@ -350,8 +350,8 @@ namespace Rift.Services.Message.Templates.Quest
                 if (progress.GiftedStreamer.HasValue)
                 {
                     sb.AppendLine(progress.GiftedStreamer.Value
-                        ? finishedEmote + description
-                        : notFinishedEmote + description
+                        ? $"{finishedEmote} {description}"
+                        : $"{notFinishedEmote} {description}"
                     );
                 }
                 else
@@ -366,7 +366,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.ActivatedBotRespects.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.ActivatedBotRespects.Value >= quest.ActivatedBotRespects
                         ? finishedEmote + description
                         : notFinishedEmote + description
@@ -384,8 +384,8 @@ namespace Rift.Services.Message.Templates.Quest
                 if (progress.OpenedSphere.HasValue)
                 {
                     sb.AppendLine(progress.OpenedSphere.Value
-                        ? finishedEmote + description
-                        : notFinishedEmote + description
+                        ? $"{finishedEmote} {description}"
+                        : $"{notFinishedEmote} {description}"
                     );
                 }
                 else
@@ -400,7 +400,7 @@ namespace Rift.Services.Message.Templates.Quest
                 
                 if (progress.RolesPurchased.HasValue)
                 {
-                    description = $"{description} {pr}";
+                    description = $" {description} {pr}";
                     sb.AppendLine(progress.RolesPurchased.Value >= quest.RolesPurchased
                         ? finishedEmote + description
                         : notFinishedEmote + description
