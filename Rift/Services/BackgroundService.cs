@@ -73,6 +73,7 @@ namespace Rift.Services
                 if (!users.Contains(userId))
                 {
                     await DB.BackgroundInventory.DeleteAsync(userId, 13);
+                    await DB.Users.SetBackgroundAsync(userId, 0);
                     fixedBackgrounds++;
                 }
             }
