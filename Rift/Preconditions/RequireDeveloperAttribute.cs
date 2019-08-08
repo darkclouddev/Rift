@@ -8,7 +8,8 @@ namespace Rift.Preconditions
     [AttributeUsage(AttributeTargets.Method)]
     public class RequireDeveloperAttribute : PreconditionAttribute
     {
-        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override async Task<PreconditionResult> CheckPermissionsAsync(
+            ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             if (await Task.Run(() => RiftBot.IsDeveloper(context.User)))
                 return PreconditionResult.FromSuccess();

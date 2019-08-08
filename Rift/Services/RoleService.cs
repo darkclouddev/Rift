@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Data.Models;
-using Rift.Embeds;
+using Rift.Services.Message;
+using Rift.Util;
 
 using IonicLib;
 
@@ -21,11 +22,9 @@ namespace Rift.Services
 
         public RoleService()
         {
+            // TODO: implement scheduling timer
             tempRoleTimer = new Timer(
-                async delegate
-                {
-                    await TimerProcAsync();
-                },
+                async delegate { await TimerProcAsync(); },
                 null,
                 TimeSpan.FromSeconds(10),
                 TimeSpan.FromSeconds(5));
@@ -33,28 +32,40 @@ namespace Rift.Services
 
         async Task TimerProcAsync()
         {
-            var expiredRoles = await Database.GetExpiredTempRolesAsync();
+            var expiredRoles = await DB.TempRoles.GetExpiredTempRolesAsync();
 
             if (expiredRoles is null || expiredRoles.Count == 0)
                 return;
 
             foreach (var expiredRole in expiredRoles)
-            {
                 await RemoveTempRoleAsync(expiredRole.UserId, expiredRole.RoleId);
-            }
         }
 
-        public async Task<(bool, Embed)> AddPermanentRoleAsync(ulong userId, ulong roleId)
+        public async Task<(bool, IonicMessage)> AddPermanentRoleAsync(ulong userId, ulong roleId)
         {
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
             if (sgUser is null)
-                return (false, GenericEmbeds.UserNotFound);
+                return (false, MessageService.UserNotFound);
 
             if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var role))
-                return (false, GenericEmbeds.RoleNotFound);
+                return (false, MessageService.RoleNotFound);
 
             await sgUser.AddRoleAsync(role);
+            return (true, null);
+        }
+
+        public async Task<(bool, IonicMessage)> RemovePermanentRoleAsync(ulong userId, ulong roleId)
+        {
+            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
+
+            if (sgUser is null)
+                return (false, MessageService.UserNotFound);
+
+            if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var role))
+                return (false, MessageService.RoleNotFound);
+
+            await sgUser.RemoveRoleAsync(role);
             return (true, null);
         }
 
@@ -78,12 +89,12 @@ namespace Rift.Services
                 return;
 
             await sgUser.AddRoleAsync(serverRole);
-            await Database.AddTempRoleAsync(role);
+            await DB.TempRoles.AddAsync(role);
         }
 
         public async Task<(bool, Embed)> RemoveTempRoleAsync(ulong userId, ulong roleId)
         {
-            await Database.RemoveUserTempRoleAsync(userId, roleId);
+            await DB.TempRoles.RemoveAsync(userId, roleId);
 
             var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
 
@@ -99,14 +110,14 @@ namespace Rift.Services
 
         public async Task<List<RiftTempRole>> GetUserTempRolesAsync(ulong userId)
         {
-            return await Database.GetUserTempRolesAsync(userId);
+            return await DB.TempRoles.GetAsync(userId);
         }
 
         public async Task RestoreTempRolesAsync(SocketGuildUser sgUser)
         {
-            RiftBot.Log.Info($"User {sgUser} ({sgUser.Id.ToString()}) joined, checking temp roles");
+            RiftBot.Log.Info($"User {sgUser.ToLogString()} joined, checking temp roles");
 
-            var tempRoles = await Database.GetUserTempRolesAsync(sgUser.Id);
+            var tempRoles = await DB.TempRoles.GetAsync(sgUser.Id);
 
             if (tempRoles is null || tempRoles.Count == 0)
             {
@@ -114,20 +125,92 @@ namespace Rift.Services
                 return;
             }
 
-            foreach (var tempRole in tempRoles)
-            {
-                if (sgUser.Roles.Any(x => x.Id == tempRole.RoleId))
-                    continue;
+            var remainingRoles = tempRoles.Select(x => x.RoleId).Except(sgUser.Roles.Select(x => x.Id));
 
-                if (!IonicClient.GetRole(Settings.App.MainGuildId, tempRole.RoleId, out var role))
+            foreach (var id in remainingRoles)
+            {
+                if (!IonicClient.GetRole(Settings.App.MainGuildId, id, out var role))
                 {
-                    RiftBot.Log.Error($"Applying role {tempRole.RoleId.ToString()}: FAILED");
+                    RiftBot.Log.Error($"Applying role {id.ToString()}: FAILED");
                     continue;
                 }
 
                 await sgUser.AddRoleAsync(role);
                 RiftBot.Log.Debug($"Successfully added temp role \"{role.Name}\" for user {sgUser}");
             }
+        }
+
+        public async Task UpdateInventoryRoleAsync(ulong userId, int id, bool add)
+        {
+            if (!await DB.RoleInventory.HasAnyAsync(userId, id))
+            {
+                await RiftBot.SendMessageAsync("roleinventory-wrongnumber", Settings.ChannelId.Commands, new FormatData(userId));
+                return;
+            }
+
+            var dbUser = await DB.Users.GetAsync(userId);
+            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
+            if (dbUser is null || sgUser is null)
+            {
+                await RiftBot.SendMessageAsync(MessageService.UserNotFound, Settings.ChannelId.Commands);
+                return;
+            }
+
+            var role = await DB.Roles.GetAsync(id);
+            if (role is null)
+            {
+                await RiftBot.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
+                await RiftBot.SendMessageToAdmins($"User <@{userId.ToString()}> failed to set role ID {id.ToString()}.");
+                return;
+            }
+
+            if (!IonicClient.GetRole(Settings.App.MainGuildId, role.RoleId, out var guildRole))
+            {
+                await RiftBot.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
+                return;
+            }
+
+            var hasRole = IonicClient.HasRolesAny(Settings.App.MainGuildId, userId, role.RoleId);
+
+            if (add)
+            {
+                if (hasRole)
+                {
+                    await RiftBot.SendMessageAsync("roleinventory-hasrole", Settings.ChannelId.Commands, new FormatData(userId));
+                    return;
+                }
+
+                await sgUser.AddRoleAsync(guildRole);
+            }
+            else
+            {
+                if (!hasRole)
+                {
+                    await RiftBot.SendMessageAsync("roleinventory-norole", Settings.ChannelId.Commands, new FormatData(userId));
+                    return;
+                }
+
+                await sgUser.RemoveRoleAsync(guildRole);
+            }
+        }
+
+        const string InventoryIdentifier = "role-inventory-list";
+
+        public async Task GetInventoryAsync(ulong userId)
+        {
+            await RiftBot.SendMessageAsync(InventoryIdentifier, Settings.ChannelId.Commands, new FormatData(userId))
+                .ConfigureAwait(false);
+        }
+        
+        public async Task<List<ulong>> GetNitroBoostersAsync()
+        {
+            var nitro = await DB.Roles.GetAsync(91);
+            
+            if (!IonicClient.GetRole(Settings.App.MainGuildId, nitro.RoleId, out var role)
+                || !(role is SocketRole sgRole))
+                return null;
+
+            return sgRole.Members.Select(x => x.Id).ToList();
         }
     }
 }

@@ -1,24 +1,23 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-using Rift.Configuration;
-using Rift.Embeds;
+using Settings = Rift.Configuration.Settings;
+
+using Rift.Database;
 using Rift.Preconditions;
 using Rift.Services;
-
-using IonicLib;
-using IonicLib.Util;
+using Rift.Services.Message;
+using Rift.Util;
 
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
-using Humanizer;
+using IonicLib;
+using IonicLib.Util;
 
 namespace Rift.Modules
 {
@@ -26,26 +25,242 @@ namespace Rift.Modules
     {
         readonly RiotService riotService;
         readonly EconomyService economyService;
+        readonly EventService eventService;
+        readonly GiveawayService giveawayService;
 
-        public AdminHelperModule(RiotService riotService, EconomyService economyService)
+        public AdminHelperModule(RiotService riotService,
+                                 EconomyService economyService,
+                                 EventService eventService,
+                                 GiveawayService giveawayService)
         {
             this.riotService = riotService;
             this.economyService = economyService;
+            this.eventService = eventService;
+            this.giveawayService = giveawayService;
         }
-
-        [Command("code")]
-        [RequireContext(ContextType.DM)]
-        public async Task Code(ulong userId)
+        
+        [Command("msg")]
+        [RequireAdmin]
+        [RequireContext(ContextType.Guild)]
+        public async Task GetMsgByMapping(string mapping)
         {
-            var pendingData = await Database.GetPendingUserAsync(userId);
-
-            if (pendingData is null)
+            await RiftBot.SendMessageAsync(mapping, Context.Channel.Id, new FormatData(Context.User.Id));
+        }
+        
+        [Command("addback")]
+        [RequireAdmin]
+        [RequireContext(ContextType.Guild)]
+        public async Task AddBack(ulong roleId, int backId)
+        {
+            var dbBack = await DB.ProfileBackgrounds.GetAsync(backId);
+            
+            if (dbBack is null
+                || !IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var sr)
+                || !(sr is SocketRole role))
             {
-                await ReplyAsync($"No data for that user.");
+                await RiftBot.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
                 return;
             }
 
-            (var result, var code) = await riotService.GetThirdPartyCodeByEncryptedSummonerIdAsync(pendingData.Region, pendingData.SummonedId);
+            var count = 0;
+
+            foreach (var user in role.Members)
+            {
+                if (!await DB.Users.EnsureExistsAsync(user.Id))
+                {
+                    await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
+                    return;
+                }
+                
+                if (await DB.BackgroundInventory.HasAsync(user.Id, dbBack.Id))
+                    continue;
+                
+                await DB.BackgroundInventory.AddAsync(user.Id, dbBack.Id);
+                count++;
+            }
+            
+            await ReplyAsync($"Added background \"{dbBack.Name}\" for role \"{role.Name}\" ({count.ToString()} user(s)).");
+        }
+        
+        [Command("addrole")]
+        [RequireAdmin]
+        [RequireContext(ContextType.Guild)]
+        public async Task AddRole(ulong roleId)
+        {
+            var dbRole = await DB.Roles.GetByRoleIdAsync(roleId);
+            
+            if (dbRole is null
+                || !IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var sr)
+                || !(sr is SocketRole role))
+            {
+                await RiftBot.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
+                return;
+            }
+
+            var count = 0;
+
+            foreach (var user in role.Members)
+            {
+                await user.RemoveRoleAsync(sr);
+                
+                if (!await DB.Users.EnsureExistsAsync(user.Id))
+                {
+                    await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
+                    return;
+                }
+                
+                if (await DB.RoleInventory.HasAnyAsync(user.Id, dbRole.Id))
+                    continue;
+                
+                await DB.RoleInventory.AddAsync(user.Id, dbRole.Id, "Launch seeding");
+                count++;
+            }
+            
+            await ReplyAsync($"Added role \"{role.Name}\" to {count.ToString()} user(s).");
+        }
+        
+        [Command("activestages")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task ActiveStages()
+        {
+            var things = await DB.Quests.GetStageIdsInProgressAsync(Context.User.Id);
+
+            await ReplyAsync($"{things.Count.ToString()} stage(s).");
+        }
+
+        [Command("estart")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task EventStart(string eventType)
+        {
+            await eventService.StartAsync(eventType, Context.User.Id);
+        }
+
+        [Command("gtstart")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task GiveawayStart(int rewardId)
+        {
+            await giveawayService.StartTicketGiveawayAsync(rewardId, Context.User.Id);
+        }
+
+        [Command("gastart")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task GiveawayStart(string name)
+        {
+            await giveawayService.StartGiveawayAsync(name, Context.User.Id);
+        }
+
+        [Command("templates")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task GetTemplates()
+        {
+            var templates = RiftBot.GetService<MessageService>().GetActiveTemplates();
+
+            await ReplyAsync("**Supported templates**\n\n" +
+                             $"{string.Join(',', templates.Select(x => x.Template))}");
+        }
+
+        [Command("reactions")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task Reactions(ulong messageId)
+        {
+            var msg = (IUserMessage) await Context.Channel.GetMessageAsync(messageId);
+            var text = "";
+
+            if (msg.Reactions is null)
+                text = "0";
+            else
+                foreach ((var emote, var reactionMetadata) in msg.Reactions)
+                    text += $"**{emote}**: {reactionMetadata.ReactionCount.ToString()}\n";
+
+            await Context.Channel.SendMessageAsync(text).ConfigureAwait(false);
+        }
+
+        [Command("exp")]
+        [RequireAdmin]
+        [RequireContext(ContextType.Guild)]
+        public async Task Exp(uint level)
+        {
+            await ReplyAsync($"Level {level.ToString()}: {EconomyService.GetExpForLevel(level).ToString()} XP")
+                .ConfigureAwait(false);
+        }
+
+        [Command("getprofile")]
+        [RequireAdmin]
+        [RequireContext(ContextType.Guild)]
+        public async Task GetProfile(IUser user)
+        {
+            var message = await economyService.GetUserProfileAsync(user.Id);
+
+            if (message is null)
+                return;
+
+            await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
+        }
+
+        [Command("getgamestat")]
+        [RequireAdmin]
+        [RequireContext(ContextType.Guild)]
+        public async Task GetGameStat(IUser user)
+        {
+            var message = await riotService.GetUserGameStatAsync(user.Id);
+
+            if (message is null)
+                return;
+
+            await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
+        }
+
+        [Command("getstat")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task GetStat(IUser user)
+        {
+            var message = await economyService.GetUserStatAsync(user.Id);
+
+            if (message is null)
+                return;
+
+            await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
+        }
+
+        [Command("update")]
+        [RequireAdmin]
+        [RateLimit(1, 10, Measure.Minutes)]
+        [RequireContext(ContextType.Guild)]
+        public async Task Update(IUser user)
+        {
+            await riotService.UpdateSummonerAsync(user.Id).ConfigureAwait(false);
+        }
+
+        [Command("gastart")]
+        [RequireDeveloper]
+        [RequireContext(ContextType.Guild)]
+        public async Task StartGiveaway(string name)
+        {
+            await RiftBot.GetService<GiveawayService>().StartGiveawayAsync(name, Context.User.Id).ConfigureAwait(false);
+        }
+
+        [Command("code")]
+        [RequireContext(ContextType.Guild)]
+        public async Task Code(IUser user)
+        {
+            var pendingData = await DB.PendingUsers.GetAsync(user.Id);
+
+            if (pendingData is null)
+            {
+                await ReplyAsync("No data for that user.");
+                return;
+            }
+
+            (var result, var code) =
+                await riotService.GetThirdPartyCodeByEncryptedSummonerIdAsync(
+                    pendingData.Region, pendingData.SummonedId);
 
             if (result != RequestResult.Success)
             {
@@ -56,146 +271,62 @@ namespace Rift.Modules
             await ReplyAsync($"Expected code: \"{pendingData.ConfirmationCode}\"\nActual code: \"{code}\"");
         }
 
-        [Command("добавить донат")]
-        [RequireAdmin]
-        [RequireContext(ContextType.Guild)]
-        public async Task GiveDonateAsync(decimal amount, IUser mention)
-        {
-            if (amount <= 0M)
-            {
-                await Context.User.SendMessageAsync("Сумма доната не может быть меньше или равна нулю!");
-                return;
-            }
-
-            await ModifyDonateAsync(mention.Id, amount, true);
-        }
-
-        [Command("удалить донат")]
-        [RequireAdmin]
-        [RequireContext(ContextType.Guild)]
-        public async Task RemoveDonateAsync(decimal amount, IUser mention)
-        {
-            if (amount <= 0M)
-            {
-                await Context.User.SendMessageAsync("Сумма доната не может быть меньше или равна нулю!");
-                return;
-            }
-
-            await ModifyDonateAsync(mention.Id, amount, false);
-        }
-
-        async Task ModifyDonateAsync(ulong userId, decimal amount, bool add)
-        {
-            if (add)
-                await Database.AddDonateAsync(userId, amount);
-            else
-                await Database.RemoveDonateAsync(userId, amount);
-        }
-
-        [Command("донат подарки")]
-        [RequireAdmin]
-        [RequireContext(ContextType.Guild)]
-        public async Task DonateRewards()
-        {
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.Absolute, out var absoluteRole))
-                return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.Legendary, out var legendaryRole))
-                return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateBore, out var pvtBore))
-                return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateKayn, out var pvtKayn))
-                return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateMellifluous, out var pvtMellifluous))
-                return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateOctopusMom, out var pvtOctopus))
-                return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateSempai, out var pvtSempai))
-                return;
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.PrivateToxic, out var pvtToxic))
-                return;
-
-            if (!(absoluteRole is SocketRole srAbsolute))
-                return;
-            if (!(legendaryRole is SocketRole srLegendary))
-                return;
-            if (!(pvtBore is SocketRole srBore))
-                return;
-            if (!(pvtKayn is SocketRole srKayn))
-                return;
-            if (!(pvtMellifluous is SocketRole srMellifluous))
-                return;
-            if (!(pvtOctopus is SocketRole srOctopus))
-                return;
-            if (!(pvtSempai is SocketRole srSempai))
-                return;
-            if (!(pvtToxic is SocketRole srToxic))
-                return;
-
-            var absoluteEmbed = GiftEmbeds.RoleReward($"{Settings.Emote.Coin} 10000 {Settings.Emote.Sphere} 1");
-
-            foreach (var user in srAbsolute.Members)
-            {
-                await Database.AddInventoryAsync(user.Id, coins: 10_000u, spheres: 1u);
-                await user.SendEmbedAsync(absoluteEmbed);
-            }
-
-            var legendaryEmbed = GiftEmbeds.RoleReward($"{Settings.Emote.Coin} 5000 {Settings.Emote.UsualTickets} 2");
-
-            foreach (var user in srLegendary.Members)
-            {
-                await Database.AddInventoryAsync(user.Id, coins: 50_000u, usualTickets: 2u);
-                await user.SendEmbedAsync(legendaryEmbed);
-            }
-
-            var privateEmbed = GiftEmbeds.RoleReward($"{Settings.Emote.Coin} 20000 {Settings.Emote.Sphere} 1");
-
-            var privateRoleUsers = new List<SocketGuildUser>();
-            privateRoleUsers.AddRange(srBore.Members);
-            privateRoleUsers.AddRange(srKayn.Members);
-            privateRoleUsers.AddRange(srMellifluous.Members);
-            privateRoleUsers.AddRange(srOctopus.Members);
-            privateRoleUsers.AddRange(srSempai.Members);
-            privateRoleUsers.AddRange(srToxic.Members);
-
-            foreach (var user in privateRoleUsers)
-            {
-                await Database.AddInventoryAsync(user.Id, coins: 20_000u, spheres: 1u);
-                await user.SendEmbedAsync(privateEmbed);
-            }
-
-            await Context.User.SendMessageAsync($"Выдача подарков завершена!\n\n"
-                                                + $"{srAbsolute.Name}: {srAbsolute.Members.Count().ToString()}\n"
-                                                + $"{srLegendary.Name}: {srLegendary.Members.Count().ToString()}\n"
-                                                + $"Личные роли: {privateRoleUsers.Count.ToString()}");
-        }
-
         [Command("selftest")]
         [RequireDeveloper]
         public async Task SelfTest()
         {
-            var skipChecks = false; // TODO: Make it configurable
+            var skipChecks = false;
 
             var errors = new List<string>();
             var fixedRoles = 0u;
 
-            var eb = new EmbedBuilder();
+            var eb = new RiftEmbed().WithTitle("Self-test");
 
-            eb.WithTitle("Self-test");
+            if (!IonicClient.GetGuild(Settings.App.MainGuildId, out var guild))
+            {
+                errors.Add($"Guild is null: {nameof(Settings.App.MainGuildId)}");
+                skipChecks = true;
+            }
+
+            var channelNames = Settings.ChannelId.GetNames();
 
             foreach (var field in Settings.ChannelId.GetType().GetProperties())
             {
                 if (skipChecks)
                     break;
 
-                if (field.GetValue(Settings.ChannelId) is ulong value)
+                if (field.GetValue(Settings.ChannelId, null) is ulong value)
                 {
                     if (value == 0ul)
                     {
-                        errors.Add($"Channel ID is undefined: {field.Name}");
+                        if (channelNames.ContainsKey(field.Name))
+                        {
+                            var channelName = channelNames[field.Name];
+
+                            var guildChannel = guild.Channels.FirstOrDefault(
+                                x => x.Name.Equals(channelName,
+                                                   StringComparison
+                                                       .InvariantCultureIgnoreCase));
+
+                            if (guildChannel is null)
+                            {
+                                errors.Add($"Channel ID remains undefined: {field.Name} {channelName}");
+                                continue;
+                            }
+
+                            Settings.ChannelId.SetValue(field.Name, guildChannel.Id);
+                            fixedRoles++;
+                        }
+                        else
+                        {
+                            errors.Add($"Channel ID remains undefined: {field.Name}");
+                            continue;
+                        }
                     }
-                    else if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, value, out var channel))
+                    else if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, value, out var textChannel) &&
+                             !IonicClient.GetVoiceChannel(Settings.App.MainGuildId, value, out var voiceChannel))
                     {
-                        errors.Add($"No text channel on server: {field.Name}");
+                        errors.Add($"No channel on server: {field.Name}");
                     }
                 }
             }
@@ -209,17 +340,11 @@ namespace Rift.Modules
 
                 if (obj is ulong ulongValue)
                 {
-                    if (ulongValue == 0ul)
-                    {
-                        errors.Add($"Chat parameter undefined: {field.Name}");
-                    }
+                    if (ulongValue == 0ul) errors.Add($"Chat parameter undefined: {field.Name}");
                 }
                 else if (obj is uint uintValue)
                 {
-                    if (uintValue == 0u)
-                    {
-                        errors.Add($"Chat parameter undefined: {field.Name}");
-                    }
+                    if (uintValue == 0u) errors.Add($"Chat parameter undefined: {field.Name}");
                 }
             }
 
@@ -234,17 +359,11 @@ namespace Rift.Modules
 
                     if (obj is ulong ulongValue)
                     {
-                        if (ulongValue == 0ul)
-                        {
-                            errors.Add($"Economy parameter undefined: {field.Name}");
-                        }
+                        if (ulongValue == 0ul) errors.Add($"Economy parameter undefined: {field.Name}");
                     }
                     else if (obj is uint uintValue)
                     {
-                        if (uintValue == 0u)
-                        {
-                            errors.Add($"Economy parameter undefined: {field.Name}");
-                        }
+                        if (uintValue == 0u) errors.Add($"Economy parameter undefined: {field.Name}");
                     }
                 }
                 catch (TargetInvocationException ex)
@@ -257,95 +376,63 @@ namespace Rift.Modules
                 }
             }
 
-            foreach (var field in Settings.Emote.GetType().GetProperties())
+            var serverRoles = Context.Guild.Roles.ToList();
+            var roles = await DB.Roles.GetAllAsync();
+            
+            foreach (var role in serverRoles)
             {
                 if (skipChecks)
                     break;
-
-                if (field.GetValue(Settings.Emote, null) is string value)
+                
+                var matchedRole = roles.FirstOrDefault(x => x.Name.Equals(role.Name));
+                
+                if (matchedRole is null)
                 {
-                    if (String.IsNullOrWhiteSpace(value))
-                    {
-                        errors.Add($"Emote undefined: {field.Name}");
-                    }
+                    await DB.Roles.AddAsync(role);
+                    fixedRoles++;
+                    continue;
                 }
-            }
-
-            if (!IonicClient.GetGuild(Settings.App.MainGuildId, out var guild))
-            {
-                errors.Add($"Guild is null: {nameof(Settings.App.MainGuildId)}");
-                skipChecks = true;
-            }
-
-            var roleNames = Settings.RoleId.GetNames();
-
-            foreach (var field in Settings.RoleId.GetType().GetProperties())
-            {
-                if (skipChecks)
-                    break;
-
-                if (field.GetValue(Settings.RoleId, null) is ulong value)
-                {
-                    if (value == 0ul)
-                    {
-                        if (roleNames.ContainsKey(field.Name))
-                        {
-                            var serverRole = guild.Roles.FirstOrDefault(x => x.Name.Contains(roleNames[field.Name]));
-
-                            if (serverRole is null)
-                            {
-                                errors.Add($"Role ID undefined: {field.Name}");
-                                continue;
-                            }
-
-                            Settings.RoleId.SetValue(field.Name, serverRole.Id);
-                            fixedRoles++;
-                        }
-                        else
-                        {
-                            errors.Add($"Role ID undefined: {field.Name}");
-                            continue;
-                        }
-                    }
-                    else if (!IonicClient.GetRole(Settings.App.MainGuildId, value, out var channel))
-                    {
-                        errors.Add($"No role on server: {field.Name}");
-                    }
-                }
+                
+                if (matchedRole.RoleId.Equals(role.Id))
+                    continue;
+                
+                matchedRole.RoleId = role.Id;
+                await DB.Roles.UpdateAsync(matchedRole);
+                fixedRoles++;
             }
 
             if (errors.Count == 0)
             {
                 eb.WithColor(0, 255, 0);
-                eb.WithDescription("OK");
+                eb.WithDescription("OK 👌");
             }
             else
             {
                 eb.WithColor(255, 0, 0);
 
-                var errorList = String.Join('\n', errors);
+                var errorList = string.Join('\n', errors);
 
-                if (errorList.Length >= 1024)
+                if (errorList.Length >= 2048)
                 {
                     errorList = string.Join('\n', errors.Take(10));
-                    eb.AddField($"{errors.Count.ToString()} error(s)", "Displaying first 10\n\n" + errorList);
+                    eb.WithDescription($"**{errors.Count.ToString()} error(s), showing first 10**\n\n{errorList}");
                 }
                 else
                 {
-                    eb.AddField($"{errors.Count.ToString()} error(s)", errorList);
+                    eb.WithDescription($"**{errors.Count.ToString()} error(s)**\n\n{errorList}");
                 }
             }
 
-            await Context.Channel.SendEmbedAsync(eb);
+            await Context.Channel.SendIonicMessageAsync(new IonicMessage(eb));
 
             if (fixedRoles > 0u)
             {
-                var embedMsg = new EmbedBuilder()
+                var embedMsg = new RiftEmbed()
                                .WithColor(255, 255, 0)
                                .WithAuthor("Self-test")
-                               .WithDescription($"Automatically resolved {fixedRoles.ToString()} roles.");
+                               .WithDescription($"Fixed {fixedRoles.ToString()} roles.");
 
-                await Context.Channel.SendEmbedAsync(embedMsg);
+                await Context.Channel.SendIonicMessageAsync(new IonicMessage(embedMsg));
             }
         }
 
@@ -371,7 +458,7 @@ namespace Rift.Modules
 
                 var remove = amount >= 20 ? 20 : amount;
 
-                for (int i = 0; i < remove; i++)
+                for (var i = 0; i < remove; i++)
                 {
                     var role = roles.Dequeue();
 
@@ -398,17 +485,15 @@ namespace Rift.Modules
         {
             Settings.App.MaintenanceMode = !Settings.App.MaintenanceMode;
 
-            if (Context.Client is DiscordSocketClient client)
-            {
-                await client.SetGameAsync(RiftBot.BotStatusMessage);
-            }
+            if (Context.Client is DiscordSocketClient client) await client.SetGameAsync(RiftBot.BotStatusMessage);
 
-            var message = await ReplyAsync($"Maintenance mode **{(Settings.App.MaintenanceMode ? "enabled" : "disabled")}**");
+            var message =
+                await ReplyAsync($"Maintenance mode **{(Settings.App.MaintenanceMode ? "enabled" : "disabled")}**");
         }
 
         [Command("whois")]
-        [RequireDeveloper]
-        [RequireContext(ContextType.DM)]
+        [RequireAdmin]
+        [RequireContext(ContextType.Guild)]
         public async Task WhoIs(ulong userId)
         {
             var user = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
@@ -427,8 +512,6 @@ namespace Rift.Modules
         public async Task FF()
         {
             await Context.Message.DeleteAsync();
-            await ReplyAsync(embed: AdminEmbeds.ShutDown);
-
             IonicClient.TokenSource.Cancel();
         }
 
@@ -444,39 +527,296 @@ namespace Rift.Modules
             IonicClient.TokenSource.Cancel();
         }
 
-        [Command("emotes")]
+        [Command("listemotes")]
         [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
         public async Task Emotes()
         {
             var emotes = Context.Guild.Emotes.ToList();
 
-            var eb = new EmbedBuilder();
+            var re = new RiftEmbed()
+                     .WithAuthor("Server emotes")
+                     .AddField("Emote", string.Join('\n', emotes.Select(x => x.Name)), true)
+                     .AddField("ID", string.Join('\n', emotes.Select(x => x.Id)), true);
 
-            eb.WithAuthor("Server emotes");
-
-            eb.AddField("Emote", string.Join('\n', emotes.Select(x => x.Name)), true);
-            eb.AddField("ID", string.Join('\n', emotes.Select(x => x.Id)), true);
-
-            await ReplyAsync("", embed: eb.Build());
+            await Context.Channel.SendIonicMessageAsync(new IonicMessage(re));
         }
 
-        [Command("бот")]
-        [RequireDeveloper]
+        [Command("about")]
+        [RequireModerator]
         [RequireContext(ContextType.Guild)]
         public async Task AppStatus()
         {
-            var infoText =
-                $"{Format.Underline($"{Format.Bold(nameof(Rift))} v{RiftBot.InternalVersion} {RuntimeInformation.OSArchitecture.ToString()}")}\n"
-                + $"- Автор: <@212997107525746690>\n"
-                + $"- Аптайм: {GetUptime()}\n"
-                + $"- Память: {GetHeapSize()} MB\n"
-                + $"- API: {DiscordConfig.Version}";
+            var msg = await RiftBot.GetMessageAsync("bot-about", new FormatData(212997107525746690ul));
 
-            await ReplyAsync(infoText);
+            if (msg is null)
+                return;
+            
+            await Context.Channel.SendIonicMessageAsync(msg);
         }
 
-        static string GetUptime() => (DateTime.Now - Process.GetCurrentProcess().StartTime).Humanize(5);
-        static string GetHeapSize() => Math.Round(GC.GetTotalMemory(true) / (1024.0 * 1024.0), 2).ToString();
+        const string addRemoveHeaderText = "Оповещение";
+
+        [Group("give")]
+        public class GiveModule : ModuleBase
+        {
+            const string giveText = "Основатель сервера выдал вам";
+
+            [Command("coins")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Coins(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Coins = amount});
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emotecoins {amount.ToString()}"));
+            }
+
+            [Command("tokens")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Tokens(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Tokens = amount});
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emotetokens {amount.ToString()}"));
+            }
+
+            [Command("chests")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Chests(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Chests = amount});
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emotechest {amount.ToString()}"));
+            }
+
+            [Command("capsules")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Capsules(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Capsules = amount});
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emotecapsule {amount.ToString()}"));
+            }
+
+            [Command("spheres")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Spheres(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Spheres = amount});
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emotesphere {amount.ToString()}"));
+            }
+
+            [Command("2exp")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Levels(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {DoubleExps = amount});
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emote2exp {amount.ToString()}"));
+            }
+
+            [Command("respects")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task BotRespects(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {BotRespects = amount});
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emoterespect {amount.ToString()}"));
+            }
+
+            [Command("tickets")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task CustomTickets(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Tickets = amount});
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{giveText} $emoteticket {amount.ToString()}"));
+            }
+        }
+
+        [Group("take")]
+        public class TakeModule : ModuleBase
+        {
+            const string takeText = "Основатель сервера забрал у вас";
+
+            [Command("coins")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Coins(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Coins = amount});
+
+                await sgUser.SendEmbedAsync(new EmbedBuilder()
+                                            .WithAuthor(addRemoveHeaderText)
+                                            .WithDescription($"{takeText} $emotecoins {amount.ToString()}"));
+            }
+
+            [Command("tokens")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Tokens(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Tokens = amount});
+
+                await sgUser.SendEmbedAsync(new EmbedBuilder()
+                                            .WithAuthor(addRemoveHeaderText)
+                                            .WithDescription($"{takeText} $emotetoken {amount.ToString()}"));
+            }
+
+            [Command("2exp")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Level(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {DoubleExps = amount});
+
+                await sgUser.SendEmbedAsync(new EmbedBuilder()
+                                            .WithAuthor(addRemoveHeaderText)
+                                            .WithDescription($"{takeText} $emote2exp {amount.ToString()}"));
+            }
+
+            [Command("chests")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Chests(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Chests = amount});
+
+                await sgUser.SendEmbedAsync(new EmbedBuilder()
+                                            .WithAuthor(addRemoveHeaderText)
+                                            .WithDescription($"{takeText} $emotechest {amount.ToString()}"));
+            }
+
+            [Command("capsules")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Capsules(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Capsules = amount});
+
+                await sgUser.SendEmbedAsync(new EmbedBuilder()
+                                            .WithAuthor(addRemoveHeaderText)
+                                            .WithDescription($"{takeText} $emotecapsule {amount.ToString()}"));
+            }
+
+            [Command("spheres")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task Spheres(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Spheres = amount});
+
+                await sgUser.SendEmbedAsync(new EmbedBuilder()
+                                            .WithAuthor(addRemoveHeaderText)
+                                            .WithDescription($"{takeText} $emotesphere {amount.ToString()}"));
+            }
+
+            [Command("respects")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task BotRespects(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {BotRespects = amount});
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{takeText} $emoterespect {amount.ToString()}"));
+            }
+
+            [Command("tickets")]
+            [RequireAdmin]
+            [RequireContext(ContextType.Guild)]
+            public async Task CustomTickets(uint amount, IUser user)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Tickets = amount});
+
+                await sgUser.SendEmbedAsync(
+                    new EmbedBuilder()
+                        .WithAuthor(addRemoveHeaderText)
+                        .WithDescription($"{takeText} $emoteticket {amount.ToString()}"));
+            }
+        }
     }
 }

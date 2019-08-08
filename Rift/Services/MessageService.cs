@@ -1,19 +1,82 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
+using Rift.Data.Models;
 using Rift.Services.Message;
+
+using MessageType = Rift.Services.Message.MessageType;
+
+using Rift.Services.Message.Templates;
+
+using Humanizer;
 
 using IonicLib;
 using IonicLib.Util;
 
 namespace Rift.Services
 {
-    public class MessageService //TODO: rewrite using scheduling timer
+    public class MessageService
     {
+        public static readonly IonicMessage Error =
+            new IonicMessage(new RiftEmbed()
+                             .WithAuthor("Ошибка")
+                             .WithColor(226, 87, 76)
+                             .WithDescription(
+                                 "Обратитесь к хранителю ботов и опишите ваши действия, которые привели к возникновению данной ошибки.")
+                             .WithThumbnailUrl("https://cdn.ionpri.me/rift/error.jpg"));
+
+        public static readonly IonicMessage UserNotFound =
+            new IonicMessage(new RiftEmbed()
+                             .WithAuthor("Ошибка")
+                             .WithColor(255, 0, 0)
+                             .WithDescription("Пользователь не найден!"));
+
+        public static readonly IonicMessage RoleNotFound =
+            new IonicMessage(new RiftEmbed()
+                             .WithAuthor("Ошибка")
+                             .WithColor(255, 0, 0)
+                             .WithDescription("Роль не найдена!"));
+
+        public MessageService()
+        {
+            RiftBot.Log.Info($"Starting up {nameof(MessageService)}.");
+
+            var sw = new Stopwatch();
+            sw.Restart();
+
+            templates = new ConcurrentDictionary<string, TemplateBase>();
+
+            foreach (var type in GetTemplates())
+            {
+                var templateObj = (TemplateBase) Activator.CreateInstance(type);
+                templates.TryAdd(templateObj.Template, templateObj);
+            }
+
+            sw.Stop();
+            RiftBot.Log.Info($"Loaded {templates.Count.ToString()} message templates in" +
+                             $" {sw.Elapsed.Humanize(1, new CultureInfo("en-US")).ToLowerInvariant()}.");
+
+            RiftBot.Log.Info("Starting up message scheduler.");
+            checkTimer = new Timer(
+                async delegate { await CheckMessagesAsync(); },
+                null,
+                TimeSpan.FromSeconds(10),
+                TimeSpan.FromSeconds(1));
+        }
+
+        //TODO: refactor using scheduling timer
+
+        #region Delayed messages
+
         static ConcurrentDictionary<Guid, SendMessageBase> toSend = new ConcurrentDictionary<Guid, SendMessageBase>();
 
         static ConcurrentDictionary<Guid, DeleteMessageBase> toDelete =
@@ -21,37 +84,32 @@ namespace Rift.Services
 
         static Timer checkTimer;
 
-        public MessageService()
+        public bool TryAddSend(SendMessageBase message)
         {
-            checkTimer = new Timer(
-                async delegate
-                {
-                    await CheckMessagesAsync();
-                },
-                null,
-                TimeSpan.FromSeconds(10),
-                TimeSpan.FromSeconds(1));
+            return toSend.TryAdd(message.Id, message);
         }
 
-        public bool TryAddSend(SendMessageBase message) => toSend.TryAdd(message.Id, message);
-        public bool TryAddDelete(DeleteMessageBase message) => toDelete.TryAdd(message.Id, message);
+        public bool TryAddDelete(DeleteMessageBase message)
+        {
+            return toDelete.TryAdd(message.Id, message);
+        }
 
         async Task CheckMessagesAsync()
         {
             var dtNow = DateTime.UtcNow;
 
-            await CheckSendAsync(dtNow);
-            await CheckDeleteAsync(dtNow);
+            await CheckSendAsync(dtNow).ConfigureAwait(false);
+            await CheckDeleteAsync(dtNow).ConfigureAwait(false);
         }
 
         async Task CheckSendAsync(DateTime dt)
         {
             var unsentId = toSend.Values.ToList()
-                .Where(x => x.DeliveryTime < dt)
-                .Take(3)
-                .OrderBy(x => x.AddedOn)
-                .Select(x => x.Id)
-                .ToList();
+                                 .Where(x => x.DeliveryTime < dt)
+                                 .OrderBy(x => x.AddedOn)
+                                 .Take(3)
+                                 .Select(x => x.Id)
+                                 .ToList();
 
             if (!unsentId.Any())
                 return;
@@ -63,29 +121,29 @@ namespace Rift.Services
                 if (!success)
                     continue;
 
-                await DeliverAsync(message);
+                await DeliverAsync(message).ConfigureAwait(false);
             }
         }
 
         async Task CheckDeleteAsync(DateTime dt)
         {
-            var undeletedId = toDelete.Values.ToList()
-                .Where(x => x.DeletionTime < dt)
-                .Take(3)
-                .Select(x => x.Id)
-                .ToList();
+            var undeletedIds = toDelete.Values.ToList()
+                                       .Where(x => x.DeletionTime < dt)
+                                       .Take(3)
+                                       .Select(x => x.Id)
+                                       .ToList();
 
-            if (!undeletedId.Any())
+            if (!undeletedIds.Any())
                 return;
 
-            foreach (var id in undeletedId)
+            foreach (var id in undeletedIds)
             {
                 (var success, var message) = TryRemoveDelete(id);
 
                 if (!success)
                     continue;
 
-                await DeleteAsync(message);
+                await DeleteAsync(message).ConfigureAwait(false);
             }
         }
 
@@ -106,17 +164,18 @@ namespace Rift.Services
                     {
                         case MessageType.PlainText:
 
-                            await userChannel.SendMessageAsync(message.Text);
+                            await userChannel.SendMessageAsync(message.Text).ConfigureAwait(false);
                             break;
 
                         case MessageType.Embed:
 
-                            await userChannel.SendEmbedAsync(message.Embed);
+                            await userChannel.SendEmbedAsync(message.Embed).ConfigureAwait(false);
                             break;
 
                         case MessageType.Mixed:
 
-                            await userChannel.SendMessageAsync(message.Text, embed: message.Embed);
+                            await userChannel.SendMessageAsync(message.Text, embed: message.Embed)
+                                             .ConfigureAwait(false);
                             break;
                     }
 
@@ -131,17 +190,17 @@ namespace Rift.Services
                     {
                         case MessageType.PlainText:
 
-                            await channel.SendMessageAsync(message.Text);
+                            await channel.SendMessageAsync(message.Text).ConfigureAwait(false);
                             break;
 
                         case MessageType.Embed:
 
-                            await channel.SendEmbedAsync(message.Embed);
+                            await channel.SendEmbedAsync(message.Embed).ConfigureAwait(false);
                             break;
 
                         case MessageType.Mixed:
 
-                            await channel.SendMessageAsync(message.Text, embed: message.Embed);
+                            await channel.SendMessageAsync(message.Text, embed: message.Embed).ConfigureAwait(false);
                             break;
                     }
 
@@ -161,28 +220,137 @@ namespace Rift.Services
                 if (msg is null)
                     return;
 
-                await msg?.DeleteAsync();
+                await msg.DeleteAsync().ConfigureAwait(false);
             }
-            catch
+            catch (Exception ex) // fails when message is already deleted, no delete perms or discord outage
             {
+                RiftBot.Log.Error(ex);
             }
         }
 
         static (bool, SendMessageBase) TryRemoveSend(Guid id)
         {
-            bool result = toSend.TryRemove(id, out var message);
+            var result = toSend.TryRemove(id, out var message);
 
             return (result, message);
         }
 
         static (bool, DeleteMessageBase) TryRemoveDelete(Guid id)
         {
-            bool result = toDelete.TryRemove(id, out var message);
+            var result = toDelete.TryRemove(id, out var message);
 
             return (result, message);
         }
 
-        public int GetSendQueueLength() => toSend.Count;
-        public int GetDeleteQueueLength() => toDelete.Count;
+        public int GetSendQueueLength()
+        {
+            return toSend.Count;
+        }
+
+        public int GetDeleteQueueLength()
+        {
+            return toDelete.Count;
+        }
+
+        #endregion Delayed messages
+
+        #region Message formatting
+
+        static ConcurrentDictionary<string, TemplateBase> templates;
+
+        static List<Type> GetTemplates()
+        {
+            var assembly = Assembly.GetEntryAssembly();
+
+            if (assembly is null)
+            {
+                RiftBot.Log.Error("Unable to obtain entry assembly, disabling template service.");
+                return null;
+            }
+
+            return assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(TemplateBase))).ToList();
+        }
+
+        public List<TemplateBase> GetActiveTemplates()
+        {
+            return templates.Values.ToList();
+        }
+
+        public async Task<IonicMessage> GetMessageAsync(string identifier, FormatData data)
+        {
+            var mapping = await DB.StoredMessages.GetMessageMappingByNameAsync(identifier);
+
+            if (mapping is null)
+            {
+                RiftBot.Log.Warn($"Message mapping \"{identifier}\" does not exist.");
+                return Error;
+            }
+
+            var dbMessage = await DB.StoredMessages.GetMessageByIdAsync(mapping.MessageId);
+
+            if (dbMessage is null)
+            {
+                RiftBot.Log.Warn($"Message with ID \"{mapping.MessageId.ToString()}\" does not exist.");
+                return Error;
+            }
+
+            return await FormatMessageAsync(dbMessage, data);
+        }
+
+        const string TemplateRegex = @"\$\w+";
+        const string EmotePrefix = "$emote";
+
+        public async Task<IonicMessage> FormatMessageAsync(RiftMessage message, FormatData data = null)
+        {
+            if (templates.Count == 0)
+                return new IonicMessage(message);
+
+            if (message is null)
+            {
+                RiftBot.Log.Error("Message is empty!");
+                return Error;
+            }
+
+            if (string.IsNullOrWhiteSpace(message.Text)
+                && string.IsNullOrWhiteSpace(message.Embed)
+                && string.IsNullOrWhiteSpace(message.ImageUrl))
+            {
+                RiftBot.Log.Error($"Message \"{message.Id.ToString()}\" has no data!");
+                return Error;
+            }
+            
+            var matches = new List<Match>();
+
+            if (!string.IsNullOrWhiteSpace(message.Text))
+                matches.AddRange(Regex.Matches(message.Text, TemplateRegex));
+
+            if (!string.IsNullOrWhiteSpace(message.Embed))
+                matches.AddRange(Regex.Matches(message.Embed, TemplateRegex));
+
+            foreach (var match in matches)
+            {
+                if (!templates.TryGetValue(match.Value, out var template))
+                {
+                    if (!match.Value.StartsWith(EmotePrefix))
+                        continue;
+
+                    RiftBot.GetService<EmoteService>().FormatMessage(match.Value, message);
+                    continue;
+                }
+
+                try
+                {
+                    await template.ApplyAsync(message, data).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    RiftBot.Log.Error(ex);
+                }
+            }
+
+            return new IonicMessage(message);
+        }
+
+        #endregion Message formatting
     }
 }

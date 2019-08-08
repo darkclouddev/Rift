@@ -28,7 +28,8 @@ namespace Rift.Modules
             {
                 Task.Run(async () =>
                 {
-                    await base.ReplyAsync("В настоящий момент эта команда доступна только для администраторов.");
+                    await base.ReplyAsync(
+                        "В настоящий момент эта команда доступна только для администраторов.");
                 });
                 return;
             }

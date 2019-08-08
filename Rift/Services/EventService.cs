@@ -1,294 +1,495 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Discord;
+
+using Humanizer;
+
 using Rift.Configuration;
 using Rift.Data.Models;
-using Rift.Embeds;
-using Rift.Rewards;
+using Rift.Events;
+using Rift.Services.Message;
 
 using IonicLib;
 using IonicLib.Extensions;
-using IonicLib.Util;
-
-using Discord;
-using Discord.WebSocket;
 
 namespace Rift.Services
 {
     public class EventService
     {
-        static readonly TimeSpan eventDuration = TimeSpan.FromMinutes(5);
+        public static event EventHandler<NormalMonstersKilledEventArgs> NormalMonstersKilled;
+        public static event EventHandler<RareMonstersKilledEventArgs> RareMonstersKilled;
+        public static event EventHandler<EpicMonstersKilledEventArgs> EpicMonstersKilled;
 
-        Timer startupTimer;
-
-        Timer eventTimer;
-        Timer eventEndTimer;
-        GuildEmote eventEmote;
-        Reward reward;
-        Reward winnerReward;
-        EventType eventType;
+        Timer startTimer;
+        Timer checkTimer;
+        readonly CultureInfo schedulerCulture;
 
         public EventService()
         {
-            RiftBot.Log.Info($"Starting EventService..");
+            RiftBot.Log.Info("Starting EventService..");
 
-            startupTimer = new Timer(
-                async delegate
+            schedulerCulture = new CultureInfo("en-US");
+            InitializeStartTimer(TimeSpan.FromSeconds(4));
+            InitializeCheckTimer(TimeSpan.FromSeconds(5));
+
+            /*var events = new List<RiftScheduledEvent>();
+
+            for (var i = 1; i <= 12; i++)
+            {
+                var generated = GenerateEventsForMonth(i);
+                
+                foreach (var ge in generated)
                 {
-                    await SetupNextEvent();
-                },
-                null,
-                TimeSpan.FromSeconds(15),
-                TimeSpan.Zero);
+                    events.Add(ge);
+                }
+            }
+            
+            Task.Run(() => DB.EventSchedule.AddRangeAsync(events));*/
 
-            RiftBot.Log.Info($"EventService loaded successfully.");
+            RiftBot.Log.Info("EventService loaded successfully.");
         }
 
-        static async Task<ScheduledEvent> GetNextEvent(DateTime dt)
+        void InitializeStartTimer(TimeSpan delay)
         {
-            return (await Database.GetEventsAsync(x =>
-                    x.DayId == (int) dt.DayOfWeek && dt < dt.Date + new TimeSpan(x.Hour, x.Minute, 0)))
-                .FirstOrDefault();
+            startTimer = new Timer(async delegate { await ScheduleTimerToNextEventAsync(); }, null, delay,
+                                   TimeSpan.Zero);
         }
 
-        async Task SetupNextEvent()
+        void InitializeCheckTimer(TimeSpan delay)
         {
-            if (!(await Database.GetAllEventsAsync()).Any())
+            checkTimer = new Timer(async delegate { await CheckExpiredAsync(); }, null, delay, TimeSpan.Zero);
+        }
+
+        async Task CheckExpiredAsync()
+        {
+            var expiredEvents = await DB.ActiveEvents.GetExpiredAsync();
+
+            if (expiredEvents is null || expiredEvents.Count == 0)
             {
-                RiftBot.Log.Warn($"No events in db, skipping event setup.");
+                await ScheduleTimerToClosestActiveAsync().ConfigureAwait(false);
                 return;
             }
 
-            var dt = DateTime.Now;
+            foreach (var e in expiredEvents)
+                await FinishAsync(e);
 
-            ScheduledEvent eventData;
-
-            do
-            {
-                eventData = await GetNextEvent(dt);
-
-                if (eventData is null)
-                    dt = dt.Date.AddDays(1);
-            }
-            while (eventData is null);
-
-            eventType = (EventType) eventData.EventId;
-            switch (eventType)
-            {
-                case EventType.Baron:
-                    reward = EventReward.BaronGeneral;
-                    winnerReward = EventReward.BaronWinner;
-                    winnerReward.CalculateReward();
-                    winnerReward.GenerateRewardString();
-                    break;
-                case EventType.Drake:
-                    reward = EventReward.DrakeGeneral;
-                    winnerReward = EventReward.DrakeWinner;
-                    winnerReward.CalculateReward();
-                    winnerReward.GenerateRewardString();
-                    break;
-                case EventType.BlueBuff:
-                case EventType.Krug:
-                case EventType.Razorfins:
-                case EventType.RedBuff:
-                case EventType.Wolves:
-                    reward = EventReward.RandomReward;
-                    break;
-            }
-
-            reward.CalculateReward();
-            reward.GenerateRewardString();
-
-            var eventTs = GetEventTimeSpan(dt, eventData.Hour, eventData.Minute);
-
-            RiftBot.Log.Debug($"Event Type: {eventType.ToString()}");
-            RiftBot.Log.Debug($"Event Time: {(DateTime.Now + eventTs).ToString(RiftBot.Culture)}");
-
-            eventTimer = new Timer(async delegate { await StartEvent(eventType); }, null, eventTs, TimeSpan.Zero);
-        }
-
-        static TimeSpan GetEventTimeSpan(DateTime date, int hour, int minute)
-        {
-            var eventTime = date.Date + new TimeSpan(hour, minute, 0);
-
-            return eventTime - DateTime.Now;
-        }
-
-        static List<ulong> reactionIds = new List<ulong>();
-        static ulong eventMessageId = 0ul;
-
-        Task Client_AddReactedUser(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
-        {
-            if (message.Id != eventMessageId)
-                return Task.CompletedTask;
-
-            if (eventEmote is null)
-                return Task.CompletedTask;
-
-            if (!reaction.Emote.Name.Equals(eventEmote.Name, StringComparison.InvariantCultureIgnoreCase))
-                return Task.CompletedTask;
-
-            if (reactionIds.Contains(reaction.UserId))
-                return Task.CompletedTask;
-
-            reactionIds.Add(reaction.UserId);
-
-            return Task.CompletedTask;
-        }
-
-        public async Task StartEvent(EventType eventType)
-        {
-            if (eventEmote is null)
-            {
-                if (!IonicClient.GetEmote(Settings.App.MainGuildId, "smite", out var emote))
-                    return;
-
-                eventEmote = emote;
-            }
-
-            await EnableChat(false);
-
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
+            if (!await DB.ActiveEvents.AnyAsync())
                 return;
 
-            Embed eventEmbed = null;
-
-            switch (eventType)
-            {
-                case EventType.Baron:
-                    eventEmbed = EventEmbeds.Baron(reward);
-                    break;
-
-                case EventType.Drake:
-                    eventEmbed = EventEmbeds.Drake(reward);
-                    break;
-
-                case EventType.Wolves:
-                    eventEmbed = EventEmbeds.Wolves(reward);
-                    break;
-
-                case EventType.Razorfins:
-                    eventEmbed = EventEmbeds.Razorfins(reward);
-                    break;
-
-                case EventType.Krug:
-                    eventEmbed = EventEmbeds.Krug(reward);
-                    break;
-
-                case EventType.RedBuff:
-                    eventEmbed = EventEmbeds.RedBuff(reward);
-                    break;
-
-                case EventType.BlueBuff:
-                    eventEmbed = EventEmbeds.BlueBuff(reward);
-                    break;
-
-                default:
-                    RiftBot.Log.Error($"Wrong event type: {eventType.ToString()}");
-                    return;
-            }
-
-            await channel.SendEmbedAsync(EventEmbeds.embedMsg);
-
-            IonicClient.Client.ReactionAdded += Client_AddReactedUser;
-
-            var msg = await channel.SendMessageAsync($"Призыватели, @here, атакуйте и получайте награды.",
-                                                     embed: eventEmbed);
-
-            await msg.AddReactionAsync(eventEmote);
-
-            eventMessageId = msg.Id;
-
-            eventEndTimer = new Timer(async delegate { await EndEvent(eventType); },
-                                      null,
-                                      eventDuration,
-                                      TimeSpan.Zero);
+            await ScheduleTimerToClosestActiveAsync().ConfigureAwait(false);
         }
 
-        async Task EndEvent(EventType eventType)
+        async Task ScheduleTimerToNextEventAsync()
         {
-            IonicClient.Client.ReactionAdded -= Client_AddReactedUser;
+            // Mimic 2000 year
+            var utc = DateTime.UtcNow;
+            var dt = new DateTime(2000, utc.Month, utc.Day, utc.Hour, utc.Minute, utc.Second, DateTimeKind.Utc);
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
+            if (utc.Year % 4 > 0 && dt.Month == 2 && dt.Day == 29) // skip 29th Feb of non-leap years
+                dt = dt.AddDays(1);
+            
+            var closest = await DB.EventSchedule.GetClosestAsync(dt);
+
+            if (closest is null) // this should not be possible but just in case
+            {
+                RiftBot.Log.Error("Next schedule event is null!");
+                return;
+            }
+
+            var ts = closest.StartAt - dt;
+
+            startTimer = new Timer(async delegate
+            {
+                var nextEvent = await RandomizeEventAsync(closest);
+                await StartAsync(nextEvent, IonicClient.Client.CurrentUser.Id);
+
+                await ScheduleTimerToNextEventAsync();
+            }, null, ts, TimeSpan.Zero);
+
+            RiftBot.Log.Info(
+                $"Event starter scheduled to {ts.Humanize(culture: schedulerCulture)} (type ID: {closest.EventType.ToString()}).");
+        }
+
+        async Task ScheduleTimerToClosestActiveAsync()
+        {
+            var closest = await DB.ActiveEvents.GetClosestAsync();
+
+            if (closest is null)
                 return;
 
-            RiftBot.Log.Debug($"EndEvent Reactions: {reactionIds.Count.ToString()}");
+            if (DateTime.UtcNow > closest.DueTime)
+                return;
 
-            if (reactionIds.Count != 0)
+            // Sometimes timer invokes milliseconds before event expiration
+            // Waiting for one second should fix this behaviour
+            var ts = closest.DueTime - DateTime.UtcNow + TimeSpan.FromSeconds(1);
+            checkTimer.Change(ts, TimeSpan.Zero);
+
+            RiftBot.Log.Info($"Expired event check scheduled to {ts.Humanize(culture: schedulerCulture)}.");
+        }
+
+        async Task<RiftEvent> RandomizeEventAsync(RiftScheduledEvent scheduledEvent)
+        {
+            var events = await DB.Events.GetAllOfTypeAsync(scheduledEvent.EventType);
+
+            if (events is null || events.Count == 0)
             {
-                foreach (var id in reactionIds)
+                RiftBot.Log.Error($"No events of type {scheduledEvent.EventType.ToString()}!");
+                return null;
+            }
+
+            return events.Random();
+        }
+
+        public async Task StartAsync(string name, ulong startedById)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                RiftBot.Log.Warn("Empty event name, skipping execution.");
+                return;
+            }
+
+            var dbEvent = await DB.Events.GetAsync(name);
+
+            await StartAsync(dbEvent, startedById);
+        }
+
+        public async Task StartAsync(RiftEvent dbEvent, ulong startedById)
+        {
+            if (dbEvent is null)
+            {
+                RiftBot.Log.Warn("Wrong event name, skipping execution.");
+                return;
+            }
+
+            var msg = await DB.StoredMessages.GetMessageByIdAsync(dbEvent.StoredMessageId);
+
+            if (msg is null)
+            {
+                RiftBot.Log.Warn("Wrong event message ID, skipping execution.");
+                return;
+            }
+
+            var dbSharedReward = await DB.Rewards.GetAsync(dbEvent.SharedRewardId);
+
+            if (dbSharedReward is null)
+            {
+                RiftBot.Log.Warn("Wrong event reward ID, skipping execution.");
+                return;
+            }
+
+            if (!IonicClient.GetEmote(213672490491314176, "smite", out var smite))
+            {
+                RiftBot.Log.Warn("No event emote, skipping execution.");
+                return;
+            }
+
+            var activeGiveaway = new RiftActiveEvent
+            {
+                EventName = dbEvent.Name,
+                StoredMessageId = dbEvent.StoredMessageId,
+                StartedBy = startedById == 0u ? IonicClient.Client.CurrentUser.Id : startedById,
+                StartedAt = DateTime.UtcNow,
+                DueTime = DateTime.UtcNow + dbEvent.Duration,
+            };
+
+            var formattedMsg = await RiftBot.GetService<MessageService>().FormatMessageAsync(
+                msg, new FormatData(startedById));
+
+            var eventMessage = await RiftBot.SendMessageAsync(formattedMsg, Settings.ChannelId.Monsters).ConfigureAwait(false);
+
+            activeGiveaway.ChannelMessageId = eventMessage.Id;
+
+            await DB.ActiveEvents.AddAsync(activeGiveaway).ConfigureAwait(false);
+
+            await eventMessage.AddReactionAsync(smite);
+
+            await ScheduleTimerToClosestActiveAsync().ConfigureAwait(false);
+        }
+
+        async Task FinishAsync(RiftActiveEvent expiredEvent)
+        {
+            var dbEvent = await DB.Events.GetAsync(expiredEvent.EventName);
+
+            var eventLogString = $"ID {expiredEvent.Id.ToString()} \"{expiredEvent.EventName}\"";
+
+            if (dbEvent is null)
+            {
+                RiftBot.Log.Error($"Could not finish event {eventLogString}: {nameof(RiftEvent)} is null!");
+                return;
+            }
+
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Monsters, out var channel))
+            {
+                RiftBot.Log.Error($"Could not finish event {eventLogString}: Event channel is null!");
+                return;
+            }
+
+            var message = (IUserMessage) await channel.GetMessageAsync(expiredEvent.ChannelMessageId);
+
+            if (message is null)
+            {
+                RiftBot.Log.Error($"Could not finish event {eventLogString}: Event message is null! Deleted?");
+                return;
+            }
+
+            if (!IonicClient.GetEmote(213672490491314176ul, "smite", out var emote))
+            {
+                RiftBot.Log.Error($"Could not finish event {eventLogString}: Emote is null! Deleted?");
+                return;
+            }
+
+            // Reaction amount is limited by discord itself.
+            // See https://discordapp.com/developers/docs/resources/channel#get-reactions
+            var reactions = await message.GetReactionUsersAsync(emote, 100).FlattenAsync();
+
+            if (reactions is null)
+            {
+                RiftBot.Log.Error($"Could not finish event {eventLogString}: Unable to get reactions.");
+                return;
+            }
+
+            var dbReward = await DB.Rewards.GetAsync(dbEvent.SharedRewardId);
+
+            if (dbReward is null)
+            {
+                RiftBot.Log.Error($"Could not finish event {eventLogString}: " +
+                                  $"Unable to get reward ID {dbEvent.SharedRewardId.ToString()}.");
+                return;
+            }
+
+            var participants = reactions
+                               .Where(x => !x.IsBot && x.Id != IonicClient.Client.CurrentUser.Id)
+                               .Select(x => x.Id)
+                               .ToArray();
+
+            if (participants.Length == 0)
+            {
+                await LogEventAsync(dbEvent.Name, null, dbReward.ToPlainString(), expiredEvent.StartedBy,
+                                    expiredEvent.StartedAt, dbEvent.Duration);
+                await DB.ActiveEvents.RemoveAsync(expiredEvent.Id);
+
+                RiftBot.Log.Error($"Could not finish event {eventLogString}: No participants.");
+                return;
+            }
+
+            RiftReward specialReward = null;
+            var specialWinnerId = 0ul;
+
+            if (dbEvent.HasSpecialReward)
+            {
+                specialReward = await DB.Rewards.GetAsync(dbEvent.SpecialRewardId);
+
+                if (specialReward is null)
                 {
-                    await reward.GiveRewardAsync(id);
+                    RiftBot.Log.Error($"Could not finish event {eventLogString}: " +
+                                      $"Unable to get special reward ID {dbEvent.SharedRewardId.ToString()}.");
+                    return;
                 }
 
+                specialWinnerId = participants.Random();
+                await specialReward.DeliverToAsync(specialWinnerId);
+            }
+
+            var reward = dbReward.ToRewardBase();
+
+            foreach (var userId in participants)
+                await reward.DeliverToAsync(userId);
+
+            await DB.ActiveEvents.RemoveAsync(expiredEvent.Id);
+
+            var eventType = (EventType) dbEvent.Type;
+
+            foreach (var participant in participants)
+            {
                 switch (eventType)
                 {
-                    case EventType.Baron:
-                    case EventType.Drake:
-                    {
-                        ulong winnerId = reactionIds.Random();
-                        await winnerReward.GiveRewardAsync(winnerId);
-
-                        await channel.SendEmbedAsync(EventEmbeds.Winner(winnerId, winnerReward.RewardString));
+                    case EventType.Normal:
+                        NormalMonstersKilled?.Invoke(
+                            null, new NormalMonstersKilledEventArgs(participant, 1u));
                         break;
-                    }
+
+                    case EventType.Rare:
+                        RareMonstersKilled?.Invoke(
+                            null, new RareMonstersKilledEventArgs(participant, 1u));
+                        break;
+
+                    case EventType.Epic:
+                        EpicMonstersKilled?.Invoke(
+                            null, new EpicMonstersKilledEventArgs(participant, 1u));
+                        break;
                 }
             }
 
-            await channel.SendEmbedAsync(EventEmbeds.UserCount(reactionIds.Count));
+            var log = new RiftEventLog
+            {
+                Name = dbEvent.Name,
+                ParticipantsAmount = (uint) participants.Length,
+                Reward = dbReward.ToPlainString(),
+                StartedBy = expiredEvent.StartedBy,
+                StartedAt = expiredEvent.StartedAt,
+                Duration = dbEvent.Duration,
+                FinishedAt = DateTime.UtcNow,
+                SpecialWinnerId = specialWinnerId
+            };
 
-            reactionIds = new List<ulong>();
-            eventMessageId = 0ul;
+            await RiftBot.SendMessageAsync("event-finished", Settings.ChannelId.Monsters, new FormatData(expiredEvent.StartedBy)
+            {
+                EventData = new EventData
+                {
+                    Log = log,
+                    Stored = dbEvent,
+                }
+            });
 
-            await EnableChat(true);
+            if (dbEvent.HasSpecialReward)
+            {
+                await RiftBot.SendMessageAsync("event-finished-special", Settings.ChannelId.Monsters, new FormatData(specialWinnerId)
+                {
+                    Reward = specialReward.ToRewardBase()
+                });
+            }
 
-            await SetupNextEvent();
+            await LogEventAsync(log).ConfigureAwait(false);
         }
 
-        async Task EnableChat(bool enable)
+        static async Task LogEventAsync(RiftEventLog log)
         {
-            if (!IonicClient.GetGuild(Settings.App.MainGuildId, out var guild))
-                return;
+            await DB.EventLogs.AddAsync(log);
+        }
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
-                return;
-
-            await DoEnableChatForRole(guild.EveryoneRole)
-                .ContinueWith(async x =>
-                {
-                    if (IonicClient.GetRole(Settings.App.MainGuildId, Settings.RoleId.Moderator, out var modRole))
-                        await DoEnableChatForRole(modRole);
-                });
-
-            async Task DoEnableChatForRole(IRole role)
+        static async Task LogEventAsync(string name, ulong[] participants, string rewardPlain,
+                                        ulong startedBy, DateTime startedAt, TimeSpan duration)
+        {
+            var log = new RiftEventLog
             {
-                var perms = channel.GetPermissionOverwrite(role);
+                Name = name,
+                ParticipantsAmount = (uint) participants.Length,
+                Reward = rewardPlain,
+                StartedBy = startedBy,
+                StartedAt = startedAt,
+                Duration = duration,
+                FinishedAt = DateTime.UtcNow,
+            };
 
-                if (perms.HasValue)
+            await LogEventAsync(log);
+        }
+
+        static List<RiftScheduledEvent> GenerateEventsForMonth(int month)
+        {
+            // settings
+
+            const int rareEventsAmount = 2;
+            var rareEventsBaseHour = TimeSpan.FromHours(16);
+            var rareEventsOffset = TimeSpan.FromHours(4);
+
+            var epicEventsBaseHour = TimeSpan.FromHours(16);
+            var epicEventsOffset = TimeSpan.FromHours(4);
+
+            const int typeNormal = (int) EventType.Normal;
+            const int typeRare = (int) EventType.Rare;
+            const int typeEpic = (int) EventType.Epic;
+
+            // settings
+
+            var events = new List<RiftScheduledEvent>();
+
+            var monthStart = new DateTime(2000, month, 1);
+
+            var daysInMonth = monthStart.AddMonths(1).AddDays(-1).Day;
+
+            var rareEventDays = new int[rareEventsAmount];
+
+            for (var i = 0; i < rareEventDays.Length; i++)
+            {
+                var ratio = (int) Math.Floor((double) daysInMonth / rareEventsAmount);
+                var min = i * ratio;
+                var max = (i + 1) * ratio;
+
+                rareEventDays[i] = Helper.NextInt(min, max + 1);
+            }
+
+            for (var dayNumber = 1; dayNumber <= daysInMonth; dayNumber++)
+            {
+                var dt = new DateTime(monthStart.Year, monthStart.Month, dayNumber);
+
+                if (rareEventDays.Contains(dayNumber))
                 {
-                    var newPerms = perms.Value.Modify(sendMessages: enable ? PermValue.Inherit : PermValue.Deny);
-                    await channel.AddPermissionOverwriteAsync(role, newPerms);
+                    dt += GetEventTime(rareEventsBaseHour, rareEventsOffset);
+
+                    events.Add(new RiftScheduledEvent
+                    {
+                        StartAt = new DateTime(2000, dt.Month, dt.Day, dt.Hour, dt.Minute, 0),
+                        EventType = typeRare
+                    });
+
+                    continue;
                 }
-                else
+
+                if (dt.DayOfWeek == DayOfWeek.Sunday) // epic day
                 {
-                    await channel.AddPermissionOverwriteAsync(role, 
-                        new OverwritePermissions(sendMessages: enable ? PermValue.Inherit : PermValue.Deny));
+                    dt += GetEventTime(epicEventsBaseHour, epicEventsOffset);
+
+                    events.Add(new RiftScheduledEvent
+                    {
+                        StartAt = new DateTime(2000, dt.Month, dt.Day, dt.Hour, dt.Minute, 0),
+                        EventType = typeEpic
+                    });
+
+                    continue;
+                }
+                else // normal day
+                {
+                    var deviation = TimeSpan.FromHours(2);
+
+                    var dt10 = dt + GetEventTime(TimeSpan.FromHours(7), deviation);
+                    var dt16 = dt + GetEventTime(TimeSpan.FromHours(13), deviation);
+                    var dt22 = dt + GetEventTime(TimeSpan.FromHours(19), deviation);
+
+                    events.Add(new RiftScheduledEvent()
+                    {
+                        StartAt = new DateTime(2000, dt10.Month, dt10.Day, dt10.Hour, dt10.Minute, 0),
+                        EventType = typeNormal
+                    });
+
+                    events.Add(new RiftScheduledEvent
+                    {
+                        StartAt = new DateTime(2000, dt16.Month, dt16.Day, dt16.Hour, dt16.Minute, 0),
+                        EventType = typeNormal
+                    });
+
+                    events.Add(new RiftScheduledEvent
+                    {
+                        StartAt = new DateTime(2000, dt22.Month, dt22.Day, dt22.Hour, dt22.Minute, 0),
+                        EventType = typeNormal
+                    });
                 }
             }
+
+            return events;
+        }
+
+        static TimeSpan GetEventTime(TimeSpan start, TimeSpan maxDeviation)
+        {
+            var minimum = start - maxDeviation;
+            var diff = (int) (maxDeviation * 2).TotalMinutes;
+
+            var offset = Helper.NextInt(0, diff + 1);
+            var result = minimum + TimeSpan.FromMinutes(offset);
+
+            return result;
         }
     }
 
     public enum EventType
     {
-        Baron = 0,
-        Drake = 1,
-        Wolves = 2,
-        Razorfins = 3,
-        Krug = 4,
-        RedBuff = 5,
-        BlueBuff = 6,
+        Normal = 0,
+        Epic = 1,
+        Rare = 2,
     }
 }

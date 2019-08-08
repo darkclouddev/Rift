@@ -9,15 +9,40 @@ namespace Rift.Data
         public DbSet<RiftUser> Users { get; set; }
         public DbSet<RiftInventory> Inventory { get; set; }
         public DbSet<RiftCooldowns> Cooldowns { get; set; }
-        public DbSet<RiftLolData> LolData { get; set; }
+        public DbSet<RiftLeagueData> LeagueData { get; set; }
         public DbSet<RiftStatistics> Statistics { get; set; }
         public DbSet<RiftPendingUser> PendingUsers { get; set; }
-        public DbSet<ScheduledEvent> ScheduledEvents { get; set; }
         public DbSet<RiftTempRole> TempRoles { get; set; }
         public DbSet<RiftStreamer> Streamers { get; set; }
+        public DbSet<RiftMessage> Messages { get; set; }
+        public DbSet<RiftMapping> MessageMappings { get; set; }
+        public DbSet<RiftToxicity> Toxicity { get; set; }
+        public DbSet<RiftModerationLog> ModerationLog { get; set; }
+        public DbSet<RiftSettings> Settings { get; set; }
+        public DbSet<RiftRole> Roles { get; set; }
+        public DbSet<RiftRoleInventory> RoleInventories { get; set; }
+        public DbSet<RiftSystemTimer> SystemCooldowns { get; set; }
+        public DbSet<RiftReward> Rewards { get; set; }
+        public DbSet<RiftGiveaway> Giveaways { get; set; }
+        public DbSet<RiftGiveawayLog> GiveawayLogs { get; set; }
+        public DbSet<RiftActiveGiveaway> ActiveGiveaways { get; set; }
+        public DbSet<RiftQuestStage> QuestStages { get; set; }
+        public DbSet<RiftQuest> Quests { get; set; }
+        public DbSet<RiftQuestProgress> QuestProgress { get; set; }
+        public DbSet<RiftProfileBackground> Backgrounds { get; set; }
+        public DbSet<RiftBackgroundInventory> BackgroundInventories { get; set; }
+        public DbSet<RiftScheduledEvent> EventSchedule { get; set; }
+        public DbSet<RiftEvent> Events { get; set; }
+        public DbSet<RiftActiveEvent> ActiveEvents { get; set; }
+        public DbSet<RiftEventLog> EventLogs { get; set; }
+        public DbSet<RiftCommunity> Communities { get; set; }
+        public DbSet<RiftTeam> Teams { get; set; }
+        public DbSet<RiftVote> Votes { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
-            optionsBuilder.UseSqlServer(@"Data Source=127.0.0.1,1433;Initial Catalog=Rift;persist security info=True;user id=Rift;password=727");
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseMySql(@"Server=localhost;Database=rift;Uid=rift;Pwd=;");
+        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -35,11 +60,11 @@ namespace Rift.Data
                    .WithOne(inv => inv.User)
                    .HasForeignKey<RiftInventory>(user => user.UserId);
 
-            builder.Entity<RiftLolData>().HasKey(key => key.UserId);
+            builder.Entity<RiftLeagueData>().HasKey(key => key.UserId);
             builder.Entity<RiftUser>()
                    .HasOne(user => user.LolData)
                    .WithOne(lol => lol.User)
-                   .HasForeignKey<RiftLolData>(user => user.UserId);
+                   .HasForeignKey<RiftLeagueData>(user => user.UserId);
 
             builder.Entity<RiftPendingUser>().HasKey(key => key.UserId);
             builder.Entity<RiftUser>()
@@ -47,19 +72,18 @@ namespace Rift.Data
                    .WithOne(pending => pending.User)
                    .HasForeignKey<RiftPendingUser>(user => user.UserId);
 
-            builder.Entity<RiftTempRole>().ToTable("TempRoles");
             builder.Entity<RiftTempRole>()
                    .HasKey(x => new
                    {
                        x.UserId,
                        x.RoleId
                    });
-            
+
             builder.Entity<RiftUser>()
                    .HasMany(users => users.TempRoles)
                    .WithOne(role => role.User)
                    .HasForeignKey(role => role.UserId)
-                   .HasConstraintName($"FK_RiftTempRoles_Users_UserId");
+                   .HasConstraintName("FK_RiftTempRoles_Users_UserId");
 
             builder.Entity<RiftStatistics>().HasKey(key => key.UserId);
             builder.Entity<RiftUser>()
@@ -67,17 +91,112 @@ namespace Rift.Data
                    .WithOne(stat => stat.User)
                    .HasForeignKey<RiftStatistics>(user => user.UserId);
 
-            builder.Entity<ScheduledEvent>().HasKey(key => key.Id);
-            builder.Entity<ScheduledEvent>()
-                   .Property(prop => prop.Id)
-                   .ValueGeneratedOnAdd();
-
             builder.Entity<RiftStreamer>().ToTable("Streamers");
             builder.Entity<RiftStreamer>().HasKey(x => x.UserId);
             builder.Entity<RiftUser>()
                    .HasOne(user => user.Streamers)
                    .WithOne(streamer => streamer.User)
                    .HasForeignKey<RiftStreamer>(user => user.UserId);
+
+            builder.Entity<RiftMapping>().HasKey(key => key.Identifier);
+
+            builder.Entity<RiftMessage>().HasKey(key => key.Id);
+            builder.Entity<RiftMessage>().Property(key => key.Id).ValueGeneratedOnAdd();
+
+            builder.Entity<RiftToxicity>().HasKey(key => key.UserId);
+            builder.Entity<RiftToxicity>().Ignore(key => key.Level);
+            builder.Entity<RiftUser>().HasOne(user => user.Toxicity)
+                   .WithOne(toxicity => toxicity.User)
+                   .HasForeignKey<RiftToxicity>(user => user.UserId);
+
+            builder.Entity<RiftModerationLog>().HasKey(prop => prop.Id);
+            builder.Entity<RiftModerationLog>().Property(prop => prop.Id).ValueGeneratedOnAdd();
+
+            builder.Entity<RiftSettings>().HasKey(prop => prop.Id);
+            builder.Entity<RiftSettings>().Property(prop => prop.Id).ValueGeneratedNever();
+
+            builder.Entity<RiftRole>().HasKey(x => x.Id);
+            builder.Entity<RiftRole>().Property(x => x.Id).ValueGeneratedOnAdd();
+            
+            builder.Entity<RiftRoleInventory>()
+                   .HasKey(x => new
+                   {
+                       x.UserId,
+                       x.RoleId
+                   });
+
+            builder.Entity<RiftSystemTimer>().HasKey(prop => prop.Id);
+            builder.Entity<RiftSystemTimer>().Property(prop => prop.Id).ValueGeneratedOnAdd();
+
+            builder.Entity<RiftReward>().HasKey(prop => prop.Id);
+            builder.Entity<RiftReward>().Property(prop => prop.Id).ValueGeneratedOnAdd();
+            builder.Entity<RiftReward>().Ignore(prop => prop.ItemReward);
+            builder.Entity<RiftReward>().Ignore(prop => prop.RoleReward);
+
+            builder.Entity<RiftGiveaway>().HasKey(prop => prop.Name);
+
+            builder.Entity<RiftGiveawayLog>().HasKey(prop => prop.Id);
+            builder.Entity<RiftGiveawayLog>().Property(prop => prop.Id).ValueGeneratedOnAdd();
+            builder.Entity<RiftGiveawayLog>().Ignore(prop => prop.Winners);
+            builder.Entity<RiftGiveawayLog>().Ignore(prop => prop.Participants);
+
+            builder.Entity<RiftActiveGiveaway>().HasKey(prop => prop.Id);
+            builder.Entity<RiftActiveGiveaway>().Property(prop => prop.Id).ValueGeneratedOnAdd();
+
+            builder.Entity<RiftQuestStage>().HasKey(prop => prop.Id);
+
+            builder.Entity<RiftQuest>().HasKey(prop => prop.Id);
+
+            builder.Entity<RiftQuestProgress>()
+                   .HasKey(prop => new
+                   {
+                       prop.UserId,
+                       prop.QuestId
+                   });
+            builder.Entity<RiftQuestProgress>().Property(prop => prop.UserId).ValueGeneratedNever();
+            builder.Entity<RiftQuestProgress>().Property(prop => prop.QuestId).ValueGeneratedNever();
+
+            builder.Entity<RiftProfileBackground>().HasKey(x => x.Id);
+            builder.Entity<RiftProfileBackground>().Property(x => x.Id).ValueGeneratedOnAdd();
+
+            builder.Entity<RiftBackgroundInventory>()
+                   .HasKey(x => new
+                   {
+                       x.UserId,
+                       x.BackgroundId
+                   });
+            
+            builder.Entity<RiftUser>()
+                   .HasOne(user => user.BackgroundInventory)
+                   .WithOne(inv => inv.User)
+                   .HasForeignKey<RiftBackgroundInventory>(inv => inv.UserId);
+            
+            builder.Entity<RiftScheduledEvent>().HasKey(key => key.Id);
+            builder.Entity<RiftScheduledEvent>().Property(prop => prop.Id).ValueGeneratedOnAdd();
+
+            builder.Entity<RiftEvent>().HasKey(x => x.Name);
+            builder.Entity<RiftEvent>().Ignore(x => x.HasSpecialReward);
+            
+            builder.Entity<RiftActiveEvent>().HasKey(x => x.Id);
+            builder.Entity<RiftActiveEvent>().Property(x => x.Id).ValueGeneratedOnAdd();
+            
+            builder.Entity<RiftEventLog>().HasKey(x => x.Id);
+            builder.Entity<RiftEventLog>().Property(x => x.Id).ValueGeneratedOnAdd();
+            builder.Entity<RiftEventLog>().Ignore(x => x.HadSpecialReward);
+            
+            builder.Entity<RiftCommunity>().HasKey(x => x.Id);
+            builder.Entity<RiftCommunity>().Property(x => x.Id).ValueGeneratedOnAdd();
+            
+            builder.Entity<RiftTeam>().HasKey(x => x.Id);
+            builder.Entity<RiftTeam>().Property(x => x.Id).ValueGeneratedOnAdd();
+            
+            builder.Entity<RiftVote>().HasKey(x => x.UserId);
+            builder.Entity<RiftVote>().Property(x => x.UserId).ValueGeneratedOnAdd();
+            
+            builder.Entity<RiftUser>()
+                   .HasOne(x => x.Votes)
+                   .WithOne(x => x.User)
+                   .HasForeignKey<RiftVote>(x => x.UserId);
         }
     }
 }

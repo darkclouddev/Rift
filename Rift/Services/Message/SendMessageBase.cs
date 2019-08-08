@@ -21,6 +21,8 @@ namespace Rift.Services.Message
         public virtual string Text { get; protected set; } = "";
 
         public virtual Embed Embed { get; protected set; } = null;
+
+        public virtual string ImageUrl { get; protected set; } = null;
     }
 
     public enum MessageType

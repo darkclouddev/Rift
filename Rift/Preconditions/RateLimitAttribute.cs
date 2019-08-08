@@ -64,23 +64,19 @@ namespace Rift.Preconditions
             invokeLimit = times;
             noLimitInDMs = (flags & RateLimitFlags.NoLimitInDMs) == RateLimitFlags.NoLimitInDMs;
             noLimitForAdmins = (flags & RateLimitFlags.NoLimitForAdmins) == RateLimitFlags.NoLimitForAdmins;
+            invokeLimitPeriod = GetPeriod(measure, period);
+        }
 
-            // TODO: C# 8 candidate switch expression
-            switch (measure)
-            {
-                case Measure.Days:
-                    invokeLimitPeriod = TimeSpan.FromDays(period);
-                    break;
-                case Measure.Hours:
-                    invokeLimitPeriod = TimeSpan.FromHours(period);
-                    break;
-                case Measure.Minutes:
-                    invokeLimitPeriod = TimeSpan.FromMinutes(period);
-                    break;
-                case Measure.Seconds:
-                    invokeLimitPeriod = TimeSpan.FromSeconds(period);
-                    break;
-            }
+        static TimeSpan GetPeriod(Measure measure, double period)
+        {
+            return measure switch
+                {
+                Measure.Days => TimeSpan.FromDays(period),
+                Measure.Hours => TimeSpan.FromHours(period),
+                Measure.Minutes => TimeSpan.FromMinutes(period),
+                Measure.Seconds => TimeSpan.FromSeconds(period),
+                _ => TimeSpan.Zero
+                };
         }
 
         /// <summary>
@@ -122,9 +118,10 @@ namespace Rift.Preconditions
             var now = DateTime.UtcNow;
             var key = context.User.Id;
 
-            var timeout = (invokeTracker.TryGetValue(key, out var t)
-                && ((now - t.FirstInvoke) < invokeLimitPeriod))
-                    ? t : new CommandTimeout(now);
+            var timeout = invokeTracker.TryGetValue(key, out var t)
+                          && now - t.FirstInvoke < invokeLimitPeriod
+                ? t
+                : new CommandTimeout(now);
 
             timeout.TimesInvoked++;
 
@@ -142,7 +139,7 @@ namespace Rift.Preconditions
         /// </summary>
         sealed class CommandTimeout
         {
-             /// <summary>
+            /// <summary>
             /// Initializes a new instance of the <see cref="CommandTimeout"/> class.
             /// </summary>
             /// <param name="timeStarted">
@@ -152,7 +149,7 @@ namespace Rift.Preconditions
             {
                 FirstInvoke = timeStarted;
             }
-            
+
             /// <summary>
             /// Gets or sets the times invoked.
             /// </summary>

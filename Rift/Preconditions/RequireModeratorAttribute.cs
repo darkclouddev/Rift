@@ -10,7 +10,7 @@ namespace Rift.Preconditions
     {
         public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
-            if (await Task.Run(() => RiftBot.IsModerator(context.User) || RiftBot.IsAdmin(context.User)))
+            if (await RiftBot.IsModeratorAsync(context.User) || RiftBot.IsAdmin(context.User))
                 return PreconditionResult.FromSuccess();
 
             return PreconditionResult.FromError(RiftBot.CommandDenyMessage);

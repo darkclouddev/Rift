@@ -1,19 +1,12 @@
-﻿using System;
 using System.Threading.Tasks;
-
-using Rift.Configuration;
-using Rift.Embeds;
-using Rift.Preconditions;
-using Rift.Services;
-using Rift.Services.Economy;
-using Rift.Services.Message;
-
-using IonicLib;
-using IonicLib.Util;
 
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
+
+using Rift.Configuration;
+using Rift.Preconditions;
+using Rift.Services;
+using Rift.Util;
 
 namespace Rift.Modules
 {
@@ -21,90 +14,93 @@ namespace Rift.Modules
     {
         readonly EconomyService economyService;
         readonly RiotService riotService;
-        readonly MessageService messageService;
+        readonly BragService bragService;
+        readonly GiveawayService giveawayService;
+        readonly BotRespectService botRespectService;
+        readonly BackgroundService backgroundService;
+        readonly RoleService roleService;
+        readonly RewindService rewindService;
+        readonly DoubleExpService doubleExpService;
+        readonly QuestService questService;
+        readonly ChannelService channelService;
 
-        public EconomyModule(EconomyService economyService, RiotService riotService, MessageService messageService)
+        public EconomyModule(EconomyService economyService, RiotService riotService, BragService bragService,
+                             GiveawayService giveawayService, BotRespectService botRespectService, BackgroundService backgroundService,
+                             RoleService roleService, RewindService rewindService, DoubleExpService doubleExpService,
+                             QuestService questService, ChannelService channelService)
         {
             this.economyService = economyService;
             this.riotService = riotService;
-            this.messageService = messageService;
+            this.bragService = bragService;
+            this.giveawayService = giveawayService;
+            this.botRespectService = botRespectService;
+            this.backgroundService = backgroundService;
+            this.roleService = roleService;
+            this.rewindService = rewindService;
+            this.doubleExpService = doubleExpService;
+            this.questService = questService;
+            this.channelService = channelService;
         }
 
-        [Command("update")]
-        [RequireDeveloper]
-        [RateLimit(1, 10, Measure.Minutes)]
+        [Command("выгнать")]
         [RequireContext(ContextType.Guild)]
-        public async Task Update(ulong userId)
+        public async Task BanFromChannel(IUser targetUser)
         {
-            //var eb = new EmbedBuilder()
-            //	.WithAuthor("Оповещения")
-            //	.WithDescription($"Недоступно до обновления.");
-
-            //await Context.User.SendEmbedAsync(eb);
-            //return;
-
-            await riotService.UpdateRankAsync(userId);
+            await channelService.DenyAccessToUserAsync(Context.User, targetUser);
         }
 
-        [Command("обновить")]
-        [RateLimit(1, 10, Measure.Minutes)]
+        [Command("задания")]
+        [Alias("квесты")]
         [RequireContext(ContextType.Guild)]
-        public async Task Update()
+        public async Task Quests()
         {
-            await riotService.UpdateRankAsync(Context.User.Id);
+            await questService.GetUserQuests(Context.User.Id);
         }
 
-        [Group("gift")]
-        public class SpecialGiftModule : ModuleBase
+        [Command("поставить роль")]
+        [RequireContext(ContextType.Guild)]
+        public async Task AddRole(int id)
         {
-            readonly EconomyService economyService;
+            await roleService.UpdateInventoryRoleAsync(Context.User.Id, id, true);
+        }
 
-            public SpecialGiftModule(EconomyService economyService)
-            {
-                this.economyService = economyService;
-            }
+        [Command("убрать роль")]
+        [RequireContext(ContextType.Guild)]
+        public async Task RemoveRole(int id)
+        {
+            await roleService.UpdateInventoryRoleAsync(Context.User.Id, id, false);
+        }
 
-            [Command("stream")]
-            [RequireStreamer]
-            [RequireContext(ContextType.Guild)]
-            public async Task Stream(IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
+        [Command("поставить фон")]
+        [RequireContext(ContextType.Guild)]
+        public async Task SetBackground(int id)
+        {
+            await backgroundService.SetActiveAsync(Context.User.Id, id);
+        }
 
-                await GiftAsync(Context.User.Id, sgUser.Id, GiftSource.Streamer);
-            }
+        [Command("роли")]
+        [RequireContext(ContextType.Guild)]
+        public async Task RoleInventoryList()
+        {
+            await roleService.GetInventoryAsync(Context.User.Id);
+        }
 
-            [Command("mod")]
-            [RequireModerator]
-            [RequireContext(ContextType.Guild)]
-            public async Task Moderator(IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
+        [Command("фоны")]
+        [RequireContext(ContextType.Guild)]
+        public async Task BackgroundInventoryList()
+        {
+            await backgroundService.GetInventoryAsync(Context.User.Id);
+        }
 
-                await GiftAsync(Context.User.Id, sgUser.Id, GiftSource.Moderator);
-            }
-
-            [Command("voice")]
-            [RequireModerator]
-            [RequireContext(ContextType.Guild)]
-            public async Task Voice(IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await GiftAsync(Context.User.Id, sgUser.Id, GiftSource.Voice);
-            }
-
-            async Task GiftAsync(ulong fromId, ulong toId, GiftSource giftSource)
-            {
-                await economyService.GiftSpecialAsync(fromId, toId, giftSource);
-            }
+        [Command("выдать билеты")]
+        [RequireTicketKeeper]
+        [RequireContext(ContextType.Guild)]
+        public async Task GiveTickets()
+        {
+            await giveawayService.GiveTicketsToLowLevelUsersAsync(Context.User.Id);
         }
 
         [Command("активные")]
-        [RequireAdmin]
         [RequireContext(ContextType.Guild)]
         public async Task Active()
         {
@@ -112,154 +108,64 @@ namespace Rift.Modules
         }
 
         [Command("богатые")]
-        [RequireAdmin]
         [RequireContext(ContextType.Guild)]
         public async Task RichBitch()
         {
             await EconomyService.ShowRichUsersAsync();
         }
 
-        [Command("донатеры")]
-        [RequireAdmin]
-        [RequireContext(ContextType.Guild)]
-        public async Task Donators()
-        {
-            var topTen = await Database.GetTopTenDonatesAsync(x =>
-                !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
-
-            if (topTen.Length == 0)
-                return;
-
-            await Context.Channel.SendEmbedAsync(DonateEmbeds.StatisticEmbed(topTen));
-        }
-
-        [Command("exp")]
-        [RequireAdmin]
-        [RequireContext(ContextType.DM)]
-        public async Task Exp(uint level)
-        {
-            await ReplyAsync($"Level {level.ToString()}: {EconomyService.GetExpForLevel(level).ToString()} XP");
-        }
-
-        [Command("getprofile")]
-        [RequireAdmin]
-        [RequireContext(ContextType.DM)]
-        public async Task GetProfile(ulong userId)
-        {
-            var embedResult = await economyService.GetUserProfileAsync(userId);
-
-            await Context.User.SendEmbedAsync(embedResult);
-        }
-
-        [Command("getinventory")]
-        [RequireAdmin]
-        [RequireContext(ContextType.DM)]
-        public async Task GetInventory(ulong userId)
-        {
-            var embedResult = await economyService.GetUserInventoryAsync(userId);
-
-            await Context.User.SendEmbedAsync(embedResult);
-        }
-
-        [Command("getgamestat")]
-        [RequireAdmin]
-        [RequireContext(ContextType.DM)]
-        public async Task GetGameStat(ulong userId)
-        {
-            //var eb = new EmbedBuilder()
-            //	.WithAuthor("Оповещения")
-            //	.WithDescription($"Недоступно до обновления.");
-
-            //await Context.User.SendEmbedAsync(eb);
-            //return;
-
-            var embedResult = await economyService.GetUserGameStatAsync(userId);
-
-            await Context.User.SendEmbedAsync(embedResult);
-        }
-
-        [Command("getstat")]
-        [RequireAdmin]
-        [RequireContext(ContextType.DM)]
-        public async Task GetStat(ulong userId)
-        {
-            var embedResult = await economyService.GetUserStatAsync(userId);
-            await Context.User.SendEmbedAsync(embedResult);
-        }
-
         [Command("профиль")]
         [RequireContext(ContextType.Guild)]
-        public async Task Profile()
+        public async Task Profile(IUser user = null)
         {
             using (Context.Channel.EnterTypingState())
             {
-                await GetProfile(Context.User.Id);
+                var message = await economyService.GetUserProfileAsync(user?.Id ?? Context.User.Id);
+                await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
             }
         }
-
-        [Command("кд")]
-        [Alias("таймеры")]
-        [RateLimit(1, 10.0, Measure.Seconds, RateLimitFlags.NoLimitForAdmins, ErrorMessage = "Проверять таймеры можно не чаще 1 раза в 10 секунд!")]
+        
+        [Command("таймеры")]
+        [Alias("кд")]
+        [RateLimit(1, 10.0, Measure.Seconds, RateLimitFlags.NoLimitForAdmins,
+            ErrorMessage = "Проверять таймеры можно не чаще 1 раза в 10 секунд!")]
         [RequireContext(ContextType.Guild)]
         public async Task Cooldowns()
         {
             using (Context.Channel.EnterTypingState())
             {
-                var result = await economyService.GetUserCooldownsAsync(Context.User.Id);
-                await Context.User.SendEmbedAsync(result);
+                var message = await economyService.GetUserCooldownsAsync(Context.User.Id);
+                await Context.Channel.SendIonicMessageAsync(message);
             }
         }
 
-        [Group("активировать")]
+        [Command("двойной опыт")]
         [RequireContext(ContextType.Guild)]
-        public class ActivateModule : ModuleBase
-        {
-            readonly EconomyService economy;
-
-            public ActivateModule(EconomyService service)
-            {
-                economy = service;
-            }
-
-            [Command("двойной опыт")]
-            [RequireContext(ContextType.Guild)]
-            public async Task DoubleExp()
-            {
-                using (Context.Channel.EnterTypingState())
-                {
-                    await economy.ActivateDoubleExp(Context.User.Id);
-                }
-            }
-
-            [Command("уважение ботов")]
-            [RequireContext(ContextType.Guild)]
-            public async Task BotRespect()
-            {
-                using (Context.Channel.EnterTypingState())
-                {
-                    await economy.ActivateBotRespect(Context.User.Id);
-                }
-            }
-        }
-
-        [Command("инвентарь")]
-        [RequireContext(ContextType.Guild)]
-        public async Task Inventory()
+        public async Task DoubleExp()
         {
             using (Context.Channel.EnterTypingState())
             {
-                await GetInventory(Context.User.Id);
+                await doubleExpService.ActivateAsync(Context.User.Id);
             }
         }
 
-        [Command("игровой профиль")]
-        [RateLimit(1, 10, Measure.Minutes)]
+        [Command("уважение ботов")]
         [RequireContext(ContextType.Guild)]
-        public async Task GameStat()
+        public async Task BotRespect()
         {
             using (Context.Channel.EnterTypingState())
             {
-                await GetGameStat(Context.User.Id);
+                await botRespectService.ActivateAsync(Context.User.Id);
+            }
+        }
+
+        [Command("перемотка")]
+        [RequireContext(ContextType.Guild)]
+        public async Task Rewind()
+        {
+            using (Context.Channel.EnterTypingState())
+            {
+                await rewindService.ActivateAsync(Context.User.Id);
             }
         }
 
@@ -269,7 +175,8 @@ namespace Rift.Modules
         {
             using (Context.Channel.EnterTypingState())
             {
-                await GetStat(Context.User.Id);
+                var message = await economyService.GetUserStatAsync(Context.User.Id);
+                await Context.Channel.SendIonicMessageAsync(message);
             }
         }
 
@@ -279,338 +186,42 @@ namespace Rift.Modules
         {
             using (Context.Channel.EnterTypingState())
             {
-                (var state, var embed) = await economyService.GetUserBragAsync(Context.User.Id);
-
-                if (state != BragResult.Success)
-                {
-                    await Context.User.SendEmbedAsync(embed);
-                    return;
-                }
-
-                var msg = await Context.Channel.SendEmbedAsync(embed);
-                messageService.TryAddDelete(new DeleteMessage(msg, TimeSpan.FromMinutes(15)));
+                await bragService.GetUserBragAsync(Context.User.Id);
             }
         }
-
-        const string addRemoveHeaderText = "Оповещение";
-
-        [Group("give")]
-        public class GiveModule : ModuleBase
+        
+        [Command("роли")]
+        [RequireContext(ContextType.Guild)]
+        public async Task Roles()
         {
-            const string giveText = "Основатель сервера выдал вам";
-
-            [Command("coins")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task Coins(uint amount, IUser user)
+            using (Context.Channel.EnterTypingState())
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.AddInventoryAsync(sgUser.Id, coins: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.Coin} {amount.ToString()}"));
-            }
-
-            [Command("tokens")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task Tokens(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.AddInventoryAsync(sgUser.Id, tokens: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.Token} {amount.ToString()}"));
-            }
-
-            [Command("chests")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task Chests(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.AddInventoryAsync(sgUser.Id, chests: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.Chest} {amount.ToString()}"));
-            }
-
-            [Command("capsules")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task Capsules(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.AddInventoryAsync(sgUser.Id, capsules: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.Capsule} {amount.ToString()}"));
-            }
-
-            [Command("spheres")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task Spheres(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.AddInventoryAsync(sgUser.Id, spheres: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.Sphere} {amount.ToString()}"));
-            }
-
-            [Command("lvl2")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task Levels(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.AddInventoryAsync(sgUser.Id, doubleExps: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.PowerupDoubleExperience} {amount.ToString()}"));
-            }
-
-            [Command("respects")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task BotRespects(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.AddInventoryAsync(sgUser.Id, respects: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.BotRespect} {amount.ToString()}"));
-            }
-
-            [Command("ctickets")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task CustomTickets(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.AddInventoryAsync(sgUser.Id, usualTickets: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.UsualTickets} {amount.ToString()}"));
-            }
-
-            [Command("gtickets")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task GiveawayTickets(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.AddInventoryAsync(sgUser.Id, rareTickets: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{giveText} {Settings.Emote.RareTickets} {amount.ToString()}"));
-            }
-        }
-
-        [Group("take")]
-        public class TakeModule : ModuleBase
-        {
-            const string takeText = "Основатель сервера забрал у вас";
-
-            [Command("coins")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task Coins(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.RemoveInventoryAsync(sgUser.Id, coins: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.Coin} {amount.ToString()}"));
-            }
-
-            [Command("tokens")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task Tokens(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.RemoveInventoryAsync(sgUser.Id, tokens: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.Token} {amount.ToString()}"));
-            }
-
-            [Command("lvl2")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task Level(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.RemoveInventoryAsync(sgUser.Id, doubleExps: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.PowerupDoubleExperience} {amount.ToString()}"));
-            }
-
-            [Command("chests")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task Chests(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.RemoveInventoryAsync(sgUser.Id, chests: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.Chest} {amount.ToString()}"));
-            }
-
-            [Command("capsules")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task Capsules(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.RemoveInventoryAsync(sgUser.Id, capsules: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.Capsule} {amount.ToString()}"));
-            }
-
-            [Command("spheres")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task Spheres(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.RemoveInventoryAsync(sgUser.Id, spheres: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.Sphere} {amount.ToString()}"));
-            }
-
-            [Command("respects")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task BotRespects(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.RemoveInventoryAsync(sgUser.Id, respects: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.BotRespect} {amount.ToString()}"));
-            }
-
-            [Command("ctickets")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task CustomTickets(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.RemoveInventoryAsync(sgUser.Id, usualTickets: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.UsualTickets} {amount.ToString()}"));
-            }
-
-            [Command("gtickets")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task GiveawayTickets(uint amount, IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.RemoveInventoryAsync(sgUser.Id, rareTickets: amount);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} {Settings.Emote.RareTickets} {amount.ToString()}"));
-            }
-
-            [Command("all")]
-            [RequireAdmin]
-            [RequireContext(ContextType.Guild)]
-            public async Task All(IUser user)
-            {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await Database.RemoveInventoryAsync(sgUser.Id, uint.MaxValue, uint.MaxValue, uint.MaxValue, uint.MaxValue,
-                    uint.MaxValue, uint.MaxValue, uint.MaxValue, uint.MaxValue, uint.MaxValue);
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"Основатель сервера очистил ваш инвентарь."));
+                await RiftBot.SendMessageAsync("roles-list", Settings.ChannelId.Commands, null);
             }
         }
 
         [Group("открыть")]
         public class OpenModule : ModuleBase
         {
-            readonly EconomyService economyService;
-            
-            public OpenModule(EconomyService economyService)
+            readonly ChestService chestService;
+            readonly CapsuleService capsuleService;
+            readonly SphereService sphereService;
+
+            public OpenModule(ChestService chestService, CapsuleService capsuleService, SphereService sphereService)
             {
-                this.economyService = economyService;
+                this.chestService = chestService;
+                this.capsuleService = capsuleService;
+                this.sphereService = sphereService;
             }
 
             [Command("сундук")]
             [RequireContext(ContextType.Guild)]
-            public async Task Chest()
+            public async Task Chest(uint amount = 1u)
             {
                 using (Context.Channel.EnterTypingState())
                 {
-                    var (state, embed) = await economyService.OpenChestAsync(Context.User.Id);
-
-                    await PostOpenAsync(state, embed);
+                    var message = await chestService.OpenAsync(Context.User.Id, amount);
+                    await Context.Channel.SendIonicMessageAsync(message);
                 }
             }
 
@@ -620,25 +231,8 @@ namespace Rift.Modules
             {
                 using (Context.Channel.EnterTypingState())
                 {
-                    var (state, embed) = await economyService.OpenChestAllAsync(Context.User.Id);
-
-                    await PostOpenAsync(state, embed);
-                }
-            }
-
-            async Task PostOpenAsync(OpenChestResult state, Embed embed)
-            {
-                switch (state)
-                {
-                    case OpenChestResult.Error:
-
-                        await Context.User.SendEmbedAsync(embed);
-                        break;
-
-                    case OpenChestResult.NoChests:
-
-                        await Context.User.SendEmbedAsync(embed);
-                        break;
+                    var message = await chestService.OpenAllAsync(Context.User.Id);
+                    await Context.Channel.SendIonicMessageAsync(message);
                 }
             }
 
@@ -646,165 +240,16 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Capsule()
             {
-                (var state, var embed) = await economyService.OpenCapsuleAsync(Context.User.Id);
-
-                await Context.User.SendEmbedAsync(embed);
+                var message = await capsuleService.OpenAsync(Context.User.Id);
+                await Context.Channel.SendIonicMessageAsync(message);
             }
 
             [Command("сферу")]
             [RequireContext(ContextType.Guild)]
             public async Task Sphere()
             {
-                (var state, var embed) = await economyService.OpenSphereAsync(Context.User.Id);
-
-                await Context.User.SendEmbedAsync(embed);
-            }
-        }
-
-        [Group("купить")]
-        public class BuyModule : ModuleBase
-        {
-            readonly EconomyService economy;
-
-            public BuyModule(EconomyService service)
-            {
-                economy = service;
-            }
-
-            [Command]
-            [RequireContext(ContextType.Guild)]
-            public async Task Default(uint id)
-            {
-                using (Context.Channel.EnterTypingState())
-                {
-                    var storeItem = Store.GetShopItemById(id);
-
-                    if (storeItem is null)
-                    {
-                        await Context.User.SendMessageAsync("Данный номер отсутствует в магазине.");
-                        return;
-                    }
-
-                    var result = await economy.StorePurchaseAsync(Context.User.Id, storeItem);
-
-                    switch (result.Item1)
-                    {
-                        default:
-
-                            await Context.User.SendEmbedAsync(result.Item2);
-                            break;
-                    }
-                }
-            }
-        }
-
-        [Group("подарить")]
-        public class GiftModule : ModuleBase
-        {
-            readonly EconomyService economy;
-
-            public GiftModule(EconomyService service)
-            {
-                economy = service;
-            }
-
-            [Command]
-            [RequireContext(ContextType.Guild)]
-            public async Task Default(uint id, IUser user)
-            {
-                using (Context.Channel.EnterTypingState())
-                {
-                    if (user is null || !(user is SocketGuildUser sgUser))
-                    {
-                        await Context.User.SendMessageAsync($"Пользователь не найден!");
-                        return;
-                    }
-
-                    await SendGiftAsync((SocketGuildUser) Context.User, sgUser, id);
-                }
-            }
-
-            async Task SendGiftAsync(SocketGuildUser fromSgUser, SocketGuildUser toSgUser, uint id)
-            {
-                var result = await economy.GiftAsync(fromSgUser, toSgUser, id);
-
-                if (result.Item1 != GiftResult.Success)
-                {
-                    switch (result.Item1)
-                    {
-                        default:
-
-                            await Context.User.SendEmbedAsync(result.Item2);
-                            break;
-                    }
-                }
-            }
-        }
-
-        [Group("атаковать")]
-        public class AttackModule : ModuleBase
-        {
-            readonly EconomyService economy;
-
-            public AttackModule(EconomyService service)
-            {
-                economy = service;
-            }
-
-            [Command]
-            [RequireContext(ContextType.Guild)]
-            public async Task Default([Remainder] string mention)
-            {
-                using (Context.Channel.EnterTypingState())
-                {
-                    var sgTarget = await MentionHelper.ResolveFirstMentionedUser(Context);
-
-                    if (sgTarget == null || !(Context.User is SocketGuildUser sgUser))
-                    {
-                        await Context.User.SendMessageAsync($"Пользователь не найден!");
-                        return;
-                    }
-
-                    await AttackAsync(sgUser, sgTarget);
-                }
-            }
-
-            async Task AttackAsync(SocketGuildUser sgAttacker, SocketGuildUser sgTarget)
-            {
-                var (attackResult, embed) = await economy.AttackAsync(sgAttacker, sgTarget);
-
-                if (attackResult == AttackResult.Success)
-                    return;
-
-                await Context.User.SendEmbedAsync(embed);
-            }
-        }
-
-        [Command("атаки")]
-        public async Task Attacks()
-        {
-            await Context.User.SendEmbedAsync(AttackEmbeds.Help);
-        }
-
-        [Command("магазин")]
-        public async Task Shop()
-        {
-            await Context.User.SendEmbedAsync(Store.Embed);
-        }
-
-        [Command("подарки")]
-        public async Task Gifts()
-        {
-            await Context.User.SendEmbedAsync(Gift.Embed);
-        }
-
-        [Command("платные роли")]
-        [RequireContext(ContextType.Guild)]
-        public async Task DonateRoles()
-        {
-            using (Context.Channel.EnterTypingState())
-            {
-                await Context.User.SendEmbedAsync(RoleEmbeds.DonatedRoles);
+                var message = await sphereService.OpenAsync(Context.User.Id);
+                await Context.Channel.SendIonicMessageAsync(message);
             }
         }
     }

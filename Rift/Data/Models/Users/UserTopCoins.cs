@@ -4,6 +4,5 @@
     {
         public ulong UserId;
         public uint Coins;
-        public uint Tokens;
     }
 }
