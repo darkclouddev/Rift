@@ -55,7 +55,7 @@ namespace Rift.Services
 
             if (msg.Id == HuntersMessageId)
             {
-                await HuntersReactionAsync(userId, true, reaction.Emote.Name);
+                await HuntersReactionAsync(userId, added, reaction.Emote.Name);
                 return;
             }
         }
