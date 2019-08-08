@@ -37,7 +37,7 @@ namespace Rift
 
         public static string InternalVersion { get; private set; } = "6.0";
         public const string CommandDenyMessage = "У вас нет доступа к этой команде.";
-        public static string BotStatusMessage => Settings.App.MaintenanceMode ? "Тестовый режим" : "Подготовка к запуску";
+        public static string BotStatusMessage => Settings.App.MaintenanceMode ? "Тестовый режим" : "!команды";
 
         public static bool ShouldReboot;
 

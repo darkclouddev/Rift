@@ -232,11 +232,11 @@ namespace Rift
                 if (sgUser.Guild.Id == Settings.App.MainGuildId)
                 {
                     var msg = await RiftBot.GetMessageAsync("welcome", null);
-                    await sgUser.SendIonicMessageAsync(msg);
+                    await (await sgUser.GetOrCreateDMChannelAsync()).SendMessageAsync(embed: msg.Embed);
                 }
             }
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Logs, out var usersChannel))
+            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Logs, out var logsChannel))
                 return;
 
             var eb = new RiftEmbed()
@@ -249,7 +249,7 @@ namespace Rift
                      .WithFooter($"ID: {sgUser.Id.ToString()}")
                      .WithCurrentTimestamp();
 
-            await usersChannel.SendIonicMessageAsync(new IonicMessage(eb));
+            await logsChannel.SendIonicMessageAsync(new IonicMessage(eb));
         }
 
         static async Task UserLeft(SocketGuildUser user)

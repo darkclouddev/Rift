@@ -40,7 +40,7 @@ namespace Rift.Services
                 }
             };
 
-            await RiftBot.SendMessageAsync("mod-kick-success", Settings.ChannelId.Commands, data);
+            await RiftBot.SendMessageAsync("mod-kick-success", Settings.ChannelId.Chat, data);
         }
 
         public async Task BanAsync(IUser target, string reason, IUser moderator)
@@ -59,7 +59,6 @@ namespace Rift.Services
             if (!IonicClient.GetGuild(Settings.App.MainGuildId, out var guild))
                 return;
 
-            await guild.AddBanAsync(sgTarget, 1, $"Banned by {moderator}: {reason}");
             await DB.ModerationLogs.AddAsync(sgTarget.Id, moderator.Id, "Ban", reason, DateTime.UtcNow, TimeSpan.Zero);
 
             (var oldToxicity, var newToxicity) = await GetNewToxicityAsync(sgTarget.Id, ToxicitySource.Ban);
@@ -75,7 +74,8 @@ namespace Rift.Services
                 }
             };
 
-            await RiftBot.SendMessageAsync("mod-ban-success", Settings.ChannelId.Commands, data);
+            await RiftBot.SendMessageAsync("mod-ban-success", Settings.ChannelId.Chat, data);
+            await guild.AddBanAsync(sgTarget, 1, $"Banned by {moderator}: {reason}");
         }
 
         public async Task MuteAsync(IUser target, string reason, string time, IUser moderator)
@@ -133,7 +133,7 @@ namespace Rift.Services
             await DB.Toxicity.UpdatePercentAsync(sgTarget.Id, newToxicity.Percent);
 
             if (newToxicity.Level > oldToxicity.Level)
-                await RiftBot.SendMessageAsync("mod-toxicity-increased", Settings.ChannelId.Commands, new FormatData(sgTarget.Id));
+                await RiftBot.SendMessageAsync("mod-toxicity-increased", Settings.ChannelId.Chat, new FormatData(sgTarget.Id));
 
             var data = new FormatData(sgTarget.Id)
             {
@@ -146,7 +146,7 @@ namespace Rift.Services
                 }
             };
 
-            await RiftBot.SendMessageAsync("mod-mute-success", Settings.ChannelId.Commands, data);
+            await RiftBot.SendMessageAsync("mod-mute-success", Settings.ChannelId.Chat, data);
         }
 
         public async Task UnmuteAsync(IUser target, string reason, IUser moderator)
@@ -175,7 +175,7 @@ namespace Rift.Services
             await DB.Toxicity.UpdatePercentAsync(sgTarget.Id, newToxicity.Percent);
 
             if (newToxicity.Level > oldToxicity.Level)
-                await RiftBot.SendMessageAsync("mod-toxicity-increased", Settings.ChannelId.Commands, new FormatData(sgTarget.Id));
+                await RiftBot.SendMessageAsync("mod-toxicity-increased", Settings.ChannelId.Chat, new FormatData(sgTarget.Id));
 
             var data = new FormatData(sgTarget.Id)
             {
@@ -187,7 +187,7 @@ namespace Rift.Services
                 }
             };
 
-            await RiftBot.SendMessageAsync("mod-warn-success", Settings.ChannelId.Commands, data);
+            await RiftBot.SendMessageAsync("mod-warn-success", Settings.ChannelId.Chat, data);
         }
 
         static async Task<(bool, SocketGuildUser)> ValidateAsync(IUser target, string reason, IUser moderator)
