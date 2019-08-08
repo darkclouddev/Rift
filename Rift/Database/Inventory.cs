@@ -72,10 +72,7 @@ namespace Rift.Database
                     else
                         inventory.Coins = coinsBefore + value;
 
-                    if (uint.MaxValue - dbStatistics.CoinsEarned < value)
-                        stat.CoinsEarned = uint.MaxValue;
-                    else
-                        stat.CoinsEarned = dbStatistics.CoinsEarned + value;
+                    stat.CoinsEarned = inventory.Coins - coinsBefore;
 
                     inventoryEntry.Property(x => x.Coins).IsModified = true;
                     RiftBot.Log.Info(
@@ -92,10 +89,7 @@ namespace Rift.Database
                     else
                         inventory.Tokens = tokensBefore + value;
 
-                    if (uint.MaxValue - dbStatistics.TokensEarned < value)
-                        stat.TokensEarned = uint.MaxValue;
-                    else
-                        stat.TokensEarned = dbStatistics.TokensEarned + value;
+                    stat.TokensEarned = inventory.Tokens - tokensBefore;
 
                     inventoryEntry.Property(x => x.Tokens).IsModified = true;
                     RiftBot.Log.Info(
@@ -112,10 +106,7 @@ namespace Rift.Database
                     else
                         inventory.Essence = essenceBefore + value;
 
-                    if (uint.MaxValue - dbStatistics.EssenceEarned < value)
-                        stat.EssenceEarned = uint.MaxValue;
-                    else
-                        stat.EssenceEarned = dbStatistics.EssenceEarned + value;
+                    stat.EssenceEarned = inventory.Essence - essenceBefore;
 
                     inventoryEntry.Property(x => x.Essence).IsModified = true;
                     RiftBot.Log.Info(
@@ -132,10 +123,7 @@ namespace Rift.Database
                     else
                         inventory.Chests = chestsBefore + value;
 
-                    if (uint.MaxValue - dbStatistics.ChestsEarned < data.Chests)
-                        stat.ChestsEarned = uint.MaxValue;
-                    else
-                        stat.ChestsEarned = dbStatistics.ChestsEarned + data.Chests;
+                    stat.ChestsEarned = inventory.Chests - chestsBefore;
 
                     inventoryEntry.Property(x => x.Chests).IsModified = true;
                     RiftBot.Log.Info(
@@ -152,10 +140,7 @@ namespace Rift.Database
                     else
                         inventory.Spheres = spheresBefore + value;
 
-                    if (uint.MaxValue - dbStatistics.SpheresEarned < value)
-                        stat.SpheresEarned = uint.MaxValue;
-                    else
-                        stat.SpheresEarned = dbStatistics.SpheresEarned + value;
+                    stat.SpheresEarned = inventory.Spheres - spheresBefore;
 
                     inventoryEntry.Property(x => x.Spheres).IsModified = true;
                     RiftBot.Log.Info(
@@ -172,10 +157,7 @@ namespace Rift.Database
                     else
                         inventory.Capsules = capsulesBefore + value;
 
-                    if (uint.MaxValue - dbStatistics.CapsulesEarned < value)
-                        stat.CapsulesEarned = uint.MaxValue;
-                    else
-                        stat.CapsulesEarned = dbStatistics.CapsulesEarned + value;
+                    stat.CapsulesEarned = inventory.Capsules - capsulesBefore;
 
                     inventoryEntry.Property(x => x.Capsules).IsModified = true;
                     RiftBot.Log.Info(
@@ -192,10 +174,7 @@ namespace Rift.Database
                     else
                         inventory.Tickets = ticketsBefore + value;
 
-                    if (uint.MaxValue - dbStatistics.TicketsEarned < value)
-                        stat.TicketsEarned = uint.MaxValue;
-                    else
-                        stat.TicketsEarned = dbStatistics.TicketsEarned + value;
+                    stat.TicketsEarned = inventory.Tickets - ticketsBefore;
 
                     inventoryEntry.Property(x => x.Tickets).IsModified = true;
                     RiftBot.Log.Info(
@@ -212,10 +191,7 @@ namespace Rift.Database
                     else
                         inventory.BonusDoubleExp = doubleExpsBefore + value;
 
-                    if (uint.MaxValue - dbStatistics.DoubleExpsEarned < value)
-                        stat.DoubleExpsEarned = uint.MaxValue;
-                    else
-                        stat.DoubleExpsEarned = dbStatistics.DoubleExpsEarned + value;
+                    stat.DoubleExpsEarned = inventory.BonusDoubleExp - doubleExpsBefore;
 
                     inventoryEntry.Property(x => x.BonusDoubleExp).IsModified = true;
                     RiftBot.Log.Info(
@@ -232,10 +208,7 @@ namespace Rift.Database
                     else
                         inventory.BonusBotRespect = respectsBefore + value;
 
-                    if (uint.MaxValue - dbStatistics.BotRespectsEarned < value)
-                        stat.BotRespectsEarned = uint.MaxValue;
-                    else
-                        stat.BotRespectsEarned = dbStatistics.BotRespectsEarned + value;
+                    stat.BotRespectsEarned = inventory.BonusBotRespect - respectsBefore;
 
                     inventoryEntry.Property(x => x.BonusBotRespect).IsModified = true;
                     RiftBot.Log.Info(
@@ -252,10 +225,7 @@ namespace Rift.Database
                     else
                         inventory.BonusRewind = rewindsBefore + value;
 
-                    if (uint.MaxValue - dbStatistics.RewindsEarned < value)
-                        stat.RewindsEarned = uint.MaxValue;
-                    else
-                        stat.RewindsEarned = dbStatistics.RewindsEarned + value;
+                    stat.RewindsEarned = inventory.BonusRewind - rewindsBefore;
 
                     inventoryEntry.Property(x => x.BonusRewind).IsModified = true;
                     RiftBot.Log.Info(
