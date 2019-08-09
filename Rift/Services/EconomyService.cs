@@ -136,7 +136,7 @@ namespace Rift.Services
 
                 var nitroBooster = await DB.Roles.GetAsync(91);
                 if (IonicClient.HasRolesAny(sgUser, nitroBooster.RoleId))
-                    reward.AddChests(1u);
+                    reward.AddChests(2u);
                 
                 var rankGold = await DB.Roles.GetAsync(3);
                 if (IonicClient.HasRolesAny(sgUser, rankGold.RoleId))
