@@ -347,7 +347,7 @@ namespace Rift.Services
 
             RiftBot.Log.Info($"Gived tickets to {affectedRows.ToString()} users");
 
-            await RiftBot.SendMessageAsync("ticket-charity-success", Settings.ChannelId.Commands, new FormatData(startedBy));
+            await RiftBot.SendMessageAsync("ticket-charity-success", Settings.ChannelId.Chat, new FormatData(startedBy));
         }
 
         static async Task LogGiveawayAsync(RiftGiveawayLog log)
