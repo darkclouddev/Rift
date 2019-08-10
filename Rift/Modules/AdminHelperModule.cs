@@ -38,6 +38,29 @@ namespace Rift.Modules
             this.eventService = eventService;
             this.giveawayService = giveawayService;
         }
+
+        [Command("nitrorewards")]
+        [RequireAdmin]
+        [RequireContext(ContextType.Guild)]
+        public async Task NitroRewards()
+        {
+            var reward = new ItemReward().AddTokens(10u);
+
+            var role = await DB.Roles.GetAsync(91);
+
+            if (!IonicClient.GetRole(Settings.App.MainGuildId, role.RoleId, out var gr))
+                return;
+
+            if (!(gr is SocketRole sr))
+                return;
+
+            foreach (var sgUser in sr.Members)
+            {
+                await reward.DeliverToAsync(sgUser.Id);
+            }
+
+            await RiftBot.SendMessageAsync("nitro-booster-reward", Settings.ChannelId.Chat, null);
+        }
         
         [Command("msg")]
         [RequireAdmin]
