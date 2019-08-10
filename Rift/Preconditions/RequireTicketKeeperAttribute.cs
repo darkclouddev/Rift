@@ -16,8 +16,7 @@ namespace Rift.Preconditions
         {
             var role = await DB.Roles.GetAsync(173);
             
-            if (await Task.Run(() => IonicClient.HasRolesAny(context.User.Id, role.RoleId)
-                                     || RiftBot.IsAdmin(context.User)))
+            if (IonicClient.HasRolesAny(Settings.App.MainGuildId, context.User.Id, role.RoleId) || RiftBot.IsAdmin(context.User))
                 return PreconditionResult.FromSuccess();
 
             return PreconditionResult.FromError(RiftBot.CommandDenyMessage);
