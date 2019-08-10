@@ -38,7 +38,7 @@ namespace Rift.Services
                     itemShopList = new List<StoreItem>
                     {
                         new StoreItem(1u, "Сундуки (1 шт.)", StoreItemType.Chest, 1u, 2_000u, Currency.Coins),
-                        new StoreItem(2u, "Сундуки (6 шт.)", StoreItemType.Chest, 6u, 11_000u, Currency.Coins),
+                        new StoreItem(2u, "Сундуки (6 шт.)", StoreItemType.Chest, 6u, 11_500u, Currency.Coins),
                         new StoreItem(3u, "Уважение ботов", StoreItemType.BotRespect, 1u, 24_000u, Currency.Coins),
                         new StoreItem(4u, "Сфера", StoreItemType.Sphere, 1u, 40_000u, Currency.Coins),
                     };
