@@ -313,7 +313,7 @@ namespace Rift.Services
 
             await reward.DeliverToAsync(winnerId);
 
-            await RiftBot.SendMessageAsync("giveaway-ticket-success", Settings.ChannelId.Commands, new FormatData(startedBy)
+            await RiftBot.SendMessageAsync("giveaway-ticket-success", Settings.ChannelId.Chat, new FormatData(startedBy)
             {
                 Giveaway = new GiveawayData
                 {

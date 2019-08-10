@@ -10,6 +10,7 @@ using Rift.Database;
 using Rift.Preconditions;
 using Rift.Services;
 using Rift.Services.Message;
+using Rift.Services.Reward;
 using Rift.Util;
 
 using Discord;
@@ -37,6 +38,29 @@ namespace Rift.Modules
             this.economyService = economyService;
             this.eventService = eventService;
             this.giveawayService = giveawayService;
+        }
+
+        [Command("nitrorewards")]
+        [RequireAdmin]
+        [RequireContext(ContextType.Guild)]
+        public async Task NitroRewards()
+        {
+            var reward = new ItemReward().AddTokens(10u);
+
+            var role = await DB.Roles.GetAsync(91);
+
+            if (!IonicClient.GetRole(Settings.App.MainGuildId, role.RoleId, out var gr))
+                return;
+
+            if (!(gr is SocketRole sr))
+                return;
+
+            foreach (var sgUser in sr.Members)
+            {
+                await reward.DeliverToAsync(sgUser.Id);
+            }
+
+            await RiftBot.SendMessageAsync("nitro-booster-reward", Settings.ChannelId.Chat, null);
         }
         
         [Command("msg")]
@@ -120,7 +144,7 @@ namespace Rift.Modules
         }
         
         [Command("activestages")]
-        [RequireDeveloper]
+        [RequireAdmin]
         [RequireContext(ContextType.Guild)]
         public async Task ActiveStages()
         {
@@ -138,7 +162,7 @@ namespace Rift.Modules
         }
 
         [Command("gtstart")]
-        [RequireDeveloper]
+        [RequireTicketKeeper]
         [RequireContext(ContextType.Guild)]
         public async Task GiveawayStart(int rewardId)
         {
@@ -146,7 +170,7 @@ namespace Rift.Modules
         }
 
         [Command("gastart")]
-        [RequireDeveloper]
+        [RequireAdmin]
         [RequireContext(ContextType.Guild)]
         public async Task GiveawayStart(string name)
         {
@@ -217,7 +241,7 @@ namespace Rift.Modules
         }
 
         [Command("getstat")]
-        [RequireDeveloper]
+        [RequireAdmin]
         [RequireContext(ContextType.Guild)]
         public async Task GetStat(IUser user)
         {
@@ -239,7 +263,7 @@ namespace Rift.Modules
         }
 
         [Command("gastart")]
-        [RequireDeveloper]
+        [RequireAdmin]
         [RequireContext(ContextType.Guild)]
         public async Task StartGiveaway(string name)
         {
@@ -247,6 +271,7 @@ namespace Rift.Modules
         }
 
         [Command("code")]
+        [RequireModerator]
         [RequireContext(ContextType.Guild)]
         public async Task Code(IUser user)
         {
@@ -254,7 +279,7 @@ namespace Rift.Modules
 
             if (pendingData is null)
             {
-                await ReplyAsync("No data for that user.");
+                await ReplyAsync("Этот пользователь не находится в списке ожидания на подтверждение.");
                 return;
             }
 
@@ -264,11 +289,11 @@ namespace Rift.Modules
 
             if (result != RequestResult.Success)
             {
-                await ReplyAsync($"Failed to obtain confirmation code!");
+                await ReplyAsync("Не удалось получить код подтверждения!");
                 return;
             }
 
-            await ReplyAsync($"Expected code: \"{pendingData.ConfirmationCode}\"\nActual code: \"{code}\"");
+            await ReplyAsync($"Ожидаемый код: \"{pendingData.ConfirmationCode}\"\nВведённый код: \"{code}\"");
         }
 
         [Command("selftest")]
@@ -437,7 +462,7 @@ namespace Rift.Modules
         }
 
         [Command("listroles")]
-        [RequireDeveloper]
+        [RequireAdmin]
         public async Task ListRoles()
         {
             var roles = new Queue<IRole>(Context.Guild.Roles);
@@ -528,7 +553,7 @@ namespace Rift.Modules
         }
 
         [Command("listemotes")]
-        [RequireDeveloper]
+        [RequireAdmin]
         [RequireContext(ContextType.Guild)]
         public async Task Emotes()
         {
