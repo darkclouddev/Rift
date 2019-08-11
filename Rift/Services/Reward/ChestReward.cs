@@ -12,7 +12,7 @@ namespace Rift.Services.Reward
 
                 if (Helper.GetChance(3u))
                     AddTickets(1u);
-                else if (Helper.GetChance(3u))
+                else if (Helper.GetChance(1u))
                     AddDoubleExps(1u);
             }
         }
