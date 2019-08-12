@@ -10,11 +10,8 @@ namespace Rift.Services.Reward
             AddRandomChests(3, 7);
             AddRandomTickets(2, 4);
 
-            if (Helper.GetChance(45u))
+            if (Helper.GetChance(40u))
                 AddBotRespects(1u);
-
-            if (Helper.GetChance(45u))
-                AddDoubleExps(1u);
         }
     }
 }

@@ -10,10 +10,8 @@ namespace Rift.Services.Reward
             {
                 AddRandomCoins(1_500, 2_201);
 
-                if (Helper.GetChance(3u))
+                if (Helper.GetChance(1u))
                     AddTickets(1u);
-                else if (Helper.GetChance(1u))
-                    AddDoubleExps(1u);
             }
         }
     }
