@@ -9,18 +9,18 @@ namespace Rift.Services
 {
     public class ToxicityService
     {
-        const string timerName = "toxicity-reducer";
+        const string TimerName = "toxicity-reducer";
         Timer checkTimer;
 
         public ToxicityService()
         {
             Task.Run(async () =>
             {
-                var toxicityTimer = await DB.SystemTimers.GetAsync(timerName);
+                var toxicityTimer = await DB.SystemTimers.GetAsync(TimerName);
 
                 if (toxicityTimer is null)
                 {
-                    RiftBot.Log.Error($"Failed to get system timer \"{timerName}\"");
+                    RiftBot.Log.Error($"Failed to get system timer \"{TimerName}\"");
                     return;
                 }
 
@@ -35,13 +35,13 @@ namespace Rift.Services
             });
         }
 
-        async Task StartAsync()
+        static async Task StartAsync()
         {
-            await DB.SystemTimers.UpdateAsync(timerName, DateTime.UtcNow).ConfigureAwait(false);
+            await DB.SystemTimers.UpdateAsync(TimerName, DateTime.UtcNow);
             await CheckToxicityAsync();
         }
 
-        public async Task CheckToxicityAsync()
+        static async Task CheckToxicityAsync()
         {
             var toxicity = await DB.Toxicity.GetNonZeroAsync();
 
@@ -68,18 +68,18 @@ namespace Rift.Services
                 await ReduceToxicityAsync(toxic).ConfigureAwait(false);
             }
 
-            RiftBot.Log.Info($"Successfully reduced toxicity level of {count} users.");
+            RiftBot.Log.Info($"Successfully reduced toxicity level of {count.ToString()} users.");
         }
 
-        public async Task ReduceToxicityAsync(RiftToxicity toxicity)
+        static async Task ReduceToxicityAsync(RiftToxicity toxicity)
         {
-            var perc = toxicity.Percent > Settings.Economy.ToxicityWeeklyDropRate
+            var percent = toxicity.Percent > Settings.Economy.ToxicityWeeklyDropRate
                 ? toxicity.Percent - Settings.Economy.ToxicityWeeklyDropRate
                 : 0u;
 
-            RiftBot.Log.Warn($"Reduced {toxicity.UserId}'s toxicity to {perc}% (level {toxicity.Level}).");
+            RiftBot.Log.Warn($"Reduced {toxicity.UserId.ToString()}'s toxicity to {percent.ToString()}% (level {toxicity.Level.ToString()}).");
 
-            await DB.Toxicity.UpdatePercentAsync(toxicity.UserId, perc);
+            await DB.Toxicity.UpdatePercentAsync(toxicity.UserId, percent);
         }
     }
 }
