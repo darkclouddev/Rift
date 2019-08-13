@@ -62,7 +62,7 @@ namespace Rift.Modules
 
             await RiftBot.SendMessageAsync("nitro-booster-reward", Settings.ChannelId.Chat, null);
         }
-        
+
         [Command("msg")]
         [RequireAdmin]
         [RequireContext(ContextType.Guild)]
@@ -70,14 +70,14 @@ namespace Rift.Modules
         {
             await RiftBot.SendMessageAsync(mapping, Context.Channel.Id, new FormatData(Context.User.Id));
         }
-        
+
         [Command("addback")]
         [RequireAdmin]
         [RequireContext(ContextType.Guild)]
         public async Task AddBack(ulong roleId, int backId)
         {
             var dbBack = await DB.ProfileBackgrounds.GetAsync(backId);
-            
+
             if (dbBack is null
                 || !IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var sr)
                 || !(sr is SocketRole role))
@@ -95,24 +95,24 @@ namespace Rift.Modules
                     await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
                     return;
                 }
-                
+
                 if (await DB.BackgroundInventory.HasAsync(user.Id, dbBack.Id))
                     continue;
-                
+
                 await DB.BackgroundInventory.AddAsync(user.Id, dbBack.Id);
                 count++;
             }
-            
+
             await ReplyAsync($"Added background \"{dbBack.Name}\" for role \"{role.Name}\" ({count.ToString()} user(s)).");
         }
-        
+
         [Command("addrole")]
         [RequireAdmin]
         [RequireContext(ContextType.Guild)]
         public async Task AddRole(ulong roleId)
         {
             var dbRole = await DB.Roles.GetByRoleIdAsync(roleId);
-            
+
             if (dbRole is null
                 || !IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var sr)
                 || !(sr is SocketRole role))
@@ -126,23 +126,23 @@ namespace Rift.Modules
             foreach (var user in role.Members)
             {
                 await user.RemoveRoleAsync(sr);
-                
+
                 if (!await DB.Users.EnsureExistsAsync(user.Id))
                 {
                     await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
                     return;
                 }
-                
+
                 if (await DB.RoleInventory.HasAnyAsync(user.Id, dbRole.Id))
                     continue;
-                
+
                 await DB.RoleInventory.AddAsync(user.Id, dbRole.Id, "Launch seeding");
                 count++;
             }
-            
+
             await ReplyAsync($"Added role \"{role.Name}\" to {count.ToString()} user(s).");
         }
-        
+
         [Command("activestages")]
         [RequireAdmin]
         [RequireContext(ContextType.Guild)]
@@ -330,8 +330,8 @@ namespace Rift.Modules
 
                             var guildChannel = guild.Channels.FirstOrDefault(
                                 x => x.Name.Equals(channelName,
-                                                   StringComparison
-                                                       .InvariantCultureIgnoreCase));
+                                    StringComparison
+                                        .InvariantCultureIgnoreCase));
 
                             if (guildChannel is null)
                             {
@@ -403,24 +403,24 @@ namespace Rift.Modules
 
             var serverRoles = Context.Guild.Roles.ToList();
             var roles = await DB.Roles.GetAllAsync();
-            
+
             foreach (var role in serverRoles)
             {
                 if (skipChecks)
                     break;
-                
+
                 var matchedRole = roles.FirstOrDefault(x => x.Name.Equals(role.Name));
-                
+
                 if (matchedRole is null)
                 {
                     await DB.Roles.AddAsync(role);
                     fixedRoles++;
                     continue;
                 }
-                
+
                 if (matchedRole.RoleId.Equals(role.Id))
                     continue;
-                
+
                 matchedRole.RoleId = role.Id;
                 await DB.Roles.UpdateAsync(matchedRole);
                 fixedRoles++;
@@ -453,9 +453,9 @@ namespace Rift.Modules
             if (fixedRoles > 0u)
             {
                 var embedMsg = new RiftEmbed()
-                               .WithColor(255, 255, 0)
-                               .WithAuthor("Self-test")
-                               .WithDescription($"Fixed {fixedRoles.ToString()} roles.");
+                    .WithColor(255, 255, 0)
+                    .WithAuthor("Self-test")
+                    .WithDescription($"Fixed {fixedRoles.ToString()} roles.");
 
                 await Context.Channel.SendIonicMessageAsync(new IonicMessage(embedMsg));
             }
@@ -475,8 +475,8 @@ namespace Rift.Modules
                 ++page;
 
                 var eb = new EmbedBuilder()
-                         .WithAuthor($"Server roles")
-                         .WithFooter($"Page {page.ToString()}");
+                    .WithAuthor($"Server roles")
+                    .WithFooter($"Page {page.ToString()}");
 
                 var ids = new List<ulong>();
                 var names = new List<string>();
@@ -560,9 +560,9 @@ namespace Rift.Modules
             var emotes = Context.Guild.Emotes.ToList();
 
             var re = new RiftEmbed()
-                     .WithAuthor("Server emotes")
-                     .AddField("Emote", string.Join('\n', emotes.Select(x => x.Name)), true)
-                     .AddField("ID", string.Join('\n', emotes.Select(x => x.Id)), true);
+                .WithAuthor("Server emotes")
+                .AddField("Emote", string.Join('\n', emotes.Select(x => x.Name)), true)
+                .AddField("ID", string.Join('\n', emotes.Select(x => x.Id)), true);
 
             await Context.Channel.SendIonicMessageAsync(new IonicMessage(re));
         }
@@ -576,31 +576,33 @@ namespace Rift.Modules
 
             if (msg is null)
                 return;
-            
+
             await Context.Channel.SendIonicMessageAsync(msg);
         }
-
-        const string addRemoveHeaderText = "Оповещение";
 
         [Group("give")]
         public class GiveModule : ModuleBase
         {
-            const string giveText = "Основатель сервера выдал вам";
+            static async Task GiveAsync(IUser user, ItemReward reward)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
+
+                await reward.DeliverToAsync(sgUser.Id);
+                
+                await RiftBot.SendMessageAsync("admin-give", Settings.ChannelId.Commands, new FormatData(sgUser.Id)
+                {
+                    Reward = reward
+                });
+            }
 
             [Command("coins")]
             [RequireAdmin]
             [RequireContext(ContextType.Guild)]
             public async Task Coins(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Coins = amount});
-
-                await sgUser.SendEmbedAsync(
-                    new EmbedBuilder()
-                        .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} $emotecoins {amount.ToString()}"));
+                var reward = new ItemReward().AddCoins(amount);
+                await GiveAsync(user, reward);
             }
 
             [Command("tokens")]
@@ -608,15 +610,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Tokens(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Tokens = amount});
-
-                await sgUser.SendEmbedAsync(
-                    new EmbedBuilder()
-                        .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} $emotetokens {amount.ToString()}"));
+                var reward = new ItemReward().AddTokens(amount);
+                await GiveAsync(user, reward);
             }
 
             [Command("chests")]
@@ -624,15 +619,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Chests(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Chests = amount});
-
-                await sgUser.SendEmbedAsync(
-                    new EmbedBuilder()
-                        .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} $emotechest {amount.ToString()}"));
+                var reward = new ItemReward().AddChests(amount);
+                await GiveAsync(user, reward);
             }
 
             [Command("capsules")]
@@ -640,15 +628,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Capsules(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Capsules = amount});
-
-                await sgUser.SendEmbedAsync(
-                    new EmbedBuilder()
-                        .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} $emotecapsule {amount.ToString()}"));
+                var reward = new ItemReward().AddCapsules(amount);
+                await GiveAsync(user, reward);
             }
 
             [Command("spheres")]
@@ -656,15 +637,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Spheres(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Spheres = amount});
-
-                await sgUser.SendEmbedAsync(
-                    new EmbedBuilder()
-                        .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} $emotesphere {amount.ToString()}"));
+                var reward = new ItemReward().AddSpheres(amount);
+                await GiveAsync(user, reward);
             }
 
             [Command("2exp")]
@@ -672,15 +646,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Levels(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {DoubleExps = amount});
-
-                await sgUser.SendEmbedAsync(
-                    new EmbedBuilder()
-                        .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} $emote2exp {amount.ToString()}"));
+                var reward = new ItemReward().AddDoubleExps(amount);
+                await GiveAsync(user, reward);
             }
 
             [Command("respects")]
@@ -688,15 +655,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task BotRespects(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {BotRespects = amount});
-
-                await sgUser.SendEmbedAsync(
-                    new EmbedBuilder()
-                        .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} $emoterespect {amount.ToString()}"));
+                var reward = new ItemReward().AddBotRespects(amount);
+                await GiveAsync(user, reward);
             }
 
             [Command("tickets")]
@@ -704,36 +664,36 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task CustomTickets(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Tickets = amount});
-
-                await sgUser.SendEmbedAsync(
-                    new EmbedBuilder()
-                        .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{giveText} $emoteticket {amount.ToString()}"));
+                var reward = new ItemReward().AddTickets(amount);
+                await GiveAsync(user, reward);
             }
         }
 
         [Group("take")]
         public class TakeModule : ModuleBase
         {
-            const string takeText = "Основатель сервера забрал у вас";
+            async Task TakeAsync(IUser user, ItemReward reward)
+            {
+                if (!(user is SocketGuildUser sgUser))
+                    return;
 
+                var invData = reward.ToInventoryData();
+
+                await DB.Inventory.RemoveAsync(sgUser.Id, invData);
+                
+                await RiftBot.SendMessageAsync("admin-take", Settings.ChannelId.Commands, new FormatData(sgUser.Id)
+                {
+                    Reward = reward
+                });
+            }
+            
             [Command("coins")]
             [RequireAdmin]
             [RequireContext(ContextType.Guild)]
             public async Task Coins(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Coins = amount});
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} $emotecoins {amount.ToString()}"));
+                var reward = new ItemReward().AddCoins(amount);
+                await TakeAsync(user, reward);
             }
 
             [Command("tokens")]
@@ -741,14 +701,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Tokens(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Tokens = amount});
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} $emotetoken {amount.ToString()}"));
+                var reward = new ItemReward().AddTokens(amount);
+                await TakeAsync(user, reward);
             }
 
             [Command("2exp")]
@@ -756,14 +710,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Level(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {DoubleExps = amount});
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} $emote2exp {amount.ToString()}"));
+                var reward = new ItemReward().AddDoubleExps(amount);
+                await TakeAsync(user, reward);
             }
 
             [Command("chests")]
@@ -771,14 +719,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Chests(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Chests = amount});
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} $emotechest {amount.ToString()}"));
+                var reward = new ItemReward().AddChests(amount);
+                await TakeAsync(user, reward);
             }
 
             [Command("capsules")]
@@ -786,14 +728,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Capsules(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Capsules = amount});
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} $emotecapsule {amount.ToString()}"));
+                var reward = new ItemReward().AddCapsules(amount);
+                await TakeAsync(user, reward);
             }
 
             [Command("spheres")]
@@ -801,14 +737,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Spheres(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Spheres = amount});
-
-                await sgUser.SendEmbedAsync(new EmbedBuilder()
-                                            .WithAuthor(addRemoveHeaderText)
-                                            .WithDescription($"{takeText} $emotesphere {amount.ToString()}"));
+                var reward = new ItemReward().AddSpheres(amount);
+                await TakeAsync(user, reward);
             }
 
             [Command("respects")]
@@ -816,15 +746,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task BotRespects(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {BotRespects = amount});
-
-                await sgUser.SendEmbedAsync(
-                    new EmbedBuilder()
-                        .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{takeText} $emoterespect {amount.ToString()}"));
+                var reward = new ItemReward().AddBotRespects(amount);
+                await TakeAsync(user, reward);
             }
 
             [Command("tickets")]
@@ -832,15 +755,8 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task CustomTickets(uint amount, IUser user)
             {
-                if (!(user is SocketGuildUser sgUser))
-                    return;
-
-                await DB.Inventory.RemoveAsync(sgUser.Id, new InventoryData {Tickets = amount});
-
-                await sgUser.SendEmbedAsync(
-                    new EmbedBuilder()
-                        .WithAuthor(addRemoveHeaderText)
-                        .WithDescription($"{takeText} $emoteticket {amount.ToString()}"));
+                var reward = new ItemReward().AddTickets(amount);
+                await TakeAsync(user, reward);
             }
         }
     }
