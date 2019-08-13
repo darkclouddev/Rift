@@ -120,8 +120,7 @@ namespace Rift.Modules
         {
             using (Context.Channel.EnterTypingState())
             {
-                var message = await economyService.GetUserProfileAsync(user?.Id ?? Context.User.Id);
-                await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
+                await economyService.GetUserProfileAsync(user?.Id ?? Context.User.Id);
             }
         }
         
@@ -134,8 +133,7 @@ namespace Rift.Modules
         {
             using (Context.Channel.EnterTypingState())
             {
-                var message = await economyService.GetUserCooldownsAsync(Context.User.Id);
-                await Context.Channel.SendIonicMessageAsync(message);
+                await economyService.GetUserCooldownsAsync(Context.User.Id);
             }
         }
 
@@ -175,8 +173,7 @@ namespace Rift.Modules
         {
             using (Context.Channel.EnterTypingState())
             {
-                var message = await economyService.GetUserStatAsync(Context.User.Id);
-                await Context.Channel.SendIonicMessageAsync(message);
+                await economyService.GetUserStatAsync(Context.User.Id);
             }
         }
 
@@ -220,8 +217,7 @@ namespace Rift.Modules
             {
                 using (Context.Channel.EnterTypingState())
                 {
-                    var message = await chestService.OpenAsync(Context.User.Id, amount);
-                    await Context.Channel.SendIonicMessageAsync(message);
+                    await chestService.OpenAsync(Context.User.Id, amount);
                 }
             }
 
@@ -231,8 +227,7 @@ namespace Rift.Modules
             {
                 using (Context.Channel.EnterTypingState())
                 {
-                    var message = await chestService.OpenAllAsync(Context.User.Id);
-                    await Context.Channel.SendIonicMessageAsync(message);
+                    await chestService.OpenAllAsync(Context.User.Id);
                 }
             }
 
@@ -240,16 +235,17 @@ namespace Rift.Modules
             [RequireContext(ContextType.Guild)]
             public async Task Capsule()
             {
-                var message = await capsuleService.OpenAsync(Context.User.Id);
-                await Context.Channel.SendIonicMessageAsync(message);
+                using (Context.Channel.EnterTypingState())
+                {
+                    await capsuleService.OpenAsync(Context.User.Id);
+                }
             }
 
             [Command("сферу")]
             [RequireContext(ContextType.Guild)]
             public async Task Sphere()
             {
-                var message = await sphereService.OpenAsync(Context.User.Id);
-                await Context.Channel.SendIonicMessageAsync(message);
+                await sphereService.OpenAsync(Context.User.Id);
             }
         }
     }

@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Settings = Rift.Configuration.Settings;
 
-using Rift.Database;
 using Rift.Services.Message;
 using Rift.Services.Reward;
-using Rift.Util;
 
 using Discord;
 
@@ -170,21 +167,21 @@ namespace Rift.Services
             });
         }
 
-        public async Task<IonicMessage> GetUserCooldownsAsync(ulong userId)
+        public async Task GetUserCooldownsAsync(ulong userId)
         {
-            return await RiftBot.GetMessageAsync("user-cooldowns", new FormatData(userId));
+            await RiftBot.SendMessageAsync("user-cooldowns", Settings.ChannelId.Commands, new FormatData(userId));
         }
 
-        public async Task<IonicMessage> GetUserProfileAsync(ulong userId)
+        public async Task GetUserProfileAsync(ulong userId)
         {
-            return await RiftBot.GetMessageAsync("user-profile", new FormatData(userId));
+            await RiftBot.SendMessageAsync("user-profile", Settings.ChannelId.Commands, new FormatData(userId));
         }
 
-        public async Task<IonicMessage> GetUserStatAsync(ulong userId)
+        public async Task GetUserStatAsync(ulong userId)
         {
             var statistics = await DB.Statistics.GetAsync(userId);
 
-            return await RiftBot.GetMessageAsync("user-stat", new FormatData(userId)
+            await RiftBot.SendMessageAsync("user-stat", Settings.ChannelId.Commands, new FormatData(userId)
             {
                 Statistics = statistics
             });

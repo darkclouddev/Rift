@@ -22,14 +22,35 @@ namespace Rift.Services
         const ulong VoiceCategoryId = 360570328197496833ul;
         static Timer voiceUptimeTimer;
         static readonly TimeSpan VoiceRewardsInterval = TimeSpan.FromMinutes(5);
+        const string TimerName = "voice-uptime";
 
         public ChannelService(DiscordSocketClient client)
         {
-            voiceUptimeTimer = new Timer(
-                async delegate { await UpdateUsersVoiceUptimeAsync(); },
-                null,
-                TimeSpan.FromSeconds(15),
-                VoiceRewardsInterval);
+            Task.Run(async () =>
+            {
+                var timer = await DB.SystemTimers.GetAsync(TimerName);
+
+                if (timer is null)
+                {
+                    RiftBot.Log.Error($"Failed to get system timer \"{TimerName}\"");
+                    return;
+                }
+
+                var delay = DateTime.UtcNow - timer.LastInvoked > timer.Interval
+                    ? TimeSpan.Zero
+                    : timer.Interval - (DateTime.UtcNow - timer.LastInvoked);
+
+                voiceUptimeTimer = new Timer(async delegate { await StartAsync(); },
+                    null,
+                    delay,
+                    timer.Interval);
+            });
+        }
+        
+        static async Task StartAsync()
+        {
+            await DB.SystemTimers.UpdateAsync(TimerName, DateTime.UtcNow);
+            await UpdateUsersVoiceUptimeAsync();
         }
 
         static async Task ManageChannelsAsync(SocketUser user, SocketVoiceState fromState, SocketVoiceState toState)

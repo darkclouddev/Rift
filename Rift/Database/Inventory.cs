@@ -51,8 +51,6 @@ namespace Rift.Database
         public async Task AddAsync(ulong userId, InventoryData data)
         {
             var dbInventory = await GetAsync(userId);
-            var dbStatistics = await DB.Statistics.GetAsync(userId);
-
             var inventory = new RiftInventory {UserId = userId};
             var stat = new StatisticData();
 

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 using Settings = Rift.Configuration.Settings;
 
-using Rift.Database;
 using Rift.Preconditions;
 using Rift.Services;
 using Rift.Services.Message;
@@ -219,12 +218,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task GetProfile(IUser user)
         {
-            var message = await economyService.GetUserProfileAsync(user.Id);
-
-            if (message is null)
-                return;
-
-            await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
+            await economyService.GetUserProfileAsync(user.Id);
         }
 
         [Command("getgamestat")]
@@ -245,12 +239,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task GetStat(IUser user)
         {
-            var message = await economyService.GetUserStatAsync(user.Id);
-
-            if (message is null)
-                return;
-
-            await Context.Channel.SendIonicMessageAsync(message).ConfigureAwait(false);
+            await economyService.GetUserStatAsync(user.Id);
         }
 
         [Command("update")]
