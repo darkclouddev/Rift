@@ -205,7 +205,12 @@ namespace Rift.Services.Reward
 
         public override async Task DeliverToAsync(ulong userId)
         {
-            await DB.Inventory.AddAsync(userId, new InventoryData
+            await DB.Inventory.AddAsync(userId, ToInventoryData());
+        }
+
+        public InventoryData ToInventoryData()
+        {
+            return new InventoryData
             {
                 Coins = Coins,
                 Tokens = Tokens,
@@ -216,7 +221,7 @@ namespace Rift.Services.Reward
                 DoubleExps = DoubleExps,
                 BotRespects = BotRespects,
                 Rewinds = Rewinds,
-            });
+            };
         }
 
         public override string ToString()
