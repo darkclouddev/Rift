@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
-    <UserSecretsId>aspnet-Rift-7FB4B985-CBC2-46EC-BC11-E0EEC9BDC2E4</UserSecretsId>
-    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <LangVersion>8</LangVersion>
     <Version>6.0.0</Version>
     <OutputType>Exe</OutputType>
@@ -24,7 +22,6 @@
     <PackageReference Include="Humanizer.Core.ru" Version="2.6.2" />
     <PackageReference Include="IonicLib.Core" Version="1.2.39" />
     <PackageReference Include="IonicLib.Extensions" Version="1.7.0" />
-    <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.2.6">
       <PrivateAssets>all</PrivateAssets>
@@ -35,7 +32,7 @@
     <PackageReference Include="NLog" Version="4.6.6" />
     <PackageReference Include="NLog.Extensions.Logging" Version="1.5.2" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.2.0" />
-    <PackageReference Include="SharpZipLib" Version="1.1.0" />
+    <PackageReference Include="SharpZipLib" Version="1.2.0" />
   </ItemGroup>
   
 </Project>
