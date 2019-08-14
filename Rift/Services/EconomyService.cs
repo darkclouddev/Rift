@@ -119,13 +119,13 @@ namespace Rift.Services
             for (var level = fromLevel + 1; level <= toLevel; level++)
             {
                 if (level == 100u)
-                    reward.AddCapsules(1u);
+                    reward.AddCapsules(1u).AddCoins(2_000u);
                 else if (level == 50u)
-                    reward.AddSpheres(1u);
+                    reward.AddSpheres(1u).AddCoins(2_000u);
                 else if (level % 25u == 0u)
-                    reward.AddSpheres(1u);
+                    reward.AddSpheres(1u).AddCoins(2_000u);
                 else if (level % 10u == 0u)
-                    reward.AddTokens(2u);
+                    reward.AddTokens(2u).AddCoins(2_000u);
                 else if (level % 5u == 0u)
                     reward.AddTickets(1u).AddCoins(2_000u);
                 else
