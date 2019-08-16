@@ -39,6 +39,29 @@ namespace Rift.Modules
             this.giveawayService = giveawayService;
         }
 
+        [Command("reward")]
+        [RequireAdmin]
+        [RequireContext(ContextType.Guild)]
+        public async Task Reward(int id)
+        {
+            var dbReward = await DB.Rewards.GetAsync(id);
+
+            if (dbReward is null)
+            {
+                await ReplyAsync($"No such reward with ID {id}!");
+                return;
+            }
+
+            var reward = dbReward.ToRewardBase();
+
+            await reward.DeliverToAsync(Context.User.Id);
+
+            await RiftBot.SendMessageAsync("chests-open-success", Settings.ChannelId.Commands, new FormatData(Context.User.Id)
+            {
+                Reward = reward
+            });
+        }
+        
         [Command("nitrorewards")]
         [RequireAdmin]
         [RequireContext(ContextType.Guild)]

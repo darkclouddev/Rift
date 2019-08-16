@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 
 using Rift.Configuration;
 
-using Discord;
-
 using IonicLib;
 
 using Humanizer;
@@ -13,7 +11,7 @@ namespace Rift.Services.Reward
 {
     public class RoleReward : RewardBase
     {
-        public ulong RoleId { get; set; }
+        public int RoleId { get; set; }
         public TimeSpan? Duration { get; set; }
 
         public RoleReward()
@@ -21,15 +19,9 @@ namespace Rift.Services.Reward
             Type = RewardType.Role;
         }
 
-        public RoleReward SetRole(ulong roleId)
+        public RoleReward SetRole(int roleId)
         {
             RoleId = roleId;
-            return this;
-        }
-
-        public RoleReward SetRole(IRole role)
-        {
-            RoleId = role.Id;
             return this;
         }
 
@@ -44,16 +36,32 @@ namespace Rift.Services.Reward
             var roleService = RiftBot.GetService<RoleService>();
 
             if (Duration is null)
-                await roleService.AddPermanentRoleAsync(userId, RoleId);
-            else
-                await roleService.AddTempRoleAsync(userId, RoleId, Duration.Value, nameof(RoleReward));
+            {
+                if (await DB.RoleInventory.HasAnyAsync(userId, RoleId))
+                    return;
+
+                await DB.RoleInventory.AddAsync(userId, RoleId, "Reward");
+                return;
+            }
+            
+            var dbRole = await DB.Roles.GetAsync(RoleId);
+
+            if (dbRole is null)
+            {
+                RiftBot.Log.Error($"No such role ID in database: {RoleId.ToString()}");
+                return;
+            }
+            
+            await roleService.AddTempRoleAsync(userId, dbRole.RoleId, Duration.Value, nameof(RoleReward));
         }
 
         public override string ToString()
         {
             var text = "роль";
 
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, RoleId, out var role))
+            var dbRole = Task.Run(async () => await DB.Roles.GetAsync(RoleId)).Result;
+
+            if (dbRole is null || !IonicClient.GetRole(Settings.App.MainGuildId, dbRole.RoleId, out var role))
             {
                 text += " не найдена";
                 return text;
@@ -62,7 +70,7 @@ namespace Rift.Services.Reward
             text += $" {role.Name}";
 
             if (Duration != null)
-                text += $" на {Duration.Value.Humanize()}";
+                text += $" на {Duration.Value.Humanize(culture: RiftBot.Culture)}";
 
             return text;
         }
