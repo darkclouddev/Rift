@@ -427,7 +427,7 @@ namespace Rift.Services
 
             await DB.RoleInventory.AddAsync(userId, role.Id, "Store");
 
-            var reward = new RoleReward().SetRole(item.RoleId);
+            var reward = new RoleReward().SetRole(item.DatabaseId);
 
             await DB.Cooldowns.SetLastRoleStoreTimeAsync(userId, DateTime.UtcNow);
 
