@@ -32,8 +32,8 @@ namespace Rift.Services.Message.Templates.Quest
                 if (progress.ApprovedLolAccount.HasValue)
                 {
                     sb.AppendLine(progress.ApprovedLolAccount.Value
-                        ? finishedEmote + description
-                        : notFinishedEmote + description
+                        ? $"{finishedEmote} {description}"
+                        : $"{notFinishedEmote} {description}"
                     );
                 }
                 else
