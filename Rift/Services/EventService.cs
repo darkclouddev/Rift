@@ -39,30 +39,27 @@ namespace Rift.Services
 
             /*var events = new List<RiftScheduledEvent>();
 
-            for (var i = 1; i <= 12; i++)
-            {
-                var generated = GenerateEventsForMonth(i);
-                
-                foreach (var ge in generated)
-                {
-                    events.Add(ge);
-                }
-            }
-            
-            Task.Run(() => DB.EventSchedule.AddRangeAsync(events));*/
+            var g19 = GenerateEventsForYear(2019);
+            var g20 = GenerateEventsForYear(2020);
+
+            events.AddRange(g19);
+            events.AddRange(g20);
+
+            Task.Run(async () => await DB.EventSchedule.AddRangeAsync(events));*/
 
             RiftBot.Log.Info("EventService loaded successfully.");
         }
 
         void InitializeStartTimer(TimeSpan delay)
         {
-            startTimer = new Timer(async delegate { await ScheduleTimerToNextEventAsync(); }, null, delay,
-                                   TimeSpan.Zero);
+            startTimer = new Timer(async delegate { await ScheduleTimerToNextEventAsync(); },
+                null, delay, TimeSpan.Zero);
         }
 
         void InitializeCheckTimer(TimeSpan delay)
         {
-            checkTimer = new Timer(async delegate { await CheckExpiredAsync(); }, null, delay, TimeSpan.Zero);
+            checkTimer = new Timer(async delegate { await CheckExpiredAsync(); },
+                null, delay, TimeSpan.Zero);
         }
 
         async Task CheckExpiredAsync()
@@ -86,16 +83,11 @@ namespace Rift.Services
 
         async Task ScheduleTimerToNextEventAsync()
         {
-            // Mimic 2000 year
-            var utc = DateTime.UtcNow;
-            var dt = new DateTime(2000, utc.Month, utc.Day, utc.Hour, utc.Minute, utc.Second, DateTimeKind.Utc);
+            var dt = DateTime.UtcNow;
 
-            if (utc.Year % 4 > 0 && dt.Month == 2 && dt.Day == 29) // skip 29th Feb of non-leap years
-                dt = dt.AddDays(1);
-            
             var closest = await DB.EventSchedule.GetClosestAsync(dt);
 
-            if (closest is null) // this should not be possible but just in case
+            if (closest is null)
             {
                 RiftBot.Log.Error("Next schedule event is null!");
                 return;
@@ -264,14 +256,14 @@ namespace Rift.Services
             }
 
             var participants = reactions
-                               .Where(x => !x.IsBot && x.Id != IonicClient.Client.CurrentUser.Id)
-                               .Select(x => x.Id)
-                               .ToArray();
+                .Where(x => !x.IsBot && x.Id != IonicClient.Client.CurrentUser.Id)
+                .Select(x => x.Id)
+                .ToArray();
 
             if (participants.Length == 0)
             {
                 await LogEventAsync(dbEvent.Name, null, dbReward.ToPlainString(), expiredEvent.StartedBy,
-                                    expiredEvent.StartedAt, dbEvent.Duration);
+                    expiredEvent.StartedAt, dbEvent.Duration);
                 await DB.ActiveEvents.RemoveAsync(expiredEvent.Id);
 
                 RiftBot.Log.Error($"Could not finish event {eventLogString}: No participants.");
@@ -380,7 +372,7 @@ namespace Rift.Services
             await LogEventAsync(log);
         }
 
-        static List<RiftScheduledEvent> GenerateEventsForMonth(int month)
+        static List<RiftScheduledEvent> GenerateEventsForYear(int year)
         {
             // settings
 
@@ -399,75 +391,78 @@ namespace Rift.Services
 
             var events = new List<RiftScheduledEvent>();
 
-            var monthStart = new DateTime(2000, month, 1);
-
-            var daysInMonth = monthStart.AddMonths(1).AddDays(-1).Day;
-
-            var rareEventDays = new int[rareEventsAmount];
-
-            for (var i = 0; i < rareEventDays.Length; i++)
+            for (var month = 1; month <= 12; month++)
             {
-                var ratio = (int) Math.Floor((double) daysInMonth / rareEventsAmount);
-                var min = i * ratio;
-                var max = (i + 1) * ratio;
+                var monthStart = new DateTime(year, month, 1);
 
-                rareEventDays[i] = Helper.NextInt(min, max + 1);
-            }
+                var daysInMonth = monthStart.AddMonths(1).AddDays(-1).Day;
 
-            for (var dayNumber = 1; dayNumber <= daysInMonth; dayNumber++)
-            {
-                var dt = new DateTime(monthStart.Year, monthStart.Month, dayNumber);
+                var rareEventDays = new int[rareEventsAmount];
 
-                if (rareEventDays.Contains(dayNumber))
+                for (var i = 0; i < rareEventDays.Length; i++)
                 {
-                    dt += GetEventTime(rareEventsBaseHour, rareEventsOffset);
+                    var ratio = (int) Math.Floor((double) daysInMonth / rareEventsAmount);
+                    var min = i * ratio;
+                    var max = (i + 1) * ratio;
 
-                    events.Add(new RiftScheduledEvent
-                    {
-                        StartAt = new DateTime(2000, dt.Month, dt.Day, dt.Hour, dt.Minute, 0),
-                        EventType = typeRare
-                    });
-
-                    continue;
+                    rareEventDays[i] = Helper.NextInt(min, max + 1);
                 }
 
-                if (dt.DayOfWeek == DayOfWeek.Sunday) // epic day
+                for (var dayNumber = 1; dayNumber <= daysInMonth; dayNumber++)
                 {
-                    dt += GetEventTime(epicEventsBaseHour, epicEventsOffset);
+                    var dt = new DateTime(monthStart.Year, monthStart.Month, dayNumber);
 
-                    events.Add(new RiftScheduledEvent
+                    if (rareEventDays.Contains(dayNumber))
                     {
-                        StartAt = new DateTime(2000, dt.Month, dt.Day, dt.Hour, dt.Minute, 0),
-                        EventType = typeEpic
-                    });
+                        dt += GetEventTime(rareEventsBaseHour, rareEventsOffset);
 
-                    continue;
-                }
-                else // normal day
-                {
-                    var deviation = TimeSpan.FromHours(2);
+                        events.Add(new RiftScheduledEvent
+                        {
+                            StartAt = dt,
+                            EventType = typeRare
+                        });
 
-                    var dt10 = dt + GetEventTime(TimeSpan.FromHours(7), deviation);
-                    var dt16 = dt + GetEventTime(TimeSpan.FromHours(13), deviation);
-                    var dt22 = dt + GetEventTime(TimeSpan.FromHours(19), deviation);
+                        continue;
+                    }
 
-                    events.Add(new RiftScheduledEvent()
+                    if (dt.DayOfWeek == DayOfWeek.Sunday) // epic day
                     {
-                        StartAt = new DateTime(2000, dt10.Month, dt10.Day, dt10.Hour, dt10.Minute, 0),
-                        EventType = typeNormal
-                    });
+                        dt += GetEventTime(epicEventsBaseHour, epicEventsOffset);
 
-                    events.Add(new RiftScheduledEvent
-                    {
-                        StartAt = new DateTime(2000, dt16.Month, dt16.Day, dt16.Hour, dt16.Minute, 0),
-                        EventType = typeNormal
-                    });
+                        events.Add(new RiftScheduledEvent
+                        {
+                            StartAt = dt,
+                            EventType = typeEpic
+                        });
 
-                    events.Add(new RiftScheduledEvent
+                        continue;
+                    }
+                    else // normal day
                     {
-                        StartAt = new DateTime(2000, dt22.Month, dt22.Day, dt22.Hour, dt22.Minute, 0),
-                        EventType = typeNormal
-                    });
+                        var deviation = TimeSpan.FromHours(2);
+
+                        var dt10 = dt + GetEventTime(TimeSpan.FromHours(7), deviation);
+                        var dt16 = dt + GetEventTime(TimeSpan.FromHours(13), deviation);
+                        var dt22 = dt + GetEventTime(TimeSpan.FromHours(19), deviation);
+
+                        events.Add(new RiftScheduledEvent()
+                        {
+                            StartAt = dt10,
+                            EventType = typeNormal
+                        });
+
+                        events.Add(new RiftScheduledEvent
+                        {
+                            StartAt = dt16,
+                            EventType = typeNormal
+                        });
+
+                        events.Add(new RiftScheduledEvent
+                        {
+                            StartAt = dt22,
+                            EventType = typeNormal
+                        });
+                    }
                 }
             }
 
