@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,6 +19,7 @@ namespace Rift.Services
     {
         static Timer ratingUpdateTimer;
         static readonly TimeSpan RatingTimerCooldown = TimeSpan.FromMinutes(10);
+        static readonly Func<uint, uint> ExpFormula = level => (uint) (Math.Pow(level, 1.5) * 40 - 40);
 
         public void Init()
         {
@@ -194,7 +196,7 @@ namespace Rift.Services
 
         public static uint GetExpForLevel(uint level)
         {
-            return (uint) (Math.Pow(level, 1.5) * 40 - 40);
+            return ExpFormula.Invoke(level);
         }
     }
 
