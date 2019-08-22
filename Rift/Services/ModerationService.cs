@@ -275,17 +275,11 @@ namespace Rift.Services
                                                               IonicClient.GetGuildUserById(Settings.App.MainGuildId,
                                                                                            x.ModeratorId).Username));
 
-            var embed = new RiftEmbed
-            {
-                Description =
-                    $"Досье товарища {user.Username}\nУровень токсичности: {FormatToxicityLevel(toxicity.Level)}",
-                Fields = new[]
-                {
-                    new RiftField("Действие", actions, true),
-                    new RiftField("Дата и время", datetime, true),
-                    new RiftField("Модератор", moderator, true),
-                }
-            };
+            var embed = new RiftEmbed()
+                .WithDescription($"Досье товарища {user.Username}\nУровень токсичности: {FormatToxicityLevel(toxicity.Level)}")
+                .AddField("Действие", actions, true)
+                .AddField("Дата и время", datetime, true)
+                .AddField("Модератор", moderator, true);
 
             return new IonicMessage(embed);
         }
@@ -312,16 +306,11 @@ namespace Rift.Services
                 return action;
             }));
 
-            var embed = new RiftEmbed
-            {
-                Description = "Последние действия банхаммером",
-                Fields = new[]
-                {
-                    new RiftField("Модератор", mods, true),
-                    new RiftField("Нарушитель", targets, true),
-                    new RiftField("Действие", actions, true),
-                }
-            };
+            var embed = new RiftEmbed()
+                .WithDescription("Последние действия банхаммером")
+                .AddField("Модератор", mods, true)
+                .AddField("Нарушитель", targets, true)
+                .AddField("Действие", actions, true);
 
             return new IonicMessage(embed);
         }
