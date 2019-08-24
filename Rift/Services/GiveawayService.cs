@@ -304,13 +304,27 @@ namespace Rift.Services
 
             var removeInv = new InventoryData {Tickets = 1u};
 
+            var userList = usersWithTickets.ToList();
+            var winnerId = 0ul;
+            
+            do
+            {
+                if (userList.Count == 0)
+                {
+                    RiftBot.Log.Warn("No users on server participated, skipping execution.");
+                    return;
+                } 
+                
+                var winner = userList.Random();
+                winnerId = winner.UserId;
+                userList.Remove(winner);
+            } while (IonicClient.GetGuildUserById(Settings.App.MainGuildId, winnerId) is null);
+
             foreach (var userInventory in usersWithTickets)
             {
                 await DB.Inventory.RemoveAsync(userInventory.UserId, removeInv); // very slow on tunneled db connection
             }
-
-            var winnerId = usersWithTickets.Random().UserId;
-
+            
             await reward.DeliverToAsync(winnerId);
 
             await RiftBot.SendMessageAsync("giveaway-ticket-success", Settings.ChannelId.Chat, new FormatData(startedBy)
