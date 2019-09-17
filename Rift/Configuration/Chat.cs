@@ -8,5 +8,6 @@
         public bool UrlFilterEnabled { get; set; } = false;
         public bool AllowYoutubeLinks { get; set; } = false;
         public bool ProcessUserNames { get; set; } = false;
+        public int MessageMinimumLength { get; set; } = 8;
     }
 }
