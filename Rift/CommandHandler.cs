@@ -105,54 +105,49 @@ namespace Rift
         {
             var argPos = 0;
 
-            if (context.Message.HasCharPrefix(CommandPrefix, ref argPos))
-            {
-                if (context.Channel.Id != Settings.ChannelId.Commands)
-                    return true;
-                
-                var result = await commandService.ExecuteAsync(context, argPos, provider);
-
-                if (result.IsSuccess)
-                {
-                    var command = context.Message.Content.Substring(1).TrimStart();
-                    RiftBot.Log.Info($"{context.Message.Author} sent channel command: \"{command}\"");
-                }
-                else
-                {
-                    if (result.Error != null && result.Error.Value != CommandError.UnknownCommand)
-                        RiftBot.Log.Error(result.ErrorReason);
-
-                    if (result.Error != null)
-                    {
-                        string errorMessage;
-                        
-                        var error = result.Error.Value;
-
-                        switch (error)
-                        {
-                            case CommandError.UnknownCommand:
-                                errorMessage = "Неизвестная команда!";
-                                break;
-
-                            case CommandError.BadArgCount:
-                            case CommandError.ParseFailed:
-                                errorMessage = "Неверные параметры команды!";
-                                break;
-
-                            default:
-                                errorMessage = result.ErrorReason;
-                                break;
-                        }
-
-                        await context.Channel.SendMessageAsync($"<@{context.Message.Author.Id.ToString()}> {errorMessage}");
-                    }
-                }
-
-                //messageService.TryAddDelete(new DeleteMessage(context.Message, TimeSpan.FromSeconds(5)));
+            if (!context.Message.HasCharPrefix(CommandPrefix, ref argPos))
+                return false;
+            
+            if (context.Channel.Id != Settings.ChannelId.Commands)
                 return true;
-            }
+            
+            var command = context.Message.Content.Substring(1).TrimStart();
+            RiftBot.Log.Info($"{context.Message.Author} sent channel command: \"{command}\"");
+            
+            var result = await commandService.ExecuteAsync(context, argPos, provider);
 
-            return false;
+            if (result.IsSuccess)
+                return true;
+
+            if (result.Error != null)
+            {
+                string errorMessage;
+                
+                var error = result.Error.Value;
+
+                switch (error)
+                {
+                    case CommandError.UnknownCommand:
+                        errorMessage = "Неизвестная команда!";
+                        break;
+
+                    case CommandError.BadArgCount:
+                    case CommandError.ParseFailed:
+                        errorMessage = "Неверные параметры команды!";
+                        break;
+
+                    default:
+                        errorMessage = error.ToString();
+                        break;
+                }
+                
+                if (error != CommandError.UnknownCommand)
+                    RiftBot.Log.Error(result.ErrorReason);
+
+                await context.Channel.SendMessageAsync($"<@{context.Message.Author.Id.ToString()}> {errorMessage}");
+            }
+            
+            return true;
         }
 
         static async Task HandlePlainText(CommandContext context)
@@ -190,6 +185,7 @@ namespace Rift
             }
 
             if (Settings.Chat.ProcessUserNames) // TODO: experimental feature
+            {
                 if (context.User is SocketGuildUser sgUser)
                 {
                     var name = string.IsNullOrWhiteSpace(sgUser.Nickname) ? sgUser.Username : sgUser.Nickname;
@@ -202,11 +198,12 @@ namespace Rift
                         await sgUser.ModifyAsync(x => { x.Nickname = editedName; });
                     }
                 }
+            }
 
             await DB.Statistics.AddAsync(context.User.Id, new StatisticData {MessagesSent = 1u});
             await questService.TryAddFirstQuestAsync(context.User.Id);
 
-            if (IsEligibleForEconomy(context.User.Id))
+            if (HasMinimumLength(context.Message.Content) && IsEligibleForEconomy(context.User.Id))
             {
                 await dailyService.CheckAsync(context.User.Id);
                 await EconomyService.ProcessMessageAsync(context.Message).ConfigureAwait(false);
@@ -272,7 +269,7 @@ namespace Rift
 
             var upperCase = new List<char>();
 
-            await Task.Run(delegate { upperCase = msg.Where(x => char.IsLetter(x) && char.IsUpper(x)).ToList(); });
+            await Task.Run(() =>  upperCase = msg.Where(x => char.IsLetter(x) && char.IsUpper(x)).ToList());
 
             var ratio = upperCase.Count / (float) msg.Length;
 
@@ -319,6 +316,26 @@ namespace Rift
             return !name.Equals(editedName);
         }
 
+        static readonly Regex DiscordMentionRegex = new Regex(" *\\<[^)]*\\> *");
+        
+        static bool HasMinimumLength(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return false;
+
+            var cleanMsg = DiscordMentionRegex.Replace(message, string.Empty);
+            
+            if (string.IsNullOrWhiteSpace(cleanMsg))
+                return false;
+
+            cleanMsg = cleanMsg.Trim();
+            
+            if (string.IsNullOrWhiteSpace(cleanMsg))
+                return false;
+
+            return cleanMsg.Length >= Settings.Chat.MessageMinimumLength;
+        }
+        
         static readonly Dictionary<ulong, DateTime> LastPostTimestamps = new Dictionary<ulong, DateTime>();
 
         static bool IsEligibleForEconomy(ulong userId)
