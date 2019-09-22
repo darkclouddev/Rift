@@ -13,7 +13,7 @@ namespace Rift.Services.Message
 {
     public class FormatData
     {
-        public ulong UserId { get; set; }
+        public ulong UserId { get; }
         public BragData Brag { get; set; }
         public EconomyData Economy { get; set; }
         public EventData EventData { get; set; }
@@ -23,6 +23,7 @@ namespace Rift.Services.Message
         public LeagueStatData LeagueStat { get; set; }
         public MessageData MessageData { get; set; }
         public ModerationData Moderation { get; set; }
+        public RankData RankData { get; set; }
         public RewardBase Reward { get; set; }
         public RiftQuest Quest { get; set; }
         public RiftQuestStage QuestStage { get; set; }
@@ -101,6 +102,12 @@ namespace Rift.Services.Message
                 Duration = log.Duration != TimeSpan.Zero ? log.Duration : TimeSpan.Zero
             };
         }
+    }
+
+    public class RankData
+    {
+        public string PreviousRank { get; set; }
+        public string CurrentRank { get; set; }
     }
 
     public class TicketGiveaway
