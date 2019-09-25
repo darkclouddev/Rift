@@ -78,8 +78,7 @@ namespace Rift.Services
                     }
                     catch (Exception ex)
                     {
-                        RiftBot.Log.Error("Failed to get one or more store roles!");
-                        RiftBot.Log.Error(ex);
+                        RiftBot.Log.Error(ex, "Failed to get one or more store roles!");
                         roleShopList = null;
                     }
                 }
@@ -304,11 +303,6 @@ namespace Rift.Services
 
         async Task<IonicMessage> PurchaseItemInternalAsync(ulong userId, uint itemId)
         {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (sgUser is null)
-                return MessageService.Error;
-
             var item = GetItemById(itemId);
 
             if (item is null)
@@ -354,7 +348,7 @@ namespace Rift.Services
             await DB.Cooldowns.SetLastItemStoreTimeAsync(userId, DateTime.UtcNow);
             await DB.Statistics.AddAsync(userId, new StatisticData {PurchasedItems = item.Amount});
 
-            RiftBot.Log.Info($"Item purchased: #{item.Id.ToString()} by {userId.ToString()}.");
+            RiftBot.Log.Information($"Item purchased: #{item.Id.ToString()} by {userId.ToString()}.");
 
             return await RiftBot.GetMessageAsync("store-success", new FormatData(userId)
             {
@@ -394,11 +388,6 @@ namespace Rift.Services
 
         async Task<IonicMessage> PurchaseRoleInternalAsync(ulong userId, uint itemId)
         {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (sgUser is null)
-                return MessageService.Error;
-
             var item = GetRoleById(itemId);
 
             if (item is null)
@@ -431,7 +420,7 @@ namespace Rift.Services
 
             await DB.Cooldowns.SetLastRoleStoreTimeAsync(userId, DateTime.UtcNow);
 
-            RiftBot.Log.Info($"Role purchased: #{item.RoleId.ToString()} by {userId.ToString()}.");
+            RiftBot.Log.Information($"Role purchased: #{item.RoleId.ToString()} by {userId.ToString()}.");
 
             return await RiftBot.GetMessageAsync("store-success", new FormatData(userId)
             {
@@ -471,11 +460,6 @@ namespace Rift.Services
 
         async Task<IonicMessage> PurchaseBackgroundInternalAsync(ulong userId, uint itemId)
         {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (sgUser is null)
-                return MessageService.Error;
-
             var item = GetBackgroundById(itemId);
 
             if (item is null)
@@ -506,13 +490,13 @@ namespace Rift.Services
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error(ex);
+                RiftBot.Log.Error(ex, $"An error occured while delivering reward to {userId.ToString()}");
                 return MessageService.Error;
             }
 
             await DB.Cooldowns.SetLastBackgroundStoreTimeAsync(userId, DateTime.UtcNow);
 
-            RiftBot.Log.Info($"Background purchased: #{item.Id.ToString()} by {userId.ToString()}.");
+            RiftBot.Log.Information($"Background purchased: #{item.Id.ToString()} by {userId.ToString()}.");
 
             return await RiftBot.GetMessageAsync("store-success", new FormatData(userId)
             {

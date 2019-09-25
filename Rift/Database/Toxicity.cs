@@ -16,30 +16,27 @@ namespace Rift.Database
             if (!await DB.Users.EnsureExistsAsync(userId))
                 throw new DatabaseException(nameof(EnsureExistsAsync));
 
-            using (var context = new RiftContext())
+            await using var context = new RiftContext();
+            if (await context.Toxicity.AnyAsync(x => x.UserId == userId))
+                return true;
+
+            try
             {
-                if (await context.Toxicity.AnyAsync(x => x.UserId == userId))
-                    return true;
-
-                try
+                var entry = new RiftToxicity
                 {
-                    var entry = new RiftToxicity
-                    {
-                        UserId = userId,
-                        LastIncreased = DateTime.MinValue,
-                    };
+                    UserId = userId,
+                    LastIncreased = DateTime.MinValue,
+                };
 
-                    await context.Toxicity.AddAsync(entry);
-                    await context.SaveChangesAsync();
+                await context.Toxicity.AddAsync(entry);
+                await context.SaveChangesAsync();
 
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    RiftBot.Log.Error($"Failed to check {nameof(EnsureExistsAsync)} for user {userId.ToString()}.");
-                    RiftBot.Log.Error(ex);
-                    return false;
-                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RiftBot.Log.Error(ex, $"Failed to check {nameof(EnsureExistsAsync)} for user {userId.ToString()}.");
+                return false;
             }
         }
 
@@ -48,10 +45,8 @@ namespace Rift.Database
             if (!await EnsureExistsAsync(userId))
                 throw new DatabaseException(nameof(GetAsync));
 
-            using (var context = new RiftContext())
-            {
-                return await context.Toxicity.FirstOrDefaultAsync(x => x.UserId == userId);
-            }
+            await using var context = new RiftContext();
+            return await context.Toxicity.FirstOrDefaultAsync(x => x.UserId == userId);
         }
 
         public async Task<bool> HasBlockingAsync(ulong userId)
@@ -66,12 +61,10 @@ namespace Rift.Database
 
         public async Task<RiftToxicity[]> GetNonZeroAsync()
         {
-            using (var context = new RiftContext())
-            {
-                return await context.Toxicity
-                                    .Where(x => x.Level > 0u)
-                                    .ToArrayAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.Toxicity
+                .Where(x => x.Level > 0u)
+                .ToArrayAsync();
         }
 
         public async Task UpdatePercentAsync(ulong userId, uint percent)
@@ -80,29 +73,27 @@ namespace Rift.Database
 
             var oldToxicity = await GetAsync(userId);
 
-            using (var context = new RiftContext())
+            await using var context = new RiftContext();
+            var toxicity = new RiftToxicity
             {
-                var toxicity = new RiftToxicity
-                {
-                    UserId = userId,
-                    Percent = percent
-                };
+                UserId = userId,
+                Percent = percent
+            };
 
-                context.Entry(toxicity).Property(x => x.Percent).IsModified = true;
+            context.Entry(toxicity).Property(x => x.Percent).IsModified = true;
 
-                if (percent > oldToxicity.Percent)
-                {
-                    toxicity.LastIncreased = DateTime.UtcNow;
-                    context.Entry(toxicity).Property(x => x.LastIncreased).IsModified = true;
-                }
-                else if (percent < oldToxicity.Percent)
-                {
-                    toxicity.LastDecreased = DateTime.UtcNow;
-                    context.Entry(toxicity).Property(x => x.LastDecreased).IsModified = true;
-                }
-
-                await context.SaveChangesAsync();
+            if (percent > oldToxicity.Percent)
+            {
+                toxicity.LastIncreased = DateTime.UtcNow;
+                context.Entry(toxicity).Property(x => x.LastIncreased).IsModified = true;
             }
+            else if (percent < oldToxicity.Percent)
+            {
+                toxicity.LastDecreased = DateTime.UtcNow;
+                context.Entry(toxicity).Property(x => x.LastDecreased).IsModified = true;
+            }
+
+            await context.SaveChangesAsync();
         }
     }
 }

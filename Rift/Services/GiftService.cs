@@ -38,7 +38,7 @@ namespace Rift.Services
 
             IonicMessage result;
 
-            RiftBot.Log.Info($"Gift from {fromSgUser.ToLogString()} => {toSgUser.ToLogString()}.");
+            RiftBot.Log.Information($"Gift from {fromSgUser.ToLogString()} => {toSgUser.ToLogString()}.");
 
             try
             {
@@ -102,7 +102,7 @@ namespace Rift.Services
                 GiftedFounder?.Invoke(null, new GiftedFounderEventArgs(receiverId, senderId));
 
             var developers = await DB.Roles.GetAsync(44);
-            if (IonicClient.HasRolesAny(toSgUser, developers.RoleId))
+            if (IonicHelper.HasRolesAny(toSgUser, developers.RoleId))
                 GiftedDeveloper?.Invoke(null, new GiftedDeveloperEventArgs(senderId, receiverId));
 
             if (await RiftBot.IsModeratorAsync(toSgUser))

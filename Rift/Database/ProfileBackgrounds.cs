@@ -12,30 +12,23 @@ namespace Rift.Database
     {
         public async Task AddAsync(RiftProfileBackground background)
         {
-            using (var context = new RiftContext())
-            {
-                await context.Backgrounds.AddAsync(background);
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            await context.Backgrounds.AddAsync(background);
+            await context.SaveChangesAsync();
         }
 
         public async Task<RiftProfileBackground> GetAsync(int id)
         {
-            using (var context = new RiftContext())
-            {
-                return await context.Backgrounds
-                                    .FirstOrDefaultAsync(x => x.Id == id);
-            }
+            await using var context = new RiftContext();
+            return await context.Backgrounds.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<RiftProfileBackground[]> GetAllAsync()
         {
-            using (var context = new RiftContext())
-            {
-                return await context.Backgrounds
-                                    .OrderBy(x => x.Id)
-                                    .ToArrayAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.Backgrounds
+                .OrderBy(x => x.Id)
+                .ToArrayAsync();
         }
     }
 }

@@ -54,7 +54,7 @@ namespace Rift.Services
 
             var ts = closest.DueTime - DateTime.UtcNow;
 
-            RiftBot.Log.Info($"Giveaway tracker scheduled to {closest.DueTime.Humanize(culture: schedulerCulture)}.");
+            RiftBot.Log.Information($"Giveaway tracker scheduled to {closest.DueTime.Humanize(culture: schedulerCulture)}.");
 
             eventTimer.Change(ts, TimeSpan.Zero);
         }
@@ -91,7 +91,7 @@ namespace Rift.Services
                 return;
             }
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
+            if (!IonicHelper.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Chat, out var channel))
             {
                 RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: Giveaway channel is null!");
                 return;
@@ -105,7 +105,7 @@ namespace Rift.Services
                 return;
             }
 
-            if (!IonicClient.GetEmote(403616665603932162, "giveaway", out var emote))
+            if (!IonicHelper.GetEmote(403616665603932162, "giveaway", out var emote))
             {
                 RiftBot.Log.Error($"Could not finish giveaway {giveawayData}: Emote is null! Deleted?");
                 return;
@@ -133,7 +133,7 @@ namespace Rift.Services
             var reward = dbReward.ToRewardBase();
 
             var participants = reactions
-                               .Where(x => !x.IsBot && x.Id != IonicClient.Client.CurrentUser.Id)
+                               .Where(x => !x.IsBot && x.Id != IonicHelper.Client.CurrentUser.Id)
                                .Select(x => x.Id)
                                .ToArray();
 
@@ -213,7 +213,7 @@ namespace Rift.Services
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                RiftBot.Log.Warn("Empty giveaway name, skipping execution.");
+                RiftBot.Log.Warning("Empty giveaway name, skipping execution.");
                 return;
             }
 
@@ -221,7 +221,7 @@ namespace Rift.Services
 
             if (giveaway is null)
             {
-                RiftBot.Log.Warn("Wrong giveaway name, skipping execution.");
+                RiftBot.Log.Warning("Wrong giveaway name, skipping execution.");
                 return;
             }
 
@@ -229,7 +229,7 @@ namespace Rift.Services
 
             if (msg is null)
             {
-                RiftBot.Log.Warn("Wrong giveaway message ID, skipping execution.");
+                RiftBot.Log.Warning("Wrong giveaway message ID, skipping execution.");
                 return;
             }
 
@@ -237,15 +237,15 @@ namespace Rift.Services
 
             if (dbReward is null)
             {
-                RiftBot.Log.Warn("Wrong giveaway reward ID, skipping execution.");
+                RiftBot.Log.Warning("Wrong giveaway reward ID, skipping execution.");
                 return;
             }
 
             var reward = dbReward.ToRewardBase();
 
-            if (!IonicClient.GetEmote(403616665603932162, "giveaway", out var smite))
+            if (!IonicHelper.GetEmote(403616665603932162, "giveaway", out var smite))
             {
-                RiftBot.Log.Warn("No giveaway emote, skipping execution.");
+                RiftBot.Log.Warning("No giveaway emote, skipping execution.");
                 return;
             }
 
@@ -253,7 +253,7 @@ namespace Rift.Services
             {
                 GiveawayName = giveaway.Name,
                 StoredMessageId = giveaway.StoredMessageId,
-                StartedBy = startedById == 0u ? IonicClient.Client.CurrentUser.Id : startedById,
+                StartedBy = startedById == 0u ? IonicHelper.Client.CurrentUser.Id : startedById,
                 StartedAt = DateTime.UtcNow,
                 DueTime = DateTime.UtcNow + giveaway.Duration,
             };
@@ -285,7 +285,7 @@ namespace Rift.Services
 
             if (dbReward is null)
             {
-                RiftBot.Log.Warn("Wrong reward ID, skipping execution.");
+                RiftBot.Log.Warning("Wrong reward ID, skipping execution.");
                 return;
             }
 
@@ -295,12 +295,11 @@ namespace Rift.Services
 
             if (usersWithTickets is null || usersWithTickets.Count == 0)
             {
-                RiftBot.Log.Warn("No users with tickets, skipping execution.");
+                RiftBot.Log.Warning("No users with tickets, skipping execution.");
                 return;
             }
 
-            RiftBot.Log.Info(
-                $"Ticket giveaway started for {usersWithTickets.Count.ToString()}, reward ID {rewardId.ToString()}.");
+            RiftBot.Log.Information($"Ticket giveaway started for {usersWithTickets.Count.ToString()}, reward ID {rewardId.ToString()}.");
 
             var removeInv = new InventoryData {Tickets = 1u};
 
@@ -311,14 +310,14 @@ namespace Rift.Services
             {
                 if (userList.Count == 0)
                 {
-                    RiftBot.Log.Warn("No users on server participated, skipping execution.");
+                    RiftBot.Log.Warning("No users on server participated, skipping execution.");
                     return;
                 } 
                 
                 var winner = userList.Random();
                 winnerId = winner.UserId;
                 userList.Remove(winner);
-            } while (IonicClient.GetGuildUserById(Settings.App.MainGuildId, winnerId) is null);
+            } while (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, winnerId, out var sgUser));
 
             foreach (var userInventory in usersWithTickets)
             {
@@ -359,7 +358,7 @@ namespace Rift.Services
         {
             var affectedRows = await DB.Inventory.GiveTicketsToUsersAsync();
 
-            RiftBot.Log.Info($"Gived tickets to {affectedRows.ToString()} users");
+            RiftBot.Log.Information($"Gived tickets to {affectedRows.ToString()} users");
 
             await RiftBot.SendMessageAsync("ticket-charity-success", Settings.ChannelId.Chat, new FormatData(startedBy));
         }

@@ -15,7 +15,7 @@ namespace Rift.Services.Message.Templates.Guild
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            if (!IonicClient.GetGuild(Settings.App.MainGuildId, out var guild))
+            if (!IonicHelper.GetGuild(Settings.App.MainGuildId, out var guild))
             {
                 TemplateError($"No guild found with ID {Settings.App.MainGuildId.ToString()}!");
                 return Task.FromResult(message);

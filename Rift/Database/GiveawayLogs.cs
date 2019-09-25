@@ -15,29 +15,23 @@ namespace Rift.Database
     {
         public async Task AddAsync(RiftGiveawayLog log)
         {
-            using (var context = new RiftContext())
-            {
-                await context.GiveawayLogs.AddAsync(log);
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            await context.GiveawayLogs.AddAsync(log);
+            await context.SaveChangesAsync();
         }
 
         public async Task<RiftGiveawayLog> GetAsync(int id)
         {
-            using (var context = new RiftContext())
-            {
-                return await context.GiveawayLogs.FirstOrDefaultAsync(x => x.Id == id);
-            }
+            await using var context = new RiftContext();
+            return await context.GiveawayLogs.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<RiftGiveawayLog>> GetStartedAsync(Expression<Func<RiftGiveawayLog, bool>> predicate)
         {
-            using (var context = new RiftContext())
-            {
-                return await context.GiveawayLogs
-                                    .Where(predicate)
-                                    .ToListAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.GiveawayLogs
+                .Where(predicate)
+                .ToListAsync();
         }
     }
 }

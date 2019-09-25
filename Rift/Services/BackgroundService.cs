@@ -28,7 +28,7 @@ namespace Rift.Services
         
         static async Task TimerProcAsync()
         {
-            RiftBot.Log.Info("Checking nitro boosters integrity..");
+            RiftBot.Log.Information("Checking nitro boosters integrity..");
             
             var nitroUsers = await RiftBot.GetService<RoleService>().GetNitroBoostersAsync();
 
@@ -56,7 +56,7 @@ namespace Rift.Services
             }
             
             if (fixedBackgrounds > 0)
-                RiftBot.Log.Info($"Added {fixedBackgrounds.ToString()} missing nitro backgrounds.");
+                RiftBot.Log.Information($"Added {fixedBackgrounds.ToString()} missing nitro backgrounds.");
         }
 
         static async Task RemoveBackgroundsIfNotBoosting(List<ulong> users)
@@ -79,7 +79,7 @@ namespace Rift.Services
             }
             
             if (fixedBackgrounds > 0)
-                RiftBot.Log.Info($"Removed {fixedBackgrounds.ToString()} nitro backgrounds.");
+                RiftBot.Log.Information($"Removed {fixedBackgrounds.ToString()} nitro backgrounds.");
         }
 
         public async Task GetInventoryAsync(ulong userId)
@@ -98,8 +98,7 @@ namespace Rift.Services
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error($"Failed to set active background {backgroundId.ToString()} for user {userId.ToString()}");
-                RiftBot.Log.Error(ex);
+                RiftBot.Log.Error(ex, $"Failed to set active background {backgroundId.ToString()} for user {userId.ToString()}");
             }
             finally
             {

@@ -66,8 +66,7 @@ namespace Rift.Services.Message
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error($"Failed to deserialize \"{nameof(RiftMessage)}\"!");
-                RiftBot.Log.Error(ex);
+                RiftBot.Log.Error(ex, $"Failed to deserialize \"{nameof(RiftMessage)}\"!");
                 Embed = null;
             }
         }

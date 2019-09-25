@@ -12,19 +12,15 @@ namespace Rift.Database
     {
         public async Task<RiftTeam> GetAsync(int id)
         {
-            using (var context = new RiftContext())
-            {
-                return await context.Teams
-                    .FirstOrDefaultAsync(x => x.Id == id);
-            }
+            await using var context = new RiftContext();
+            return await context.Teams
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
         
         public async Task<List<RiftTeam>> GetAllAsync()
         {
-            using (var context = new RiftContext())
-            {
-                return await context.Teams.ToListAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.Teams.ToListAsync();
         }
     }
 }

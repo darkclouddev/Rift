@@ -23,8 +23,7 @@ namespace Rift.Services
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error("An error occured when activating double exp:");
-                RiftBot.Log.Error(ex);
+                RiftBot.Log.Error(ex, "An error occured when activating double exp:");
             }
             finally
             {

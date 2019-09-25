@@ -31,7 +31,7 @@ namespace Rift.Services
 
         async Task Announce_Callback()
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Commands, out var channel))
+            if (!IonicHelper.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Commands, out var channel))
                 return;
 
             await channel.SendEmbedAsync(embeds.Random());

@@ -112,7 +112,7 @@ namespace Rift
                 return true;
             
             var command = context.Message.Content.Substring(1).TrimStart();
-            RiftBot.Log.Info($"{context.Message.Author} sent channel command: \"{command}\"");
+            RiftBot.Log.Information($"{context.Message.Author} sent channel command: \"{command}\"");
             
             var result = await commandService.ExecuteAsync(context, argPos, provider);
 
@@ -233,7 +233,7 @@ namespace Rift
                 }
             }
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Logs, out var logsChannel))
+            if (!IonicHelper.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Logs, out var logsChannel))
                 return;
 
             var eb = new RiftEmbed()

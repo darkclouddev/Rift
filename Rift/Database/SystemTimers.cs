@@ -12,14 +12,9 @@ namespace Rift.Database
     {
         public async Task<RiftSystemTimer> GetAsync(string name)
         {
-            using (var context = new RiftContext())
-            {
-                return await context.SystemCooldowns.FirstOrDefaultAsync(x =>
-                                                                             x.Name.Equals(
-                                                                                 name,
-                                                                                 StringComparison
-                                                                                     .InvariantCultureIgnoreCase));
-            }
+            await using var context = new RiftContext();
+            return await context.SystemCooldowns.FirstOrDefaultAsync(x =>
+                x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
         }
 
         public async Task UpdateAsync(string name, DateTime lastUpdated)
@@ -32,12 +27,10 @@ namespace Rift.Database
                 return;
             }
 
-            using (var context = new RiftContext())
-            {
-                timer.LastInvoked = lastUpdated;
-                context.Entry(timer).Property(x => x.LastInvoked).IsModified = true;
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            timer.LastInvoked = lastUpdated;
+            context.Entry(timer).Property(x => x.LastInvoked).IsModified = true;
+            await context.SaveChangesAsync();
         }
     }
 }

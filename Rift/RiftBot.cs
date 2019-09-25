@@ -20,9 +20,8 @@ using IonicLib.Services;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using NLog;
-
-using ILogger = NLog.ILogger;
+using Serilog;
+using Serilog.Events;
 
 namespace Rift
 {
@@ -81,9 +80,7 @@ namespace Rift
         {
             foreach (var userId in developersIds)
             {
-                var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-                if (sgUser is null)
+                if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, userId, out var sgUser))
                     return;
 
                 await sgUser.SendMessageAsync(msg);
@@ -94,9 +91,7 @@ namespace Rift
         {
             foreach (var userId in developersIds)
             {
-                var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-                if (sgUser is null)
+                if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, userId, out var sgUser))
                     return;
 
                 await sgUser.SendMessageAsync(msg);
@@ -110,7 +105,7 @@ namespace Rift
 
         public static async Task<IUserMessage> SendMessageAsync(string identifier, ulong channelId, FormatData data)
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, channelId, out var channel))
+            if (!IonicHelper.GetTextChannel(Settings.App.MainGuildId, channelId, out var channel))
                 return null;
 
             var msg = await GetService<MessageService>().GetMessageAsync(identifier, data);
@@ -123,7 +118,7 @@ namespace Rift
 
         public static async Task<IUserMessage> SendMessageAsync(IonicMessage message, ulong channelId)
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, channelId, out var channel))
+            if (!IonicHelper.GetTextChannel(Settings.App.MainGuildId, channelId, out var channel))
                 return null;
 
             return await channel.SendIonicMessageAsync(message);
@@ -140,13 +135,24 @@ namespace Rift
 
             Console.WriteLine($"Using content root: {AppPath}");
 
-            await new IonicClient(Path.Combine(AppPath, ".token"))
-                .RunAsync()
+            var tokenData = await File.ReadAllTextAsync(Path.Combine(AppPath, ".token"));
+
+            await new IonicHelper(tokenData)
+                .RunAsync(new DiscordSocketConfig
+                {
+                    LogLevel = LogSeverity.Warning,
+                    MessageCacheSize = 1000
+                }, LogDiscord )
                 .ConfigureAwait(false);
 
             await new RiftBot()
                 .RunAsync()
                 .ConfigureAwait(false);
+        }
+
+        static Task LogDiscord(LogMessage arg)
+        {
+            return Task.CompletedTask;
         }
 
         public static string GetContentRoot()
@@ -161,8 +167,12 @@ namespace Rift
 
         public async Task RunAsync()
         {
-            LogManager.LoadConfiguration("nlog.config");
-            Log = LogManager.GetCurrentClassLogger();
+            Log = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .Enrich.FromLogContext()
+                .WriteTo.Async(x => x.File("logs/rift-.log", rollingInterval: RollingInterval.Day))
+                .CreateLogger();
 
             var serviceProvider = SetupServices();
 
@@ -171,28 +181,28 @@ namespace Rift
 
             try
             {
-                await Task.Delay(-1, IonicClient.TokenSource.Token);
+                await Task.Delay(-1, IonicHelper.GetCancellationToken());
             }
             catch (TaskCanceledException)
             {
-                await IonicClient.Client.StopAsync().ContinueWith(x =>
+                await IonicHelper.Client.StopAsync().ContinueWith(x =>
                 {
                     if (!ShouldReboot)
                     {
                         Console.WriteLine("Shutting down");
-                        LogManager.Shutdown();
+                        Serilog.Log.CloseAndFlush();
                     }
                     else
                     {
                         Console.WriteLine("Restarting...");
-                        LogManager.Shutdown();
+                        Serilog.Log.CloseAndFlush();
                         Environment.Exit(4); //anything higher than zero is a restart
                     }
                 });
             }
             catch (Exception ex)
             {
-                Log.Error(ex);
+                Log.Error(ex, "An error occured while shutting down");
             }
         }
 
@@ -200,7 +210,7 @@ namespace Rift
         {
             var services = new ServiceCollection()
                 .AddSingleton(Log)
-                .AddSingleton(IonicClient.Client)
+                .AddSingleton(IonicHelper.Client)
                 .AddSingleton(new EconomyService())
                 .AddSingleton(new GiftService())
                 .AddSingleton(new RoleService())
@@ -214,8 +224,8 @@ namespace Rift
                 .AddSingleton(new BotRespectService())
                 .AddSingleton(new QuizService())
                 .AddSingleton(new ModerationService())
-                .AddSingleton(new ReliabilityService(IonicClient.Client))
-                .AddSingleton(new ChannelService(IonicClient.Client))
+                .AddSingleton(new ReliabilityService(IonicHelper.Client))
+                .AddSingleton(new ChannelService(IonicHelper.Client))
                 .AddSingleton(new QuestService())
                 .AddSingleton(new StoreService())
                 .AddSingleton(new ChestService())
@@ -226,7 +236,7 @@ namespace Rift
                 .AddSingleton(new RewindService())
                 .AddSingleton(new DoubleExpService())
                 .AddSingleton(new DailyService())
-                .AddSingleton(new RoleSetupService(IonicClient.Client))
+                .AddSingleton(new RoleSetupService(IonicHelper.Client))
                 .AddSingleton(new CommandService(new CommandServiceConfig
                 {
                     CaseSensitiveCommands = false,

@@ -31,8 +31,7 @@ namespace Rift.Data.Models
                 }
                 catch (Exception ex)
                 {
-                    RiftBot.Log.Error($"Failed to deserialize {nameof(ItemsData)} to {nameof(ItemReward)}!");
-                    RiftBot.Log.Error(ex);
+                    RiftBot.Log.Error(ex, $"Failed to deserialize {nameof(ItemsData)} to {nameof(ItemReward)}!");
                     return null;
                 }
             }
@@ -53,8 +52,7 @@ namespace Rift.Data.Models
                 }
                 catch (Exception ex)
                 {
-                    RiftBot.Log.Error($"Failed to serialize given value to {nameof(ItemReward)}!");
-                    RiftBot.Log.Error(ex);
+                    RiftBot.Log.Error(ex, $"Failed to serialize given value to {nameof(ItemReward)}!");
                     return;
                 }
             }
@@ -76,8 +74,7 @@ namespace Rift.Data.Models
                 }
                 catch (Exception ex)
                 {
-                    RiftBot.Log.Error($"Failed to deserialize {nameof(RoleData)} to {nameof(RoleReward)}!");
-                    RiftBot.Log.Error(ex);
+                    RiftBot.Log.Error(ex, $"Failed to deserialize {nameof(RoleData)} to {nameof(RoleReward)}!");
                     return null;
                 }
             }
@@ -98,8 +95,7 @@ namespace Rift.Data.Models
                 }
                 catch (Exception ex)
                 {
-                    RiftBot.Log.Error($"Failed to serialize given value to {nameof(RoleReward)}!");
-                    RiftBot.Log.Error(ex);
+                    RiftBot.Log.Error(ex, $"Failed to serialize given value to {nameof(RoleReward)}!");
                     return;
                 }
             }

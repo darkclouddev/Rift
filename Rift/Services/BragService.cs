@@ -13,7 +13,6 @@ using Rift.Services.Message;
 using Rift.Services.Reward;
 
 using IonicLib.Extensions;
-using IonicLib.Util;
 
 namespace Rift.Services
 {
@@ -33,8 +32,7 @@ namespace Rift.Services
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error("Failed to brag:");
-                RiftBot.Log.Error(ex);
+                RiftBot.Log.Error(ex, "Failed to brag:");
                 return;
             }
             finally

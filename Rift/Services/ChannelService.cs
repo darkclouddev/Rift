@@ -89,7 +89,7 @@ namespace Rift.Services
 
         static async Task<(bool, RestVoiceChannel)> CreateRoomForUser(IUser user)
         {
-            if (!IonicClient.GetCategory(Settings.App.MainGuildId, VoiceCategoryId, out var category))
+            if (!IonicHelper.GetCategory(Settings.App.MainGuildId, VoiceCategoryId, out var category))
                 return (false, null);
 
             var channel = await category.Guild.CreateVoiceChannelAsync(user.Username, x =>
@@ -105,7 +105,7 @@ namespace Rift.Services
 
         static async Task UpdateUsersVoiceUptimeAsync()
         {
-            if (!IonicClient.GetGuild(Settings.App.MainGuildId, out var guild))
+            if (!IonicHelper.GetGuild(Settings.App.MainGuildId, out var guild))
                 return;
 
             var channels = guild.VoiceChannels
@@ -131,7 +131,7 @@ namespace Rift.Services
                 await DB.Statistics.AddAsync(userId, new StatisticData {VoiceUptime = VoiceRewardsInterval});
             }
 
-            RiftBot.Log.Info($"Gived out voice online rewards for {users.Count.ToString()} user(s).");
+            RiftBot.Log.Information($"Gived out voice online rewards for {users.Count.ToString()} user(s).");
         }
 
         public async Task DenyAccessToUserAsync(IUser roomOwnerUser, IUser targetUser)
@@ -168,22 +168,20 @@ namespace Rift.Services
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Warn("Channel was disposed while executing command, skipping");
-                RiftBot.Log.Warn(ex);
+                RiftBot.Log.Warning(ex, "Channel was disposed while executing command, skipping");
                 return;
             }
             
             try
             {
-                if (!IonicClient.GetVoiceChannel(Settings.App.MainGuildId, Settings.ChannelId.Afk, out var afkChannel))
+                if (!IonicHelper.GetVoiceChannel(Settings.App.MainGuildId, Settings.ChannelId.Afk, out var afkChannel))
                     return;
                     
                 await targetSgUser.ModifyAsync(x => { x.Channel = afkChannel; });
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Warn($"User {targetSgUser.ToLogString()} wasn't in any channel when kick issued, skipping");
-                RiftBot.Log.Warn(ex);
+                RiftBot.Log.Warning(ex, $"User {targetSgUser.ToLogString()} wasn't in any channel when kick issued, skipping");
                 return;
             }
             

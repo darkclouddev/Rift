@@ -17,7 +17,7 @@ namespace Rift.Services
         {
             await Mutex.WaitAsync().ConfigureAwait(false);
 
-            RiftBot.Log.Info($"Opening capsule for {userId.ToString()}.");
+            RiftBot.Log.Information($"Opening capsule for {userId.ToString()}.");
 
             try
             {

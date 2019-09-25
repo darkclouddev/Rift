@@ -15,9 +15,7 @@ namespace Rift.Services.Message.Templates.Users
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, data.UserId);
-
-            if (sgUser is null)
+            if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, data.UserId, out var sgUser))
             {
                 TemplateError("No user data found.");
                 return null;

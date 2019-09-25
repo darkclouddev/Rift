@@ -47,11 +47,11 @@ namespace Rift.Services
 
             if (toxicity is null || toxicity.Length == 0)
             {
-                RiftBot.Log.Info("No toxicity data was found, skipping checks.");
+                RiftBot.Log.Information("No toxicity data was found, skipping checks.");
                 return;
             }
 
-            RiftBot.Log.Info("Starting up toxicity reducer.");
+            RiftBot.Log.Information("Starting up toxicity reducer.");
 
             var count = 0;
 
@@ -68,7 +68,7 @@ namespace Rift.Services
                 await ReduceToxicityAsync(toxic).ConfigureAwait(false);
             }
 
-            RiftBot.Log.Info($"Successfully reduced toxicity level of {count.ToString()} users.");
+            RiftBot.Log.Information($"Successfully reduced toxicity level of {count.ToString()} users.");
         }
 
         static async Task ReduceToxicityAsync(RiftToxicity toxicity)
@@ -77,7 +77,7 @@ namespace Rift.Services
                 ? toxicity.Percent - Settings.Economy.ToxicityWeeklyDropRate
                 : 0u;
 
-            RiftBot.Log.Warn($"Reduced {toxicity.UserId.ToString()}'s toxicity to {percent.ToString()}% (level {toxicity.Level.ToString()}).");
+            RiftBot.Log.Warning($"Reduced {toxicity.UserId.ToString()}'s toxicity to {percent.ToString()}% (level {toxicity.Level.ToString()}).");
 
             await DB.Toxicity.UpdatePercentAsync(toxicity.UserId, percent);
         }

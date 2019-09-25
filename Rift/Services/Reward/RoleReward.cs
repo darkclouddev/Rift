@@ -61,7 +61,7 @@ namespace Rift.Services.Reward
 
             var dbRole = Task.Run(async () => await DB.Roles.GetAsync(RoleId)).Result;
 
-            if (dbRole is null || !IonicClient.GetRole(Settings.App.MainGuildId, dbRole.RoleId, out var role))
+            if (dbRole is null || !IonicHelper.GetRole(Settings.App.MainGuildId, dbRole.RoleId, out var role))
             {
                 text += " не найдена";
                 return text;
