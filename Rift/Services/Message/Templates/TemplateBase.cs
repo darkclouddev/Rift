@@ -4,7 +4,7 @@ using Rift.Data.Models;
 
 namespace Rift.Services.Message.Templates
 {
-    public abstract class TemplateBase
+    public abstract class TemplateBase : ITemplate
     {
         public string Template { get; }
         string TemplateWithoutPrefix { get; }
@@ -16,7 +16,7 @@ namespace Rift.Services.Message.Templates
             TemplateWithoutPrefix = template;
             Template = $"{Prefix}{TemplateWithoutPrefix}";
         }
-
+        
         public abstract Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data);
 
         protected Task<RiftMessage> ReplaceDataAsync(RiftMessage message, string replacement)

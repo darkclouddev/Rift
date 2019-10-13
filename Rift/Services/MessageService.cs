@@ -53,7 +53,7 @@ namespace Rift.Services
             var sw = new Stopwatch();
             sw.Restart();
 
-            templates = new ConcurrentDictionary<string, TemplateBase>();
+            templates = new ConcurrentDictionary<string, ITemplate>();
 
             foreach (var type in GetTemplates())
             {
@@ -254,7 +254,7 @@ namespace Rift.Services
 
         #region Message formatting
 
-        static ConcurrentDictionary<string, TemplateBase> templates;
+        static ConcurrentDictionary<string, ITemplate> templates;
 
         static List<Type> GetTemplates()
         {
@@ -269,7 +269,7 @@ namespace Rift.Services
             return assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(TemplateBase))).ToList();
         }
 
-        public List<TemplateBase> GetActiveTemplates()
+        public List<ITemplate> GetActiveTemplates()
         {
             return templates.Values.ToList();
         }
