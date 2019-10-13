@@ -37,7 +37,7 @@ namespace Rift.Services
 
         public BotRespectService()
         {
-            RiftBot.Log.Info($"Starting {nameof(BotRespectService)}..");
+            RiftBot.Log.Information($"Starting {nameof(BotRespectService)}..");
             
             timer = new Timer(
                 async delegate { await StartBotGifts(); },
@@ -47,7 +47,7 @@ namespace Rift.Services
             
             InitTimer();
 
-            RiftBot.Log.Info($"{nameof(BotRespectService)} loaded successfully.");
+            RiftBot.Log.Information($"{nameof(BotRespectService)} loaded successfully.");
         }
 
         void InitTimer()
@@ -73,9 +73,7 @@ namespace Rift.Services
             
             foreach (var userId in users)
             {
-                var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-                
-                if (sgUser is null)
+                if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, userId, out var sgUser))
                     continue;
 
                 var reward = AvailableRewards.Random();

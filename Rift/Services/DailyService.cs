@@ -22,8 +22,7 @@ namespace Rift.Services
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error("An error occured while checking daily reward:");
-                RiftBot.Log.Error(ex);
+                RiftBot.Log.Error(ex, "An error occured while checking daily reward:");
             }
             finally
             {

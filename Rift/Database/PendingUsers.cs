@@ -16,40 +16,33 @@ namespace Rift.Database
         {
             await DB.Users.EnsureExistsAsync(pendingUser.UserId);
 
-            using (var context = new RiftContext())
-            {
-                await context.PendingUsers.AddAsync(pendingUser);
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            await context.PendingUsers.AddAsync(pendingUser);
+            await context.SaveChangesAsync();
         }
 
         public async Task<List<RiftPendingUser>> GetAllAsync()
         {
-            using (var context = new RiftContext())
-            {
-                return await context.PendingUsers
-                                    .ToListAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.PendingUsers.ToListAsync();
         }
 
         public async Task<RiftPendingUser> GetAsync(ulong userId)
         {
-            using (var context = new RiftContext())
-            {
-                return await context.PendingUsers
-                                    .Select(x => new RiftPendingUser
-                                    {
-                                        UserId = x.UserId,
-                                        Region = x.Region,
-                                        PlayerUUID = x.PlayerUUID,
-                                        AccountId = x.AccountId,
-                                        SummonedId = x.SummonedId,
-                                        ConfirmationCode = x.ConfirmationCode,
-                                        ExpirationTime = x.ExpirationTime
-                                    })
-                                    .Where(x => x.UserId == userId)
-                                    .FirstOrDefaultAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.PendingUsers
+                .Select(x => new RiftPendingUser
+                {
+                    UserId = x.UserId,
+                    Region = x.Region,
+                    PlayerUUID = x.PlayerUUID,
+                    AccountId = x.AccountId,
+                    SummonedId = x.SummonedId,
+                    ConfirmationCode = x.ConfirmationCode,
+                    ExpirationTime = x.ExpirationTime
+                })
+                .Where(x => x.UserId == userId)
+                .FirstOrDefaultAsync();
         }
 
         public async Task RemoveAsync(RiftPendingUser pendingUser)
@@ -59,34 +52,28 @@ namespace Rift.Database
 
         public async Task RemoveAsync(ulong userId)
         {
-            using (var context = new RiftContext())
+            await using var context = new RiftContext();
+            var pendingUser = new RiftPendingUser
             {
-                var pendingUser = new RiftPendingUser
-                {
-                    UserId = userId
-                };
+                UserId = userId
+            };
 
-                context.PendingUsers.Remove(pendingUser);
-                await context.SaveChangesAsync();
-            }
+            context.PendingUsers.Remove(pendingUser);
+            await context.SaveChangesAsync();
         }
 
         public async Task<bool> IsPendingAsync(ulong userId)
         {
-            using (var context = new RiftContext())
-            {
-                return await context.PendingUsers.AnyAsync(x => x.UserId == userId);
-            }
+            await using var context = new RiftContext();
+            return await context.PendingUsers.AnyAsync(x => x.UserId == userId);
         }
 
         public async Task<List<RiftPendingUser>> GetExpiredAsync()
         {
-            using (var context = new RiftContext())
-            {
-                return await context.PendingUsers
-                                    .Where(x => x.ExpirationTime > DateTime.UtcNow)
-                                    .ToListAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.PendingUsers
+                .Where(x => x.ExpirationTime > DateTime.UtcNow)
+                .ToListAsync();
         }
     }
 }

@@ -31,7 +31,7 @@ namespace Rift.Services
 
         public EventService()
         {
-            RiftBot.Log.Info("Starting EventService..");
+            RiftBot.Log.Information("Starting EventService..");
 
             schedulerCulture = new CultureInfo("en-US");
             InitializeStartTimer(TimeSpan.FromSeconds(4));
@@ -47,7 +47,7 @@ namespace Rift.Services
 
             Task.Run(async () => await DB.EventSchedule.AddRangeAsync(events));*/
 
-            RiftBot.Log.Info("EventService loaded successfully.");
+            RiftBot.Log.Information("EventService loaded successfully.");
         }
 
         void InitializeStartTimer(TimeSpan delay)
@@ -98,12 +98,12 @@ namespace Rift.Services
             startTimer = new Timer(async delegate
             {
                 var nextEvent = await RandomizeEventAsync(closest);
-                await StartAsync(nextEvent, IonicClient.Client.CurrentUser.Id);
+                await StartAsync(nextEvent, IonicHelper.Client.CurrentUser.Id);
 
                 await ScheduleTimerToNextEventAsync();
             }, null, ts, TimeSpan.Zero);
 
-            RiftBot.Log.Info(
+            RiftBot.Log.Information(
                 $"Event starter scheduled to {ts.Humanize(culture: schedulerCulture)} (type ID: {closest.EventType.ToString()}).");
         }
 
@@ -122,7 +122,7 @@ namespace Rift.Services
             var ts = closest.DueTime - DateTime.UtcNow + TimeSpan.FromSeconds(1);
             checkTimer.Change(ts, TimeSpan.Zero);
 
-            RiftBot.Log.Info($"Expired event check scheduled to {ts.Humanize(culture: schedulerCulture)}.");
+            RiftBot.Log.Information($"Expired event check scheduled to {ts.Humanize(culture: schedulerCulture)}.");
         }
 
         async Task<RiftEvent> RandomizeEventAsync(RiftScheduledEvent scheduledEvent)
@@ -142,7 +142,7 @@ namespace Rift.Services
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                RiftBot.Log.Warn("Empty event name, skipping execution.");
+                RiftBot.Log.Warning("Empty event name, skipping execution.");
                 return;
             }
 
@@ -155,7 +155,7 @@ namespace Rift.Services
         {
             if (dbEvent is null)
             {
-                RiftBot.Log.Warn("Wrong event name, skipping execution.");
+                RiftBot.Log.Warning("Wrong event name, skipping execution.");
                 return;
             }
 
@@ -163,7 +163,7 @@ namespace Rift.Services
 
             if (msg is null)
             {
-                RiftBot.Log.Warn("Wrong event message ID, skipping execution.");
+                RiftBot.Log.Warning("Wrong event message ID, skipping execution.");
                 return;
             }
 
@@ -171,13 +171,13 @@ namespace Rift.Services
 
             if (dbSharedReward is null)
             {
-                RiftBot.Log.Warn("Wrong event reward ID, skipping execution.");
+                RiftBot.Log.Warning("Wrong event reward ID, skipping execution.");
                 return;
             }
 
-            if (!IonicClient.GetEmote(213672490491314176, "smite", out var smite))
+            if (!IonicHelper.GetEmote(213672490491314176, "smite", out var smite))
             {
-                RiftBot.Log.Warn("No event emote, skipping execution.");
+                RiftBot.Log.Warning("No event emote, skipping execution.");
                 return;
             }
 
@@ -185,7 +185,7 @@ namespace Rift.Services
             {
                 EventName = dbEvent.Name,
                 StoredMessageId = dbEvent.StoredMessageId,
-                StartedBy = startedById == 0u ? IonicClient.Client.CurrentUser.Id : startedById,
+                StartedBy = startedById == 0u ? IonicHelper.Client.CurrentUser.Id : startedById,
                 StartedAt = DateTime.UtcNow,
                 DueTime = DateTime.UtcNow + dbEvent.Duration,
             };
@@ -216,7 +216,7 @@ namespace Rift.Services
                 return;
             }
 
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Monsters, out var channel))
+            if (!IonicHelper.GetTextChannel(Settings.App.MainGuildId, Settings.ChannelId.Monsters, out var channel))
             {
                 RiftBot.Log.Error($"Could not finish event {eventLogString}: Event channel is null!");
                 return;
@@ -230,7 +230,7 @@ namespace Rift.Services
                 return;
             }
 
-            if (!IonicClient.GetEmote(213672490491314176ul, "smite", out var emote))
+            if (!IonicHelper.GetEmote(213672490491314176ul, "smite", out var emote))
             {
                 RiftBot.Log.Error($"Could not finish event {eventLogString}: Emote is null! Deleted?");
                 return;
@@ -256,7 +256,7 @@ namespace Rift.Services
             }
 
             var participants = reactions
-                .Where(x => !x.IsBot && x.Id != IonicClient.Client.CurrentUser.Id)
+                .Where(x => !x.IsBot && x.Id != IonicHelper.Client.CurrentUser.Id)
                 .Select(x => x.Id)
                 .ToArray();
 

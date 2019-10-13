@@ -21,7 +21,7 @@ namespace Rift.Services
         {
             await Mutex.WaitAsync().ConfigureAwait(false);
 
-            RiftBot.Log.Info($"Opening sphere for {userId.ToString()}.");
+            RiftBot.Log.Information($"Opening sphere for {userId.ToString()}.");
 
             try
             {

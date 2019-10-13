@@ -93,14 +93,14 @@ namespace Rift.Services
                 return;
             }
 
-            RiftBot.Log.Info($"Initiating data update: {Settings.App.LolVersion} -> {version}");
+            RiftBot.Log.Information($"Initiating data update: {Settings.App.LolVersion} -> {version}");
 
             await DownloadDataAsync(version).ContinueWith(async x =>
             {
                 if (x.IsFaulted)
                 {
                     RiftBot.Log.Error(x.Exception, "Data download failed!");
-                    RiftBot.Log.Warn("Falling back to existing data.");
+                    RiftBot.Log.Warning("Falling back to existing data.");
                     LoadData();
 
                     return;
@@ -130,7 +130,7 @@ namespace Rift.Services
                     }
                     catch (Exception ex)
                     {
-                        RiftBot.Log.Error(ex);
+                        RiftBot.Log.Error(ex, "An error occured while moving lol data files");
                         return;
                     }
 
@@ -139,7 +139,7 @@ namespace Rift.Services
                     Settings.App.LolVersion = version;
                     await Settings.SaveAppAsync();
 
-                    RiftBot.Log.Info($"Data update completed. New version is {Settings.App.LolVersion}");
+                    RiftBot.Log.Information($"Data update completed. New version is {Settings.App.LolVersion}");
 
                     await RiftBot.SendMessageToDevelopers(
                         $"Data update completed. New version is {Settings.App.LolVersion}.");
@@ -162,19 +162,19 @@ namespace Rift.Services
 
             if (string.IsNullOrWhiteSpace(version))
             {
-                RiftBot.Log.Warn($"Failed to parse data version!");
+                RiftBot.Log.Warning($"Failed to parse data version!");
 
                 return (false, string.Empty);
             }
 
             if (version.Equals(Settings.App.LolVersion, StringComparison.InvariantCultureIgnoreCase))
             {
-                RiftBot.Log.Info($"Data version {Settings.App.LolVersion} is up to date.");
+                RiftBot.Log.Information($"Data version {Settings.App.LolVersion} is up to date.");
 
                 return (false, string.Empty);
             }
 
-            RiftBot.Log.Info($"Found new version: {version}");
+            RiftBot.Log.Information($"Found new version: {version}");
 
             return (true, version);
         }
@@ -201,7 +201,7 @@ namespace Rift.Services
 
             foreach (var champData in championData.Data) champions.Add(champData.Value.Key, champData.Value);
 
-            RiftBot.Log.Info($"Loaded {champions.Count.ToString()} champion(s).");
+            RiftBot.Log.Information($"Loaded {champions.Count.ToString()} champion(s).");
         }
 
         static async Task UnpackData(string pathToArchive, string version)
@@ -418,14 +418,12 @@ namespace Rift.Services
                 await PostValidateAsync(user);
             }
 
-            RiftBot.Log.Info($"{usersValidated.ToString()} users validated.");
+            RiftBot.Log.Information($"{usersValidated.ToString()} users validated.");
         }
 
         async Task PostValidateAsync(RiftPendingUser pendingUser)
         {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, pendingUser.UserId);
-
-            if (sgUser is null)
+            if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, pendingUser.UserId, out var sgUser))
                 return;
 
             await DB.PendingUsers.RemoveAsync(pendingUser.UserId);
@@ -443,11 +441,9 @@ namespace Rift.Services
 
         public async Task UpdateSummonerAsync(ulong userId)
         {
-            RiftBot.Log.Info($"[User|{userId.ToString()}] Getting summoner for the league data update");
+            RiftBot.Log.Information($"[User|{userId.ToString()}] Getting summoner for the league data update");
 
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (sgUser is null)
+            if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, userId, out var sgUser))
             {
                 RiftBot.Log.Error($"{userId.ToString()} Failed to find guild user.");
                 return;
@@ -467,7 +463,7 @@ namespace Rift.Services
 
             await UpdateRankRoleAsync(sgUser, leagueData);
 
-            RiftBot.Log.Info($"{userId.ToString()} League data update completed.");
+            RiftBot.Log.Information($"{userId.ToString()} League data update completed.");
         }
 
         async Task UpdateRankRoleAsync(IGuildUser sgUser, RiftLeagueData leagueData)
@@ -484,7 +480,7 @@ namespace Rift.Services
 
             if (currentRank == newRank)
             {
-                RiftBot.Log.Info($"{sgUser.ToLogString()} Same rank, nothing to update.");
+                RiftBot.Log.Information($"{sgUser.ToLogString()} Same rank, nothing to update.");
                 return;
             }
 
@@ -494,7 +490,7 @@ namespace Rift.Services
             if (roleId is null || roleId.RoleId == 0ul)
                 return;
 
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId.RoleId, out var role))
+            if (!IonicHelper.GetRole(Settings.App.MainGuildId, roleId.RoleId, out var role))
                 return;
 
             await RiftBot.SendMessageAsync("rank-updated", Settings.ChannelId.Chat, new FormatData(sgUser.Id)
@@ -577,7 +573,7 @@ namespace Rift.Services
 
                     var iron = await DB.Roles.GetAsync(58);
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, iron.RoleId, out var ironRole))
+                    if (!IonicHelper.GetRole(Settings.App.MainGuildId, iron.RoleId, out var ironRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(ironRole);
@@ -587,7 +583,7 @@ namespace Rift.Services
 
                     var bronze = await DB.Roles.GetAsync(25);
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, bronze.RoleId, out var bronzeRole))
+                    if (!IonicHelper.GetRole(Settings.App.MainGuildId, bronze.RoleId, out var bronzeRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(bronzeRole);
@@ -597,7 +593,7 @@ namespace Rift.Services
 
                     var silver = await DB.Roles.GetAsync(33);
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, silver.RoleId, out var silverRole))
+                    if (!IonicHelper.GetRole(Settings.App.MainGuildId, silver.RoleId, out var silverRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(silverRole);
@@ -607,7 +603,7 @@ namespace Rift.Services
 
                     var gold = await DB.Roles.GetAsync(3);
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, gold.RoleId, out var goldRole))
+                    if (!IonicHelper.GetRole(Settings.App.MainGuildId, gold.RoleId, out var goldRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(goldRole);
@@ -617,7 +613,7 @@ namespace Rift.Services
 
                     var platinum = await DB.Roles.GetAsync(11);
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, platinum.RoleId, out var platRole))
+                    if (!IonicHelper.GetRole(Settings.App.MainGuildId, platinum.RoleId, out var platRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(platRole);
@@ -627,7 +623,7 @@ namespace Rift.Services
 
                     var diamond = await DB.Roles.GetAsync(8);
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, diamond.RoleId, out var diamondRole))
+                    if (!IonicHelper.GetRole(Settings.App.MainGuildId, diamond.RoleId, out var diamondRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(diamondRole);
@@ -637,7 +633,7 @@ namespace Rift.Services
 
                     var master = await DB.Roles.GetAsync(79);
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, master.RoleId, out var masterRole))
+                    if (!IonicHelper.GetRole(Settings.App.MainGuildId, master.RoleId, out var masterRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(masterRole);
@@ -647,7 +643,7 @@ namespace Rift.Services
 
                     var grandmaster = await DB.Roles.GetAsync(71);
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, grandmaster.RoleId, out var grandmasterRole))
+                    if (!IonicHelper.GetRole(Settings.App.MainGuildId, grandmaster.RoleId, out var grandmasterRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(grandmasterRole);
@@ -657,7 +653,7 @@ namespace Rift.Services
 
                     var challenger = await DB.Roles.GetAsync(23);
 
-                    if (!IonicClient.GetRole(Settings.App.MainGuildId, challenger.RoleId, out var challengerRole))
+                    if (!IonicHelper.GetRole(Settings.App.MainGuildId, challenger.RoleId, out var challengerRole))
                         return;
 
                     await sgUser.RemoveRoleAsync(challengerRole);
@@ -681,7 +677,7 @@ namespace Rift.Services
             if (roleId is null || roleId.RoleId == 0ul)
                 return;
 
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId.RoleId, out var role))
+            if (!IonicHelper.GetRole(Settings.App.MainGuildId, roleId.RoleId, out var role))
                 return;
 
             await guildUser.AddRoleAsync(role);
@@ -731,9 +727,7 @@ namespace Rift.Services
 
         public async Task<IonicMessage> GetUserGameStatAsync(ulong userId)
         {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (sgUser is null)
+            if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, userId, out var sgUser))
                 return MessageService.Error;
 
             var dbSummoner = await DB.LeagueData.GetAsync(userId);
@@ -775,7 +769,7 @@ namespace Rift.Services
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error(ex);
+                RiftBot.Log.Error(ex, $"An error occured while processing request {nameof(GetSummonerByEncryptedSummonerIdAsync)}");
                 return (RequestResult.Error, null);
             }
         }
@@ -790,7 +784,7 @@ namespace Rift.Services
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error(ex);
+                RiftBot.Log.Error(ex, $"An error occured while processing request {nameof(GetSummonerByEncryptedUUIDAsync)}");
                 return (RequestResult.Error, null);
             }
         }
@@ -805,7 +799,7 @@ namespace Rift.Services
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error(ex);
+                RiftBot.Log.Error(ex, $"An error occured while processing request {nameof(GetSummonerByNameAsync)}");
                 return (RequestResult.Error, null);
             }
         }
@@ -820,7 +814,7 @@ namespace Rift.Services
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error(ex);
+                RiftBot.Log.Error(ex, $"An error occured while processing request {nameof(GetLeaguePositionsByEncryptedSummonerIdAsync)}");
                 return (RequestResult.Error, null);
             }
         }
@@ -830,14 +824,13 @@ namespace Rift.Services
             try
             {
                 var result =
-                    await api.ThirdPartyCodeV4.GetThirdPartyCodeBySummonerIdAsync(
-                        GetRegionFromString(region), encryptedSummonerId);
+                    await api.ThirdPartyCodeV4.GetThirdPartyCodeBySummonerIdAsync(GetRegionFromString(region), encryptedSummonerId);
 
                 return (RequestResult.Success, result);
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error(ex);
+                RiftBot.Log.Error(ex, $"An error occured while processing request {nameof(GetThirdPartyCodeByEncryptedSummonerIdAsync)}");
                 return (RequestResult.Error, null);
             }
         }
@@ -846,14 +839,12 @@ namespace Rift.Services
         {
             try
             {
-                var matchlist =
-                    await api.MatchV4.GetMatchlistAsync(GetRegionFromString(region), encryptedAccountId, beginIndex: 0, endIndex: 19);
-
+                var matchlist = await api.MatchV4.GetMatchlistAsync(GetRegionFromString(region), encryptedAccountId, beginIndex: 0, endIndex: 19);
                 return (RequestResult.Success, matchlist.Matches);
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error(ex);
+                RiftBot.Log.Error(ex, $"An error occured while processing request {nameof(GetLast20MatchesByAccountIdAsync)}");
                 return (RequestResult.Error, null);
             }
         }
@@ -863,12 +854,11 @@ namespace Rift.Services
             try
             {
                 var match = await api.MatchV4.GetMatchAsync(GetRegionFromString(region), matchId);
-
                 return (RequestResult.Success, match);
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error(ex);
+                RiftBot.Log.Error(ex, $"An error occured while processing request {nameof(GetMatchById)}");
                 return (RequestResult.Error, null);
             }
         }
@@ -957,7 +947,7 @@ namespace Rift.Services
                 case 1200: return "Осада Нексуса";
 
                 default:
-                    RiftBot.Log.Warn($"Unknown queue ID: {id.ToString()}");
+                    RiftBot.Log.Warning($"Unknown queue ID: {id.ToString()}");
                     return "Неизвестная очередь";
             }
         }

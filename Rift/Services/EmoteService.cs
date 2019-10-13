@@ -44,10 +44,10 @@ namespace Rift.Services
         {
             emotes.Clear();
 
-            foreach (var guild in IonicClient.Client.Guilds)
+            foreach (var guild in IonicHelper.Client.Guilds)
                 await AddEmotesFromGuild(guild);
 
-            RiftBot.Log.Info($"{nameof(EmoteService)} Loaded {emotes.Count.ToString()} emote(s) from {IonicClient.Client.Guilds.Count.ToString()} guild(s)");
+            RiftBot.Log.Information($"{nameof(EmoteService)} Loaded {emotes.Count.ToString()} emote(s) from {IonicHelper.Client.Guilds.Count.ToString()} guild(s)");
         }
 
         const string EmoteUrlPostfix = "Url";
@@ -78,8 +78,7 @@ namespace Rift.Services
 
                 if (!emotes.TryGetValue(urlTemplate, out var emote))
                 {
-                    RiftBot.Log.Warn(
-                        $"[{nameof(EmoteService)}] Emote template \"{template}\" does not exist, skipping.");
+                    RiftBot.Log.Warning($"[{nameof(EmoteService)}] Emote template \"{template}\" does not exist, skipping.");
                     return template;
                 }
 
@@ -89,8 +88,7 @@ namespace Rift.Services
             {
                 if (!emotes.TryGetValue(template, out var emote))
                 {
-                    RiftBot.Log.Warn(
-                        $"[{nameof(EmoteService)}] Emote template \"{template}\" does not exist, skipping.");
+                    RiftBot.Log.Warning($"[{nameof(EmoteService)}] Emote template \"{template}\" does not exist, skipping.");
                     return template;
                 }
 

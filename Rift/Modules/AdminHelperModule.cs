@@ -61,7 +61,7 @@ namespace Rift.Modules
                 Reward = reward
             });
         }
-        
+
         [Command("nitrorewards")]
         [RequireAdmin]
         [RequireContext(ContextType.Guild)]
@@ -71,7 +71,7 @@ namespace Rift.Modules
 
             var role = await DB.Roles.GetAsync(91);
 
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, role.RoleId, out var gr))
+            if (!IonicHelper.GetRole(Settings.App.MainGuildId, role.RoleId, out var gr))
                 return;
 
             if (!(gr is SocketRole sr))
@@ -101,7 +101,7 @@ namespace Rift.Modules
             var dbBack = await DB.ProfileBackgrounds.GetAsync(backId);
 
             if (dbBack is null
-                || !IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var sr)
+                || !IonicHelper.GetRole(Settings.App.MainGuildId, roleId, out var sr)
                 || !(sr is SocketRole role))
             {
                 await RiftBot.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
@@ -136,7 +136,7 @@ namespace Rift.Modules
             var dbRole = await DB.Roles.GetByRoleIdAsync(roleId);
 
             if (dbRole is null
-                || !IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var sr)
+                || !IonicHelper.GetRole(Settings.App.MainGuildId, roleId, out var sr)
                 || !(sr is SocketRole role))
             {
                 await RiftBot.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
@@ -319,7 +319,7 @@ namespace Rift.Modules
 
             var eb = new RiftEmbed().WithTitle("Self-test");
 
-            if (!IonicClient.GetGuild(Settings.App.MainGuildId, out var guild))
+            if (!IonicHelper.GetGuild(Settings.App.MainGuildId, out var guild))
             {
                 errors.Add($"Guild is null: {nameof(Settings.App.MainGuildId)}");
                 skipChecks = true;
@@ -341,9 +341,7 @@ namespace Rift.Modules
                             var channelName = channelNames[field.Name];
 
                             var guildChannel = guild.Channels.FirstOrDefault(
-                                x => x.Name.Equals(channelName,
-                                    StringComparison
-                                        .InvariantCultureIgnoreCase));
+                                x => x.Name.Equals(channelName, StringComparison.InvariantCultureIgnoreCase));
 
                             if (guildChannel is null)
                             {
@@ -360,8 +358,8 @@ namespace Rift.Modules
                             continue;
                         }
                     }
-                    else if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, value, out var textChannel) &&
-                             !IonicClient.GetVoiceChannel(Settings.App.MainGuildId, value, out var voiceChannel))
+                    else if (!IonicHelper.GetTextChannel(Settings.App.MainGuildId, value, out var textChannel) &&
+                             !IonicHelper.GetVoiceChannel(Settings.App.MainGuildId, value, out var voiceChannel))
                     {
                         errors.Add($"No channel on server: {field.Name}");
                     }
@@ -533,15 +531,13 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task WhoIs(ulong userId)
         {
-            var user = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (user is null)
+            if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, userId, out var sgUser))
             {
                 await ReplyAsync($"Пользователя с таким ID нет на сервере.");
                 return;
             }
 
-            await ReplyAsync($"Пользователь найден: {user.Mention} ({user.Username}#{user.Discriminator})");
+            await ReplyAsync($"Пользователь найден: {sgUser.Mention} ({sgUser})");
         }
 
         [Command("ff")]
@@ -549,7 +545,7 @@ namespace Rift.Modules
         public async Task FF()
         {
             await Context.Message.DeleteAsync();
-            IonicClient.TokenSource.Cancel();
+            await IonicHelper.Client.StopAsync();
         }
 
         [Command("reboot")]
@@ -561,7 +557,7 @@ namespace Rift.Modules
             await Context.Message.DeleteAsync();
             await ReplyAsync("Перезапускаюсь");
 
-            IonicClient.TokenSource.Cancel();
+            await IonicHelper.Client.StopAsync();
         }
 
         [Command("listemotes")]
@@ -601,7 +597,7 @@ namespace Rift.Modules
                     return;
 
                 await reward.DeliverToAsync(sgUser.Id);
-                
+
                 await RiftBot.SendMessageAsync("admin-give", Settings.ChannelId.Commands, new FormatData(sgUser.Id)
                 {
                     Reward = reward
@@ -692,13 +688,13 @@ namespace Rift.Modules
                 var invData = reward.ToInventoryData();
 
                 await DB.Inventory.RemoveAsync(sgUser.Id, invData);
-                
+
                 await RiftBot.SendMessageAsync("admin-take", Settings.ChannelId.Commands, new FormatData(sgUser.Id)
                 {
                     Reward = reward
                 });
             }
-            
+
             [Command("coins")]
             [RequireAdmin]
             [RequireContext(ContextType.Guild)]

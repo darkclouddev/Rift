@@ -87,8 +87,7 @@ namespace Rift.Configuration
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Fatal($"Failed to deserialize {type.ToString()} settings!");
-                RiftBot.Log.Fatal(ex);
+                RiftBot.Log.Fatal(ex, $"Failed to deserialize {type.ToString()} settings!");
                 return default;
             }
         }
@@ -97,7 +96,7 @@ namespace Rift.Configuration
         {
             if (data is null)
             {
-                RiftBot.Log.Warn($"Trying to write null {type.ToString()} settings, skipping.");
+                RiftBot.Log.Warning($"Trying to write null {type.ToString()} settings, skipping.");
                 return;
             }
 
@@ -108,8 +107,7 @@ namespace Rift.Configuration
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Fatal($"Failed to write {type.ToString()} settings to database!");
-                RiftBot.Log.Fatal(ex);
+                RiftBot.Log.Fatal(ex, $"Failed to write {type.ToString()} settings to database!");
             }
         }
     }

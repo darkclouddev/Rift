@@ -37,13 +37,13 @@ namespace Rift.Services
         public static async Task ShowActiveUsersAsync()
         {
             var topTen = await DB.Users.GetTopTenByExpAsync(x =>
-                !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
+                !IonicHelper.GetGuildUserById(Settings.App.MainGuildId, x.UserId, out var sgUser));
 
             if (topTen.Count == 0)
                 return;
 
             await RiftBot.SendMessageAsync("economy-activeusers", Settings.ChannelId.Commands,
-                new FormatData(IonicClient.Client.CurrentUser.Id)
+                new FormatData(IonicHelper.Client.CurrentUser.Id)
                 {
                     Economy = new EconomyData
                     {
@@ -55,13 +55,13 @@ namespace Rift.Services
         public static async Task ShowRichUsersAsync()
         {
             var topTen = await DB.Users.GetTopTenByCoinsAsync(x =>
-                !(IonicClient.GetGuildUserById(Settings.App.MainGuildId, x.UserId) is null));
+                !IonicHelper.GetGuildUserById(Settings.App.MainGuildId, x.UserId, out var sgUser));
 
             if (topTen.Count == 0)
                 return;
 
             await RiftBot.SendMessageAsync("economy-richusers", Settings.ChannelId.Commands,
-                new FormatData(IonicClient.Client.CurrentUser.Id)
+                new FormatData(IonicHelper.Client.CurrentUser.Id)
                 {
                     Economy = new EconomyData
                     {
@@ -97,7 +97,7 @@ namespace Rift.Services
                 {
                     await DB.Users.SetLevelAsync(dbUser.UserId, newLevel);
 
-                    RiftBot.Log.Info($"{dbUser.UserId.ToString()} just leveled up: " +
+                    RiftBot.Log.Information($"{dbUser.UserId.ToString()} just leveled up: " +
                                      $"{dbUser.Level.ToString()} => {newLevel.ToString()}");
 
                     if (newLevel == 1u)
@@ -110,9 +110,7 @@ namespace Rift.Services
 
         static async Task GiveRewardsForLevelAsync(ulong userId, uint fromLevel, uint toLevel)
         {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (sgUser is null)
+            if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, userId, out var sgUser))
                 return;
 
             var reward = new ItemReward();
@@ -133,31 +131,31 @@ namespace Rift.Services
                     reward.AddChests(1u).AddCoins(2_000u);
 
                 var nitroBooster = await DB.Roles.GetAsync(91);
-                if (IonicClient.HasRolesAny(sgUser, nitroBooster.RoleId))
+                if (IonicHelper.HasRolesAny(sgUser, nitroBooster.RoleId))
                     reward.AddChests(2u);
                 
                 var rankGold = await DB.Roles.GetAsync(3);
-                if (IonicClient.HasRolesAny(sgUser, rankGold.RoleId))
+                if (IonicHelper.HasRolesAny(sgUser, rankGold.RoleId))
                     reward.AddCoins(250u);
                 
                 var rankPlatinum = await DB.Roles.GetAsync(11);
-                if (IonicClient.HasRolesAny(sgUser, rankPlatinum.RoleId))
+                if (IonicHelper.HasRolesAny(sgUser, rankPlatinum.RoleId))
                     reward.AddCoins(500u);
                 
                 var rankDiamond = await DB.Roles.GetAsync(8);
-                if (IonicClient.HasRolesAny(sgUser, rankDiamond.RoleId))
+                if (IonicHelper.HasRolesAny(sgUser, rankDiamond.RoleId))
                     reward.AddCoins(750u);
                 
                 var rankMaster = await DB.Roles.GetAsync(79);
-                if (IonicClient.HasRolesAny(sgUser, rankMaster.RoleId))
+                if (IonicHelper.HasRolesAny(sgUser, rankMaster.RoleId))
                     reward.AddCoins(1000u);
                 
                 var rankGrandmaster = await DB.Roles.GetAsync(71);
-                if (IonicClient.HasRolesAny(sgUser, rankGrandmaster.RoleId))
+                if (IonicHelper.HasRolesAny(sgUser, rankGrandmaster.RoleId))
                     reward.AddCoins(1250u);
                 
                 var rankChallenger = await DB.Roles.GetAsync(23);
-                if (IonicClient.HasRolesAny(sgUser, rankChallenger.RoleId))
+                if (IonicHelper.HasRolesAny(sgUser, rankChallenger.RoleId))
                     reward.AddCoins(1500u);
             }
 

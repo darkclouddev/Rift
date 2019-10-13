@@ -11,30 +11,25 @@ namespace Rift.Database
     {
         public async Task<RiftSettings> GetAsync(int id)
         {
-            using (var context = new RiftContext())
-            {
-                return await context.Settings
-                                    .FirstOrDefaultAsync(x => x.Id == id);
-            }
+            await using var context = new RiftContext();
+            return await context.Settings.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task SetAsync(int id, string data)
         {
-            using (var context = new RiftContext())
+            await using var context = new RiftContext();
+            var settings = new RiftSettings
             {
-                var settings = new RiftSettings
-                {
-                    Id = id,
-                    Data = data
-                };
+                Id = id,
+                Data = data
+            };
 
-                if (await context.Settings.AnyAsync(x => x.Id == id))
-                    context.Entry(settings).Property(x => x.Data).IsModified = true;
-                else
-                    await context.Settings.AddAsync(settings);
+            if (await context.Settings.AnyAsync(x => x.Id == id))
+                context.Entry(settings).Property(x => x.Data).IsModified = true;
+            else
+                await context.Settings.AddAsync(settings);
 
-                await context.SaveChangesAsync();
-            }
+            await context.SaveChangesAsync();
         }
     }
 }

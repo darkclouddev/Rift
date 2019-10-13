@@ -25,34 +25,28 @@ namespace Rift.Database
                 Duration = duration
             };
 
-            using (var context = new RiftContext())
-            {
-                await context.AddAsync(log);
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            await context.AddAsync(log);
+            await context.SaveChangesAsync();
         }
 
         public async Task<List<RiftModerationLog>> GetAsync(ulong userId)
         {
-            using (var context = new RiftContext())
-            {
-                return await context.ModerationLog
-                                    .Where(x => x.TargetId == userId)
-                                    .OrderByDescending(x => x.CreatedAt)
-                                    .Take(10)
-                                    .ToListAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.ModerationLog
+                .Where(x => x.TargetId == userId)
+                .OrderByDescending(x => x.CreatedAt)
+                .Take(10)
+                .ToListAsync();
         }
 
         public async Task<List<RiftModerationLog>> GetLastTenAsync()
         {
-            using (var context = new RiftContext())
-            {
-                return await context.ModerationLog
-                                    .OrderByDescending(x => x.CreatedAt)
-                                    .Take(10)
-                                    .ToListAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.ModerationLog
+                .OrderByDescending(x => x.CreatedAt)
+                .Take(10)
+                .ToListAsync();
         }
     }
 }

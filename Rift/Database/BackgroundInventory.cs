@@ -22,53 +22,43 @@ namespace Rift.Database
                 BackgroundId = backgroundId
             };
 
-            using (var context = new RiftContext())
-            {
-                await context.BackgroundInventories.AddAsync(backInv);
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            await context.BackgroundInventories.AddAsync(backInv);
+            await context.SaveChangesAsync();
         }
 
         public async Task<List<RiftBackgroundInventory>> GetAsync(ulong userId)
         {
-            using (var context = new RiftContext())
-            {
-                return await context.BackgroundInventories
-                    .Where(x => x.UserId == userId)
-                    .OrderBy(x => x.BackgroundId)
-                    .ToListAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.BackgroundInventories
+                .Where(x => x.UserId == userId)
+                .OrderBy(x => x.BackgroundId)
+                .ToListAsync();
         }
 
         public async Task<List<ulong>> GetNitroBoostUsersAsync()
         {
-            using (var context = new RiftContext())
-            {
-                return await context.BackgroundInventories
-                    .Where(x => x.BackgroundId == 13) // nitro booster background
-                    .Select(x => x.UserId)
-                    .ToListAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.BackgroundInventories
+                .Where(x => x.BackgroundId == 13) // nitro booster background
+                .Select(x => x.UserId)
+                .ToListAsync();
         }
 
         public async Task<int> CountAsync(ulong userId)
         {
-            using (var context = new RiftContext())
-            {
-                return await context.BackgroundInventories
-                    .Where(x => x.UserId == userId)
-                    .CountAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.BackgroundInventories
+                .Where(x => x.UserId == userId)
+                .CountAsync();
         }
 
         public async Task<bool> HasAsync(ulong userId, int backgroundId)
         {
-            using (var context = new RiftContext())
-            {
-                return await context.BackgroundInventories
-                    .Where(x => x.UserId == userId && x.BackgroundId == backgroundId)
-                    .AnyAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.BackgroundInventories
+                .Where(x => x.UserId == userId && x.BackgroundId == backgroundId)
+                .AnyAsync();
         }
 
         public async Task DeleteAsync(ulong userId, int backgroundId)
@@ -84,13 +74,11 @@ namespace Rift.Database
 
         public async Task DeleteAsync(RiftBackgroundInventory backInv)
         {
-            using (var context = new RiftContext())
+            await using var context = new RiftContext();
+            if (await context.BackgroundInventories.AnyAsync(x => x.Equals(backInv)))
             {
-                if (await context.BackgroundInventories.AnyAsync(x => x.Equals(backInv)))
-                {
-                    context.BackgroundInventories.Remove(backInv);
-                    await context.SaveChangesAsync();
-                }
+                context.BackgroundInventories.Remove(backInv);
+                await context.SaveChangesAsync();
             }
         }
         

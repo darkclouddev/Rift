@@ -14,49 +14,39 @@ namespace Rift.Database
     {
         public async Task<bool> AnyAsync()
         {
-            using (var context = new RiftContext())
-            {
-                return await context.ActiveEvents.AnyAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.ActiveEvents.AnyAsync();
         }
         
         public async Task AddAsync(RiftActiveEvent activeEvent)
         {
-            using (var context = new RiftContext())
-            {
-                await context.ActiveEvents.AddAsync(activeEvent);
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            await context.ActiveEvents.AddAsync(activeEvent);
+            await context.SaveChangesAsync();
         }
 
         public async Task<RiftActiveEvent> GetClosestAsync()
         {
-            using (var context = new RiftContext())
-            {
-                return await context.ActiveEvents
-                                    .OrderBy(x => x.DueTime)
-                                    .FirstOrDefaultAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.ActiveEvents
+                .OrderBy(x => x.DueTime)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<List<RiftActiveEvent>> GetExpiredAsync()
         {
             var dt = DateTime.UtcNow;
-            
-            using (var context = new RiftContext())
-            {
-                return await context.ActiveEvents
-                                    .Where(x => x.DueTime <= dt)
-                                    .ToListAsync();
-            }
+
+            await using var context = new RiftContext();
+            return await context.ActiveEvents
+                .Where(x => x.DueTime <= dt)
+                .ToListAsync();
         }
         
         public async Task<List<RiftActiveEvent>> GetAllAsync()
         {
-            using (var context = new RiftContext())
-            {
-                return await context.ActiveEvents.ToListAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.ActiveEvents.ToListAsync();
         }
 
         public async Task RemoveAsync(int id)
@@ -66,11 +56,9 @@ namespace Rift.Database
                 Id = id
             };
 
-            using (var context = new RiftContext())
-            {
-                context.ActiveEvents.Remove(activeEvent);
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            context.ActiveEvents.Remove(activeEvent);
+            await context.SaveChangesAsync();
         }
     }
 }

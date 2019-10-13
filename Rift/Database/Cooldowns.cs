@@ -17,29 +17,26 @@ namespace Rift.Database
             if (!await DB.Users.EnsureExistsAsync(userId))
                 return false;
 
-            using (var context = new RiftContext())
+            await using var context = new RiftContext();
+            if (await context.Cooldowns.AnyAsync(x => x.UserId == userId))
+                return true;
+
+            try
             {
-                if (await context.Cooldowns.AnyAsync(x => x.UserId == userId))
-                    return true;
-
-                try
+                var entry = new RiftCooldowns
                 {
-                    var entry = new RiftCooldowns
-                    {
-                        UserId = userId,
-                    };
+                    UserId = userId,
+                };
 
-                    await context.Cooldowns.AddAsync(entry);
-                    await context.SaveChangesAsync();
+                await context.Cooldowns.AddAsync(entry);
+                await context.SaveChangesAsync();
 
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    RiftBot.Log.Error($"Failed to check {nameof(EnsureExistsAsync)} for user {userId.ToString()}.");
-                    RiftBot.Log.Error(ex);
-                    return false;
-                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RiftBot.Log.Error(ex, $"Failed to check {nameof(EnsureExistsAsync)} for user {userId.ToString()}.");
+                return false;
             }
         }
 
@@ -48,25 +45,21 @@ namespace Rift.Database
             if (!await EnsureExistsAsync(userId))
                 throw new DatabaseException(nameof(GetAsync));
 
-            using (var context = new RiftContext())
-            {
-                return await context.Cooldowns
-                                    .Where(x => x.UserId == userId)
-                                    .FirstAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.Cooldowns
+                .Where(x => x.UserId == userId)
+                .FirstAsync();
         }
 
         public async Task<List<ulong>> GetBotRespectedUsersAsync()
         {
-            using (var context = new RiftContext())
-            {
-                var dt = DateTime.UtcNow;
+            await using var context = new RiftContext();
+            var dt = DateTime.UtcNow;
                 
-                return await context.Cooldowns
-                                    .Where(x => x.BotRespectTime > dt)
-                                    .Select(x => x.UserId)
-                                    .ToListAsync();;
-            }
+            return await context.Cooldowns
+                .Where(x => x.BotRespectTime > dt)
+                .Select(x => x.UserId)
+                .ToListAsync();;
         }
 
         public async Task SetLastItemStoreTimeAsync(ulong userId, DateTime time)
@@ -80,11 +73,9 @@ namespace Rift.Database
                 LastItemStoreTime = time,
             };
 
-            using (var context = new RiftContext())
-            {
-                context.Attach(cd).Property(x => x.LastItemStoreTime).IsModified = true;
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            context.Attach(cd).Property(x => x.LastItemStoreTime).IsModified = true;
+            await context.SaveChangesAsync();
         }
 
         public async Task SetLastRoleStoreTimeAsync(ulong userId, DateTime time)
@@ -98,11 +89,9 @@ namespace Rift.Database
                 LastRoleStoreTime = time,
             };
 
-            using (var context = new RiftContext())
-            {
-                context.Attach(cd).Property(x => x.LastRoleStoreTime).IsModified = true;
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            context.Attach(cd).Property(x => x.LastRoleStoreTime).IsModified = true;
+            await context.SaveChangesAsync();
         }
 
         public async Task SetLastBackgroundStoreTimeAsync(ulong userId, DateTime time)
@@ -116,11 +105,9 @@ namespace Rift.Database
                 LastBackgroundStoreTime = time,
             };
 
-            using (var context = new RiftContext())
-            {
-                context.Attach(cd).Property(x => x.LastBackgroundStoreTime).IsModified = true;
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            context.Attach(cd).Property(x => x.LastBackgroundStoreTime).IsModified = true;
+            await context.SaveChangesAsync();
         }
 
         public async Task SetDoubleExpTimeAsync(ulong userId, DateTime time)
@@ -134,11 +121,9 @@ namespace Rift.Database
                 DoubleExpTime = time,
             };
 
-            using (var context = new RiftContext())
-            {
-                context.Attach(cd).Property(x => x.DoubleExpTime).IsModified = true;
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            context.Attach(cd).Property(x => x.DoubleExpTime).IsModified = true;
+            await context.SaveChangesAsync();
         }
 
         public async Task SetBotRespeсtTimeAsync(ulong userId, DateTime time)
@@ -152,11 +137,9 @@ namespace Rift.Database
                 BotRespectTime = time,
             };
 
-            using (var context = new RiftContext())
-            {
-                context.Attach(cd).Property(x => x.BotRespectTime).IsModified = true;
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            context.Attach(cd).Property(x => x.BotRespectTime).IsModified = true;
+            await context.SaveChangesAsync();
         }
 
         public async Task SetLastBragTimeAsync(ulong userId, DateTime time)
@@ -170,11 +153,9 @@ namespace Rift.Database
                 LastBragTime = time,
             };
 
-            using (var context = new RiftContext())
-            {
-                context.Attach(cd).Property(x => x.LastBragTime).IsModified = true;
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            context.Attach(cd).Property(x => x.LastBragTime).IsModified = true;
+            await context.SaveChangesAsync();
         }
 
         public async Task SetLastGiftTimeAsync(ulong userId, DateTime time)
@@ -188,11 +169,9 @@ namespace Rift.Database
                 LastGiftTime = time,
             };
 
-            using (var context = new RiftContext())
-            {
-                context.Attach(cd).Property(x => x.LastGiftTime).IsModified = true;
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            context.Attach(cd).Property(x => x.LastGiftTime).IsModified = true;
+            await context.SaveChangesAsync();
         }
         
         public async Task SetLastCommunityVoteTimeAsync(ulong userId, DateTime time)
@@ -206,11 +185,9 @@ namespace Rift.Database
                 LastCommunityVoteTime = time,
             };
 
-            using (var context = new RiftContext())
-            {
-                context.Attach(cd).Property(x => x.LastCommunityVoteTime).IsModified = true;
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            context.Attach(cd).Property(x => x.LastCommunityVoteTime).IsModified = true;
+            await context.SaveChangesAsync();
         }
 
         public async Task SetLastStreamerVoteTimeAsync(ulong userId, DateTime time)
@@ -224,11 +201,9 @@ namespace Rift.Database
                 LastStreamerVoteTime = time,
             };
 
-            using (var context = new RiftContext())
-            {
-                context.Attach(cd).Property(x => x.LastStreamerVoteTime).IsModified = true;
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            context.Attach(cd).Property(x => x.LastStreamerVoteTime).IsModified = true;
+            await context.SaveChangesAsync();
         }
 
         public async Task SetLastTeamVoteTimeAsync(ulong userId, DateTime time)
@@ -242,11 +217,9 @@ namespace Rift.Database
                 LastTeamVoteTime = time,
             };
 
-            using (var context = new RiftContext())
-            {
-                context.Attach(cd).Property(x => x.LastTeamVoteTime).IsModified = true;
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            context.Attach(cd).Property(x => x.LastTeamVoteTime).IsModified = true;
+            await context.SaveChangesAsync();
         }
 
         public async Task SetLastDailyRewardTimeAsync(ulong userId, DateTime time)
@@ -260,11 +233,9 @@ namespace Rift.Database
                 LastDailyRewardTime = time,
             };
 
-            using (var context = new RiftContext())
-            {
-                context.Attach(cd).Property(x => x.LastDailyRewardTime).IsModified = true;
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            context.Attach(cd).Property(x => x.LastDailyRewardTime).IsModified = true;
+            await context.SaveChangesAsync();
         }
         
         public async Task ResetAsync(ulong userId)

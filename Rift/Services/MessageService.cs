@@ -48,12 +48,12 @@ namespace Rift.Services
 
         public MessageService()
         {
-            RiftBot.Log.Info($"Starting up {nameof(MessageService)}.");
+            RiftBot.Log.Information($"Starting up {nameof(MessageService)}.");
 
             var sw = new Stopwatch();
             sw.Restart();
 
-            templates = new ConcurrentDictionary<string, TemplateBase>();
+            templates = new ConcurrentDictionary<string, ITemplate>();
 
             foreach (var type in GetTemplates())
             {
@@ -62,10 +62,10 @@ namespace Rift.Services
             }
 
             sw.Stop();
-            RiftBot.Log.Info($"Loaded {templates.Count.ToString()} message templates in" +
+            RiftBot.Log.Information($"Loaded {templates.Count.ToString()} message templates in" +
                              $" {sw.Elapsed.Humanize(1, new CultureInfo("en-US")).ToLowerInvariant()}.");
 
-            RiftBot.Log.Info("Starting up message scheduler.");
+            RiftBot.Log.Information("Starting up message scheduler.");
             checkTimer = new Timer(
                 async delegate { await CheckMessagesAsync(); },
                 null,
@@ -153,12 +153,10 @@ namespace Rift.Services
             {
                 case DestinationType.DM:
 
-                    var user = IonicClient.GetGuildUserById(Settings.App.MainGuildId, message.DestinationId);
-
-                    if (user is null)
+                    if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, message.DestinationId, out var sgUser))
                         return;
 
-                    var userChannel = await user.GetOrCreateDMChannelAsync();
+                    var userChannel = await sgUser.GetOrCreateDMChannelAsync();
 
                     switch (message.MessageType)
                     {
@@ -183,7 +181,7 @@ namespace Rift.Services
 
                 case DestinationType.GuildChannel:
 
-                    if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, message.DestinationId, out var channel))
+                    if (!IonicHelper.GetTextChannel(Settings.App.MainGuildId, message.DestinationId, out var channel))
                         return;
 
                     switch (message.MessageType)
@@ -210,7 +208,7 @@ namespace Rift.Services
 
         async Task DeleteAsync(DeleteMessageBase message)
         {
-            if (!IonicClient.GetTextChannel(Settings.App.MainGuildId, message.ChannelId, out var channel))
+            if (!IonicHelper.GetTextChannel(Settings.App.MainGuildId, message.ChannelId, out var channel))
                 return;
 
             try
@@ -224,7 +222,7 @@ namespace Rift.Services
             }
             catch (Exception ex) // fails when message is already deleted, no delete perms or discord outage
             {
-                RiftBot.Log.Error(ex);
+                RiftBot.Log.Error(ex, "Message was already deleted or no permissions?");
             }
         }
 
@@ -256,7 +254,7 @@ namespace Rift.Services
 
         #region Message formatting
 
-        static ConcurrentDictionary<string, TemplateBase> templates;
+        static ConcurrentDictionary<string, ITemplate> templates;
 
         static List<Type> GetTemplates()
         {
@@ -271,7 +269,7 @@ namespace Rift.Services
             return assembly.GetTypes().Where(x => x.IsSubclassOf(typeof(TemplateBase))).ToList();
         }
 
-        public List<TemplateBase> GetActiveTemplates()
+        public List<ITemplate> GetActiveTemplates()
         {
             return templates.Values.ToList();
         }
@@ -282,7 +280,7 @@ namespace Rift.Services
 
             if (mapping is null)
             {
-                RiftBot.Log.Warn($"Message mapping \"{identifier}\" does not exist.");
+                RiftBot.Log.Warning($"Message mapping \"{identifier}\" does not exist.");
                 return Error;
             }
 
@@ -290,7 +288,7 @@ namespace Rift.Services
 
             if (dbMessage is null)
             {
-                RiftBot.Log.Warn($"Message with ID \"{mapping.MessageId.ToString()}\" does not exist.");
+                RiftBot.Log.Warning($"Message with ID \"{mapping.MessageId.ToString()}\" does not exist.");
                 return Error;
             }
 
@@ -344,7 +342,7 @@ namespace Rift.Services
                 }
                 catch (Exception ex)
                 {
-                    RiftBot.Log.Error(ex);
+                    RiftBot.Log.Error(ex, "An error occured while applying template");
                 }
             }
 

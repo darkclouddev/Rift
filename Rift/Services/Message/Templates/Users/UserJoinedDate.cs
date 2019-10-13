@@ -16,16 +16,14 @@ namespace Rift.Services.Message.Templates.Users
 
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            var user = IonicClient.GetGuildUserById(Settings.App.MainGuildId, data.UserId);
-
-            if (user?.JoinedAt is null)
+            if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, data.UserId, out var sgUser)
+                || sgUser?.JoinedAt is null)
             {
                 TemplateError("No user data found.");
                 return message;
             }
 
-            return await ReplaceDataAsync(
-                message, user.JoinedAt.Value.UtcDateTime.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture));
+            return await ReplaceDataAsync(message, sgUser.JoinedAt.Value.UtcDateTime.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture));
         }
     }
 }

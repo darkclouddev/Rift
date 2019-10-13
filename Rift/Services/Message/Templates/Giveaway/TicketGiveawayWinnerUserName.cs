@@ -15,9 +15,7 @@ namespace Rift.Services.Message.Templates.Giveaway
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, data.Giveaway.TicketGiveaway.WinnerId);
-
-            if (sgUser is null)
+            if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, data.Giveaway.TicketGiveaway.WinnerId, out var sgUser))
             {
                 TemplateError("No user data found.");
                 return null;

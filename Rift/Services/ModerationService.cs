@@ -56,7 +56,7 @@ namespace Rift.Services
                 return;
             }
 
-            if (!IonicClient.GetGuild(Settings.App.MainGuildId, out var guild))
+            if (!IonicHelper.GetGuild(Settings.App.MainGuildId, out var guild))
                 return;
 
             await DB.ModerationLogs.AddAsync(sgTarget.Id, moderator.Id, "Ban", reason, DateTime.UtcNow, TimeSpan.Zero);
@@ -272,8 +272,10 @@ namespace Rift.Services
                                                              x.CreatedAt.Humanize()));
 
             var moderator = string.Join('\n', list.Select(x =>
-                                                              IonicClient.GetGuildUserById(Settings.App.MainGuildId,
-                                                                                           x.ModeratorId).Username));
+            {
+                IonicHelper.GetGuildUserById(Settings.App.MainGuildId, x.ModeratorId, out var sgUser);
+                return sgUser is null ? "-" : sgUser.Username;
+            }));
 
             var embed = new RiftEmbed()
                 .WithDescription($"Досье товарища {user.Username}\nУровень токсичности: {FormatToxicityLevel(toxicity.Level)}")
@@ -289,12 +291,16 @@ namespace Rift.Services
             var list = await DB.ModerationLogs.GetLastTenAsync();
 
             var mods = string.Join('\n', list.Select(x =>
-                                                         IonicClient.GetGuildUserById(Settings.App.MainGuildId,
-                                                                                      x.ModeratorId).Username));
+            {
+                IonicHelper.GetGuildUserById(Settings.App.MainGuildId, x.ModeratorId, out var sgUser);
+                return sgUser is null ? "-" : sgUser.Username;
+            }));
 
             var targets = string.Join('\n', list.Select(x =>
-                                                            IonicClient.GetGuildUserById(Settings.App.MainGuildId,
-                                                                                         x.TargetId).Username));
+            {
+                IonicHelper.GetGuildUserById(Settings.App.MainGuildId, x.TargetId, out var sgUser);
+                return sgUser is null ? "-" : sgUser.Username;
+            }));
 
             var actions = string.Join('\n', list.Select(x =>
             {

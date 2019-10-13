@@ -22,10 +22,8 @@ namespace Rift.Util
             {
                 var request = WebRequest.Create(message.ImageUrl);
 
-                using (var stream = (await request.GetResponseAsync()).GetResponseStream())
-                {
-                    return await channel.SendFileAsync(stream, ImageFileName, message.Text ?? "", embed: message.Embed);
-                }
+                await using var stream = (await request.GetResponseAsync()).GetResponseStream();
+                return await channel.SendFileAsync(stream, ImageFileName, message.Text ?? "", embed: message.Embed);
             }
 
             return await channel.SendMessageAsync(message.Text ?? "", embed: message.Embed)

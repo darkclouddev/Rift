@@ -20,49 +20,43 @@ namespace Rift.Database
 
         public async Task<bool> EnsureExistsAsync(ulong userId)
         {
-            using (var context = new RiftContext())
+            await using var context = new RiftContext();
+            if (await context.Users.AnyAsync(x => x.UserId == userId))
+                return true;
+
+            try
             {
-                if (await context.Users.AnyAsync(x => x.UserId == userId))
-                    return true;
-
-                try
+                var entry = new RiftUser
                 {
-                    var entry = new RiftUser
-                    {
-                        UserId = userId,
-                    };
+                    UserId = userId,
+                };
 
-                    await context.Users.AddAsync(entry);
-                    await context.SaveChangesAsync();
-                    OnUserCreated?.Invoke(null, new UserCreatedEventArgs(userId));
-                    return true;
-                }
-                catch
-                {
-                    RiftBot.Log.Info($"Failed to check {nameof(EnsureExistsAsync)} for user {userId.ToString()}.");
-                    return false;
-                }
+                await context.Users.AddAsync(entry);
+                await context.SaveChangesAsync();
+                OnUserCreated?.Invoke(null, new UserCreatedEventArgs(userId));
+                return true;
+            }
+            catch
+            {
+                RiftBot.Log.Error($"Failed to check {nameof(EnsureExistsAsync)} for user {userId.ToString()}.");
+                return false;
             }
         }
 
         public async Task<int> GetCountAsync()
         {
-            using (var context = new RiftContext())
-            {
-                return await context.Users.CountAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.Users.CountAsync();
         }
 
         public async Task<List<ulong>> GetAllSortedAsync()
         {
-            using (var context = new RiftContext())
-            {
-                return await context.Users
-                                    .OrderByDescending(x => x.Level)
-                                    .ThenByDescending(x => x.Experience)
-                                    .Select(x => x.UserId)
-                                    .ToListAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.Users
+                .OrderByDescending(x => x.Level)
+                .ThenByDescending(x => x.Experience)
+                .Select(x => x.UserId)
+                .ToListAsync();
         }
 
         public async Task<RiftUser> GetAsync(ulong userId)
@@ -70,21 +64,17 @@ namespace Rift.Database
             if (!await EnsureExistsAsync(userId))
                 throw new DatabaseException(nameof(GetAsync));
 
-            using (var context = new RiftContext())
-            {
-                return await context.Users
-                                    .FirstOrDefaultAsync(x => x.UserId == userId);
-            }
+            await using var context = new RiftContext();
+            return await context.Users
+                .FirstOrDefaultAsync(x => x.UserId == userId);
         }
 
         public async Task<List<RiftUser>> GetAsync(Expression<Func<RiftUser, bool>> predicate)
         {
-            using (var context = new RiftContext())
-            {
-                return await context.Users
-                                    .Where(predicate)
-                                    .ToListAsync();
-            }
+            await using var context = new RiftContext();
+            return await context.Users
+                .Where(predicate)
+                .ToListAsync();
         }
 
         public async Task<uint> GetLevelAsync(ulong userId)
@@ -95,37 +85,33 @@ namespace Rift.Database
 
         public async Task<List<UserTopCoins>> GetTopTenByCoinsAsync(Func<UserTopCoins, bool> predicate)
         {
-            using (var context = new RiftContext())
-            {
-                var list = await context.Inventory
-                                        .OrderByDescending(x => x.Coins)
-                                        .Select(x => new UserTopCoins
-                                        {
-                                            UserId = x.UserId,
-                                            Coins = x.Coins,
-                                        })
-                                        .ToListAsync();
+            await using var context = new RiftContext();
+            var list = await context.Inventory
+                .OrderByDescending(x => x.Coins)
+                .Select(x => new UserTopCoins
+                {
+                    UserId = x.UserId,
+                    Coins = x.Coins,
+                })
+                .ToListAsync();
 
-                return list.Where(predicate).Take(10).ToList();
-            }
+            return list.Where(predicate).Take(10).ToList();
         }
 
         public async Task<List<UserTopExp>> GetTopTenByExpAsync(Func<UserTopExp, bool> predicate)
         {
-            using (var context = new RiftContext())
-            {
-                var list = await context.Users
-                                        .OrderByDescending(x => x.Experience)
-                                        .Select(x => new UserTopExp
-                                        {
-                                            UserId = x.UserId,
-                                            Level = x.Level,
-                                            Experience = x.Experience,
-                                        })
-                                        .ToListAsync();
+            await using var context = new RiftContext();
+            var list = await context.Users
+                .OrderByDescending(x => x.Experience)
+                .Select(x => new UserTopExp
+                {
+                    UserId = x.UserId,
+                    Level = x.Level,
+                    Experience = x.Experience,
+                })
+                .ToListAsync();
 
-                return list.Where(predicate).Take(10).ToList();
-            }
+            return list.Where(predicate).Take(10).ToList();
         }
 
         public async Task SetLevelAsync(ulong userId, uint level)
@@ -139,26 +125,22 @@ namespace Rift.Database
                 Level = level,
             };
 
-            using (var context = new RiftContext())
-            {
-                context.Attach(user).Property(x => x.Level).IsModified = true;
-                await context.SaveChangesAsync();
-                OnLevelReached?.Invoke(null, new LevelReachedEventArgs(userId, level));
-            }
+            await using var context = new RiftContext();
+            context.Attach(user).Property(x => x.Level).IsModified = true;
+            await context.SaveChangesAsync();
+            OnLevelReached?.Invoke(null, new LevelReachedEventArgs(userId, level));
         }
 
         public async Task RemoveAsync(ulong userId)
         {
-            using (var context = new RiftContext())
+            await using var context = new RiftContext();
+            var dbUser = new RiftUser
             {
-                var dbUser = new RiftUser
-                {
-                    UserId = userId,
-                };
+                UserId = userId,
+            };
 
-                context.Users.Remove(dbUser);
-                await context.SaveChangesAsync();
-            }
+            context.Users.Remove(dbUser);
+            await context.SaveChangesAsync();
         }
 
         public async Task AddExperienceAsync(ulong userId, uint exp = 0u)
@@ -174,24 +156,22 @@ namespace Rift.Database
             var profile = await GetAsync(userId);
             var cooldowns = await DB.Cooldowns.GetAsync(userId);
 
-            using (var context = new RiftContext())
-            {
-                var entry = context.Attach(dbUser);
+            await using var context = new RiftContext();
+            var entry = context.Attach(dbUser);
 
-                if (DateTime.UtcNow < cooldowns.DoubleExpTime)
-                    exp *= 2;
+            if (DateTime.UtcNow < cooldowns.DoubleExpTime)
+                exp *= 2;
 
-                var expBefore = profile.Experience;
+            var expBefore = profile.Experience;
 
-                if (uint.MaxValue - expBefore < exp)
-                    dbUser.Experience = uint.MaxValue;
-                else
-                    dbUser.Experience = expBefore + exp;
+            if (uint.MaxValue - expBefore < exp)
+                dbUser.Experience = uint.MaxValue;
+            else
+                dbUser.Experience = expBefore + exp;
 
-                entry.Property(x => x.Experience).IsModified = true;
+            entry.Property(x => x.Experience).IsModified = true;
 
-                await context.SaveChangesAsync();
-            }
+            await context.SaveChangesAsync();
         }
         
         public async Task SetBackgroundAsync(ulong userId, int backgroundId)
@@ -202,11 +182,9 @@ namespace Rift.Database
                 ProfileBackground = backgroundId
             };
 
-            using (var context = new RiftContext())
-            {
-                context.Entry(dbUser).Property(x => x.ProfileBackground).IsModified = true;
-                await context.SaveChangesAsync();
-            }
+            await using var context = new RiftContext();
+            context.Entry(dbUser).Property(x => x.ProfileBackground).IsModified = true;
+            await context.SaveChangesAsync();
         }
     }
 }

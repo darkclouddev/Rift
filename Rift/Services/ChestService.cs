@@ -21,7 +21,7 @@ namespace Rift.Services
         {
             await Mutex.WaitAsync().ConfigureAwait(false);
 
-            RiftBot.Log.Info($"Opening {amount.ToString()} chest(s) for {userId.ToString()}.");
+            RiftBot.Log.Information($"Opening {amount.ToString()} chest(s) for {userId.ToString()}.");
 
             try
             {

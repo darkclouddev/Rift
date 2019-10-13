@@ -43,12 +43,10 @@ namespace Rift.Services
 
         public async Task<(bool, IonicMessage)> AddPermanentRoleAsync(ulong userId, ulong roleId)
         {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (sgUser is null)
+            if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, userId, out var sgUser))
                 return (false, MessageService.UserNotFound);
 
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var role))
+            if (!IonicHelper.GetRole(Settings.App.MainGuildId, roleId, out var role))
                 return (false, MessageService.RoleNotFound);
 
             await sgUser.AddRoleAsync(role);
@@ -57,12 +55,10 @@ namespace Rift.Services
 
         public async Task<(bool, IonicMessage)> RemovePermanentRoleAsync(ulong userId, ulong roleId)
         {
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (sgUser is null)
+            if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, userId, out var sgUser))
                 return (false, MessageService.UserNotFound);
 
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var role))
+            if (!IonicHelper.GetRole(Settings.App.MainGuildId, roleId, out var role))
                 return (false, MessageService.RoleNotFound);
 
             await sgUser.RemoveRoleAsync(role);
@@ -80,12 +76,10 @@ namespace Rift.Services
                 ExpirationTime = DateTime.UtcNow + duration,
             };
 
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-
-            if (sgUser is null)
+            if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, userId, out var sgUser))
                 return;
 
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, roleId, out var serverRole))
+            if (!IonicHelper.GetRole(Settings.App.MainGuildId, roleId, out var serverRole))
                 return;
 
             await sgUser.AddRoleAsync(serverRole);
@@ -96,14 +90,14 @@ namespace Rift.Services
         {
             await DB.TempRoles.RemoveAsync(userId, roleId);
 
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
+            IonicHelper.GetGuildUserById(Settings.App.MainGuildId, userId, out var sgUser);
 
             var role = sgUser?.Roles.FirstOrDefault(x => x.Id == roleId);
 
             if (role != null)
                 await sgUser.RemoveRoleAsync(role);
 
-            RiftBot.Log.Info($"Removed role {roleId.ToString()} from {sgUser} {userId.ToString()}");
+            RiftBot.Log.Information($"Removed role {roleId.ToString()} from {sgUser} {userId.ToString()}");
 
             return (true, null);
         }
@@ -115,7 +109,7 @@ namespace Rift.Services
 
         public async Task RestoreTempRolesAsync(SocketGuildUser sgUser)
         {
-            RiftBot.Log.Info($"User {sgUser.ToLogString()} joined, checking temp roles");
+            RiftBot.Log.Information($"User {sgUser.ToLogString()} joined, checking temp roles");
 
             var tempRoles = await DB.TempRoles.GetAsync(sgUser.Id);
 
@@ -129,7 +123,7 @@ namespace Rift.Services
 
             foreach (var id in remainingRoles)
             {
-                if (!IonicClient.GetRole(Settings.App.MainGuildId, id, out var role))
+                if (!IonicHelper.GetRole(Settings.App.MainGuildId, id, out var role))
                 {
                     RiftBot.Log.Error($"Applying role {id.ToString()}: FAILED");
                     continue;
@@ -149,8 +143,7 @@ namespace Rift.Services
             }
 
             var dbUser = await DB.Users.GetAsync(userId);
-            var sgUser = IonicClient.GetGuildUserById(Settings.App.MainGuildId, userId);
-            if (dbUser is null || sgUser is null)
+            if (dbUser is null || !IonicHelper.GetGuildUserById(Settings.App.MainGuildId, userId, out var sgUser))
             {
                 await RiftBot.SendMessageAsync(MessageService.UserNotFound, Settings.ChannelId.Commands);
                 return;
@@ -164,13 +157,13 @@ namespace Rift.Services
                 return;
             }
 
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, role.RoleId, out var guildRole))
+            if (!IonicHelper.GetRole(Settings.App.MainGuildId, role.RoleId, out var guildRole))
             {
                 await RiftBot.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
                 return;
             }
 
-            var hasRole = IonicClient.HasRolesAny(Settings.App.MainGuildId, userId, role.RoleId);
+            var hasRole = IonicHelper.HasRolesAny(Settings.App.MainGuildId, userId, role.RoleId);
 
             if (add)
             {
@@ -206,7 +199,7 @@ namespace Rift.Services
         {
             var nitro = await DB.Roles.GetAsync(91);
             
-            if (!IonicClient.GetRole(Settings.App.MainGuildId, nitro.RoleId, out var role)
+            if (!IonicHelper.GetRole(Settings.App.MainGuildId, nitro.RoleId, out var role)
                 || !(role is SocketRole sgRole))
                 return null;
 
