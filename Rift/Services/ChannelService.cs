@@ -67,7 +67,8 @@ namespace Rift.Services
                 {
                     await sgUser.ModifyAsync(x => { x.Channel = channel; });
 
-                    if (sgUser.VoiceChannel is null) await channel.DeleteAsync();
+                    if (sgUser.VoiceChannel is null)
+                        await channel.DeleteAsync();
                 }
             }
 
@@ -118,7 +119,27 @@ namespace Rift.Services
             var users = new List<ulong>();
 
             foreach (var channel in channels)
-                users.AddRange(channel.Users.Select(x => x.Id));
+            {
+                if (channel.Users.Count <= 1)
+                    continue;
+                
+                if (channel.UserLimit == 1)
+                    continue;
+
+                foreach (var sgUser in channel.Users)
+                {
+                    if (!sgUser.VoiceState.HasValue)
+                        continue;
+                    
+                    var voiceState = sgUser.VoiceState.Value;
+                    
+                    if (voiceState.IsMuted || voiceState.IsDeafened
+                        || voiceState.IsSelfMuted || voiceState.IsSelfDeafened)
+                        continue;
+                    
+                    users.Add(sgUser.Id);
+                }
+            }
 
             if (!users.Any())
                 return;
@@ -141,25 +162,25 @@ namespace Rift.Services
                 return;
             
             if (roomOwnerSgUser.VoiceChannel is null)
-                return; // TODO: issuer not in any voice channel
+                return;
             
             if (targetSgUser.VoiceChannel is null)
-                return; // TODO: target is not in any voice channel
+                return;
 
             if (roomOwnerSgUser.VoiceChannel.Id != targetSgUser.VoiceChannel.Id)
-                return; // TODO: target is not in issuer's channel
+                return;
             
             var channel = roomOwnerSgUser.VoiceChannel;
 
             var channelPerms = channel.GetPermissionOverwrite(roomOwnerSgUser);
 
             if (!channelPerms.HasValue || channelPerms.Value.ManageChannel != PermValue.Allow)
-                return; // TODO: no rights to kick
+                return;
             
             var targetPerms = channel.GetPermissionOverwrite(targetSgUser);
 
             if (targetPerms.HasValue && targetPerms.Value.Connect == PermValue.Deny)
-                return; // TODO: already banned from this channel
+                return;
 
             try
             {
