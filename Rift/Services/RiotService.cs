@@ -12,7 +12,6 @@ using Rift.Data.Models;
 using Rift.Database;
 using Rift.Events;
 using Rift.Services.Message;
-using Rift.Services.Riot;
 using Rift.Util;
 
 using Discord;
