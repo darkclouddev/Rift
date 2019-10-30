@@ -73,7 +73,7 @@ namespace Rift.Services
             {
                 RiftBot.Log.Error("Failed to get match data");
                 await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
-                return ;
+                return;
             }
 
             long participantId = matchData.ParticipantIdentities
@@ -87,7 +87,7 @@ namespace Rift.Services
             {
                 RiftBot.Log.Error("Failed to get player object");
                 await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
-                return ;
+                return;
             }
 
             var champData = RiftBot.GetService<RiotService>().GetChampionById(player.ChampionId.ToString());
@@ -96,7 +96,7 @@ namespace Rift.Services
             {
                 RiftBot.Log.Error("Failed to obtain champ data");
                 await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
-                return ;
+                return;
             }
 
             var champThumb = RiotService.GetChampionSquareByName(champData.Image);

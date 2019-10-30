@@ -12,7 +12,6 @@ using Rift.Data.Models;
 using Rift.Database;
 using Rift.Events;
 using Rift.Services.Message;
-using Rift.Services.Riot;
 using Rift.Util;
 
 using Discord;
@@ -936,6 +935,8 @@ namespace Rift.Services
 
                 case 100:
                 case 450: return "ARAM";
+                
+                case 700: return "Clash";
 
                 case 800:
                 case 810:
