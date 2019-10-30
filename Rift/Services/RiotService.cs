@@ -936,6 +936,8 @@ namespace Rift.Services
 
                 case 100:
                 case 450: return "ARAM";
+                
+                case 700: return "Clash";
 
                 case 800:
                 case 810:
