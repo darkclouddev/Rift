@@ -14,7 +14,7 @@ namespace Rift.Services.Message.Templates.Users
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            var rating = EconomyService.SortedRating;
+            var rating = data.EconomyService.SortedRating;
 
             var position = rating is null
                 ? NoRating

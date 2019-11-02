@@ -18,25 +18,6 @@ namespace Rift.Services.Store
         public readonly string CurrencyEmote;
         public readonly uint Amount;
 
-        public string FormattedName
-        {
-            get
-            {
-                var emotes = RiftBot.GetService<EmoteService>();
-                return $"{Name}{emotes.GetEmoteString("$emotetran")}";
-            }
-        }
-
-        public string FormattedPrice
-        {
-            get
-            {
-                var format = new NumberFormatInfo {NumberGroupSeparator = " ", NumberDecimalDigits = 0};
-                var emotes = RiftBot.GetService<EmoteService>();
-                return $"{emotes.GetEmoteString(CurrencyEmote)} {Price.ToString("n", format)}";
-            }
-        }
-
         public StoreItem(uint id, string name, StoreItemType type, uint amount, uint price, Currency currency)
         {
             Id = id;
@@ -104,7 +85,7 @@ namespace Rift.Services.Store
                     var dbData = Task.Run(() => DB.Roles.GetAsync(dbId)).Result;
                     if (dbData is null)
                     {
-                        Task.Run(() => RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands));
+                        RiftBot.Log.Error($"No data for role {dbId.ToString()}!");
                         break;
                     }
 
@@ -112,11 +93,6 @@ namespace Rift.Services.Store
                     RoleId = dbData.RoleId;
                     break;
             }
-        }
-
-        public override string ToString()
-        {
-            return $"{Id.ToString()}. {Name} ({FormattedPrice})";
         }
     }
 

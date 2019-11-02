@@ -14,14 +14,20 @@ using IonicLib;
 using Discord;
 using Discord.WebSocket;
 
+using Rift.Services.Interfaces;
+
 namespace Rift.Services
 {
     public class RoleService
     {
         static Timer tempRoleTimer;
 
-        public RoleService()
+        readonly IMessageService messageService;
+        
+        public RoleService(IMessageService messageService)
         {
+            this.messageService = messageService;
+            
             // TODO: implement scheduling timer
             tempRoleTimer = new Timer(
                 async delegate { await TimerProcAsync(); },
@@ -138,28 +144,28 @@ namespace Rift.Services
         {
             if (!await DB.RoleInventory.HasAnyAsync(userId, id))
             {
-                await RiftBot.SendMessageAsync("roleinventory-wrongnumber", Settings.ChannelId.Commands, new FormatData(userId));
+                await messageService.SendMessageAsync("roleinventory-wrongnumber", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
             var dbUser = await DB.Users.GetAsync(userId);
             if (dbUser is null || !IonicHelper.GetGuildUserById(Settings.App.MainGuildId, userId, out var sgUser))
             {
-                await RiftBot.SendMessageAsync(MessageService.UserNotFound, Settings.ChannelId.Commands);
+                await messageService.SendMessageAsync(MessageService.UserNotFound, Settings.ChannelId.Commands);
                 return;
             }
 
             var role = await DB.Roles.GetAsync(id);
             if (role is null)
             {
-                await RiftBot.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
+                await messageService.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
                 await RiftBot.SendMessageToAdmins($"User <@{userId.ToString()}> failed to set role ID {id.ToString()}.");
                 return;
             }
 
             if (!IonicHelper.GetRole(Settings.App.MainGuildId, role.RoleId, out var guildRole))
             {
-                await RiftBot.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
+                await messageService.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
                 return;
             }
 
@@ -169,7 +175,7 @@ namespace Rift.Services
             {
                 if (hasRole)
                 {
-                    await RiftBot.SendMessageAsync("roleinventory-hasrole", Settings.ChannelId.Commands, new FormatData(userId));
+                    await messageService.SendMessageAsync("roleinventory-hasrole", Settings.ChannelId.Commands, new FormatData(userId));
                     return;
                 }
 
@@ -179,7 +185,7 @@ namespace Rift.Services
             {
                 if (!hasRole)
                 {
-                    await RiftBot.SendMessageAsync("roleinventory-norole", Settings.ChannelId.Commands, new FormatData(userId));
+                    await messageService.SendMessageAsync("roleinventory-norole", Settings.ChannelId.Commands, new FormatData(userId));
                     return;
                 }
 
@@ -191,7 +197,7 @@ namespace Rift.Services
 
         public async Task GetInventoryAsync(ulong userId)
         {
-            await RiftBot.SendMessageAsync(InventoryIdentifier, Settings.ChannelId.Commands, new FormatData(userId))
+            await messageService.SendMessageAsync(InventoryIdentifier, Settings.ChannelId.Commands, new FormatData(userId))
                 .ConfigureAwait(false);
         }
         

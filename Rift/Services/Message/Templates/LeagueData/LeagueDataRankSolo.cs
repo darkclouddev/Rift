@@ -19,7 +19,7 @@ namespace Rift.Services.Message.Templates.LeagueData
             var league = data.LeagueStat.SoloQueue;
             var totalGames = league.Wins + league.Losses;
             var winRatePerc = (int) Math.Round((double) league.Wins / (double) totalGames * 100);
-            var leagueName = $"{RiotService.GetStatStringFromRank(RiotService.GetRankFromEntry(league))} {league.Rank}";
+            var leagueName = $"{data.RiotService.GetStatStringFromRank(data.RiotService.GetRankFromEntry(league))} {league.Rank}";
 
             return ReplaceDataAsync(message, $"{leagueName} ({league.LeaguePoints.ToString()}LP / " +
                                              $"{league.Wins.ToString()}W {league.Losses.ToString()}L) ({winRatePerc.ToString()}%)");

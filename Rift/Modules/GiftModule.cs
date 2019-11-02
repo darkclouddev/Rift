@@ -1,19 +1,20 @@
 ﻿using System.Threading.Tasks;
 
-using Rift.Services;
 using Rift.Util;
 
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
+using Rift.Services.Interfaces;
+
 namespace Rift.Modules
 {
     public class GiftModule : RiftModuleBase
     {
-        readonly GiftService giftService;
+        readonly IGiftService giftService;
 
-        public GiftModule(GiftService giftService)
+        public GiftModule(IGiftService giftService)
         {
             this.giftService = giftService;
         }

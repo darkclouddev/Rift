@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Rift.Database;
 using Rift.Events;
+using Rift.Services.Interfaces;
 using Rift.Services.Message;
 using Rift.Services.Reward;
 
@@ -11,11 +12,21 @@ using Settings = Rift.Configuration.Settings;
 
 namespace Rift.Services
 {
-    public class SphereService
+    public class SphereService : ISphereService
     {
-        public static event EventHandler<OpenedSphereEventArgs> OpenedSphere;
+        public event EventHandler<OpenedSphereEventArgs> OpenedSphere;
         
         static readonly SemaphoreSlim Mutex = new SemaphoreSlim(1);
+
+        readonly IMessageService messageService;
+        readonly IRewardService rewardService;
+
+        public SphereService(IMessageService messageService,
+                             IRewardService rewardService)
+        {
+            this.messageService = messageService;
+            this.rewardService = rewardService;
+        }
         
         public async Task OpenAsync(ulong userId)
         {
@@ -33,13 +44,13 @@ namespace Rift.Services
             }
         }
 
-        static async Task OpenInternalAsync(ulong userId)
+        async Task OpenInternalAsync(ulong userId)
         {
             var dbInventory = await DB.Inventory.GetAsync(userId);
 
             if (dbInventory.Spheres == 0u)
             {
-                await RiftBot.SendMessageAsync("spheres-nospheres", Settings.ChannelId.Commands, new FormatData(userId));
+                await messageService.SendMessageAsync("spheres-nospheres", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
@@ -47,10 +58,10 @@ namespace Rift.Services
             OpenedSphere?.Invoke(null, new OpenedSphereEventArgs(userId));
 
             var sphere = new SphereReward();
-            await sphere.DeliverToAsync(userId);
+            await rewardService.DeliverToAsync(userId, sphere);
             await DB.Statistics.AddAsync(userId, new StatisticData {SpheresOpened = 1u});
 
-            await RiftBot.SendMessageAsync("spheres-open-success", Settings.ChannelId.Commands, new FormatData(userId)
+            await messageService.SendMessageAsync("spheres-open-success", Settings.ChannelId.Commands, new FormatData(userId)
             {
                 Reward = sphere
             });

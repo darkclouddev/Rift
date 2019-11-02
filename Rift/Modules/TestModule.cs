@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 using Discord;
 
-using Rift.Services;
+using Rift.Services.Interfaces;
 using Rift.Preconditions;
 
 using Discord.Commands;
@@ -19,18 +19,11 @@ namespace Rift.Modules
     [Alias("тест")]
     public class TestModule : RiftModuleBase
     {
-        readonly EconomyService economyService;
-        readonly RoleService roleService;
-        readonly MessageService messageService;
-        readonly EventService eventService;
+        readonly IEconomyService economyService;
 
-        public TestModule(EconomyService economyService, RoleService roleService, MessageService messageService,
-            EventService eventService)
+        public TestModule(IEconomyService economyService)
         {
             this.economyService = economyService;
-            this.roleService = roleService;
-            this.messageService = messageService;
-            this.eventService = eventService;
         }
 
         [Command("since")]
@@ -65,7 +58,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.DM)]
         public async Task Exp(uint level)
         {
-            await ReplyAsync($"Lv {level.ToString()}: {EconomyService.GetExpForLevel(level).ToString()} XP");
+            await ReplyAsync($"Lv {level.ToString()}: {economyService.GetExpForLevel(level).ToString()} XP");
         }
     }
 }

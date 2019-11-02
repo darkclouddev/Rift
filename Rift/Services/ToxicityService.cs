@@ -4,10 +4,11 @@ using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Data.Models;
+using Rift.Services.Interfaces;
 
 namespace Rift.Services
 {
-    public class ToxicityService
+    public class ToxicityService : IToxicityService
     {
         const string TimerName = "toxicity-reducer";
         Timer checkTimer;

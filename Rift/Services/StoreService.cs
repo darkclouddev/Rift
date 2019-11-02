@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,16 +14,16 @@ using Rift.Services.Message;
 using Rift.Services.Reward;
 using Rift.Services.Store;
 
-using IonicLib;
-
 using Newtonsoft.Json;
+
+using Rift.Services.Interfaces;
 
 namespace Rift.Services
 {
-    public class StoreService
+    public class StoreService : IStoreService
     {
-        public static EventHandler<BoughtChestsEventArgs> BoughtChests;
-        public static EventHandler<RolesPurchasedEventArgs> RolesPurchased;
+        public event EventHandler<BoughtChestsEventArgs> BoughtChests;
+        public event EventHandler<RolesPurchasedEventArgs> RolesPurchased;
 
         static readonly SemaphoreSlim MutexItemStore = new SemaphoreSlim(1);
         static readonly SemaphoreSlim MutexRoleStore = new SemaphoreSlim(1);
@@ -133,36 +134,21 @@ namespace Rift.Services
             get
             {
                 if (itemShopMessage is null)
-                    itemShopMessage = Task.Run(
-                        async () =>
-                            await RiftBot.GetService<MessageService>()
-                                .FormatMessageAsync(
-                                    new RiftMessage
-                                    {
-                                        Embed = JsonConvert.SerializeObject(
-                                            new RiftEmbed()
-                                                .WithTitle("Магазин")
-                                                .WithDescription(
-                                                    "В магазине находятся сундуки, капсулы, бонусы и билеты.\n" +
-                                                    "Для покупки напишите `!купить` и номер желаемого товара.")
-                                                .AddField(
-                                                    "Товар",
-                                                    string.Join(
-                                                        '\n',
-                                                        ItemShopList.Select(
-                                                            x =>
-                                                                $"{x.Id.ToString()}. {x.FormattedName}")),
-                                                    true)
-                                                .AddField("Стоимость",
-                                                    string.Join(
-                                                        '\n',
-                                                        ItemShopList.Select(
-                                                            x => x
-                                                                .FormattedPrice)),
-                                                    true)
-                                                .WithFooter(
-                                                    "Максимум одна покупка в час."))
-                                    })).Result;
+                {
+                    var things = ItemShopList.Select(x => $"{x.Id.ToString()}. {FormatName(x)}");
+                    var prices = ItemShopList.Select(FormatPrice);
+                    var embed = new RiftEmbed()
+                        .WithTitle("Магазин")
+                        .WithDescription("В магазине находятся сундуки, капсулы, бонусы и билеты.\n" +
+                                         "Для покупки напишите `!купить` и номер желаемого товара.")
+                        .AddField("Товар", string.Join('\n', things), true)
+                        .AddField("Стоимость", string.Join('\n', prices), true)
+                        .WithFooter("Максимум одна покупка в час.");
+                    var json = JsonConvert.SerializeObject(embed);
+                    var msg = new RiftMessage {Embed = json};
+                    
+                    itemShopMessage = Task.Run(async () => await messageService.FormatMessageAsync(msg)).Result;
+                }
 
                 return itemShopMessage;
             }
@@ -175,36 +161,21 @@ namespace Rift.Services
             get
             {
                 if (roleShopMessage is null)
-                    roleShopMessage = Task.Run(
-                        async () =>
-                            await RiftBot.GetService<MessageService>()
-                                .FormatMessageAsync(
-                                    new RiftMessage
-                                    {
-                                        Embed = JsonConvert.SerializeObject(
-                                            new RiftEmbed()
-                                                .WithTitle("Магазин ролей")
-                                                .WithDescription(
-                                                    "В магазине находятся обычные и уникальные роли.\n" +
-                                                    "Для покупки напишите `!купить роль` и номер желаемого товара.")
-                                                .AddField(
-                                                    "Товар",
-                                                    string.Join(
-                                                        '\n',
-                                                        RoleShopList.Select(
-                                                            x =>
-                                                                $"{x.Id.ToString()}. {x.FormattedName}")),
-                                                    true)
-                                                .AddField("Стоимость",
-                                                    string.Join(
-                                                        '\n',
-                                                        RoleShopList.Select(
-                                                            x => x
-                                                                .FormattedPrice)),
-                                                    true)
-                                                .WithFooter(
-                                                    "Максимум одна покупка в 24 часа."))
-                                    })).Result;
+                {
+                    var things = RoleShopList.Select(x => $"{x.Id.ToString()}. {FormatName(x)}");
+                    var prices = RoleShopList.Select(FormatPrice);
+                    var embed = new RiftEmbed()
+                        .WithTitle("Магазин ролей")
+                        .WithDescription("В магазине находятся обычные и уникальные роли.\n" +
+                                         "Для покупки напишите `!купить роль` и номер желаемого товара.")
+                        .AddField("Товар", string.Join('\n', things), true)
+                        .AddField("Стоимость", string.Join('\n', prices), true)
+                        .WithFooter("Максимум одна покупка в 24 часа.");
+                    var json = JsonConvert.SerializeObject(embed);
+                    var msg = new RiftMessage {Embed = json};
+                    
+                    roleShopMessage = Task.Run(async () => await messageService.FormatMessageAsync(msg)).Result;
+                }
 
                 return roleShopMessage;
             }
@@ -218,8 +189,8 @@ namespace Rift.Services
             {
                 if (backgroundShopMessage is null)
                 {
-                    var things = BackgroundShopList.Select(x => $"{x.Id.ToString()}. {x.FormattedName}");
-                    var prices = BackgroundShopList.Select(x => x.FormattedPrice);
+                    var things = BackgroundShopList.Select(x => $"{x.Id.ToString()}. {FormatName(x)}");
+                    var prices = BackgroundShopList.Select(FormatPrice);
                     var embed = new RiftEmbed()
                         .WithTitle("Магазин фонов")
                         .WithDescription("В магазине находятся фоны для вашего профиля.\n" +
@@ -230,14 +201,24 @@ namespace Rift.Services
                     var json = JsonConvert.SerializeObject(embed);
                     var msg = new RiftMessage {Embed = json};
 
-                    backgroundShopMessage = Task.Run(async () =>
-                            await RiftBot.GetService<MessageService>()
-                                .FormatMessageAsync(msg))
-                        .Result;
+                    backgroundShopMessage = Task.Run(async () => await messageService.FormatMessageAsync(msg)).Result;
                 }
 
                 return backgroundShopMessage;
             }
+        }
+
+        readonly IMessageService messageService;
+        readonly IRewardService rewardService;
+        readonly IEmoteService emoteService;
+
+        public StoreService(IMessageService messageService,
+                            IRewardService rewardService,
+                            IEmoteService emoteService)
+        {
+            this.messageService = messageService;
+            this.rewardService = rewardService;
+            this.emoteService = emoteService;
         }
 
         StoreItem GetItemById(uint id)
@@ -306,10 +287,10 @@ namespace Rift.Services
             var item = GetItemById(itemId);
 
             if (item is null)
-                return await RiftBot.GetMessageAsync("store-wrongnumber", new FormatData(userId));
+                return await messageService.GetMessageAsync("store-wrongnumber", new FormatData(userId));
 
             if (!await CanBuyItemAsync(userId))
-                return await RiftBot.GetMessageAsync("itemstore-cooldown", new FormatData(userId));
+                return await messageService.GetMessageAsync("itemstore-cooldown", new FormatData(userId));
 
             ItemReward reward;
 
@@ -335,22 +316,22 @@ namespace Rift.Services
             if (!await TryWithdrawAsync(userId, item))
                 switch (item.Currency)
                 {
-                    case Currency.Coins: return await RiftBot.GetMessageAsync("store-nocoins", new FormatData(userId));
+                    case Currency.Coins: return await messageService.GetMessageAsync("store-nocoins", new FormatData(userId));
                     case Currency.Tokens:
-                        return await RiftBot.GetMessageAsync("store-notokens", new FormatData(userId));
+                        return await messageService.GetMessageAsync("store-notokens", new FormatData(userId));
                 }
 
             if (item.Type == StoreItemType.Chest)
                 BoughtChests?.Invoke(null, new BoughtChestsEventArgs(userId, item.Amount));
 
-            await reward.DeliverToAsync(userId);
+            await rewardService.DeliverToAsync(userId, reward);
 
             await DB.Cooldowns.SetLastItemStoreTimeAsync(userId, DateTime.UtcNow);
             await DB.Statistics.AddAsync(userId, new StatisticData {PurchasedItems = item.Amount});
 
             RiftBot.Log.Information($"Item purchased: #{item.Id.ToString()} by {userId.ToString()}.");
 
-            return await RiftBot.GetMessageAsync("store-success", new FormatData(userId)
+            return await messageService.GetMessageAsync("store-success", new FormatData(userId)
             {
                 Reward = reward
             });
@@ -391,13 +372,13 @@ namespace Rift.Services
             var item = GetRoleById(itemId);
 
             if (item is null)
-                return await RiftBot.GetMessageAsync("store-wrongnumber", new FormatData(userId));
+                return await messageService.GetMessageAsync("store-wrongnumber", new FormatData(userId));
 
             if (!await CanBuyRoleAsync(userId))
-                return await RiftBot.GetMessageAsync("rolestore-cooldown", new FormatData(userId));
+                return await messageService.GetMessageAsync("rolestore-cooldown", new FormatData(userId));
 
             if (await DB.RoleInventory.HasAnyAsync(userId, item.DatabaseId))
-                return await RiftBot.GetMessageAsync("rolestore-hasrole", new FormatData(userId));
+                return await messageService.GetMessageAsync("rolestore-hasrole", new FormatData(userId));
 
             var role = await DB.Roles.GetAsync(item.DatabaseId);
 
@@ -407,9 +388,9 @@ namespace Rift.Services
             if (!await TryWithdrawAsync(userId, item))
                 switch (item.Currency)
                 {
-                    case Currency.Coins: return await RiftBot.GetMessageAsync("store-nocoins", new FormatData(userId));
+                    case Currency.Coins: return await messageService.GetMessageAsync("store-nocoins", new FormatData(userId));
                     case Currency.Tokens:
-                        return await RiftBot.GetMessageAsync("store-notokens", new FormatData(userId));
+                        return await messageService.GetMessageAsync("store-notokens", new FormatData(userId));
                 }
 
             RolesPurchased?.Invoke(null, new RolesPurchasedEventArgs(userId, 1u));
@@ -422,7 +403,7 @@ namespace Rift.Services
 
             RiftBot.Log.Information($"Role purchased: #{item.RoleId.ToString()} by {userId.ToString()}.");
 
-            return await RiftBot.GetMessageAsync("store-success", new FormatData(userId)
+            return await messageService.GetMessageAsync("store-success", new FormatData(userId)
             {
                 Reward = reward
             });
@@ -458,35 +439,47 @@ namespace Rift.Services
             return result;
         }
 
+        public string FormatName(StoreItem item)
+        {
+            return $"{item.Name}{emoteService.GetEmoteString("$emotetran")}";
+        }
+        
+        readonly NumberFormatInfo priceFormat = new NumberFormatInfo {NumberGroupSeparator = " ", NumberDecimalDigits = 0};
+
+        public string FormatPrice(StoreItem item)
+        {
+            return $"{emoteService.GetEmoteString(item.CurrencyEmote)} {item.Price.ToString("n", priceFormat)}";
+        }
+
         async Task<IonicMessage> PurchaseBackgroundInternalAsync(ulong userId, uint itemId)
         {
             var item = GetBackgroundById(itemId);
 
             if (item is null)
-                return await RiftBot.GetMessageAsync("store-wrongnumber", new FormatData(userId));
+                return await messageService.GetMessageAsync("store-wrongnumber", new FormatData(userId));
 
             if (!await CanBuyBackAsync(userId))
-                return await RiftBot.GetMessageAsync("backstore-cooldown", new FormatData(userId));
+                return await messageService.GetMessageAsync("backstore-cooldown", new FormatData(userId));
 
             var backInventory = await DB.BackgroundInventory.GetAsync(userId);
 
             if (!(backInventory is null) && backInventory.Count > 0)
                 if (backInventory.Any(x => x.BackgroundId == item.Id))
-                    return await RiftBot.GetMessageAsync("backstore-hasback", new FormatData(userId));
+                    return await messageService.GetMessageAsync("backstore-hasback", new FormatData(userId));
 
             if (!await TryWithdrawAsync(userId, item))
                 switch (item.Currency)
                 {
-                    case Currency.Coins: return await RiftBot.GetMessageAsync("store-nocoins", new FormatData(userId));
+                    case Currency.Coins: return await messageService.GetMessageAsync("store-nocoins", new FormatData(userId));
                     case Currency.Tokens:
-                        return await RiftBot.GetMessageAsync("store-notokens", new FormatData(userId));
+                        return await messageService.GetMessageAsync("store-notokens", new FormatData(userId));
                 }
 
             var reward = new BackgroundReward().SetId((int) item.Id);
 
             try
             {
-                await reward.DeliverToAsync(userId);
+                await rewardService.DeliverToAsync(userId, reward);
             }
             catch (Exception ex)
             {
@@ -498,7 +491,7 @@ namespace Rift.Services
 
             RiftBot.Log.Information($"Background purchased: #{item.Id.ToString()} by {userId.ToString()}.");
 
-            return await RiftBot.GetMessageAsync("store-success", new FormatData(userId)
+            return await messageService.GetMessageAsync("store-success", new FormatData(userId)
             {
                 Reward = reward
             });

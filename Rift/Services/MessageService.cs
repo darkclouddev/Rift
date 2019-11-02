@@ -9,22 +9,26 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Discord;
+
 using Rift.Configuration;
 using Rift.Data.Models;
 using Rift.Services.Message;
+using Rift.Services.Message.Templates;
+using Rift.Util;
 
 using MessageType = Rift.Services.Message.MessageType;
-
-using Rift.Services.Message.Templates;
 
 using Humanizer;
 
 using IonicLib;
 using IonicLib.Util;
 
+using Rift.Services.Interfaces;
+
 namespace Rift.Services
 {
-    public class MessageService
+    public class MessageService : IMessageService
     {
         public static readonly IonicMessage Error =
             new IonicMessage(new RiftEmbed()
@@ -46,8 +50,12 @@ namespace Rift.Services
                              .WithColor(255, 0, 0)
                              .WithDescription("Роль не найдена!"));
 
-        public MessageService()
+        readonly IEmoteService emoteService;
+        
+        public MessageService(IEmoteService emoteService)
         {
+            this.emoteService = emoteService;
+            
             RiftBot.Log.Information($"Starting up {nameof(MessageService)}.");
 
             var sw = new Stopwatch();
@@ -251,7 +259,7 @@ namespace Rift.Services
         }
 
         #endregion Delayed messages
-
+        
         #region Message formatting
 
         static ConcurrentDictionary<string, ITemplate> templates;
@@ -332,7 +340,7 @@ namespace Rift.Services
                     if (!match.Value.StartsWith(EmotePrefix))
                         continue;
 
-                    RiftBot.GetService<EmoteService>().FormatMessage(match.Value, message);
+                    emoteService.FormatMessage(match.Value, message);
                     continue;
                 }
 
@@ -347,6 +355,27 @@ namespace Rift.Services
             }
 
             return new IonicMessage(message);
+        }
+        
+        public async Task<IUserMessage> SendMessageAsync(string identifier, ulong channelId, FormatData data)
+        {
+            if (!IonicHelper.GetTextChannel(Settings.App.MainGuildId, channelId, out var channel))
+                return null;
+
+            var msg = await GetMessageAsync(identifier, data);
+
+            if (msg is null)
+                return null;
+
+            return await channel.SendIonicMessageAsync(msg).ConfigureAwait(false);
+        }
+        
+        public async Task<IUserMessage> SendMessageAsync(IonicMessage message, ulong channelId)
+        {
+            if (!IonicHelper.GetTextChannel(Settings.App.MainGuildId, channelId, out var channel))
+                return null;
+
+            return await channel.SendIonicMessageAsync(message);
         }
 
         #endregion Message formatting

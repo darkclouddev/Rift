@@ -1,20 +1,21 @@
-﻿using System.Threading.Tasks;
-
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Rift.Services.Reward
 {
     public abstract class RewardBase
     {
-        [JsonIgnore] protected RewardType Type;
-        public abstract Task DeliverToAsync(ulong userId);
+        [JsonIgnore]
+        public RewardType Type { get; protected set; }
     }
 
     public enum RewardType
     {
-        Undefined = 0,
         Item = 1,
         Role = 2,
         Background = 3,
+        Capsule = 4,
+        Chest = 5,
+        Gift = 6,
+        Sphere = 7,
     }
 }

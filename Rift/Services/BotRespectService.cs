@@ -10,6 +10,7 @@ using IonicLib.Extensions;
 
 using Rift.Database;
 using Rift.Events;
+using Rift.Services.Interfaces;
 using Rift.Services.Message;
 using Rift.Services.Reward;
 
@@ -17,10 +18,12 @@ using Settings = Rift.Configuration.Settings;
 
 namespace Rift.Services
 {
-    public class BotRespectService
+    public class BotRespectService : IBotRespectService
     {
-        public static event EventHandler<ActivatedBotRespectsEventArgs> ActivatedBotRespects;
+        public event EventHandler<ActivatedBotRespectsEventArgs> ActivatedBotRespects;
 
+        readonly IMessageService messageService;
+        readonly IRewardService rewardService;
         readonly Timer timer;
 
         static readonly List<ItemReward> AvailableRewards = new List<ItemReward>
@@ -35,9 +38,13 @@ namespace Rift.Services
             new ItemReward().AddCoins(500),
         };
 
-        public BotRespectService()
+        public BotRespectService(IMessageService messageService,
+                                 IRewardService rewardService)
         {
             RiftBot.Log.Information($"Starting {nameof(BotRespectService)}..");
+
+            this.messageService = messageService;
+            this.rewardService = rewardService;
             
             timer = new Timer(
                 async delegate { await StartBotGifts(); },
@@ -77,10 +84,10 @@ namespace Rift.Services
                     continue;
 
                 var reward = AvailableRewards.Random();
-                await reward.DeliverToAsync(userId);
+                await rewardService.DeliverToAsync(userId, reward);
             }
 
-            await RiftBot.SendMessageAsync("yasuo-botrespect-success", Settings.ChannelId.Chat, null);
+            await messageService.SendMessageAsync("yasuo-botrespect-success", Settings.ChannelId.Chat, null);
 
             RiftBot.Log.Debug("Finished sending gifts");
 
@@ -92,14 +99,14 @@ namespace Rift.Services
             var dbInventory = await DB.Inventory.GetAsync(userId);
             if (dbInventory.BonusBotRespect == 0)
             {
-                await RiftBot.SendMessageAsync("bonus-nobonus", Settings.ChannelId.Commands, new FormatData(userId));
+                await messageService.SendMessageAsync("bonus-nobonus", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
             var dbCooldowns = await DB.Cooldowns.GetAsync(userId);
             if (dbCooldowns.BotRespectTime > DateTime.UtcNow)
             {
-                await RiftBot.SendMessageAsync("bonus-active", Settings.ChannelId.Commands, new FormatData(userId));
+                await messageService.SendMessageAsync("bonus-active", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
@@ -109,7 +116,7 @@ namespace Rift.Services
             var dateTime = DateTime.UtcNow.AddHours(12.0);
             await DB.Cooldowns.SetBotRespeсtTimeAsync(userId, dateTime);
 
-            await RiftBot.SendMessageAsync("botrespect-success", Settings.ChannelId.Commands, new FormatData(userId));
+            await messageService.SendMessageAsync("botrespect-success", Settings.ChannelId.Commands, new FormatData(userId));
         }
     }
 }

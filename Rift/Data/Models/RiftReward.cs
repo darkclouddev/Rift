@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 using Rift.Services.Reward;
 
@@ -101,45 +100,6 @@ namespace Rift.Data.Models
             }
         }
 
-        public async Task DeliverToAsync(ulong userId)
-        {
-            var itemReward = ItemReward;
-
-            if (!(itemReward is null))
-                await itemReward.DeliverToAsync(userId);
-
-            var roleReward = RoleReward;
-
-            if (!(roleReward is null))
-                await roleReward.DeliverToAsync(userId);
-        }
-
-        public override string ToString()
-        {
-            var text = "";
-
-            if (ItemsData != null)
-                text += ItemReward.ToString();
-
-            if (RoleData != null)
-                text += RoleReward.ToString();
-
-            return text;
-        }
-
-        public string ToPlainString()
-        {
-            var text = "";
-
-            if (ItemsData != null)
-                text += ItemReward.ToPlainString();
-
-            if (RoleData != null)
-                text += RoleReward.ToString();
-
-            return text;
-        }
-
         public RewardBase ToRewardBase()
         {
             RewardBase reward = null;
@@ -150,7 +110,8 @@ namespace Rift.Data.Models
             {
                 var roleReward = RoleReward;
 
-                if (!(roleReward is null)) reward = roleReward;
+                if (!(roleReward is null))
+                    reward = roleReward;
             }
             else
             {

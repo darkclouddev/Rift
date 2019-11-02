@@ -13,8 +13,7 @@ namespace Rift.Services.Message.Templates.Economy
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            var emoteService = RiftBot.GetService<EmoteService>();
-            var coinsEmote = emoteService.GetEmoteString("$emotecoins");
+            var coinsEmote = data.EmoteService.GetEmoteString("$emotecoins");
 
             var top = data.Economy.Top10Coins;
 

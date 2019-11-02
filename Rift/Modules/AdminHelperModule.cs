@@ -8,6 +8,7 @@ using Settings = Rift.Configuration.Settings;
 
 using Rift.Preconditions;
 using Rift.Services;
+using Rift.Services.Interfaces;
 using Rift.Services.Message;
 using Rift.Services.Reward;
 using Rift.Util;
@@ -23,20 +24,26 @@ namespace Rift.Modules
 {
     public class AdminHelperModule : RiftModuleBase
     {
-        readonly RiotService riotService;
-        readonly EconomyService economyService;
-        readonly EventService eventService;
-        readonly GiveawayService giveawayService;
+        readonly IRiotService riotService;
+        readonly IEconomyService economyService;
+        readonly IEventService eventService;
+        readonly IGiveawayService giveawayService;
+        readonly IMessageService messageService;
+        readonly IRewardService rewardService;
 
-        public AdminHelperModule(RiotService riotService,
-                                 EconomyService economyService,
-                                 EventService eventService,
-                                 GiveawayService giveawayService)
+        public AdminHelperModule(IRiotService riotService,
+                                 IEconomyService economyService,
+                                 IEventService eventService,
+                                 IGiveawayService giveawayService,
+                                 IMessageService messageService,
+                                 IRewardService rewardService)
         {
             this.riotService = riotService;
             this.economyService = economyService;
             this.eventService = eventService;
             this.giveawayService = giveawayService;
+            this.messageService = messageService;
+            this.rewardService = rewardService;
         }
 
         [Command("reward")]
@@ -45,18 +52,17 @@ namespace Rift.Modules
         public async Task Reward(int id)
         {
             var dbReward = await DB.Rewards.GetAsync(id);
-
             if (dbReward is null)
             {
-                await ReplyAsync($"No such reward with ID {id}!");
+                await ReplyAsync($"No such reward with ID {id.ToString()}!");
                 return;
             }
 
             var reward = dbReward.ToRewardBase();
 
-            await reward.DeliverToAsync(Context.User.Id);
+            await rewardService.DeliverToAsync(Context.User.Id, reward);
 
-            await RiftBot.SendMessageAsync("chests-open-success", Settings.ChannelId.Commands, new FormatData(Context.User.Id)
+            await messageService.SendMessageAsync("chests-open-success", Settings.ChannelId.Commands, new FormatData(Context.User.Id)
             {
                 Reward = reward
             });
@@ -79,10 +85,10 @@ namespace Rift.Modules
 
             foreach (var sgUser in sr.Members)
             {
-                await reward.DeliverToAsync(sgUser.Id);
+                await rewardService.DeliverToAsync(sgUser.Id, reward);
             }
 
-            await RiftBot.SendMessageAsync("nitro-booster-reward", Settings.ChannelId.Chat, null);
+            await messageService.SendMessageAsync("nitro-booster-reward", Settings.ChannelId.Chat, null);
         }
 
         [Command("msg")]
@@ -90,7 +96,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task GetMsgByMapping(string mapping)
         {
-            await RiftBot.SendMessageAsync(mapping, Context.Channel.Id, new FormatData(Context.User.Id));
+            await messageService.SendMessageAsync(mapping, Context.Channel.Id, new FormatData(Context.User.Id));
         }
 
         [Command("addback")]
@@ -104,7 +110,7 @@ namespace Rift.Modules
                 || !IonicHelper.GetRole(Settings.App.MainGuildId, roleId, out var sr)
                 || !(sr is SocketRole role))
             {
-                await RiftBot.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
+                await messageService.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
                 return;
             }
 
@@ -114,7 +120,7 @@ namespace Rift.Modules
             {
                 if (!await DB.Users.EnsureExistsAsync(user.Id))
                 {
-                    await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
+                    await messageService.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
                     return;
                 }
 
@@ -139,7 +145,7 @@ namespace Rift.Modules
                 || !IonicHelper.GetRole(Settings.App.MainGuildId, roleId, out var sr)
                 || !(sr is SocketRole role))
             {
-                await RiftBot.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
+                await messageService.SendMessageAsync(MessageService.RoleNotFound, Settings.ChannelId.Commands);
                 return;
             }
 
@@ -151,7 +157,7 @@ namespace Rift.Modules
 
                 if (!await DB.Users.EnsureExistsAsync(user.Id))
                 {
-                    await RiftBot.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
+                    await messageService.SendMessageAsync(MessageService.Error, Settings.ChannelId.Commands);
                     return;
                 }
 
@@ -204,7 +210,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task GetTemplates()
         {
-            var templates = RiftBot.GetService<MessageService>().GetActiveTemplates();
+            var templates = messageService.GetActiveTemplates();
 
             await ReplyAsync("**Supported templates**\n\n" +
                              $"{string.Join(',', templates.Select(x => x.Template))}");
@@ -232,7 +238,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Exp(uint level)
         {
-            await ReplyAsync($"Level {level.ToString()}: {EconomyService.GetExpForLevel(level).ToString()} XP")
+            await ReplyAsync($"Level {level.ToString()}: {economyService.GetExpForLevel(level).ToString()} XP")
                 .ConfigureAwait(false);
         }
 
@@ -279,7 +285,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task StartGiveaway(string name)
         {
-            await RiftBot.GetService<GiveawayService>().StartGiveawayAsync(name, Context.User.Id).ConfigureAwait(false);
+            await giveawayService.StartGiveawayAsync(name, Context.User.Id).ConfigureAwait(false);
         }
 
         [Command("code")]
@@ -520,10 +526,10 @@ namespace Rift.Modules
         {
             Settings.App.MaintenanceMode = !Settings.App.MaintenanceMode;
 
-            if (Context.Client is DiscordSocketClient client) await client.SetGameAsync(RiftBot.BotStatusMessage);
+            if (Context.Client is DiscordSocketClient client)
+                await client.SetGameAsync(RiftBot.BotStatusMessage);
 
-            var message =
-                await ReplyAsync($"Maintenance mode **{(Settings.App.MaintenanceMode ? "enabled" : "disabled")}**");
+            await ReplyAsync($"Maintenance mode **{(Settings.App.MaintenanceMode ? "enabled" : "disabled")}**");
         }
 
         [Command("whois")]
@@ -580,7 +586,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task AppStatus()
         {
-            var msg = await RiftBot.GetMessageAsync("bot-about", new FormatData(212997107525746690ul));
+            var msg = await messageService.GetMessageAsync("bot-about", new FormatData(212997107525746690ul));
 
             if (msg is null)
                 return;
@@ -591,14 +597,23 @@ namespace Rift.Modules
         [Group("give")]
         public class GiveModule : ModuleBase
         {
-            static async Task GiveAsync(IUser user, ItemReward reward)
+            readonly IMessageService messageService;
+            readonly IRewardService rewardService;
+
+            public GiveModule(IMessageService messageService,
+                              IRewardService rewardService)
+            {
+                this.messageService = messageService;
+                this.rewardService = rewardService;
+            }
+            
+            async Task GiveAsync(IUser user, ItemReward reward)
             {
                 if (!(user is SocketGuildUser sgUser))
                     return;
 
-                await reward.DeliverToAsync(sgUser.Id);
-
-                await RiftBot.SendMessageAsync("admin-give", Settings.ChannelId.Commands, new FormatData(sgUser.Id)
+                await rewardService.DeliverToAsync(sgUser.Id, reward);
+                await messageService.SendMessageAsync("admin-give", Settings.ChannelId.Commands, new FormatData(sgUser.Id)
                 {
                     Reward = reward
                 });
@@ -680,6 +695,13 @@ namespace Rift.Modules
         [Group("take")]
         public class TakeModule : ModuleBase
         {
+            readonly IMessageService messageService;
+
+            public TakeModule(IMessageService messageService)
+            {
+                this.messageService = messageService;
+            }
+            
             async Task TakeAsync(IUser user, ItemReward reward)
             {
                 if (!(user is SocketGuildUser sgUser))
@@ -689,7 +711,7 @@ namespace Rift.Modules
 
                 await DB.Inventory.RemoveAsync(sgUser.Id, invData);
 
-                await RiftBot.SendMessageAsync("admin-take", Settings.ChannelId.Commands, new FormatData(sgUser.Id)
+                await messageService.SendMessageAsync("admin-take", Settings.ChannelId.Commands, new FormatData(sgUser.Id)
                 {
                     Reward = reward
                 });

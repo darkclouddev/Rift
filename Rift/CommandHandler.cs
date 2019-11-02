@@ -21,43 +21,41 @@ using IonicLib.Util;
 
 using Microsoft.Extensions.DependencyInjection;
 
+using Rift.Services.Interfaces;
+
 namespace Rift
 {
     public class CommandHandler
     {
         const char CommandPrefix = '!';
 
-        public readonly IServiceProvider provider;
+        public readonly IServiceProvider Provider;
         static DiscordSocketClient client;
         static CommandService commandService;
-        static EconomyService economyService;
-        static RoleService roleService;
-        static RiotService riotService;
-        static MessageService messageService;
-        static QuizService quizService;
-        static EmoteService emoteService;
-        static QuestService questService;
-        static DailyService dailyService;
+        static IEconomyService economyService;
+        static IRoleService roleService;
+        static IRiotService riotService;
+        static IMessageService messageService;
+        static IEmoteService emoteService;
+        static IDailyService dailyService;
 
         public CommandHandler(IServiceProvider serviceProvider)
         {
-            provider = serviceProvider;
+            Provider = serviceProvider;
 
-            client = provider.GetService<DiscordSocketClient>();
-            commandService = provider.GetService<CommandService>();
-            economyService = provider.GetService<EconomyService>();
-            roleService = provider.GetService<RoleService>();
-            messageService = provider.GetService<MessageService>();
-            riotService = provider.GetService<RiotService>();
-            quizService = provider.GetService<QuizService>();
-            emoteService = provider.GetService<EmoteService>();
-            questService = provider.GetService<QuestService>();
-            dailyService = provider.GetService<DailyService>();
+            client = Provider.GetService<DiscordSocketClient>();
+            commandService = Provider.GetService<CommandService>();
+            economyService = Provider.GetService<IEconomyService>();
+            roleService = Provider.GetService<IRoleService>();
+            messageService = Provider.GetService<IMessageService>();
+            riotService = Provider.GetService<IRiotService>();
+            emoteService = Provider.GetService<IEmoteService>();
+            dailyService = Provider.GetService<IDailyService>();
         }
 
         public async Task ConfigureAsync()
         {
-            await commandService.AddModulesAsync(Assembly.GetEntryAssembly(), provider);
+            await commandService.AddModulesAsync(Assembly.GetEntryAssembly(), Provider);
             economyService.Init();
 
             await riotService.InitAsync();
@@ -114,7 +112,7 @@ namespace Rift
             var command = context.Message.Content.Substring(1).TrimStart();
             RiftBot.Log.Information($"{context.Message.Author} sent channel command: \"{command}\"");
             
-            var result = await commandService.ExecuteAsync(context, argPos, provider);
+            var result = await commandService.ExecuteAsync(context, argPos, Provider);
 
             if (result.IsSuccess)
                 return true;
@@ -201,12 +199,11 @@ namespace Rift
             }
 
             await DB.Statistics.AddAsync(context.User.Id, new StatisticData {MessagesSent = 1u});
-            await questService.TryAddFirstQuestAsync(context.User.Id);
 
             if (HasMinimumLength(context.Message.Content) && IsEligibleForEconomy(context.User.Id))
             {
                 await dailyService.CheckAsync(context.User.Id);
-                await EconomyService.ProcessMessageAsync(context.Message).ConfigureAwait(false);
+                await economyService.ProcessMessageAsync(context.User.Id).ConfigureAwait(false);
             }
         }
 
@@ -217,7 +214,7 @@ namespace Rift
 
             await RegisterJoinedLeft(user, UserState.Joined);
 
-            await RiftBot.SendMessageAsync("user-joined", Settings.ChannelId.Chat, new FormatData(user.Id));
+            await messageService.SendMessageAsync("user-joined", Settings.ChannelId.Chat, new FormatData(user.Id));
         }
 
         static async Task RegisterJoinedLeft(SocketGuildUser sgUser, UserState state)
@@ -228,7 +225,7 @@ namespace Rift
 
                 if (sgUser.Guild.Id == Settings.App.MainGuildId)
                 {
-                    var msg = await RiftBot.GetMessageAsync("welcome", null);
+                    var msg = await messageService.GetMessageAsync("welcome", null);
                     await (await sgUser.GetOrCreateDMChannelAsync()).SendMessageAsync(embed: msg.Embed);
                 }
             }
