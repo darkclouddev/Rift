@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Rift.Configuration;
 using Rift.Data.Models;
+using Rift.Services.Interfaces;
 using Rift.Services.Message;
 
 using Discord;
@@ -15,8 +16,21 @@ using IonicLib;
 
 namespace Rift.Services
 {
-    public class ModerationService
+    public class ModerationService : IModerationService
     {
+        readonly IMessageService messageService;
+        readonly IEmoteService emoteService;
+        readonly IRoleService roleService;
+        
+        public ModerationService(IMessageService messageService,
+                                 IEmoteService emoteService,
+                                 IRoleService roleService)
+        {
+            this.messageService = messageService;
+            this.emoteService = emoteService;
+            this.roleService = roleService;
+        }
+        
         public async Task KickAsync(IUser target, string reason, IUser moderator)
         {
             (var passed, var sgTarget) = await ValidateAsync(target, reason, moderator);
@@ -40,7 +54,7 @@ namespace Rift.Services
                 }
             };
 
-            await RiftBot.SendMessageAsync("mod-kick-success", Settings.ChannelId.Chat, data);
+            await messageService.SendMessageAsync("mod-kick-success", Settings.ChannelId.Chat, data);
         }
 
         public async Task BanAsync(IUser target, string reason, IUser moderator)
@@ -52,7 +66,7 @@ namespace Rift.Services
 
             if (RiftBot.IsAdmin(sgTarget) || await RiftBot.IsModeratorAsync(sgTarget))
             {
-                await RiftBot.SendMessageAsync("mod-friendly-fire", Settings.ChannelId.Commands, new FormatData(moderator.Id));
+                await messageService.SendMessageAsync("mod-friendly-fire", Settings.ChannelId.Commands, new FormatData(moderator.Id));
                 return;
             }
 
@@ -74,7 +88,7 @@ namespace Rift.Services
                 }
             };
 
-            await RiftBot.SendMessageAsync("mod-ban-success", Settings.ChannelId.Chat, data);
+            await messageService.SendMessageAsync("mod-ban-success", Settings.ChannelId.Chat, data);
             await guild.AddBanAsync(sgTarget, 1, $"Banned by {moderator}: {reason}");
         }
 
@@ -87,13 +101,13 @@ namespace Rift.Services
 
             if (RiftBot.IsAdmin(sgTarget) || await RiftBot.IsModeratorAsync(sgTarget))
             {
-                await RiftBot.SendMessageAsync("mod-friendly-fire", Settings.ChannelId.Commands, new FormatData(moderator.Id));
+                await messageService.SendMessageAsync("mod-friendly-fire", Settings.ChannelId.Commands, new FormatData(moderator.Id));
                 return;
             }
 
             if (!int.TryParse(time.Remove(time.Length - 1), out var timeInt))
             {
-                await RiftBot.SendMessageAsync("mod-wrong-time-format", Settings.ChannelId.Commands, new FormatData(moderator.Id));
+                await messageService.SendMessageAsync("mod-wrong-time-format", Settings.ChannelId.Commands, new FormatData(moderator.Id));
                 return;
             }
 
@@ -120,12 +134,12 @@ namespace Rift.Services
                     break;
 
                 default:
-                    await RiftBot.SendMessageAsync("mod-wrong-time-format", Settings.ChannelId.Commands, new FormatData(moderator.Id));
+                    await messageService.SendMessageAsync("mod-wrong-time-format", Settings.ChannelId.Commands, new FormatData(moderator.Id));
                     return;
             }
 
             var muted = await DB.Roles.GetAsync(40);
-            await RiftBot.GetService<RoleService>().AddTempRoleAsync(sgTarget.Id, muted.RoleId, ts,
+            await roleService.AddTempRoleAsync(sgTarget.Id, muted.RoleId, ts,
                                                                      $"Muted by {moderator}|{moderator.Id.ToString()} with reason: {reason}");
             await DB.ModerationLogs.AddAsync(sgTarget.Id, moderator.Id, "Mute", reason, DateTime.UtcNow, ts);
 
@@ -133,7 +147,7 @@ namespace Rift.Services
             await DB.Toxicity.UpdatePercentAsync(sgTarget.Id, newToxicity.Percent);
 
             if (newToxicity.Level > oldToxicity.Level)
-                await RiftBot.SendMessageAsync("mod-toxicity-increased", Settings.ChannelId.Chat, new FormatData(sgTarget.Id));
+                await messageService.SendMessageAsync("mod-toxicity-increased", Settings.ChannelId.Chat, new FormatData(sgTarget.Id));
 
             var data = new FormatData(sgTarget.Id)
             {
@@ -146,7 +160,7 @@ namespace Rift.Services
                 }
             };
 
-            await RiftBot.SendMessageAsync("mod-mute-success", Settings.ChannelId.Chat, data);
+            await messageService.SendMessageAsync("mod-mute-success", Settings.ChannelId.Chat, data);
         }
 
         public async Task UnmuteAsync(IUser target, string reason, IUser moderator)
@@ -157,7 +171,7 @@ namespace Rift.Services
                 return;
 
             var muted = await DB.Roles.GetAsync(40);
-            await RiftBot.GetService<RoleService>().RemoveTempRoleAsync(sgTarget.Id, muted.RoleId);
+            await roleService.RemoveTempRoleAsync(sgTarget.Id, muted.RoleId);
             await DB.ModerationLogs.AddAsync(sgTarget.Id, moderator.Id, "Unmute", reason, DateTime.UtcNow,
                                              TimeSpan.Zero);
         }
@@ -175,7 +189,7 @@ namespace Rift.Services
             await DB.Toxicity.UpdatePercentAsync(sgTarget.Id, newToxicity.Percent);
 
             if (newToxicity.Level > oldToxicity.Level)
-                await RiftBot.SendMessageAsync("mod-toxicity-increased", Settings.ChannelId.Chat, new FormatData(sgTarget.Id));
+                await messageService.SendMessageAsync("mod-toxicity-increased", Settings.ChannelId.Chat, new FormatData(sgTarget.Id));
 
             var data = new FormatData(sgTarget.Id)
             {
@@ -187,20 +201,20 @@ namespace Rift.Services
                 }
             };
 
-            await RiftBot.SendMessageAsync("mod-warn-success", Settings.ChannelId.Chat, data);
+            await messageService.SendMessageAsync("mod-warn-success", Settings.ChannelId.Chat, data);
         }
 
-        static async Task<(bool, SocketGuildUser)> ValidateAsync(IUser target, string reason, IUser moderator)
+        async Task<(bool, SocketGuildUser)> ValidateAsync(IUser target, string reason, IUser moderator)
         {
             if (string.IsNullOrEmpty(reason))
             {
-                await RiftBot.SendMessageAsync("mod-empty-reason", Settings.ChannelId.Commands, new FormatData(moderator.Id));
+                await messageService.SendMessageAsync("mod-empty-reason", Settings.ChannelId.Commands, new FormatData(moderator.Id));
                 return (false, null);
             }
 
             if (!(target is SocketGuildUser sgTarget))
             {
-                await RiftBot.SendMessageAsync("mod-user-not-found", Settings.ChannelId.Commands, new FormatData(moderator.Id));
+                await messageService.SendMessageAsync("mod-user-not-found", Settings.ChannelId.Commands, new FormatData(moderator.Id));
                 return (false, null);
             }
 
@@ -323,21 +337,20 @@ namespace Rift.Services
 
         static string FormatAction(string action)
         {
-            switch (action.ToLowerInvariant())
+            return action.ToLowerInvariant() switch
             {
-                case "kick": return "Выгнан с сервера";
-                case "ban": return "Бан";
-                case "warn": return "Предупреждение";
-                case "mute": return "Мут ";
-                case "unmute": return "Снят мут";
-
-                default: return string.Empty;
-            }
+                "kick" => "Выгнан с сервера",
+                "ban" => "Бан",
+                "warn" => "Предупреждение",
+                "mute" => "Мут ",
+                "unmute" => "Снят мут",
+                _ => string.Empty
+            };
         }
 
-        static string FormatToxicityLevel(uint level)
+        string FormatToxicityLevel(uint level)
         {
-            return RiftBot.GetService<EmoteService>().GetEmoteString("$emotet" + level.ToString());
+            return emoteService.GetEmoteString($"$emotet{level.ToString()}");
         }
 
         enum ToxicitySource

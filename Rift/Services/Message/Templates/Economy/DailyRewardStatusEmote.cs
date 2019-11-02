@@ -17,7 +17,7 @@ namespace Rift.Services.Message.Templates.Economy
 
             var emoteName = cds.DailyRewardTimeSpan == TimeSpan.Zero ? "noach" : "ach";
 
-            var emote = RiftBot.GetService<EmoteService>().GetEmoteString($"$emote{emoteName}");
+            var emote = data.EmoteService.GetEmoteString($"$emote{emoteName}");
 
             if (string.IsNullOrWhiteSpace(emote))
             {

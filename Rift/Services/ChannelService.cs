@@ -11,21 +11,26 @@ using Discord.WebSocket;
 using IonicLib;
 
 using Rift.Database;
+using Rift.Services.Interfaces;
 using Rift.Util;
 
 using Settings = Rift.Configuration.Settings;
 
 namespace Rift.Services
 {
-    public class ChannelService
+    public class ChannelService : IChannelService
     {
         const ulong VoiceCategoryId = 360570328197496833ul;
         static Timer voiceUptimeTimer;
         static readonly TimeSpan VoiceRewardsInterval = TimeSpan.FromMinutes(5);
         const string TimerName = "voice-uptime";
 
-        public ChannelService(DiscordSocketClient client)
+        readonly IRewardService rewardService;
+        
+        public ChannelService(IRewardService rewardService)
         {
+            this.rewardService = rewardService;
+            
             Task.Run(async () =>
             {
                 var timer = await DB.SystemTimers.GetAsync(TimerName);
@@ -47,7 +52,7 @@ namespace Rift.Services
             });
         }
         
-        static async Task StartAsync()
+        async Task StartAsync()
         {
             await DB.SystemTimers.UpdateAsync(TimerName, DateTime.UtcNow);
             await UpdateUsersVoiceUptimeAsync();
@@ -104,7 +109,7 @@ namespace Rift.Services
             return (true, channel);
         }
 
-        static async Task UpdateUsersVoiceUptimeAsync()
+        async Task UpdateUsersVoiceUptimeAsync()
         {
             if (!IonicHelper.GetGuild(Settings.App.MainGuildId, out var guild))
                 return;
@@ -144,11 +149,12 @@ namespace Rift.Services
             if (!users.Any())
                 return;
 
-            var reward = await DB.Rewards.GetAsync(24);
-
+            var dbReward = await DB.Rewards.GetAsync(24);
+            var reward = dbReward.ItemReward;
+            
             foreach (var userId in users)
             {
-                await reward.DeliverToAsync(userId);
+                await rewardService.DeliverToAsync(userId, reward);
                 await DB.Statistics.AddAsync(userId, new StatisticData {VoiceUptime = VoiceRewardsInterval});
             }
 

@@ -4,12 +4,16 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
+using Rift.Services.Interfaces;
 using Rift.Services.Message;
 
 namespace Rift.Services
 {
-    public class BackgroundService
+    public class BackgroundService : IBackgroundService
     {
+        readonly IMessageService messageService;
+        readonly IRoleService roleService;
+        
         Timer timer;
         const int NitroBoosterBackgroundId = 13;
         
@@ -17,8 +21,11 @@ namespace Rift.Services
 
         const string InventoryIdentifier = "background-inventory-list";
 
-        public BackgroundService()
+        public BackgroundService(IMessageService messageService, IRoleService roleService)
         {
+            this.messageService = messageService;
+            this.roleService = roleService;
+            
             timer = new Timer(
                 async delegate { await TimerProcAsync(); },
                 null,
@@ -26,11 +33,11 @@ namespace Rift.Services
                 TimeSpan.FromMinutes(5));
         }
         
-        static async Task TimerProcAsync()
+        async Task TimerProcAsync()
         {
             RiftBot.Log.Information("Checking nitro boosters integrity..");
             
-            var nitroUsers = await RiftBot.GetService<RoleService>().GetNitroBoostersAsync();
+            var nitroUsers = await roleService.GetNitroBoostersAsync();
 
             if (nitroUsers is null || nitroUsers.Count == 0)
             {
@@ -84,7 +91,7 @@ namespace Rift.Services
 
         public async Task GetInventoryAsync(ulong userId)
         {
-            await RiftBot.SendMessageAsync(InventoryIdentifier, Settings.ChannelId.Commands, new FormatData(userId))
+            await messageService.SendMessageAsync(InventoryIdentifier, Settings.ChannelId.Commands, new FormatData(userId))
                          .ConfigureAwait(false);
         }
 
@@ -106,31 +113,31 @@ namespace Rift.Services
             }
         }
         
-        static async Task SetActiveInternalAsync(ulong userId, int backgroundId)
+        async Task SetActiveInternalAsync(ulong userId, int backgroundId)
         {
             var setDefault = backgroundId == 0;
             
             if (!setDefault && !await DB.BackgroundInventory.HasAsync(userId, backgroundId))
             {
-                await RiftBot.SendMessageAsync("backgrounds-wrongnumber", Settings.ChannelId.Commands, new FormatData(userId));
+                await messageService.SendMessageAsync("backgrounds-wrongnumber", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
             var dbUser = await DB.Users.GetAsync(userId);
             if (dbUser is null)
             {
-                await RiftBot.SendMessageAsync(MessageService.UserNotFound, Settings.ChannelId.Commands);
+                await messageService.SendMessageAsync(MessageService.UserNotFound, Settings.ChannelId.Commands);
                 return;
             }
             
             if (!setDefault && dbUser.ProfileBackground == backgroundId)
             {
-                await RiftBot.SendMessageAsync("backgrounds-alreadyactive", Settings.ChannelId.Commands, new FormatData(userId));
+                await messageService.SendMessageAsync("backgrounds-alreadyactive", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
             await DB.Users.SetBackgroundAsync(userId, backgroundId);
-            await RiftBot.SendMessageAsync("backgrounds-set-success", Settings.ChannelId.Commands, new FormatData(userId));
+            await messageService.SendMessageAsync("backgrounds-set-success", Settings.ChannelId.Commands, new FormatData(userId));
         }
     }
 }

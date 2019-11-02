@@ -6,31 +6,36 @@ using Discord.Commands;
 using Rift.Configuration;
 using Rift.Preconditions;
 using Rift.Services;
-using Rift.Util;
+using Rift.Services.Interfaces;
 
 namespace Rift.Modules
 {
     public class EconomyModule : RiftModuleBase
     {
-        readonly EconomyService economyService;
-        readonly RiotService riotService;
-        readonly BragService bragService;
-        readonly GiveawayService giveawayService;
-        readonly BotRespectService botRespectService;
-        readonly BackgroundService backgroundService;
-        readonly RoleService roleService;
-        readonly RewindService rewindService;
-        readonly DoubleExpService doubleExpService;
-        readonly QuestService questService;
-        readonly ChannelService channelService;
+        readonly IEconomyService economyService;
+        readonly IBragService bragService;
+        readonly IGiveawayService giveawayService;
+        readonly IBotRespectService botRespectService;
+        readonly IBackgroundService backgroundService;
+        readonly IRoleService roleService;
+        readonly IRewindService rewindService;
+        readonly IDoubleExpService doubleExpService;
+        readonly IChannelService channelService;
+        readonly IMessageService messageService;
 
-        public EconomyModule(EconomyService economyService, RiotService riotService, BragService bragService,
-                             GiveawayService giveawayService, BotRespectService botRespectService, BackgroundService backgroundService,
-                             RoleService roleService, RewindService rewindService, DoubleExpService doubleExpService,
-                             QuestService questService, ChannelService channelService)
+        public EconomyModule(IEconomyService economyService,
+                             IRiotService riotService,
+                             IBragService bragService,
+                             IGiveawayService giveawayService,
+                             IBotRespectService botRespectService,
+                             IBackgroundService backgroundService,
+                             IRoleService roleService,
+                             IRewindService rewindService,
+                             IDoubleExpService doubleExpService,
+                             IChannelService channelService,
+                             IMessageService messageService)
         {
             this.economyService = economyService;
-            this.riotService = riotService;
             this.bragService = bragService;
             this.giveawayService = giveawayService;
             this.botRespectService = botRespectService;
@@ -38,8 +43,8 @@ namespace Rift.Modules
             this.roleService = roleService;
             this.rewindService = rewindService;
             this.doubleExpService = doubleExpService;
-            this.questService = questService;
             this.channelService = channelService;
+            this.messageService = messageService;
         }
 
         [Command("выгнать")]
@@ -47,14 +52,6 @@ namespace Rift.Modules
         public async Task BanFromChannel(IUser targetUser)
         {
             await channelService.DenyAccessToUserAsync(Context.User, targetUser);
-        }
-
-        [Command("задания")]
-        [Alias("квесты")]
-        [RequireContext(ContextType.Guild)]
-        public async Task Quests()
-        {
-            await questService.GetUserQuests(Context.User.Id);
         }
 
         [Command("поставить роль")]
@@ -104,14 +101,14 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Active()
         {
-            await EconomyService.ShowActiveUsersAsync();
+            await economyService.ShowActiveUsersAsync();
         }
 
         [Command("богатые")]
         [RequireContext(ContextType.Guild)]
         public async Task RichBitch()
         {
-            await EconomyService.ShowRichUsersAsync();
+            await economyService.ShowRichUsersAsync();
         }
 
         [Command("профиль")]
@@ -193,7 +190,7 @@ namespace Rift.Modules
         {
             using (Context.Channel.EnterTypingState())
             {
-                await RiftBot.SendMessageAsync("roles-list", Settings.ChannelId.Commands, null);
+                await messageService.SendMessageAsync("roles-list", Settings.ChannelId.Commands, null);
             }
         }
 

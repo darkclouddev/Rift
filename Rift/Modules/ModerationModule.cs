@@ -1,20 +1,20 @@
 ﻿using System.Threading.Tasks;
 
 using Rift.Preconditions;
-using Rift.Services;
 
 using Discord;
 using Discord.Commands;
 
+using Rift.Services.Interfaces;
 using Rift.Util;
 
 namespace Rift.Modules
 {
     public class ModerationModule : RiftModuleBase
     {
-        readonly ModerationService moderationService;
+        readonly IModerationService moderationService;
 
-        public ModerationModule(ModerationService moderationService)
+        public ModerationModule(IModerationService moderationService)
         {
             this.moderationService = moderationService;
         }
@@ -68,7 +68,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task ListActions(IUser user)
         {
-            var msg = await RiftBot.GetService<ModerationService>().GetUserActionLogsAsync(user);
+            var msg = await moderationService.GetUserActionLogsAsync(user);
             await Context.Channel.SendIonicMessageAsync(msg).ConfigureAwait(false);
         }
     }

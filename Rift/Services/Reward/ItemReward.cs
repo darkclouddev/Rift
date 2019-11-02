@@ -203,11 +203,6 @@ namespace Rift.Services.Reward
             return this;
         }
 
-        public override async Task DeliverToAsync(ulong userId)
-        {
-            await DB.Inventory.AddAsync(userId, ToInventoryData());
-        }
-
         public InventoryData ToInventoryData()
         {
             return new InventoryData
@@ -222,42 +217,6 @@ namespace Rift.Services.Reward
                 BotRespects = BotRespects,
                 Rewinds = Rewinds,
             };
-        }
-
-        public override string ToString()
-        {
-            var emotes = RiftBot.GetService<EmoteService>();
-            var sb = new StringBuilder();
-
-            if (Coins.HasValue) sb.Append($"{emotes.GetEmoteString("$emotecoins")} {Coins.Value.ToString()} ");
-            if (Tokens.HasValue) sb.Append($"{emotes.GetEmoteString("$emotetokens")} {Tokens.Value.ToString()} ");
-            if (Chests.HasValue) sb.Append($"{emotes.GetEmoteString("$emotechest")} {Chests.Value.ToString()} ");
-            if (Spheres.HasValue) sb.Append($"{emotes.GetEmoteString("$emotesphere")} {Spheres.Value.ToString()} ");
-            if (Capsules.HasValue) sb.Append($"{emotes.GetEmoteString("$emotecapsule")} {Capsules.Value.ToString()} ");
-            if (Tickets.HasValue) sb.Append($"{emotes.GetEmoteString("$emoteticket")} {Tickets.Value.ToString()} ");
-            if (DoubleExps.HasValue) sb.Append($"{emotes.GetEmoteString("$emote2exp")} {DoubleExps.Value.ToString()} ");
-            if (BotRespects.HasValue)
-                sb.Append($"{emotes.GetEmoteString("$emoterespect")} {BotRespects.Value.ToString()} ");
-            if (Rewinds.HasValue) sb.Append($"{emotes.GetEmoteString("$emoterewind")} {Rewinds.Value.ToString()} ");
-
-            return sb.ToString().TrimEnd();
-        }
-
-        public string ToPlainString()
-        {
-            var sb = new StringBuilder();
-
-            if (Coins.HasValue) sb.Append($"{nameof(Coins)} {Coins.Value.ToString()} ");
-            if (Tokens.HasValue) sb.Append($"{nameof(Tokens)} {Tokens.Value.ToString()} ");
-            if (Chests.HasValue) sb.Append($"{nameof(Chests)} {Chests.Value.ToString()} ");
-            if (Spheres.HasValue) sb.Append($"{nameof(Spheres)} {Spheres.Value.ToString()} ");
-            if (Capsules.HasValue) sb.Append($"{nameof(Capsules)} {Capsules.Value.ToString()} ");
-            if (Tickets.HasValue) sb.Append($"{nameof(Tickets)} {Tickets.Value.ToString()} ");
-            if (DoubleExps.HasValue) sb.Append($"{nameof(DoubleExps)} {DoubleExps.Value.ToString()} ");
-            if (BotRespects.HasValue) sb.Append($"{nameof(BotRespects)} {BotRespects.Value.ToString()} ");
-            if (Rewinds.HasValue) sb.Append($"{nameof(Rewinds)} {Rewinds.Value.ToString()} ");
-
-            return sb.ToString().TrimEnd();
         }
     }
 }

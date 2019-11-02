@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Rift.Database;
+using Rift.Services.Interfaces;
 using Rift.Services.Message;
 using Rift.Services.Reward;
 
@@ -9,9 +10,19 @@ using Settings = Rift.Configuration.Settings;
 
 namespace Rift.Services
 {
-    public class CapsuleService
+    public class CapsuleService : ICapsuleService
     {
         static readonly SemaphoreSlim Mutex = new SemaphoreSlim(1);
+
+        readonly IMessageService messageService;
+        readonly IRewardService rewardService;
+
+        public CapsuleService(IMessageService messageService,
+                              IRewardService rewardService)
+        {
+            this.messageService = messageService;
+            this.rewardService = rewardService;
+        }
         
         public async Task OpenAsync(ulong userId)
         {
@@ -29,25 +40,25 @@ namespace Rift.Services
             }
         }
 
-        static async Task OpenInternalAsync(ulong userId)
+        async Task OpenInternalAsync(ulong userId)
         {
             var dbUserInventory = await DB.Inventory.GetAsync(userId);
 
             if (dbUserInventory.Capsules == 0u)
             {
-                await RiftBot.SendMessageAsync("capsules-nocapsules", Settings.ChannelId.Commands, new FormatData(userId));
+                await messageService.SendMessageAsync("capsules-nocapsules", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
             await DB.Inventory.RemoveAsync(userId, new InventoryData {Capsules = 1u});
 
-            var capsule = new CapsuleReward();
-            await capsule.DeliverToAsync(userId);
+            var reward = new CapsuleReward();
+            await rewardService.DeliverToAsync(userId, reward);
             await DB.Statistics.AddAsync(userId, new StatisticData {CapsulesOpened = 1u});
 
-            await RiftBot.SendMessageAsync("capsules-open-success", Settings.ChannelId.Commands, new FormatData(userId)
+            await messageService.SendMessageAsync("capsules-open-success", Settings.ChannelId.Commands, new FormatData(userId)
             {
-                Reward = capsule
+                Reward = reward
             });
         }
     }

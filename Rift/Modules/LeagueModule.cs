@@ -9,16 +9,20 @@ using Discord;
 using Discord.Commands;
 
 using Rift.Configuration;
+using Rift.Services.Interfaces;
 
 namespace Rift.Modules
 {
     public class LeagueModule : RiftModuleBase
     {
-        readonly RiotService riotService;
+        readonly IRiotService riotService;
+        readonly IMessageService messageService;
 
-        public LeagueModule(RiotService riotService)
+        public LeagueModule(IRiotService riotService,
+                            IMessageService messageService)
         {
             this.riotService = riotService;
+            this.messageService = messageService;
         }
 
         [Command("регистрация")]
@@ -26,7 +30,6 @@ namespace Rift.Modules
         public async Task RegisterAsync(string region, [Remainder] string summonerName)
         {
             var message = await riotService.RegisterAsync(Context.User.Id, region, summonerName);
-
             await Context.Channel.SendIonicMessageAsync(message);
         }
         
@@ -64,7 +67,7 @@ namespace Rift.Modules
             }
 
             await DB.LeagueData.RemoveAsync(user.Id);
-            await RiftBot.SendMessageAsync("loldata-removed", Settings.ChannelId.Commands, new FormatData(user.Id));
+            await messageService.SendMessageAsync("loldata-removed", Settings.ChannelId.Commands, new FormatData(user.Id));
         }
     }
 }

@@ -7,18 +7,26 @@ using Rift.Util;
 
 using Discord.Commands;
 
+using Rift.Services.Interfaces;
+
 namespace Rift.Modules
 {
     public class HelpModule : RiftModuleBase
     {
         static string ModHelpMessage { get; set; }
-        static string WelcomeMessage { get; set; }
 
+        readonly IMessageService messageService;
+
+        public HelpModule(IMessageService messageService)
+        {
+            this.messageService = messageService;
+        }
+        
         [Command("команды")]
         [RequireContext(ContextType.Guild)]
         public async Task Help()
         {
-            var msg = await RiftBot.GetMessageAsync("help-commands", null);
+            var msg = await messageService.GetMessageAsync("help-commands", null);
             await Context.Channel.SendIonicMessageAsync(msg);
         }
 
@@ -26,7 +34,7 @@ namespace Rift.Modules
         [RequireContext(ContextType.Guild)]
         public async Task Rules()
         {
-            var msg = await RiftBot.GetMessageAsync("help-rules", null);
+            var msg = await messageService.GetMessageAsync("help-rules", null);
             await Context.Channel.SendIonicMessageAsync(msg);
         }
 

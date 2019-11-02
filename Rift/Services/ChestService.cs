@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 using Rift.Database;
 using Rift.Events;
+using Rift.Services.Interfaces;
 using Rift.Services.Message;
 using Rift.Services.Reward;
 
@@ -11,11 +12,21 @@ using Settings = Rift.Configuration.Settings;
 
 namespace Rift.Services
 {
-    public class ChestService
+    public class ChestService : IChestService
     {
-        public static event EventHandler<ChestsOpenedEventArgs> ChestsOpened;
+        public event EventHandler<ChestsOpenedEventArgs> ChestsOpened;
+
+        readonly IMessageService messageService;
+        readonly IRewardService rewardService;
         
         static readonly SemaphoreSlim Mutex = new SemaphoreSlim(1);
+
+        public ChestService(IMessageService messageService,
+                            IRewardService rewardService)
+        {
+            this.messageService = messageService;
+            this.rewardService = rewardService;
+        }
         
         public async Task OpenAsync(ulong userId, uint amount)
         {
@@ -48,32 +59,32 @@ namespace Rift.Services
             }
         }
 
-        static async Task OpenInternalAsync(ulong userId, uint amount)
+        async Task OpenInternalAsync(ulong userId, uint amount)
         {
             var dbInventory = await DB.Inventory.GetAsync(userId);
 
             if (dbInventory.Chests == 0)
             {
-                await RiftBot.SendMessageAsync("chests-nochests", Settings.ChannelId.Commands, new FormatData(userId));
+                await messageService.SendMessageAsync("chests-nochests", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
             if (dbInventory.Chests < amount || amount == 0)
             {
-                await RiftBot.SendMessageAsync("chests-notenoughchests", Settings.ChannelId.Commands, new FormatData(userId));
+                await messageService.SendMessageAsync("chests-notenoughchests", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
             await DB.Inventory.RemoveAsync(userId, new InventoryData {Chests = amount});
             ChestsOpened?.Invoke(null, new ChestsOpenedEventArgs(userId, amount));
 
-            var chest = new ChestReward(amount);
-            await chest.DeliverToAsync(userId);
+            var reward = new ChestReward(amount);
+            await rewardService.DeliverToAsync(userId, reward);
             await DB.Statistics.AddAsync(userId, new StatisticData {ChestsOpened = amount});
 
-            await RiftBot.SendMessageAsync("chests-open-success", Settings.ChannelId.Commands, new FormatData(userId)
+            await messageService.SendMessageAsync("chests-open-success", Settings.ChannelId.Commands, new FormatData(userId)
             {
-                Reward = chest
+                Reward = reward
             });
         }
     }

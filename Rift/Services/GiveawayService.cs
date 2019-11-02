@@ -9,6 +9,7 @@ using Settings = Rift.Configuration.Settings;
 using Rift.Data.Models;
 using Rift.Database;
 using Rift.Events;
+using Rift.Services.Interfaces;
 using Rift.Services.Message;
 
 using Discord;
@@ -20,15 +21,21 @@ using IonicLib.Extensions;
 
 namespace Rift.Services
 {
-    public class GiveawayService
+    public class GiveawayService : IGiveawayService
     {
-        public static event EventHandler<GiveawaysParticipatedEventArgs> GiveawaysParticipated;
+        public event EventHandler<GiveawaysParticipatedEventArgs> GiveawaysParticipated;
 
         Timer eventTimer;
         readonly CultureInfo schedulerCulture;
+        readonly IMessageService messageService;
+        readonly IRewardService rewardService;
 
-        public GiveawayService()
+        public GiveawayService(IMessageService messageService,
+                               IRewardService rewardService)
         {
+            this.messageService = messageService;
+            this.rewardService = rewardService;
+            
             schedulerCulture = new CultureInfo("en-US");
             InitializeTimer(TimeSpan.FromSeconds(5));
         }
@@ -140,7 +147,7 @@ namespace Rift.Services
             if (participants.Length == 0)
             {
                 await LogGiveawayAsync(dbGiveaway.Name, null, null,
-                                       dbReward.ToPlainString(), expiredGiveaway.StartedBy, expiredGiveaway.StartedAt,
+                                       "No reward provided", expiredGiveaway.StartedBy, expiredGiveaway.StartedAt,
                                        dbGiveaway.Duration);
                 await DB.ActiveGiveaways.RemoveAsync(expiredGiveaway.Id);
 
@@ -176,7 +183,8 @@ namespace Rift.Services
                 }
             }
 
-            foreach (var winner in winners) await reward.DeliverToAsync(winner);
+            foreach (var winner in winners)
+                await rewardService.DeliverToAsync(winner, reward);
 
             await DB.ActiveGiveaways.RemoveAsync(expiredGiveaway.Id);
 
@@ -188,14 +196,14 @@ namespace Rift.Services
                 Name = dbGiveaway.Name,
                 Winners = winners,
                 Participants = participants,
-                Reward = dbReward.ToPlainString(),
+                Reward = "No reward provided",
                 StartedBy = expiredGiveaway.StartedBy,
                 StartedAt = expiredGiveaway.StartedAt,
                 Duration = dbGiveaway.Duration,
                 FinishedAt = DateTime.UtcNow,
             };
 
-            await RiftBot.SendMessageAsync("giveaway-finished", Settings.ChannelId.Chat,
+            await messageService.SendMessageAsync("giveaway-finished", Settings.ChannelId.Chat,
                 new FormatData(expiredGiveaway.StartedBy)
                 {
                     Giveaway = new GiveawayData
@@ -258,7 +266,7 @@ namespace Rift.Services
                 DueTime = DateTime.UtcNow + giveaway.Duration,
             };
 
-            var formattedMsg = await RiftBot.GetService<MessageService>().FormatMessageAsync(
+            var formattedMsg = await messageService.FormatMessageAsync(
                 msg, new FormatData(startedById)
                 {
                     Giveaway = new GiveawayData
@@ -268,7 +276,7 @@ namespace Rift.Services
                     Reward = reward
                 });
 
-            var giveawayMessage = await RiftBot.SendMessageAsync(formattedMsg, Settings.ChannelId.Chat).ConfigureAwait(false);
+            var giveawayMessage = await messageService.SendMessageAsync(formattedMsg, Settings.ChannelId.Chat).ConfigureAwait(false);
 
             activeGiveaway.ChannelMessageId = giveawayMessage.Id;
 
@@ -324,9 +332,9 @@ namespace Rift.Services
                 await DB.Inventory.RemoveAsync(userInventory.UserId, removeInv); // very slow on tunneled db connection
             }
             
-            await reward.DeliverToAsync(winnerId);
+            await rewardService.DeliverToAsync(winnerId, reward);
 
-            await RiftBot.SendMessageAsync("giveaway-ticket-success", Settings.ChannelId.Chat, new FormatData(startedBy)
+            await messageService.SendMessageAsync("giveaway-ticket-success", Settings.ChannelId.Chat, new FormatData(startedBy)
             {
                 Giveaway = new GiveawayData
                 {
@@ -344,7 +352,7 @@ namespace Rift.Services
                 Name = "Ticket Giveaway",
                 Winners = new[] {winnerId},
                 Participants = usersWithTickets.Select(x => x.UserId).ToArray(),
-                Reward = dbReward.ToPlainString(),
+                Reward = "No reward provided",
                 StartedBy = startedBy,
                 StartedAt = DateTime.Now,
                 Duration = TimeSpan.Zero,
@@ -360,7 +368,7 @@ namespace Rift.Services
 
             RiftBot.Log.Information($"Gived tickets to {affectedRows.ToString()} users");
 
-            await RiftBot.SendMessageAsync("ticket-charity-success", Settings.ChannelId.Chat, new FormatData(startedBy));
+            await messageService.SendMessageAsync("ticket-charity-success", Settings.ChannelId.Chat, new FormatData(startedBy));
         }
 
         static async Task LogGiveawayAsync(RiftGiveawayLog log)

@@ -12,26 +12,36 @@ using Humanizer;
 using Rift.Configuration;
 using Rift.Data.Models;
 using Rift.Events;
+using Rift.Services.Interfaces;
 using Rift.Services.Message;
 
 using IonicLib;
 using IonicLib.Extensions;
 
+using Rift.Services.Reward;
+
 namespace Rift.Services
 {
-    public class EventService
+    public class EventService : IEventService
     {
-        public static event EventHandler<NormalMonstersKilledEventArgs> NormalMonstersKilled;
-        public static event EventHandler<RareMonstersKilledEventArgs> RareMonstersKilled;
-        public static event EventHandler<EpicMonstersKilledEventArgs> EpicMonstersKilled;
+        public event EventHandler<NormalMonstersKilledEventArgs> NormalMonstersKilled;
+        public event EventHandler<RareMonstersKilledEventArgs> RareMonstersKilled;
+        public event EventHandler<EpicMonstersKilledEventArgs> EpicMonstersKilled;
 
         Timer startTimer;
         Timer checkTimer;
         readonly CultureInfo schedulerCulture;
 
-        public EventService()
+        readonly IMessageService messageService;
+        readonly IRewardService rewardService;
+
+        public EventService(IMessageService messageService,
+                            IRewardService rewardService)
         {
             RiftBot.Log.Information("Starting EventService..");
+
+            this.messageService = messageService;
+            this.rewardService = rewardService;
 
             schedulerCulture = new CultureInfo("en-US");
             InitializeStartTimer(TimeSpan.FromSeconds(4));
@@ -190,10 +200,9 @@ namespace Rift.Services
                 DueTime = DateTime.UtcNow + dbEvent.Duration,
             };
 
-            var formattedMsg = await RiftBot.GetService<MessageService>().FormatMessageAsync(
-                msg, new FormatData(startedById));
+            var formattedMsg = await messageService.FormatMessageAsync(msg, new FormatData(startedById));
 
-            var eventMessage = await RiftBot.SendMessageAsync(formattedMsg, Settings.ChannelId.Monsters).ConfigureAwait(false);
+            var eventMessage = await messageService.SendMessageAsync(formattedMsg, Settings.ChannelId.Monsters).ConfigureAwait(false);
 
             activeGiveaway.ChannelMessageId = eventMessage.Id;
 
@@ -262,7 +271,7 @@ namespace Rift.Services
 
             if (participants.Length == 0)
             {
-                await LogEventAsync(dbEvent.Name, null, dbReward.ToPlainString(), expiredEvent.StartedBy,
+                await LogEventAsync(dbEvent.Name, null, "No reward provided ", expiredEvent.StartedBy,
                     expiredEvent.StartedAt, dbEvent.Duration);
                 await DB.ActiveEvents.RemoveAsync(expiredEvent.Id);
 
@@ -276,22 +285,34 @@ namespace Rift.Services
             if (dbEvent.HasSpecialReward)
             {
                 specialReward = await DB.Rewards.GetAsync(dbEvent.SpecialRewardId);
-
                 if (specialReward is null)
                 {
                     RiftBot.Log.Error($"Could not finish event {eventLogString}: " +
                                       $"Unable to get special reward ID {dbEvent.SharedRewardId.ToString()}.");
                     return;
                 }
-
+                
                 specialWinnerId = participants.Random();
-                await specialReward.DeliverToAsync(specialWinnerId);
+
+                var specItem = specialReward.ItemReward;
+                if (specItem != null)
+                {
+                    await rewardService.DeliverToAsync(specialWinnerId, specItem);
+                    return;
+                }
+
+                var specRole = specialReward.RoleReward;
+                if (specRole != null)
+                {
+                    await rewardService.DeliverToAsync(specialWinnerId, specRole);
+                    return;
+                }
             }
 
             var reward = dbReward.ToRewardBase();
 
             foreach (var userId in participants)
-                await reward.DeliverToAsync(userId);
+                await rewardService.DeliverToAsync(userId, reward);
 
             await DB.ActiveEvents.RemoveAsync(expiredEvent.Id);
 
@@ -322,7 +343,7 @@ namespace Rift.Services
             {
                 Name = dbEvent.Name,
                 ParticipantsAmount = (uint) participants.Length,
-                Reward = dbReward.ToPlainString(),
+                Reward = "No reward provided",
                 StartedBy = expiredEvent.StartedBy,
                 StartedAt = expiredEvent.StartedAt,
                 Duration = dbEvent.Duration,
@@ -330,7 +351,7 @@ namespace Rift.Services
                 SpecialWinnerId = specialWinnerId
             };
 
-            await RiftBot.SendMessageAsync("event-finished", Settings.ChannelId.Monsters, new FormatData(expiredEvent.StartedBy)
+            await messageService.SendMessageAsync("event-finished", Settings.ChannelId.Monsters, new FormatData(expiredEvent.StartedBy)
             {
                 EventData = new EventData
                 {
@@ -341,7 +362,7 @@ namespace Rift.Services
 
             if (dbEvent.HasSpecialReward)
             {
-                await RiftBot.SendMessageAsync("event-finished-special", Settings.ChannelId.Monsters, new FormatData(specialWinnerId)
+                await messageService.SendMessageAsync("event-finished-special", Settings.ChannelId.Monsters, new FormatData(specialWinnerId)
                 {
                     Reward = specialReward.ToRewardBase()
                 });

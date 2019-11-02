@@ -20,6 +20,8 @@ using IonicLib.Services;
 
 using Microsoft.Extensions.DependencyInjection;
 
+using Rift.Services.Interfaces;
+
 using Serilog;
 using Serilog.Events;
 
@@ -31,6 +33,7 @@ namespace Rift
         public static CultureInfo Culture { get; private set; }
 
         public static ILogger Log { get; private set; }
+        static ILogger DiscordLogger { get; set; }
 
         public static string AppPath { get; private set; }
 
@@ -71,11 +74,6 @@ namespace Rift
             return developersIds.Contains(user.Id);
         }
 
-        public static T GetService<T>()
-        {
-            return handler.provider.GetService<T>();
-        }
-
         public static async Task SendMessageToDevelopers(string msg)
         {
             foreach (var userId in developersIds)
@@ -96,32 +94,6 @@ namespace Rift
 
                 await sgUser.SendMessageAsync(msg);
             }
-        }
-
-        public static async Task<IonicMessage> GetMessageAsync(string identifier, FormatData data)
-        {
-            return await GetService<MessageService>().GetMessageAsync(identifier, data).ConfigureAwait(false);
-        }
-
-        public static async Task<IUserMessage> SendMessageAsync(string identifier, ulong channelId, FormatData data)
-        {
-            if (!IonicHelper.GetTextChannel(Settings.App.MainGuildId, channelId, out var channel))
-                return null;
-
-            var msg = await GetService<MessageService>().GetMessageAsync(identifier, data);
-
-            if (msg is null)
-                return null;
-
-            return await channel.SendIonicMessageAsync(msg).ConfigureAwait(false);
-        }
-
-        public static async Task<IUserMessage> SendMessageAsync(IonicMessage message, ulong channelId)
-        {
-            if (!IonicHelper.GetTextChannel(Settings.App.MainGuildId, channelId, out var channel))
-                return null;
-
-            return await channel.SendIonicMessageAsync(message);
         }
 
         public static async Task Main(string[] args)
@@ -145,17 +117,46 @@ namespace Rift
                 }, LogDiscord )
                 .ConfigureAwait(false);
 
-            await new RiftBot()
-                .RunAsync()
+            await RunAsync()
                 .ConfigureAwait(false);
         }
 
         static Task LogDiscord(LogMessage arg)
         {
+            var text = arg.Message;
+            
+            switch (arg.Severity)
+            {
+                case LogSeverity.Critical:
+                    DiscordLogger.Write(LogEventLevel.Fatal, text);
+                    break;
+                
+                case LogSeverity.Error:
+                    DiscordLogger.Write(LogEventLevel.Error, text);
+                    break;
+                
+                case LogSeverity.Warning:
+                    DiscordLogger.Write(LogEventLevel.Warning, text);
+                    break;
+                
+                case LogSeverity.Info:
+                    DiscordLogger.Write(LogEventLevel.Information, text);
+                    break;
+                
+                case LogSeverity.Debug:
+                    DiscordLogger.Write(LogEventLevel.Debug, text);
+                    break;
+                
+                case LogSeverity.Verbose:
+                default:
+                    DiscordLogger.Write(LogEventLevel.Verbose, text);
+                    break;
+            }
+            
             return Task.CompletedTask;
         }
 
-        public static string GetContentRoot()
+        static string GetContentRoot()
         {
             var assemblyPath = Assembly.GetEntryAssembly().Location;
             var fwdSlashIndex = assemblyPath.LastIndexOf('/'); // *nix
@@ -165,13 +166,19 @@ namespace Rift
             return assemblyPath.Substring(0, index);
         }
 
-        public async Task RunAsync()
+        static async Task RunAsync()
         {
             Log = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
                 .WriteTo.Async(x => x.File("logs/rift-.log", rollingInterval: RollingInterval.Day))
+                .CreateLogger();
+
+            DiscordLogger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .Enrich.FromLogContext()
+                .WriteTo.Async(x => x.File("logs/discord-.log", rollingInterval: RollingInterval.Day))
                 .CreateLogger();
 
             var serviceProvider = SetupServices();
@@ -205,38 +212,38 @@ namespace Rift
                 Log.Error(ex, "An error occured while shutting down");
             }
         }
+        
+        public static IServiceProvider GetServiceProvider() => handler.Provider;
 
         static IServiceProvider SetupServices()
         {
             var services = new ServiceCollection()
                 .AddSingleton(Log)
                 .AddSingleton(IonicHelper.Client)
-                .AddSingleton(new EconomyService())
-                .AddSingleton(new GiftService())
-                .AddSingleton(new RoleService())
-                .AddSingleton(new RiotService())
-                .AddSingleton(new EmoteService())
-                .AddSingleton(new MessageService())
-                .AddSingleton(new ToxicityService())
-                .AddSingleton(new GiveawayService())
-                .AddSingleton(new BragService())
-                .AddSingleton(new EventService())
-                .AddSingleton(new BotRespectService())
-                .AddSingleton(new QuizService())
-                .AddSingleton(new ModerationService())
+                .AddSingleton(typeof(IEconomyService), typeof(EconomyService))
+                .AddSingleton(typeof(IGiftService), typeof(GiftService))
+                .AddSingleton(typeof(IRoleService), typeof(RoleService))
+                .AddSingleton(typeof(IRiotService), typeof(RiotService))
+                .AddSingleton(typeof(IEmoteService), typeof(EmoteService))
+                .AddSingleton(typeof(IMessageService), typeof(MessageService))
+                .AddSingleton(typeof(IToxicityService), typeof(ToxicityService))
+                .AddSingleton(typeof(IGiveawayService), typeof(GiveawayService))
+                .AddSingleton(typeof(IBragService), typeof(BragService))
+                .AddSingleton(typeof(IEventService), typeof(EventService))
+                .AddSingleton(typeof(IBotRespectService), typeof(BotRespectService))
+                .AddSingleton(typeof(IModerationService), typeof(ModerationService))
+                .AddSingleton(typeof(IChannelService), typeof(ChannelService))
+                .AddSingleton(typeof(IStoreService), typeof(StoreService))
+                .AddSingleton(typeof(IChestService), typeof(ChestService))
+                .AddSingleton(typeof(ICapsuleService), typeof(CapsuleService))
+                .AddSingleton(typeof(ISphereService), typeof(SphereService))
+                .AddSingleton(typeof(IBackgroundService), typeof(BackgroundService))
+                .AddSingleton(typeof(IRewindService), typeof(RewindService))
+                .AddSingleton(typeof(IDoubleExpService), typeof(DoubleExpService))
+                .AddSingleton(typeof(IDailyService), typeof(DailyService))
+                .AddSingleton(typeof(IRoleSetupService), typeof(RoleSetupService))
+                .AddSingleton(typeof(IRewardService), typeof(RewardService))
                 .AddSingleton(new ReliabilityService(IonicHelper.Client))
-                .AddSingleton(new ChannelService(IonicHelper.Client))
-                .AddSingleton(new QuestService())
-                .AddSingleton(new StoreService())
-                .AddSingleton(new ChestService())
-                .AddSingleton(new CapsuleService())
-                .AddSingleton(new SphereService())
-                .AddSingleton(new BackgroundService())
-                .AddSingleton(new VoteService())
-                .AddSingleton(new RewindService())
-                .AddSingleton(new DoubleExpService())
-                .AddSingleton(new DailyService())
-                .AddSingleton(new RoleSetupService(IonicHelper.Client))
                 .AddSingleton(new CommandService(new CommandServiceConfig
                 {
                     CaseSensitiveCommands = false,

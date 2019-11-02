@@ -2,9 +2,10 @@
 
 using Rift.Configuration;
 using Rift.Preconditions;
-using Rift.Services;
 
 using Discord.Commands;
+
+using Rift.Services.Interfaces;
 
 namespace Rift.Modules
 {
@@ -15,11 +16,17 @@ namespace Rift.Modules
         [RequireAdmin]
         public class ReloadModule : ModuleBase
         {
+            readonly IEmoteService emoteService;
+
+            public ReloadModule(IEmoteService emoteService)
+            {
+                this.emoteService = emoteService;
+            }
+            
             [Command]
             public async Task Default()
             {
                 await Settings.ReloadAllAsync();
-
                 await ReplyAsync("All settings reloaded successfully.");
             }
 
@@ -27,7 +34,6 @@ namespace Rift.Modules
             public async Task App()
             {
                 await Settings.ReloadAppAsync();
-
                 await ReplyAsync("App settings reloaded successfully.");
             }
 
@@ -35,7 +41,6 @@ namespace Rift.Modules
             public async Task Channels()
             {
                 await Settings.ReloadChannelsAsync();
-
                 await ReplyAsync("Channels reloaded successfully.");
             }
 
@@ -43,7 +48,6 @@ namespace Rift.Modules
             public async Task Chat()
             {
                 await Settings.ReloadChatAsync();
-
                 await ReplyAsync("Chat settings reloaded successfully.");
             }
 
@@ -51,14 +55,13 @@ namespace Rift.Modules
             public async Task Economy()
             {
                 await Settings.ReloadEconomyAsync();
-
                 await ReplyAsync("Economy settings reloaded successfully.");
             }
 
             [Command("emotes")]
             public async Task Emotes()
             {
-                await RiftBot.GetService<EmoteService>().ReloadEmotesAsync();
+                await emoteService.ReloadEmotesAsync();
                 await ReplyAsync("Reloaded emotes.");
             }
         }

@@ -3,15 +3,23 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Rift.Database;
+using Rift.Services.Interfaces;
 using Rift.Services.Message;
 
 using Settings = Rift.Configuration.Settings;
 
 namespace Rift.Services
 {
-    public class RewindService
+    public class RewindService : IRewindService
     {
         static readonly SemaphoreSlim Mutex = new SemaphoreSlim(1);
+
+        readonly IMessageService messageService;
+
+        public RewindService(IMessageService messageService)
+        {
+            this.messageService = messageService;
+        }
         
         public async Task ActivateAsync(ulong userId)
         {
@@ -37,7 +45,7 @@ namespace Rift.Services
 
             if (dbInv.BonusRewind == 0u)
             {
-                await RiftBot.SendMessageAsync("bonus-nobonus", Settings.ChannelId.Commands, new FormatData(userId));
+                await messageService.SendMessageAsync("bonus-nobonus", Settings.ChannelId.Commands, new FormatData(userId));
                 return;
             }
 
@@ -45,7 +53,7 @@ namespace Rift.Services
             await DB.Cooldowns.ResetAsync(userId);
             await DB.Statistics.AddAsync(userId, new StatisticData {RewindsActivated = 1u});
             
-            await RiftBot.SendMessageAsync("rewind-success", Settings.ChannelId.Commands, new FormatData(userId));
+            await messageService.SendMessageAsync("rewind-success", Settings.ChannelId.Commands, new FormatData(userId));
         }
     }
 }

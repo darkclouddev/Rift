@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using Rift.Data.Models;
+using Rift.Services.Interfaces;
 
 using Discord.WebSocket;
 
@@ -9,7 +10,7 @@ using IonicLib;
 
 namespace Rift.Services
 {
-    public class EmoteService
+    public class EmoteService : IEmoteService
     {
         readonly ConcurrentDictionary<string, Emote> emotes;
 

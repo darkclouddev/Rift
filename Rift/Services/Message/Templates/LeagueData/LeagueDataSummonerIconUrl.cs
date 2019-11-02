@@ -12,7 +12,7 @@ namespace Rift.Services.Message.Templates.LeagueData
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            var iconUrl = RiftBot.GetService<RiotService>().GetSummonerIconUrlById(data.LeagueStat.Summoner.ProfileIconId);
+            var iconUrl = data.RiotService.GetSummonerIconUrlById(data.LeagueStat.Summoner.ProfileIconId);
             return ReplaceDataAsync(message, iconUrl);
         }
     }

@@ -11,9 +11,11 @@ using IonicLib;
 using IonicLib.Extensions;
 using IonicLib.Util;
 
+using Rift.Services.Interfaces;
+
 namespace Rift.Services
 {
-    public class AnnounceService
+    public class AnnounceService : IAnnounceService
     {
 #pragma warning disable 169
         static Timer timer;

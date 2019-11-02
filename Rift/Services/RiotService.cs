@@ -11,6 +11,7 @@ using Settings = Rift.Configuration.Settings;
 using Rift.Data.Models;
 using Rift.Database;
 using Rift.Events;
+using Rift.Services.Interfaces;
 using Rift.Services.Message;
 using Rift.Util;
 
@@ -34,9 +35,9 @@ using Newtonsoft.Json;
 
 namespace Rift.Services
 {
-    public class RiotService
+    public class RiotService : IRiotService
     {
-        public static EventHandler<LolDataCreatedEventArgs> OnLolDataCreated;
+        public event EventHandler<LolDataCreatedEventArgs> OnLolDataCreated;
 
         static Champion championData;
         static Dictionary<string, ChampionData> champions = new Dictionary<string, ChampionData>();
@@ -56,8 +57,14 @@ namespace Rift.Services
 
         static RiotApi api;
 
-        public RiotService()
+        readonly IMessageService messageService;
+        readonly IEmoteService emoteService;
+
+        public RiotService(IMessageService messageService, IEmoteService emoteService)
         {
+            this.messageService = messageService;
+            this.emoteService = emoteService;
+            
             if (!Directory.Exists(DataDragonDataFolder))
                 Directory.CreateDirectory(DataDragonDataFolder);
 
@@ -299,18 +306,18 @@ namespace Rift.Services
         async Task<IonicMessage> RegisterInternalAsync(ulong userId, string region, string summonerName)
         {
             if (await DB.LeagueData.HasAsync(userId))
-                return await RiftBot.GetMessageAsync("register-hasAcc", new FormatData(userId));
+                return await messageService.GetMessageAsync("register-hasAcc", new FormatData(userId));
 
             if (await DB.PendingUsers.IsPendingAsync(userId))
-                return await RiftBot.GetMessageAsync("register-pending", new FormatData(userId));
+                return await messageService.GetMessageAsync("register-pending", new FormatData(userId));
 
             (var summonerResult, var summoner) = await GetSummonerByNameAsync(region.ToLowerInvariant(), summonerName);
 
             if (summonerResult != RequestResult.Success)
-                return await RiftBot.GetMessageAsync("register-namenotfound", new FormatData(userId));
+                return await messageService.GetMessageAsync("register-namenotfound", new FormatData(userId));
 
             if (await DB.LeagueData.IsTakenAsync(region, summoner.Id))
-                return await RiftBot.GetMessageAsync("register-taken", new FormatData(userId));
+                return await messageService.GetMessageAsync("register-taken", new FormatData(userId));
 
             var code = Helper.GenerateConfirmationCode(16);
 
@@ -328,7 +335,7 @@ namespace Rift.Services
             if (!await AddForApprovalAsync(pendingUser))
                 return MessageService.Error;
 
-            return await RiftBot.GetMessageAsync("register-code", new FormatData(userId)
+            return await messageService.GetMessageAsync("register-code", new FormatData(userId)
             {
                 LeagueRegistration = new LeagueRegistrationData
                 {
@@ -362,7 +369,7 @@ namespace Rift.Services
                 if (expired)
                 {
                     await DB.PendingUsers.RemoveAsync(user);
-                    await RiftBot.SendMessageAsync("register-pending-expired", Settings.ChannelId.Commands, new FormatData(user.UserId));
+                    await messageService.SendMessageAsync("register-pending-expired", Settings.ChannelId.Commands, new FormatData(user.UserId));
                 }
             }
 
@@ -390,7 +397,7 @@ namespace Rift.Services
                 if (sanitizedCode != user.ConfirmationCode)
                     continue;
 
-                (var requestResult, var summoner) = await GetSummonerByEncryptedUUIDAsync(user.Region, user.PlayerUUID);
+                (var requestResult, var summoner) = await GetSummonerByEncryptedUuidAsync(user.Region, user.PlayerUUID);
 
                 if (requestResult != RequestResult.Success)
                 {
@@ -431,7 +438,7 @@ namespace Rift.Services
 
             await DB.Inventory.AddAsync(sgUser.Id, new InventoryData {Chests = 2u});
 
-            await RiftBot.SendMessageAsync("register-success", Settings.ChannelId.Commands, new FormatData(pendingUser.UserId));
+            await messageService.SendMessageAsync("register-success", Settings.ChannelId.Commands, new FormatData(pendingUser.UserId));
         }
 
         #endregion Validation
@@ -492,7 +499,7 @@ namespace Rift.Services
             if (!IonicHelper.GetRole(Settings.App.MainGuildId, roleId.RoleId, out var role))
                 return;
 
-            await RiftBot.SendMessageAsync("rank-updated", Settings.ChannelId.Chat, new FormatData(sgUser.Id)
+            await messageService.SendMessageAsync("rank-updated", Settings.ChannelId.Chat, new FormatData(sgUser.Id)
             {
                 RankData = new RankData
                 {
@@ -682,7 +689,7 @@ namespace Rift.Services
             await guildUser.AddRoleAsync(role);
         }
 
-        public static LeagueRank GetRankFromEntry(LeagueEntry entry)
+        public LeagueRank GetRankFromEntry(LeagueEntry entry)
         {
             if (entry is null)
                 return LeagueRank.Unranked;
@@ -702,10 +709,8 @@ namespace Rift.Services
             };
         }
 
-        public static string GetStatStringFromRank(LeagueRank rank)
+        public string GetStatStringFromRank(LeagueRank rank)
         {
-            var emoteService = RiftBot.GetService<EmoteService>();
-
             switch (rank)
             {
                 case LeagueRank.Iron: return $"{emoteService.GetEmoteString("$emoteRankIron")} Железо";
@@ -732,21 +737,21 @@ namespace Rift.Services
             var dbSummoner = await DB.LeagueData.GetAsync(userId);
 
             if (string.IsNullOrWhiteSpace(dbSummoner.PlayerUUID))
-                return await RiftBot.GetMessageAsync("loldata-nodata", new FormatData(userId));
+                return await messageService.GetMessageAsync("loldata-nodata", new FormatData(userId));
 
-            (var summonerResult, var summoner) = await RiftBot.GetService<RiotService>()
-                .GetSummonerByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
+            (var summonerResult, var summoner) =
+                await GetSummonerByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
 
             if (summonerResult != RequestResult.Success)
                 return MessageService.Error;
 
-            (var requestResult, var leaguePositions) = await RiftBot.GetService<RiotService>()
-                .GetLeaguePositionsByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
+            (var requestResult, var leaguePositions) =
+                await GetLeaguePositionsByEncryptedSummonerIdAsync(dbSummoner.SummonerRegion, dbSummoner.SummonerId);
 
             if (requestResult != RequestResult.Success)
                 return MessageService.Error;
 
-            return await RiftBot.GetMessageAsync("loldata-stat-success", new FormatData(userId)
+            return await messageService.GetMessageAsync("loldata-stat-success", new FormatData(userId)
             {
                 LeagueStat = new LeagueStatData
                 {
@@ -773,17 +778,17 @@ namespace Rift.Services
             }
         }
 
-        public async Task<(RequestResult, Summoner)> GetSummonerByEncryptedUUIDAsync(string region, string encryptedUUID)
+        public async Task<(RequestResult, Summoner)> GetSummonerByEncryptedUuidAsync(string region, string encryptedUuid)
         {
             try
             {
-                var result = await api.SummonerV4.GetByPUUIDAsync(GetRegionFromString(region), encryptedUUID);
+                var result = await api.SummonerV4.GetByPUUIDAsync(GetRegionFromString(region), encryptedUuid);
 
                 return (RequestResult.Success, result);
             }
             catch (Exception ex)
             {
-                RiftBot.Log.Error(ex, $"An error occured while processing request {nameof(GetSummonerByEncryptedUUIDAsync)}");
+                RiftBot.Log.Error(ex, $"An error occured while processing request {nameof(GetSummonerByEncryptedUuidAsync)}");
                 return (RequestResult.Error, null);
             }
         }
@@ -882,7 +887,7 @@ namespace Rift.Services
             return $"http://ddragon.leagueoflegends.com/cdn/{Settings.App.LolVersion}/img/profileicon/{iconId.ToString()}.png";
         }
 
-        public static string GetChampionSquareByName(ChampionImage ci)
+        public string GetChampionSquareByName(ChampionImage ci)
         {
             return string.Format(DataDragonChampPortraitTemplate, Settings.App.LolVersion, ci.Full);
         }
@@ -970,11 +975,9 @@ namespace Rift.Services
 
             var statusCode = response.StatusCode;
 
-            using (var stream = response.GetResponseStream())
-            using (var reader = new StreamReader(stream))
-            {
-                return new GetResponse((int) statusCode, await reader.ReadToEndAsync());
-            }
+            await using var stream = response.GetResponseStream();
+            using var reader = new StreamReader(stream);
+            return new GetResponse((int) statusCode, await reader.ReadToEndAsync());
         }
     }
 

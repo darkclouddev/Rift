@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using Rift.Data.Models;
 using Rift.Data.Models.Users;
+using Rift.Services.Interfaces;
 using Rift.Services.Reward;
 
 using MingweiSamuel.Camille.LeagueV4;
@@ -29,11 +32,19 @@ namespace Rift.Services.Message
         public RiftQuestStage QuestStage { get; set; }
         public RiftQuestProgress QuestProgress { get; set; }
         public RiftStatistics Statistics { get; set; }
-        public VoteData VoteData { get; set; }
+        
+        public IEmoteService EmoteService { get; }
+        public IRiotService RiotService { get; }
+        public IEconomyService EconomyService { get; }
 
         public FormatData(ulong userId)
         {
             UserId = userId;
+            
+            var provider = RiftBot.GetServiceProvider();
+            EmoteService = provider.GetService<IEmoteService>();
+            RiotService = provider.GetService<IRiotService>();
+            EconomyService = provider.GetService<IEconomyService>();
         }
     }
 
@@ -114,11 +125,6 @@ namespace Rift.Services.Message
     {
         public int ParticipantsCount { get; set; }
         public ulong WinnerId { get; set; }
-    }
-
-    public class VoteData
-    {
-        public string Name { get; set; }
     }
 
     public class MessageData
