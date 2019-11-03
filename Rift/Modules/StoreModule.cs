@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-using Rift.Services;
+using Rift.Services.Interfaces;
 using Rift.Util;
 
 using Discord.Commands;
@@ -9,9 +9,9 @@ namespace Rift.Modules
 {
     public class StoreModule : RiftModuleBase
     {
-        readonly StoreService storeService;
+        readonly IStoreService storeService;
 
-        public StoreModule(StoreService storeService)
+        public StoreModule(IStoreService storeService)
         {
             this.storeService = storeService;
         }
