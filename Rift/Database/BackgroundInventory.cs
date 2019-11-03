@@ -82,18 +82,6 @@ namespace Rift.Database
             }
         }
         
-        public async Task RemoveCommunitiesAsync(ulong userId)
-        {
-            var backs = await DB.Communities.GetAllAsync();
-            if (backs is null || backs.Count == 0)
-                return;
-
-            foreach (var inv in backs)
-            {
-                await DB.BackgroundInventory.DeleteAsync(userId, inv.BackgroundId);
-            }
-        }
-        
         public async Task RemoveStreamersAsync(ulong userId)
         {
             var backs = await DB.Streamers.GetAllAsync();
@@ -108,27 +96,6 @@ namespace Rift.Database
                 await DB.BackgroundInventory.DeleteAsync(userId, inv.BackgroundId);
             }
         }
-        
-        public async Task RemoveTeamsAsync(ulong userId)
-        {
-            var backs = await DB.Teams.GetAllAsync();
-            if (backs is null || backs.Count == 0)
-                return;
-
-            foreach (var inv in backs)
-            {
-                await DB.BackgroundInventory.DeleteAsync(userId, inv.BackgroundId);
-            }
-        }
-
-        public async Task UnsetCommunitiesBackgroundsAsync(ulong userId)
-        {
-            var communities = await DB.Communities.GetAllAsync();
-            if (communities is null || communities.Count == 0)
-                return;
-
-            await UnsetBackgroundAsync(userId, communities.Select(x => x.BackgroundId));
-        }
 
         public async Task UnsetStreamersBackgroundsAsync(ulong userId)
         {
@@ -137,15 +104,6 @@ namespace Rift.Database
                 return;
 
             await UnsetBackgroundAsync(userId, streamers.Select(x => x.BackgroundId));
-        }
-
-        public async Task UnsetTeamsBackgroundsAsync(ulong userId)
-        {
-            var teams = await DB.Teams.GetAllAsync();
-            if (teams is null || teams.Count == 0)
-                return;
-
-            await UnsetBackgroundAsync(userId, teams.Select(x => x.BackgroundId));
         }
 
         async Task UnsetBackgroundAsync(ulong userId, IEnumerable<int> items)

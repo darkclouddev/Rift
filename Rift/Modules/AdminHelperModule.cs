@@ -171,16 +171,6 @@ namespace Rift.Modules
             await ReplyAsync($"Added role \"{role.Name}\" to {count.ToString()} user(s).");
         }
 
-        [Command("activestages")]
-        [RequireAdmin]
-        [RequireContext(ContextType.Guild)]
-        public async Task ActiveStages()
-        {
-            var things = await DB.Quests.GetStageIdsInProgressAsync(Context.User.Id);
-
-            await ReplyAsync($"{things.Count.ToString()} stage(s).");
-        }
-
         [Command("estart")]
         [RequireDeveloper]
         [RequireContext(ContextType.Guild)]
