@@ -24,7 +24,6 @@ namespace Rift.Modules
         readonly IMessageService messageService;
 
         public EconomyModule(IEconomyService economyService,
-                             IRiotService riotService,
                              IBragService bragService,
                              IGiveawayService giveawayService,
                              IBotRespectService botRespectService,
@@ -197,11 +196,13 @@ namespace Rift.Modules
         [Group("открыть")]
         public class OpenModule : ModuleBase
         {
-            readonly ChestService chestService;
-            readonly CapsuleService capsuleService;
-            readonly SphereService sphereService;
+            readonly IChestService chestService;
+            readonly ICapsuleService capsuleService;
+            readonly ISphereService sphereService;
 
-            public OpenModule(ChestService chestService, CapsuleService capsuleService, SphereService sphereService)
+            public OpenModule(IChestService chestService,
+                              ICapsuleService capsuleService,
+                              ISphereService sphereService)
             {
                 this.chestService = chestService;
                 this.capsuleService = capsuleService;

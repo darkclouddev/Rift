@@ -28,14 +28,12 @@ namespace Rift.Services.Message
         public ModerationData Moderation { get; set; }
         public RankData RankData { get; set; }
         public RewardBase Reward { get; set; }
-        public RiftQuest Quest { get; set; }
-        public RiftQuestStage QuestStage { get; set; }
-        public RiftQuestProgress QuestProgress { get; set; }
         public RiftStatistics Statistics { get; set; }
         
         public IEmoteService EmoteService { get; }
         public IRiotService RiotService { get; }
         public IEconomyService EconomyService { get; }
+        public IRewardService RewardService { get; }
 
         public FormatData(ulong userId)
         {
@@ -45,6 +43,7 @@ namespace Rift.Services.Message
             EmoteService = provider.GetService<IEmoteService>();
             RiotService = provider.GetService<IRiotService>();
             EconomyService = provider.GetService<IEconomyService>();
+            RewardService = provider.GetService<IRewardService>();
         }
     }
 

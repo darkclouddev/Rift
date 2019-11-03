@@ -18,7 +18,7 @@ using Rift.Services.Interfaces;
 
 namespace Rift.Services
 {
-    public class RoleService
+    public class RoleService : IRoleService
     {
         static Timer tempRoleTimer;
 
