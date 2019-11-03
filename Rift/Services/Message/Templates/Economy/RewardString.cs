@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 
 using Rift.Data.Models;
+using Rift.Services.Reward;
 
 namespace Rift.Services.Message.Templates.Economy
 {
@@ -10,9 +11,17 @@ namespace Rift.Services.Message.Templates.Economy
         {
         }
 
-        public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
+        public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            return ReplaceDataAsync(message, data.Reward.ToString());
+            var rewardString = data.Reward switch
+            {
+                ItemReward itemReward => data.RewardService.Format(itemReward),
+                RoleReward roleReward => await data.RewardService.FormatAsync(roleReward),
+                BackgroundReward backgroundReward => await data.RewardService.FormatAsync(backgroundReward),
+                _ => "Пусто :("
+            };
+
+            return await ReplaceDataAsync(message, rewardString);
         }
     }
 }
