@@ -11,9 +11,6 @@ namespace Rift.Database
 {
     public class Statistics
     {
-        public event EventHandler<MessageCreatedEventArgs> OnMessageCreated;
-        public event EventHandler<VoiceUptimeEarnedEventArgs> VoiceUptimeEarned;
-
         public async Task<bool> EnsureExistsAsync(ulong userId)
         {
             if (!await DB.Users.EnsureExistsAsync(userId))
@@ -353,8 +350,6 @@ namespace Rift.Database
                 else
                     stat.MessagesSent = before + value;
 
-                OnMessageCreated?.Invoke(null, new MessageCreatedEventArgs(userId, stat.MessagesSent));
-
                 entry.Property(x => x.MessagesSent).IsModified = true;
             }
 
@@ -386,17 +381,15 @@ namespace Rift.Database
 
             if (data.VoiceUptime.HasValue)
             {
-                var before = dbStatistics.VoiceUptime;
+                var before = TimeSpan.FromHours(dbStatistics.VoiceUptimeHours);
                 var value = data.VoiceUptime.Value;
 
-                VoiceUptimeEarned?.Invoke(null, new VoiceUptimeEarnedEventArgs(userId, value));
-
                 if (TimeSpan.MaxValue - before < value)
-                    stat.VoiceUptime = TimeSpan.MaxValue;
+                    stat.VoiceUptimeHours = (uint)TimeSpan.MaxValue.TotalHours;
                 else
-                    stat.VoiceUptime = before + value;
+                    stat.VoiceUptimeHours = (uint)(before + value).TotalHours;
 
-                entry.Property(x => x.VoiceUptime).IsModified = true;
+                entry.Property(x => x.VoiceUptimeHours).IsModified = true;
             }
 
             await context.SaveChangesAsync();
