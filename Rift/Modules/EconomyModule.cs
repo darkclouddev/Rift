@@ -5,7 +5,6 @@ using Discord.Commands;
 
 using Rift.Configuration;
 using Rift.Preconditions;
-using Rift.Services;
 using Rift.Services.Interfaces;
 
 namespace Rift.Modules
@@ -44,6 +43,14 @@ namespace Rift.Modules
             this.doubleExpService = doubleExpService;
             this.channelService = channelService;
             this.messageService = messageService;
+        }
+        
+        [Command("задания")]
+        [Alias("квесты")]
+        [RequireContext(ContextType.Guild)]
+        public async Task Quests()
+        {
+            await economyService.GetQuests(Context.User.Id);
         }
 
         [Command("выгнать")]

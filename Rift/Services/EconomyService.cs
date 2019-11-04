@@ -190,6 +190,11 @@ namespace Rift.Services
             });
         }
 
+        public async Task GetQuests(ulong userId)
+        {
+            await messageService.SendMessageAsync("user-quests", Settings.ChannelId.Commands, new FormatData(userId));
+        }
+
         async Task UpdateRatingAsync()
         {
             SortedRating = await DB.Users.GetAllSortedAsync();
