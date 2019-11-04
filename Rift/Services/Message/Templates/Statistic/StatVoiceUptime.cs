@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 using Rift.Data.Models;
 
@@ -16,10 +17,11 @@ namespace Rift.Services.Message.Templates.Statistic
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             return await ReplaceDataAsync(message,
-                data.Statistics.VoiceUptime.Humanize(
-                    minUnit: TimeUnit.Minute,
-                    maxUnit: TimeUnit.Hour,
-                    culture: RiftBot.Culture));
+                TimeSpan.FromHours(data.Statistics.VoiceUptimeHours)
+                    .Humanize(
+                        minUnit: TimeUnit.Minute,
+                        maxUnit: TimeUnit.Hour,
+                        culture: RiftBot.Culture));
         }
     }
 }
