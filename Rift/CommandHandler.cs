@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Reflection;
+using System.Text;
 
 using Settings = Rift.Configuration.Settings;
 
 using Rift.Database;
-using Rift.Services;
+using Rift.Services.Interfaces;
 using Rift.Services.Message;
 using Rift.Util;
 
@@ -20,8 +21,6 @@ using IonicLib;
 using IonicLib.Util;
 
 using Microsoft.Extensions.DependencyInjection;
-
-using Rift.Services.Interfaces;
 
 namespace Rift
 {
@@ -60,6 +59,7 @@ namespace Rift
 
             await riotService.InitAsync();
 
+            client.MessageReceived += LogChatMessage;
             client.MessageReceived += ProcessMessage;
             client.UserJoined += UserJoined;
             client.UserLeft += UserLeft;
@@ -70,6 +70,25 @@ namespace Rift
         {
             await emoteService.ReloadEmotesAsync();
             await client.SetGameAsync(RiftBot.BotStatusMessage);
+        }
+
+        static Task LogChatMessage(SocketMessage socketMsg)
+        {
+            if (!(socketMsg is SocketUserMessage message))
+                return Task.CompletedTask;
+            
+            if (message.Author.IsBot)
+                return Task.CompletedTask;
+            
+            var context = new CommandContext(client, message);
+
+            if (context.IsPrivate)
+                return Task.CompletedTask;
+            
+            var entry = new LogEntry(context);
+            
+            RiftBot.ChatLogger.Information(entry.ToString());
+            return Task.CompletedTask;
         }
 
         async Task ProcessMessage(SocketMessage socketMsg)
@@ -153,9 +172,6 @@ namespace Rift
             if (context.Message.Channel.Id != Settings.ChannelId.Chat)
                 return;
 
-            //if (quizService.IsActive) // TODO: uncomment when quiz will be ready
-            //    quizService.Answers.Enqueue(new QuizGuess(context.User.Id, context.Message.Content));
-
             if (Settings.Chat.AttachmentFilterEnabled && !RiftBot.IsAdmin(context.Message.Author))
                 if (context.Message.Attachments != null && context.Message.Attachments.Count > 0)
                     await context.Message.DeleteAsync();
@@ -182,7 +198,7 @@ namespace Rift
                 return;
             }
 
-            if (Settings.Chat.ProcessUserNames) // TODO: experimental feature
+            if (Settings.Chat.ProcessUserNames)
             {
                 if (context.User is SocketGuildUser sgUser)
                 {
@@ -357,5 +373,32 @@ namespace Rift
     {
         Joined,
         Left,
+    }
+
+    public class LogEntry
+    {
+        string UserString { get; }
+        string Content { get; }
+        IReadOnlyCollection<IEmbed> Embeds { get; }
+
+        public LogEntry(ICommandContext context)
+        {
+            UserString = context.User.ToLogString();
+            Content = context.Message.Content;
+            Embeds = context.Message.Embeds;
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            sb.Append(UserString);
+            sb.Append(" ");
+            sb.Append(Content ?? "");
+            sb.Append(" | ");
+            sb.Append(Embeds.Count.ToString());
+            sb.Append(" embed(s)");
+
+            return sb.ToString();
+        }
     }
 }

@@ -33,6 +33,7 @@ namespace Rift
         public static CultureInfo Culture { get; private set; }
 
         public static ILogger Log { get; private set; }
+        public static ILogger ChatLogger { get; set; }
         static ILogger DiscordLogger { get; set; }
 
         public static string AppPath { get; private set; }
@@ -179,6 +180,12 @@ namespace Rift
                 .MinimumLevel.Information()
                 .Enrich.FromLogContext()
                 .WriteTo.Async(x => x.File("logs/discord-.log", rollingInterval: RollingInterval.Day))
+                .CreateLogger();
+
+            ChatLogger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .Enrich.FromLogContext()
+                .WriteTo.Async(x => x.File("logs/chat-.log", rollingInterval: RollingInterval.Day))
                 .CreateLogger();
 
             var serviceProvider = SetupServices();

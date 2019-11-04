@@ -13,6 +13,7 @@ namespace Rift.Services.Interfaces
         Task GetUserCooldownsAsync(ulong userId);
         Task GetUserProfileAsync(ulong userId);
         Task GetUserStatAsync(ulong userId);
+        Task GetQuests(ulong userId);
         uint GetExpForLevel(uint level);
     }
 }
