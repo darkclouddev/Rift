@@ -381,15 +381,15 @@ namespace Rift.Database
 
             if (data.VoiceUptime.HasValue)
             {
-                var before = TimeSpan.FromHours(dbStatistics.VoiceUptimeHours);
+                var before = TimeSpan.FromMinutes(dbStatistics.VoiceUptimeMinutes);
                 var value = data.VoiceUptime.Value;
 
                 if (TimeSpan.MaxValue - before < value)
-                    stat.VoiceUptimeHours = (uint)TimeSpan.MaxValue.TotalHours;
+                    stat.VoiceUptimeMinutes = (uint)TimeSpan.MaxValue.TotalMinutes;
                 else
-                    stat.VoiceUptimeHours = (uint)(before + value).TotalHours;
+                    stat.VoiceUptimeMinutes = (uint)(before + value).TotalMinutes;
 
-                entry.Property(x => x.VoiceUptimeHours).IsModified = true;
+                entry.Property(x => x.VoiceUptimeMinutes).IsModified = true;
             }
 
             await context.SaveChangesAsync();

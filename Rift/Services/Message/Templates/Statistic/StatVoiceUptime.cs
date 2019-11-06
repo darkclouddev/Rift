@@ -17,7 +17,7 @@ namespace Rift.Services.Message.Templates.Statistic
         public override async Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
             return await ReplaceDataAsync(message,
-                TimeSpan.FromHours(data.Statistics.VoiceUptimeHours)
+                TimeSpan.FromMinutes(data.Statistics.VoiceUptimeMinutes)
                     .Humanize(
                         minUnit: TimeUnit.Minute,
                         maxUnit: TimeUnit.Hour,

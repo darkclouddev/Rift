@@ -28,7 +28,7 @@
         public uint MessagesSent { get; set; }
         public uint BragsDone { get; set; }
         public uint PurchasedItems { get; set; }
-        public uint VoiceUptimeHours { get; set; }
+        public ulong VoiceUptimeMinutes { get; set; }
 
         public RiftUser User { get; set; }
     }
