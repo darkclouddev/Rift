@@ -33,7 +33,7 @@ namespace Rift.Services
             this.roleService = roleService;
         }
 
-        void SetupEvents()
+        public void Init()
         {
             discordClient.ReactionAdded += ReactionAdded;
             discordClient.ReactionRemoved += ReactionRemoved;

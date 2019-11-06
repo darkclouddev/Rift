@@ -37,6 +37,7 @@ namespace Rift
         static IMessageService messageService;
         static IEmoteService emoteService;
         static IDailyService dailyService;
+        static IRoleSetupService roleSetupService;
 
         public CommandHandler(IServiceProvider serviceProvider)
         {
@@ -50,12 +51,14 @@ namespace Rift
             riotService = Provider.GetService<IRiotService>();
             emoteService = Provider.GetService<IEmoteService>();
             dailyService = Provider.GetService<IDailyService>();
+            roleSetupService = Provider.GetService<IRoleSetupService>();
         }
 
         public async Task ConfigureAsync()
         {
             await commandService.AddModulesAsync(Assembly.GetEntryAssembly(), Provider);
             economyService.Init();
+            roleSetupService.Init();
 
             await riotService.InitAsync();
 
