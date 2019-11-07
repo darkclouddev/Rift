@@ -233,7 +233,7 @@ namespace Rift.Services
                 return;
             }
 
-            var msg = await DB.StoredMessages.GetMessageByIdAsync(giveaway.StoredMessageId);
+            var msg = await messageService.GetMessageFromApi(giveaway.MessageId);
 
             if (msg is null)
             {
@@ -260,7 +260,7 @@ namespace Rift.Services
             var activeGiveaway = new RiftActiveGiveaway
             {
                 GiveawayName = giveaway.Name,
-                StoredMessageId = giveaway.StoredMessageId,
+                MessageId = giveaway.MessageId,
                 StartedBy = startedById == 0u ? IonicHelper.Client.CurrentUser.Id : startedById,
                 StartedAt = DateTime.UtcNow,
                 DueTime = DateTime.UtcNow + giveaway.Duration,

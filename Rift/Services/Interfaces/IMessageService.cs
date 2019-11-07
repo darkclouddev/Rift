@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -16,6 +17,7 @@ namespace Rift.Services.Interfaces
         int GetSendQueueLength();
         int GetDeleteQueueLength();
         List<ITemplate> GetActiveTemplates();
+        Task<RiftMessage> GetMessageFromApi(Guid id);
         Task<IonicMessage> GetMessageAsync(string identifier, FormatData data);
         Task<IonicMessage> FormatMessageAsync(RiftMessage message, FormatData data = null);
         Task<IUserMessage> SendMessageAsync(string identifier, ulong channelId, FormatData data);

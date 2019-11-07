@@ -1,6 +1,10 @@
-﻿using Rift.Data.Models;
+﻿using System;
+
+using Rift.Data.Models;
 
 using Microsoft.EntityFrameworkCore;
+
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 namespace Rift.Data
 {
@@ -14,8 +18,7 @@ namespace Rift.Data
         public DbSet<RiftPendingUser> PendingUsers { get; set; }
         public DbSet<RiftTempRole> TempRoles { get; set; }
         public DbSet<RiftStreamer> Streamers { get; set; }
-        public DbSet<RiftMessage> Messages { get; set; }
-        public DbSet<RiftMapping> MessageMappings { get; set; }
+        public DbSet<RiftMapping> Mappings { get; set; }
         public DbSet<RiftToxicity> Toxicity { get; set; }
         public DbSet<RiftModerationLog> ModerationLog { get; set; }
         public DbSet<RiftSettings> Settings { get; set; }
@@ -35,7 +38,12 @@ namespace Rift.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySql(@"Server=localhost;Database=rift;Uid=rift;Pwd=;");
+            optionsBuilder.UseMySql(
+                   @"Server=localhost;Database=rift;Uid=rift;Pwd=;",
+                   x =>
+                   {
+                          x.ServerVersion(new Version(10, 3, 16), ServerType.MariaDb);
+                   });
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -92,10 +100,7 @@ namespace Rift.Data
                    .WithOne(streamer => streamer.User)
                    .HasForeignKey<RiftStreamer>(user => user.UserId);
 
-            builder.Entity<RiftMapping>().HasKey(key => key.Identifier);
-
-            builder.Entity<RiftMessage>().HasKey(key => key.Id);
-            builder.Entity<RiftMessage>().Property(key => key.Id).ValueGeneratedOnAdd();
+            builder.Entity<RiftMapping>().HasKey(key => key.Id);
 
             builder.Entity<RiftToxicity>().HasKey(key => key.UserId);
             builder.Entity<RiftToxicity>().Ignore(key => key.Level);

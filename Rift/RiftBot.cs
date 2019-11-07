@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 
 using Rift.Configuration;
@@ -18,8 +20,12 @@ using Discord.WebSocket;
 using IonicLib;
 using IonicLib.Services;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
+using Newtonsoft.Json;
+
+using Rift.Data;
 using Rift.Services.Interfaces;
 
 using Serilog;
@@ -95,6 +101,15 @@ namespace Rift
 
                 await sgUser.SendMessageAsync(msg);
             }
+        }
+
+        class MessageDto
+        {
+            public ulong GuildId { get; set; }
+            public string Name { get; set; }
+            public string Text { get; set; }
+            public string EmbedJson { get; set; }
+            public string ImageUrl { get; set; }
         }
 
         public static async Task Main(string[] args)
@@ -195,7 +210,7 @@ namespace Rift
 
             try
             {
-                await Task.Delay(-1, IonicHelper.GetCancellationToken());
+                await Task.Delay(-1, IonicHelper.GetCancellationTokenSource().Token);
             }
             catch (TaskCanceledException)
             {

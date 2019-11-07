@@ -54,14 +54,14 @@ namespace Rift.Services.Message
             Text = msg.Text;
             ImageUrl = msg.ImageUrl;
 
-            if (msg.Embed is null)
+            if (msg.EmbedJson is null)
                 return;
 
             try
             {
                 Embed = JsonConvert
                         .DeserializeObject<RiftEmbed>(
-                            msg.Embed, new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
+                            msg.EmbedJson, new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
                         .ToEmbed();
             }
             catch (Exception ex)

@@ -17,6 +17,7 @@ namespace Rift
         public static readonly Giveaways Giveaways;
         public static readonly Inventory Inventory;
         public static readonly LeagueData LeagueData;
+        public static readonly Mappings Mappings;
         public static readonly ModerationLogs ModerationLogs;
         public static readonly PendingUsers PendingUsers;
         public static readonly ProfileBackgrounds ProfileBackgrounds;
@@ -25,7 +26,6 @@ namespace Rift
         public static readonly Roles Roles;
         public static readonly Settings Settings;
         public static readonly Statistics Statistics;
-        public static readonly StoredMessages StoredMessages;
         public static readonly Streamers Streamers;
         public static readonly SystemTimers SystemTimers;
         public static readonly TempRoles TempRoles;
@@ -45,6 +45,7 @@ namespace Rift
             Giveaways = new Giveaways();
             Inventory = new Inventory();
             LeagueData = new LeagueData();
+            Mappings = new Mappings();
             ModerationLogs = new ModerationLogs();
             PendingUsers = new PendingUsers();
             ProfileBackgrounds = new ProfileBackgrounds();
@@ -53,7 +54,6 @@ namespace Rift
             Roles = new Roles();
             Settings = new Settings();
             Statistics = new Statistics();
-            StoredMessages = new StoredMessages();
             Streamers = new Streamers();
             SystemTimers = new SystemTimers();
             TempRoles = new TempRoles();

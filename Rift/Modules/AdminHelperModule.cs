@@ -538,10 +538,10 @@ namespace Rift.Modules
 
         [Command("ff")]
         [RequireAdmin]
-        public async Task FF()
+        public async Task Shutdown()
         {
             await Context.Message.DeleteAsync();
-            await IonicHelper.Client.StopAsync();
+            IonicHelper.GetCancellationTokenSource().Cancel();
         }
 
         [Command("reboot")]

@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rift.Data;
 
 namespace Rift.Migrations
 {
     [DbContext(typeof(RiftContext))]
-    partial class RiftContextModelSnapshot : ModelSnapshot
+    [Migration("20191106165744_ImplementedMessageApi")]
+    partial class ImplementedMessageApi
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,14 +34,14 @@ namespace Rift.Migrations
                     b.Property<string>("EventName")
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("MessageId")
-                        .HasColumnType("char(36)");
-
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<ulong>("StartedBy")
                         .HasColumnType("bigint unsigned");
+
+                    b.Property<int>("StoredMessageId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -61,14 +63,14 @@ namespace Rift.Migrations
                     b.Property<string>("GiveawayName")
                         .HasColumnType("longtext");
 
-                    b.Property<Guid>("MessageId")
-                        .HasColumnType("char(36)");
-
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("datetime(6)");
 
                     b.Property<ulong>("StartedBy")
                         .HasColumnType("bigint unsigned");
+
+                    b.Property<int>("StoredMessageId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -163,6 +165,9 @@ namespace Rift.Migrations
                     b.Property<int>("SpecialRewardId")
                         .HasColumnType("int");
 
+                    b.Property<int>("StoredMessageId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
@@ -227,6 +232,9 @@ namespace Rift.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<int>("RewardId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StoredMessageId")
                         .HasColumnType("int");
 
                     b.Property<uint>("WinnersAmount")
@@ -339,15 +347,47 @@ namespace Rift.Migrations
 
             modelBuilder.Entity("Rift.Data.Models.RiftMapping", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<string>("Identifier")
                         .HasColumnType("varchar(255)");
 
-                    b.Property<Guid>("MessageId")
+                    b.Property<int>("MessageId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("StoredMessageId")
                         .HasColumnType("char(36)");
+
+                    b.HasKey("Identifier");
+
+                    b.ToTable("MessageMappings");
+                });
+
+            modelBuilder.Entity("Rift.Data.Models.RiftMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("EmbedJson")
+                        .HasColumnType("longtext");
+
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("NewId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Mappings");
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Rift.Data.Models.RiftModerationLog", b =>

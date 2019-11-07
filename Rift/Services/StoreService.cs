@@ -145,7 +145,7 @@ namespace Rift.Services
                         .AddField("Стоимость", string.Join('\n', prices), true)
                         .WithFooter("Максимум одна покупка в час.");
                     var json = JsonConvert.SerializeObject(embed);
-                    var msg = new RiftMessage {Embed = json};
+                    var msg = new RiftMessage {EmbedJson = json};
                     
                     itemShopMessage = Task.Run(async () => await messageService.FormatMessageAsync(msg)).Result;
                 }
@@ -172,7 +172,7 @@ namespace Rift.Services
                         .AddField("Стоимость", string.Join('\n', prices), true)
                         .WithFooter("Максимум одна покупка в 24 часа.");
                     var json = JsonConvert.SerializeObject(embed);
-                    var msg = new RiftMessage {Embed = json};
+                    var msg = new RiftMessage {EmbedJson = json};
                     
                     roleShopMessage = Task.Run(async () => await messageService.FormatMessageAsync(msg)).Result;
                 }
@@ -199,7 +199,7 @@ namespace Rift.Services
                         .AddField("Стоимость", string.Join('\n', prices), true)
                         .WithFooter("Максимум одна покупка в час.");
                     var json = JsonConvert.SerializeObject(embed);
-                    var msg = new RiftMessage {Embed = json};
+                    var msg = new RiftMessage {EmbedJson = json};
 
                     backgroundShopMessage = Task.Run(async () => await messageService.FormatMessageAsync(msg)).Result;
                 }

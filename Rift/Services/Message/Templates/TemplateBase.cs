@@ -24,8 +24,8 @@ namespace Rift.Services.Message.Templates
             if (message.Text != null)
                 message.Text = message.Text.Replace(Template, replacement);
 
-            if (message.Embed != null)
-                message.Embed = message.Embed.Replace(Template, replacement);
+            if (message.EmbedJson != null)
+                message.EmbedJson = message.EmbedJson.Replace(Template, replacement);
 
             return Task.FromResult(message);
         }

@@ -7,7 +7,7 @@ namespace Rift.Data.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public int Type { get; set; }
-        public int StoredMessageId { get; set; }
+        public Guid MessageId { get; set; }
         public int SharedRewardId { get; set; }
         public int SpecialRewardId { get; set; }
         public TimeSpan Duration { get; set; }

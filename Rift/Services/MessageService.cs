@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -13,6 +14,7 @@ using Discord;
 
 using Rift.Configuration;
 using Rift.Data.Models;
+using Rift.Services.Interfaces;
 using Rift.Services.Message;
 using Rift.Services.Message.Templates;
 using Rift.Util;
@@ -24,7 +26,7 @@ using Humanizer;
 using IonicLib;
 using IonicLib.Util;
 
-using Rift.Services.Interfaces;
+using Newtonsoft.Json;
 
 namespace Rift.Services
 {
@@ -50,6 +52,8 @@ namespace Rift.Services
                              .WithColor(255, 0, 0)
                              .WithDescription("Роль не найдена!"));
 
+        readonly HttpClient client;
+        
         readonly IEmoteService emoteService;
         
         public MessageService(IEmoteService emoteService)
@@ -58,6 +62,8 @@ namespace Rift.Services
             
             RiftBot.Log.Information($"Starting up {nameof(MessageService)}.");
 
+            client = new HttpClient();
+            
             var sw = new Stopwatch();
             sw.Restart();
 
@@ -282,18 +288,35 @@ namespace Rift.Services
             return templates.Values.ToList();
         }
 
+        public async Task<RiftMessage> GetMessageFromApi(Guid id)
+        {
+            var requestUrl = $"http://localhost:7727/v1/messages/{id.ToString()}";
+            var response = await client.GetAsync(requestUrl);
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            try
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<RiftMessage>(json);
+            }
+            catch (Exception ex) 
+            {
+                RiftBot.Log.Error(ex, "failed to read API response!");
+                return null;
+            }
+        }
+        
         public async Task<IonicMessage> GetMessageAsync(string identifier, FormatData data)
         {
-            var mapping = await DB.StoredMessages.GetMessageMappingByNameAsync(identifier);
-
+            var mapping = await DB.Mappings.GetByNameAsync(identifier);
             if (mapping is null)
             {
                 RiftBot.Log.Warning($"Message mapping \"{identifier}\" does not exist.");
                 return Error;
             }
-
-            var dbMessage = await DB.StoredMessages.GetMessageByIdAsync(mapping.MessageId);
-
+            
+            var dbMessage = await GetMessageFromApi(mapping.MessageId);
             if (dbMessage is null)
             {
                 RiftBot.Log.Warning($"Message with ID \"{mapping.MessageId.ToString()}\" does not exist.");
@@ -318,7 +341,7 @@ namespace Rift.Services
             }
 
             if (string.IsNullOrWhiteSpace(message.Text)
-                && string.IsNullOrWhiteSpace(message.Embed)
+                && string.IsNullOrWhiteSpace(message.EmbedJson)
                 && string.IsNullOrWhiteSpace(message.ImageUrl))
             {
                 RiftBot.Log.Error($"Message \"{message.Id.ToString()}\" has no data!");
@@ -330,8 +353,8 @@ namespace Rift.Services
             if (!string.IsNullOrWhiteSpace(message.Text))
                 matches.AddRange(Regex.Matches(message.Text, TemplateRegex));
 
-            if (!string.IsNullOrWhiteSpace(message.Embed))
-                matches.AddRange(Regex.Matches(message.Embed, TemplateRegex));
+            if (!string.IsNullOrWhiteSpace(message.EmbedJson))
+                matches.AddRange(Regex.Matches(message.EmbedJson, TemplateRegex));
 
             foreach (var match in matches)
             {

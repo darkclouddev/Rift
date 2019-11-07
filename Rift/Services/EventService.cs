@@ -169,8 +169,7 @@ namespace Rift.Services
                 return;
             }
 
-            var msg = await DB.StoredMessages.GetMessageByIdAsync(dbEvent.StoredMessageId);
-
+            var msg = await messageService.GetMessageFromApi(dbEvent.MessageId);
             if (msg is null)
             {
                 RiftBot.Log.Warning("Wrong event message ID, skipping execution.");
@@ -194,7 +193,7 @@ namespace Rift.Services
             var activeGiveaway = new RiftActiveEvent
             {
                 EventName = dbEvent.Name,
-                StoredMessageId = dbEvent.StoredMessageId,
+                MessageId = dbEvent.MessageId,
                 StartedBy = startedById == 0u ? IonicHelper.Client.CurrentUser.Id : startedById,
                 StartedAt = DateTime.UtcNow,
                 DueTime = DateTime.UtcNow + dbEvent.Duration,

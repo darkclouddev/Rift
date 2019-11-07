@@ -60,8 +60,8 @@ namespace Rift.Services
             if (message.Text != null)
                 message.Text = message.Text.Replace(template, replacement);
 
-            if (message.Embed != null)
-                message.Embed = message.Embed.Replace(template, replacement);
+            if (message.EmbedJson != null)
+                message.EmbedJson = message.EmbedJson.Replace(template, replacement);
 
             return message;
         }
