@@ -83,7 +83,16 @@ namespace Rift.Services
             }
 
             foreach (var e in expiredEvents)
-                await FinishAsync(e);
+            {
+                try
+                {
+                    await FinishAsync(e);
+                }
+                catch (Exception ex)
+                {
+                    RiftBot.Log.Error(ex, $"Failed to finish event {e.Id.ToString()}. \"{e.EventName}\"");
+                }
+            }
 
             if (!await DB.ActiveEvents.AnyAsync())
                 return;
@@ -214,10 +223,8 @@ namespace Rift.Services
 
         async Task FinishAsync(RiftActiveEvent expiredEvent)
         {
-            var dbEvent = await DB.Events.GetAsync(expiredEvent.EventName);
-
             var eventLogString = $"ID {expiredEvent.Id.ToString()} \"{expiredEvent.EventName}\"";
-
+            var dbEvent = await DB.Events.GetAsync(expiredEvent.EventName);
             if (dbEvent is null)
             {
                 RiftBot.Log.Error($"Could not finish event {eventLogString}: {nameof(RiftEvent)} is null!");
@@ -289,19 +296,8 @@ namespace Rift.Services
                 
                 specialWinnerId = participants.Random();
 
-                var specItem = specialReward.ItemReward;
-                if (specItem != null)
-                {
-                    await rewardService.DeliverToAsync(specialWinnerId, specItem);
-                    return;
-                }
-
-                var specRole = specialReward.RoleReward;
-                if (specRole != null)
-                {
-                    await rewardService.DeliverToAsync(specialWinnerId, specRole);
-                    return;
-                }
+                var specReward = specialReward.ToRewardBase();
+                await rewardService.DeliverToAsync(specialWinnerId, specReward);
             }
 
             var reward = dbReward.ToRewardBase();
