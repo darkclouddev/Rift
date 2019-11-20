@@ -896,7 +896,8 @@ namespace Rift.Services
         {
             switch (id)
             {
-                case 0: return "Кастомная игра";
+                case 0:
+                case 2010: return "Кастомная игра";
 
                 case 70:
                 case 72:
