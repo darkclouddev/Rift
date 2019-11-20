@@ -27,6 +27,12 @@ namespace Rift.Services
 
         public async Task DeliverToAsync(ulong userId, RewardBase reward)
         {
+            if (reward is null)
+            {
+                RiftBot.Log.Warning($"Trying to give an empty reward to {userId.ToString()}");
+                return;
+            }
+            
             switch (reward.Type)
             {
                 case RewardType.Item:
@@ -67,7 +73,6 @@ namespace Rift.Services
             }
             
             var dbRole = await DB.Roles.GetAsync(reward.RoleId);
-
             if (dbRole is null)
             {
                 RiftBot.Log.Error($"No such role ID in database: {reward.RoleId.ToString()}");

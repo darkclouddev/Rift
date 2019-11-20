@@ -105,7 +105,6 @@ namespace Rift.Data.Models
             RewardBase reward = null;
 
             var itemReward = ItemReward;
-
             if (itemReward is null)
             {
                 var roleReward = RoleReward;

@@ -231,7 +231,6 @@ namespace Rift.Services
             }
 
             var message = (IUserMessage) await channel.GetMessageAsync(expiredEvent.ChannelMessageId);
-
             if (message is null)
             {
                 RiftBot.Log.Error($"Could not finish event {eventLogString}: Event message is null! Deleted?");
@@ -247,7 +246,6 @@ namespace Rift.Services
             // Reaction amount is limited by discord itself.
             // See https://discordapp.com/developers/docs/resources/channel#get-reactions
             var reactions = await message.GetReactionUsersAsync(emote, 100).FlattenAsync();
-
             if (reactions is null)
             {
                 RiftBot.Log.Error($"Could not finish event {eventLogString}: Unable to get reactions.");
@@ -255,7 +253,6 @@ namespace Rift.Services
             }
 
             var dbReward = await DB.Rewards.GetAsync(dbEvent.SharedRewardId);
-
             if (dbReward is null)
             {
                 RiftBot.Log.Error($"Could not finish event {eventLogString}: " +
@@ -280,7 +277,6 @@ namespace Rift.Services
 
             RiftReward specialReward = null;
             var specialWinnerId = 0ul;
-
             if (dbEvent.HasSpecialReward)
             {
                 specialReward = await DB.Rewards.GetAsync(dbEvent.SpecialRewardId);
@@ -311,7 +307,9 @@ namespace Rift.Services
             var reward = dbReward.ToRewardBase();
 
             foreach (var userId in participants)
+            {
                 await rewardService.DeliverToAsync(userId, reward);
+            } 
 
             await DB.ActiveEvents.RemoveAsync(expiredEvent.Id);
 

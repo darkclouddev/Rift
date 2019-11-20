@@ -270,7 +270,7 @@ namespace Rift
                 {
                     CaseSensitiveCommands = false,
                     ThrowOnError = true,
-                    DefaultRunMode = RunMode.Async
+                    DefaultRunMode = RunMode.Async,
                 }));
 
             return services.BuildServiceProvider();
