@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 
-using Rift.Preconditions;
-
 using Discord;
 using Discord.Commands;
 
+using Rift.Preconditions;
 using Rift.Services.Interfaces;
 using Rift.Util;
 
@@ -41,7 +40,7 @@ namespace Rift.Modules
         [RequireModerator]
         [RequireContext(ContextType.Guild)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task MuteAsync(IUser user, string time, string reason)
+        public async Task MuteAsync(IUser user, string time, [Remainder]string reason)
         {
             await moderationService.MuteAsync(user, reason, time, Context.User).ConfigureAwait(false);
         }
@@ -50,7 +49,7 @@ namespace Rift.Modules
         [RequireModerator]
         [RequireContext(ContextType.Guild)]
         [RequireBotPermission(GuildPermission.ManageRoles)]
-        public async Task UnmuteAsync(IUser user, string reason)
+        public async Task UnmuteAsync(IUser user, [Remainder]string reason)
         {
             await moderationService.UnmuteAsync(user, reason, Context.User).ConfigureAwait(false);
         }
@@ -58,7 +57,7 @@ namespace Rift.Modules
         [Command("warn")]
         [RequireModerator]
         [RequireContext(ContextType.Guild)]
-        public async Task WarnAsync(IUser user, string reason)
+        public async Task WarnAsync(IUser user, [Remainder]string reason)
         {
             await moderationService.WarnAsync(user, reason, Context.User).ConfigureAwait(false);
         }

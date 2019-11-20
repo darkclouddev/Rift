@@ -15,7 +15,7 @@ namespace Rift.Services.Message.Templates.Moderation
 
         public override Task<RiftMessage> ApplyAsync(RiftMessage message, FormatData data)
         {
-            if (IonicHelper.GetGuildUserById(Settings.App.MainGuildId, data.Moderation.ModeratorId, out var sgUser))
+            if (!IonicHelper.GetGuildUserById(Settings.App.MainGuildId, data.Moderation.ModeratorId, out var sgUser))
             {
                 TemplateError("No user data found.");
                 return Task.FromResult(message);
