@@ -31,6 +31,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.BackgroundInventories
+                .AsQueryable()
                 .Where(x => x.UserId == userId)
                 .OrderBy(x => x.BackgroundId)
                 .ToListAsync();
@@ -40,6 +41,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.BackgroundInventories
+                .AsQueryable()
                 .Where(x => x.BackgroundId == 13) // nitro booster background
                 .Select(x => x.UserId)
                 .ToListAsync();
@@ -49,6 +51,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.BackgroundInventories
+                .AsQueryable()
                 .Where(x => x.UserId == userId)
                 .CountAsync();
         }
@@ -57,6 +60,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.BackgroundInventories
+                .AsQueryable()
                 .Where(x => x.UserId == userId && x.BackgroundId == backgroundId)
                 .AnyAsync();
         }
@@ -75,7 +79,9 @@ namespace Rift.Database
         public async Task DeleteAsync(RiftBackgroundInventory backInv)
         {
             await using var context = new RiftContext();
-            if (await context.BackgroundInventories.AnyAsync(x => x.Equals(backInv)))
+            if (await context.BackgroundInventories
+                .AsQueryable()
+                .AnyAsync(x => x.Equals(backInv)))
             {
                 context.BackgroundInventories.Remove(backInv);
                 await context.SaveChangesAsync();

@@ -15,7 +15,9 @@ namespace Rift.Database
         public async Task<bool> AnyAsync()
         {
             await using var context = new RiftContext();
-            return await context.EventSchedule.AnyAsync();
+            return await context.EventSchedule
+                .AsQueryable()
+                .AnyAsync();
         }
 
         public async Task AddRangeAsync(IEnumerable<RiftScheduledEvent> eventList)
@@ -31,6 +33,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.EventSchedule
+                .AsQueryable()
                 .Where(x => x.StartAt > dt)
                 .OrderBy(x => x.StartAt)
                 .FirstOrDefaultAsync();

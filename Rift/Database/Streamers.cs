@@ -14,13 +14,17 @@ namespace Rift.Database
         public async Task<List<RiftStreamer>> GetAllAsync()
         {
             await using var context = new RiftContext();
-            return await context.Streamers.ToListAsync();
+            return await context.Streamers
+                .AsQueryable()
+                .ToListAsync();
         }
 
         public async Task<RiftStreamer> GetAsync(ulong userId)
         {
             await using var context = new RiftContext();
-            return await context.Streamers.FirstOrDefaultAsync(x => x.UserId == userId);
+            return await context.Streamers
+                .AsQueryable()
+                .FirstOrDefaultAsync(x => x.UserId == userId);
         }
     }
 }

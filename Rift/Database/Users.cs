@@ -21,7 +21,9 @@ namespace Rift.Database
         public async Task<bool> EnsureExistsAsync(ulong userId)
         {
             await using var context = new RiftContext();
-            if (await context.Users.AnyAsync(x => x.UserId == userId))
+            if (await context.Users
+                .AsQueryable()
+                .AnyAsync(x => x.UserId == userId))
                 return true;
 
             try
@@ -46,13 +48,16 @@ namespace Rift.Database
         public async Task<int> GetCountAsync()
         {
             await using var context = new RiftContext();
-            return await context.Users.CountAsync();
+            return await context.Users
+                .AsQueryable()
+                .CountAsync();
         }
 
         public async Task<List<ulong>> GetAllSortedAsync()
         {
             await using var context = new RiftContext();
             return await context.Users
+                .AsQueryable()
                 .OrderByDescending(x => x.Level)
                 .ThenByDescending(x => x.Experience)
                 .Select(x => x.UserId)
@@ -66,6 +71,7 @@ namespace Rift.Database
 
             await using var context = new RiftContext();
             return await context.Users
+                .AsQueryable()
                 .FirstOrDefaultAsync(x => x.UserId == userId);
         }
 
@@ -87,6 +93,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             var list = await context.Inventory
+                .AsQueryable()
                 .OrderByDescending(x => x.Coins)
                 .Select(x => new UserTopCoins
                 {
@@ -102,6 +109,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             var list = await context.Users
+                .AsQueryable()
                 .OrderByDescending(x => x.Experience)
                 .Select(x => new UserTopExp
                 {

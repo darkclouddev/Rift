@@ -17,6 +17,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.Events
+                .AsQueryable()
                 .FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.InvariantCulture));
         }
 
@@ -31,6 +32,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.Events
+                .AsQueryable()
                 .Where(x => x.Type == type)
                 .ToListAsync();
         }

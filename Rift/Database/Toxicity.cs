@@ -17,7 +17,9 @@ namespace Rift.Database
                 throw new DatabaseException(nameof(EnsureExistsAsync));
 
             await using var context = new RiftContext();
-            if (await context.Toxicity.AnyAsync(x => x.UserId == userId))
+            if (await context.Toxicity
+                .AsQueryable()
+                .AnyAsync(x => x.UserId == userId))
                 return true;
 
             try
@@ -46,7 +48,9 @@ namespace Rift.Database
                 throw new DatabaseException(nameof(GetAsync));
 
             await using var context = new RiftContext();
-            return await context.Toxicity.FirstOrDefaultAsync(x => x.UserId == userId);
+            return await context.Toxicity
+                .AsQueryable()
+                .FirstOrDefaultAsync(x => x.UserId == userId);
         }
 
         public async Task<bool> HasBlockingAsync(ulong userId)
@@ -63,6 +67,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.Toxicity
+                .AsQueryable()
                 .Where(x => x.Level > 0u)
                 .ToArrayAsync();
         }

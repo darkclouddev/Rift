@@ -24,7 +24,9 @@ namespace Rift.Database
 
             await using var context = new RiftContext();
             
-            if (await context.Inventory.AnyAsync(x => x.UserId == userId))
+            if (await context.Inventory
+                .AsQueryable()
+                .AnyAsync(x => x.UserId == userId))
                 return true;
 
             try
@@ -239,13 +241,16 @@ namespace Rift.Database
 
             await using var context = new RiftContext();
             return await context.Inventory
+                .AsQueryable()
                 .FirstOrDefaultAsync(x => x.UserId == userId);
         }
 
         public async Task<List<RiftInventory>> GetAllAsync()
         {
             await using var context = new RiftContext();
-            return await context.Inventory.ToListAsync();
+            return await context.Inventory
+                .AsQueryable()
+                .ToListAsync();
         }
 
         public async Task<List<RiftInventory>> GetAsync(Expression<Func<RiftInventory, bool>> predicate)

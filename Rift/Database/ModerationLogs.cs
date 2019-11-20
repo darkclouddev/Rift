@@ -34,6 +34,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.ModerationLog
+                .AsQueryable()
                 .Where(x => x.TargetId == userId)
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(10)
@@ -44,6 +45,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.ModerationLog
+                .AsQueryable()
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(10)
                 .ToListAsync();

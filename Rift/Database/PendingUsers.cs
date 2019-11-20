@@ -24,13 +24,16 @@ namespace Rift.Database
         public async Task<List<RiftPendingUser>> GetAllAsync()
         {
             await using var context = new RiftContext();
-            return await context.PendingUsers.ToListAsync();
+            return await context.PendingUsers
+                .AsQueryable()
+                .ToListAsync();
         }
 
         public async Task<RiftPendingUser> GetAsync(ulong userId)
         {
             await using var context = new RiftContext();
             return await context.PendingUsers
+                .AsQueryable()
                 .Select(x => new RiftPendingUser
                 {
                     UserId = x.UserId,
@@ -65,13 +68,16 @@ namespace Rift.Database
         public async Task<bool> IsPendingAsync(ulong userId)
         {
             await using var context = new RiftContext();
-            return await context.PendingUsers.AnyAsync(x => x.UserId == userId);
+            return await context.PendingUsers
+                .AsQueryable()
+                .AnyAsync(x => x.UserId == userId);
         }
 
         public async Task<List<RiftPendingUser>> GetExpiredAsync()
         {
             await using var context = new RiftContext();
             return await context.PendingUsers
+                .AsQueryable()
                 .Where(x => x.ExpirationTime > DateTime.UtcNow)
                 .ToListAsync();
         }

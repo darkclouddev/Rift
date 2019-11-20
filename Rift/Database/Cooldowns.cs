@@ -8,6 +8,8 @@ using Rift.Data.Models;
 
 using Microsoft.EntityFrameworkCore;
 
+using Rift.Util;
+
 namespace Rift.Database
 {
     public class Cooldowns
@@ -18,7 +20,9 @@ namespace Rift.Database
                 return false;
 
             await using var context = new RiftContext();
-            if (await context.Cooldowns.AnyAsync(x => x.UserId == userId))
+            if (await context.Cooldowns
+                .AsQueryable()
+                .AnyAsync(x => x.UserId == userId))
                 return true;
 
             try
@@ -47,6 +51,7 @@ namespace Rift.Database
 
             await using var context = new RiftContext();
             return await context.Cooldowns
+                .AsQueryable()
                 .Where(x => x.UserId == userId)
                 .FirstAsync();
         }
@@ -57,6 +62,7 @@ namespace Rift.Database
             var dt = DateTime.UtcNow;
                 
             return await context.Cooldowns
+                .AsQueryable()
                 .Where(x => x.BotRespectTime > dt)
                 .Select(x => x.UserId)
                 .ToListAsync();;

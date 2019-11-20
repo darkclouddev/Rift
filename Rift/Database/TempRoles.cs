@@ -25,6 +25,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.TempRoles
+                .AsQueryable()
                 .Where(x => x.UserId == userId)
                 .ToListAsync();
         }
@@ -33,6 +34,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.TempRoles
+                .AsQueryable()
                 .Where(x => x.ExpirationTime >= DateTime.UtcNow)
                 .OrderBy(x => x.ExpirationTime)
                 .FirstOrDefaultAsync();
@@ -42,6 +44,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.TempRoles
+                .AsQueryable()
                 .Where(x => x.ExpirationTime <= DateTime.UtcNow)
                 .ToListAsync();
         }
@@ -49,7 +52,9 @@ namespace Rift.Database
         public async Task<int> GetCountAsync()
         {
             await using var context = new RiftContext();
-            return await context.TempRoles.CountAsync();
+            return await context.TempRoles
+                .AsQueryable()
+                .CountAsync();
         }
 
         public async Task RemoveAsync(ulong userId, ulong roleId)
@@ -68,7 +73,9 @@ namespace Rift.Database
         public async Task<bool> HasAsync(ulong userId, ulong roleId)
         {
             await using var context = new RiftContext();
-            return await context.TempRoles.AnyAsync(x => x.UserId == userId && x.RoleId == roleId);
+            return await context.TempRoles
+                .AsQueryable()
+                .AnyAsync(x => x.UserId == userId && x.RoleId == roleId);
         }
     }
 }

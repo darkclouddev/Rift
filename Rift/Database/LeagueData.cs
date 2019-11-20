@@ -23,6 +23,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.LeagueData
+                .AsQueryable()
                 .Where(x => x.UserId == userId)
                 .Select(x => new RiftLeagueData
                 {
@@ -90,7 +91,10 @@ namespace Rift.Database
         public async Task<bool> IsTakenAsync(string region, string playerUUID)
         {
             await using var context = new RiftContext();
-            return await context.LeagueData.AnyAsync(x => x.PlayerUUID == playerUUID && x.SummonerRegion == region);
+            return await context.LeagueData
+                .AsQueryable()
+                .AnyAsync(x => x.PlayerUUID == playerUUID
+                               && x.SummonerRegion == region);
         }
     }
 }

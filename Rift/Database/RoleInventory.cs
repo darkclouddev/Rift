@@ -31,6 +31,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.RoleInventories
+                .AsQueryable()
                 .Where(x => x.UserId == userId)
                 .ToListAsync();
         }
@@ -39,6 +40,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.RoleInventories
+                .AsQueryable()
                 .CountAsync(x => x.UserId == userId);
         }
         
@@ -46,14 +48,18 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.RoleInventories
-                .AnyAsync(x => x.UserId == userId && roleIds.Contains(x.RoleId));
+                .AsQueryable()
+                .AnyAsync(x => x.UserId == userId
+                               && roleIds.Contains(x.RoleId));
         }
         
         public async Task<bool> HasAllAsync(ulong userId, params int[] roleIds)
         {
             await using var context = new RiftContext();
             return await context.RoleInventories
-                .AllAsync(x => x.UserId == userId && roleIds.Contains(x.RoleId));
+                .AsQueryable()
+                .AllAsync(x => x.UserId == userId
+                               && roleIds.Contains(x.RoleId));
         }
     }
 }

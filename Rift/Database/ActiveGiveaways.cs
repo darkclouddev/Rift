@@ -23,6 +23,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.ActiveGiveaways
+                .AsQueryable()
                 .OrderBy(x => x.DueTime)
                 .FirstOrDefaultAsync();
         }
@@ -31,6 +32,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.ActiveGiveaways
+                .AsQueryable()
                 .Where(x => x.DueTime < DateTime.UtcNow)
                 .ToListAsync();
         }
@@ -39,6 +41,7 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.ActiveGiveaways
+                .AsQueryable()
                 .Where(x => x.GiveawayName.Equals(giveawayName))
                 .ToListAsync();
         }
@@ -47,13 +50,16 @@ namespace Rift.Database
         {
             await using var context = new RiftContext();
             return await context.ActiveGiveaways
+                .AsQueryable()
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<RiftActiveGiveaway>> GetAllAsync()
         {
             await using var context = new RiftContext();
-            return await context.ActiveGiveaways.ToListAsync();
+            return await context.ActiveGiveaways
+                .AsQueryable()
+                .ToListAsync();
         }
 
         public async Task RemoveAsync(int id)

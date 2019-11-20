@@ -23,7 +23,9 @@ namespace Rift.Database
         public async Task<RiftGiveawayLog> GetAsync(int id)
         {
             await using var context = new RiftContext();
-            return await context.GiveawayLogs.FirstOrDefaultAsync(x => x.Id == id);
+            return await context.GiveawayLogs
+                .AsQueryable()
+                .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<RiftGiveawayLog>> GetStartedAsync(Expression<Func<RiftGiveawayLog, bool>> predicate)
